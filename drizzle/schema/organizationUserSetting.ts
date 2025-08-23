@@ -27,7 +27,7 @@ export const organizationUserSettingsTable = pgTable(
   (table) => [primaryKey({ columns: [table.userId, table.organizationId] })]
 );
 
-export const organizationUserSettingsRelations = relations(
+export const organizationUserSettingRelations = relations(
   organizationUserSettingsTable,
   ({ one }) => ({
     user: one(usersTable, {

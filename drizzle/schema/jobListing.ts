@@ -14,7 +14,7 @@ import { relations } from "drizzle-orm";
 import { jobListingApplicationsTable } from "./jobListingApplication";
 
 export const wageIntervals = ["hourly", "monthly", "yearly"] as const;
-export type wageIntervalType = (typeof wageIntervals)[number];
+export type WageIntervalType = (typeof wageIntervals)[number];
 export const wageIntervalEnum = pgEnum(
   "job_listing_wage_interval",
   wageIntervals
@@ -74,7 +74,7 @@ export const jobListingsTable = pgTable(
   (table) => [index().on(table.stateAbbreviation)]
 );
 
-export const jobListingsRelations = relations(
+export const jobListingRelations = relations(
   jobListingsTable,
   ({ one, many }) => ({
     organization: one(organizationsTable, {

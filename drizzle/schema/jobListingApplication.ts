@@ -46,7 +46,7 @@ export const jobListingApplicationsTable = pgTable(
   (table) => [primaryKey({ columns: [table.jobListingId, table.userId] })]
 );
 
-export const jobListingApplicationsRelations = relations(
+export const jobListingApplicationRelations = relations(
   jobListingApplicationsTable,
   ({ one }) => ({
     jobListing: one(jobListingsTable, {

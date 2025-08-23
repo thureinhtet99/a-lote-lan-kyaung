@@ -13,7 +13,7 @@ export const userNotiSettingsTable = pgTable("user_noti_settings", {
   updatedAt,
 });
 
-export const userNotiSettingsRelations = relations(
+export const userNotiSettingRelations = relations(
   userNotiSettingsTable,
   ({ one }) => ({
     user: one(usersTable, {

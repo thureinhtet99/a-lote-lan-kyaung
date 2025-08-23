@@ -7,9 +7,11 @@ import { organizationUserSettingsTable } from "./organizationUserSetting";
 
 export const usersTable = pgTable("users", {
   id: varchar().primaryKey(),
-  name: varchar({ length: 255 }).notNull(),
-  image: varchar({ length: 255 }).notNull(),
+  first_name: varchar({ length: 255 }).notNull(),
+  last_name: varchar({ length: 255 }).notNull(),
+  username: varchar({ length: 255 }).notNull(),
   email: varchar({ length: 255 }).notNull().unique(),
+  image: varchar({ length: 255 }).notNull(),
   createdAt,
   updatedAt,
 });
@@ -17,5 +19,5 @@ export const usersTable = pgTable("users", {
 export const userRelations = relations(usersTable, ({ one, many }) => ({
   notiSetting: one(userNotiSettingsTable),
   resume: one(userResumesTable),
-  orgUserSetting: many(organizationUserSettingsTable),
+  orgUserSettings: many(organizationUserSettingsTable),
 }));

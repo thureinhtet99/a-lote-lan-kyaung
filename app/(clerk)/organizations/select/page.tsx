@@ -1,0 +1,31 @@
+import { OrganizationList } from "@clerk/nextjs";
+import { Suspense } from "react";
+
+type SearchParamsType = {
+  searchParams: Promise<{ redirect?: string }>;
+};
+
+const SuspendedPage = async ({ searchParams }: SearchParamsType) => {
+  const { redirect } = await searchParams;
+  const redirectedURL = redirect ?? "/employer";
+
+  return (
+    <OrganizationList
+      hidePersonal
+      hideSlug
+      skipInvitationScreen
+      afterSelectOrganizationUrl={redirectedURL}
+      afterCreateOrganizationUrl={redirectedURL}
+    />
+  );
+};
+
+export default async function OrganizationSelect(
+  searchParams: SearchParamsType
+) {
+  return (
+    <Suspense>
+      <SuspendedPage {...searchParams} />
+    </Suspense>
+  );
+}

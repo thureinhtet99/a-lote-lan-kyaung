@@ -12,7 +12,7 @@ export const organizationsTable = pgTable("organizations", {
   updatedAt,
 });
 
-export const organizationsRelations = relations(
+export const organizationRelations = relations(
   organizationsTable,
   ({ many }) => ({
     jobListings: many(jobListingsTable),
