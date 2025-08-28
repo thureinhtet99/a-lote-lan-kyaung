@@ -1,7 +1,7 @@
 export const APP_CONFIG = {
   app_name: "A Lote Lann Kyaung",
-  app_version: "1.0.0",
-  app_description: "1.0.0",
+  app_version: "0.1.0",
+  app_description: "",
 };
 
 export const APP_ROUTES = {

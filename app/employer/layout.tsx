@@ -16,8 +16,6 @@ import { OrgDatabaseSync } from "@/services/clerk/component/OrgDatabaseSync";
 
 async function LayoutSuspense({ children }: { children: ReactNode }) {
   const { orgId } = await getCurrentOrg();
-  console.log("orgId", orgId);
-
   if (orgId == null) return redirect(APP_ROUTES.ORG.SELECT);
 
   return (

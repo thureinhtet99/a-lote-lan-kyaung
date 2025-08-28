@@ -13,7 +13,7 @@ import { organizationsTable } from "./organization";
 import { relations } from "drizzle-orm";
 import { jobListingApplicationsTable } from "./jobListingApplication";
 
-export const wageIntervals = ["hourly", "monthly", "yearly"] as const;
+export const wageIntervals = ["monthly", "yearly", "hourly"] as const;
 export type WageIntervalType = (typeof wageIntervals)[number];
 export const wageIntervalEnum = pgEnum(
   "job_listing_wage_interval",
@@ -63,10 +63,10 @@ export const jobListingsTable = pgTable(
     stateAbbreviation: varchar(),
     city: varchar(),
     isFeatured: boolean().notNull().default(false),
-    locationRequirement: locationRequirementEnum().notNull(),
-    experienceLevel: experienceLevelEnum().notNull(),
+    locationRequirement: locationRequirementEnum(),
+    experienceLevel: experienceLevelEnum(),
     status: jobListingStatusEnum().notNull().default("draft"),
-    type: jobListingTypeEnum().notNull(),
+    type: jobListingTypeEnum(),
     posted: timestamp({ withTimezone: true }),
     createdAt,
     updatedAt,

@@ -6,15 +6,8 @@ import { eq } from "drizzle-orm";
 import { revalidateUserCache } from "./cache/users";
 
 export async function insertUser(user: typeof usersTable.$inferInsert) {
-  const existingUser = await db
-    .select()
-    .from(usersTable)
-    .where(eq(usersTable.id, user.id));
-
-  if (existingUser.length === 0) {
-    await db.insert(usersTable).values(user).onConflictDoNothing();
-    revalidateUserCache(user.id);
-  }
+  await db.insert(usersTable).values(user).onConflictDoNothing();
+  revalidateUserCache(user.id);
 }
 
 export async function updateUser(
@@ -29,3 +22,11 @@ export async function deleteUser(id: string) {
   await db.delete(usersTable).where(eq(usersTable.id, id));
   revalidateUserCache(id);
 }
+
+//  const existingUser = await db
+//     .select()
+//     .from(usersTable)
+//     .where(eq(usersTable.id, user.id));
+
+//   if (existingUser.length === 0) {
+//   }
