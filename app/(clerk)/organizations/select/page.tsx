@@ -7,6 +7,8 @@ type SearchParamsType = {
 
 const SuspendedPage = async ({ searchParams }: SearchParamsType) => {
   const { redirect } = await searchParams;
+  console.log("redirect",redirect);
+  
   const redirectedURL = redirect ?? "/employer";
 
   return (
@@ -20,7 +22,7 @@ const SuspendedPage = async ({ searchParams }: SearchParamsType) => {
   );
 };
 
-export default async function OrganizationSelect(
+export default async function OrganizationSelectPage(
   searchParams: SearchParamsType
 ) {
   return (

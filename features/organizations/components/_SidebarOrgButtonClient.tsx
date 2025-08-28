@@ -20,8 +20,6 @@ import {
   ChevronsUpDown,
   CreditCardIcon,
   LogOutIcon,
-  SettingsIcon,
-  UserIcon,
   UserRoundCogIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -107,7 +105,7 @@ export default function SidebarOrgButtonClient({
           }}
         >
           <Building2Icon className="mr-1" />
-          Manage orgs.
+          Manage organization
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
@@ -129,7 +127,7 @@ export default function SidebarOrgButtonClient({
         <DropdownMenuItem asChild>
           <Link href="/organizations/select">
             <ArrowLeftRightIcon className="mr-1" />
-            Switch orgs.
+            Switch organization
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

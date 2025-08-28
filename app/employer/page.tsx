@@ -1,27 +1,31 @@
 import { db } from "@/drizzle/db";
 import { jobListingsTable } from "@/drizzle/schema";
+import { APP_ROUTES } from "@/lib/appConfig";
 import { getCurrentOrg } from "@/services/clerk/lib/getCurrentAuth";
-import { desc, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
-// Create a cached factory function that depends on orgId
+// Fetch a most-recent-job from ORM and make cache
 const getMostRecentJobListing = (orgId: string) => {
-  return unstable_cache(
+  const fetchMostRecentJobListingByOrgId = unstable_cache(
     async () => {
-      return await db.query.jobListingsTable.findFirst({
-        where: eq(jobListingsTable.organizationId, orgId),
-        orderBy: desc(jobListingsTable.createdAt),
-        columns: { id: true },
-      });
+      return await db
+        .select({ id: jobListingsTable.id })
+        .from(jobListingsTable)
+        .where(eq(jobListingsTable.organizationId, orgId))
+        .orderBy(jobListingsTable.createdAt)
+        .then((res) => res[0]);
     },
-    [`${orgId}-organizations`], // cache key includes orgId
+    [`jobListings-${orgId}`],
     {
-      tags: [`${orgId}-organizations`], // tag also includes orgId
+      tags: [`jobListings-${orgId}`],
       revalidate: 3600, // 1 hour
     }
-  )(); // <-- call immediately
+  );
+  
+  return fetchMostRecentJobListingByOrgId();
 };
 
 const SuspendedPage = async () => {
@@ -29,13 +33,11 @@ const SuspendedPage = async () => {
   if (orgId == null) return null;
 
   const recentJobListing = await getMostRecentJobListing(orgId);
-
   if (recentJobListing == null) {
-    redirect("/employer/job-listings/new");
+    redirect(`${APP_ROUTES.EMPLOYER_JOB_LISTING}/new`);
   } else {
-    redirect(`/employer/job-listings/${recentJobListing.id}`);
+    redirect(`${APP_ROUTES.EMPLOYER_JOB_LISTING}/${recentJobListing.id}`);
   }
-
 };
 
 export default function EmployerHomePage() {

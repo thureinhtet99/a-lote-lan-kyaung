@@ -11,16 +11,18 @@ import { SignedIn, SignedOut } from "@/services/clerk/component/AuthStatus";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+type SidebarNavMenuItemType = {
+  href: string;
+  icon: ReactNode;
+  label: string;
+  authStatus?: "signedIn" | "signedOut";
+}[];
+
 export default function SidebarNavMenuGroup({
   items,
   className,
 }: {
-  items: {
-    href: string;
-    icon: ReactNode;
-    label: string;
-    authStatus?: "signedIn" | "signedOut";
-  }[];
+  items: SidebarNavMenuItemType;
   className?: string;
 }) {
   const pathname = usePathname();

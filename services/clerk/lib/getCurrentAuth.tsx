@@ -4,16 +4,17 @@ import { eq } from "drizzle-orm";
 import { organizationsTable, usersTable } from "@/drizzle/schema";
 import { unstable_cache } from "next/cache";
 
+// Fetch a user from ORM and make cache
 const getUserById = async (id: string) => {
   const fetchUserById = unstable_cache(
     async () => {
-      return db
+      return await db
         .select()
         .from(usersTable)
         .where(eq(usersTable.id, id))
         .then((res) => res[0]);
     },
-    [`${id}-users`],
+    [`users-${id}`],
     {
       revalidate: 3600, // Cache for 1 hour
     }
@@ -22,16 +23,18 @@ const getUserById = async (id: string) => {
   return fetchUserById();
 };
 
+// Fetch an org from ORM and make cache
 const getOrgById = async (id: string) => {
   const fetchOrgById = unstable_cache(
     async () => {
-      return db
+      return await db
         .select()
         .from(organizationsTable)
         .where(eq(organizationsTable.id, id))
         .then((res) => res[0]);
     },
-    [`${id}-organizations`],
+
+    [`organizations-${id}`],
     {
       revalidate: 3600, // Cache for 1 hour
     }
@@ -40,6 +43,7 @@ const getOrgById = async (id: string) => {
   return fetchOrgById();
 };
 
+// Get current user from clerk
 export async function getCurrentUser({ allData = false } = {}) {
   const { userId } = await auth();
 

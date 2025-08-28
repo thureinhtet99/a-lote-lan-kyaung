@@ -12,13 +12,17 @@ export function getGlobalTag(tag: CacheType) {
 }
 
 export function getJobListingTag(tag: CacheType, jobListingId: string) {
-  return `${jobListingId}-${tag}` as const;
+  return `${tag}-${jobListingId}` as const;
 }
 
 export function getOrganizationTag(tag: CacheType, organizationId: string) {
-  return `${organizationId}-${tag}` as const;
+  return `${tag}-${organizationId}` as const;
+}
+
+export function getJobListingOrganizationTag(tag: CacheType, organizationId: string) {
+  return `${tag}-${organizationId}` as const;
 }
 
 export function getIdTag(tag: CacheType, id: string) {
-  return `${id}-${tag}` as const;
+  return `${tag}-${id}` as const;
 }

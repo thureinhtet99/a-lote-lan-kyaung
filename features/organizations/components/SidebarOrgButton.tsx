@@ -12,7 +12,7 @@ const SidebarOrgSuspense = async () => {
   const [{ user }, { organization }] = await Promise.all([
     getCurrentUser({ allData: true }),
     getCurrentOrg({ allData: true }),
-  ]);
+  ]);  
   if (user == null || organization == null) {
     return (
       <SignOutButton>

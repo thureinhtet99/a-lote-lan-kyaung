@@ -19,7 +19,7 @@ export function UserDatabaseSync() {
             last_name: user.lastName || "",
             username: user.username || userId,
             email: user.primaryEmailAddress?.emailAddress || "",
-            image: user.imageUrl,
+            image: user.imageUrl || "",
           });
         } catch (error) {
           console.error("Error syncing user with database:", error);
