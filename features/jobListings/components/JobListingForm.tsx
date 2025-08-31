@@ -23,47 +23,80 @@ import {
 } from "@/components/ui/select";
 import {
   experienceLevels,
+  jobListingsTable,
   jobListingTypes,
   locationRequirements,
-  wageIntervals,
+  wageIntervels,
 } from "@/drizzle/schema";
 import {
   formatExpLevel,
   formatJobType,
   formatLocationRequirement,
-  formatWageInterval,
+  formatWageIntervel,
 } from "../lib/formatters";
 import { StateSelectItems } from "./StateSelectItems";
 import { MarkdownEditor } from "@/components/markdown/MarkdownEditor";
 import { Button } from "@/components/ui/button";
 import LoadingSwap from "@/components/LoadingSwap";
-import { createJobListing } from "../actions/actions";
+import { createJobListing, updateJobListing } from "../actions/actions";
 import { toast } from "sonner";
 
 const noneSelectedValue = "none";
 
-export function JobListingForm() {
+export function JobListingForm({
+  jobListing,
+}: {
+  jobListing?: Pick<
+    typeof jobListingsTable.$inferSelect,
+    | "title"
+    | "description"
+    | "experienceLevel"
+    | "locationRequirement"
+    | "type"
+    | "wage"
+    | "wageIntervel"
+    | "stateAbbreviation"
+    | "city"
+    | "id"
+  >;
+}) {
   const form = useForm({
     resolver: zodResolver(jobListingSchema),
-    defaultValues: {
+    defaultValues: jobListing ?? {
       title: "",
       description: "",
       experienceLevel: "junior",
       locationRequirement: "on-site",
       type: "full-time",
       wage: 0,
-      wageInterval: "monthly",
-      stateAbbreviation: "",
-      city: "",
+      wageIntervel: "monthly",
+      stateAbbreviation: null,
+      city: null,
     },
   });
 
   const onSubmit = async (data: z.infer<typeof jobListingSchema>) => {
-    const res = await createJobListing(data);
-    console.log("response", res);
+    try {
+      const submitAction = jobListing
+        ? updateJobListing.bind(null, jobListing.id)
+        : createJobListing;
 
-    if (res.error) {
-      toast("Event has been created.");
+      await submitAction(data);
+      // const res = await submitAction(data);
+
+      // if (res?.error) {
+      //   toast.error(res.message || "Something went wrong");
+      // } else {
+      //   toast.success(
+      //     jobListing
+      //       ? "Updated successfully"
+      //       : "Created successfully"
+      //   );
+      // }
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "An unexpected error occurred"
+      );
     }
   };
 
@@ -114,7 +147,7 @@ export function JobListingForm() {
                   </FormControl>
 
                   <FormField
-                    name="wageInterval"
+                    name="wageIntervel"
                     control={form.control}
                     render={({ field }) => (
                       <FormItem>
@@ -129,9 +162,9 @@ export function JobListingForm() {
                           </FormControl>
 
                           <SelectContent>
-                            {wageIntervals.map((wageItv, index) => (
+                            {wageIntervels.map((wageItv, index) => (
                               <SelectItem key={index} value={wageItv}>
-                                {formatWageInterval(wageItv)}
+                                {formatWageIntervel(wageItv)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -302,9 +335,8 @@ export function JobListingForm() {
           className="w-full"
           disabled={form.formState.isSubmitting}
         >
-          {/* {form.formState.isSubmitting} */}
           <LoadingSwap isLoading={form.formState.isSubmitting}>
-            Create Job Listing
+            {jobListing ? "Update Job Listing" : "Create Job Listing"}
           </LoadingSwap>
         </Button>
       </form>

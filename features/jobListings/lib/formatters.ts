@@ -3,11 +3,11 @@ import {
   JobListingStatusType,
   JobListingTypeType,
   LocationRequirementType,
-  WageIntervalType,
+  WageIntervelType,
 } from "@/drizzle/schema";
 
-export function formatWageInterval(interval: WageIntervalType) {
-  switch (interval) {
+export function formatWageIntervel(interval: WageIntervelType) {
+switch (interval) {
     case "hourly":
       return "Hour";
     case "yearly":
@@ -76,7 +76,7 @@ export function formatJobListingStatus(status: JobListingStatusType) {
   }
 }
 
-export function formatWage(wage: number, wageIntervel: WageIntervalType) {
+export function formatWage(wage: number, wageIntervel: WageIntervelType) {
   const wageFormatter = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "MMK",

@@ -6,9 +6,7 @@ type SearchParamsType = {
 };
 
 const SuspendedPage = async ({ searchParams }: SearchParamsType) => {
-  const { redirect } = await searchParams;
-  console.log("redirect",redirect);
-  
+  const { redirect } = await searchParams;  
   const redirectedURL = redirect ?? "/employer";
 
   return (

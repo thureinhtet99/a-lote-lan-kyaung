@@ -1,3 +1,5 @@
+import MarkdownPartial from "@/components/markdown/MarkdownPartial";
+import MarkdownRenderer from "@/components/markdown/MarkdownRenderer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { db } from "@/drizzle/db";
@@ -34,7 +36,7 @@ const SuspendedPage = async ({ params }: ParamsType) => {
   if (jobListing == null) return notFound();
 
   return (
-    <div className="spacey-6 max-w-6xl max-auto p-4 @container">
+    <div className="space-y-6 max-w-6xl mx-auto p-4 @container">
       <div className="flex items-center justify-between gap-4 @max-4xl:flex-col @max-4xl:items-start">
         {/* Left */}
         <div>
@@ -61,6 +63,20 @@ const SuspendedPage = async ({ params }: ParamsType) => {
           </Button>
         </div>
       </div>
+
+      {/* Markdown partial */}
+      <MarkdownPartial
+        dialogMarkdown={
+          <MarkdownRenderer source={jobListing.description ?? ""} />
+        }
+        mainMarkdown={
+          <MarkdownRenderer
+            className="prose-sm"
+            source={jobListing.description ?? ""}
+          />
+        }
+        dialogTitle="Description"
+      />
     </div>
   );
 };

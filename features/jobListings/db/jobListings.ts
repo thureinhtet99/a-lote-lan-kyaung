@@ -2,27 +2,27 @@
 
 import { db } from "@/drizzle/db";
 import { jobListingsTable } from "@/drizzle/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { revalidateJobListingCache } from "./cache/jobListings";
 
 // Create
-export async function insertJobListing(
+export async function insertJobListingToDb(
   job: typeof jobListingsTable.$inferInsert
 ) {
   const [result] = await db.insert(jobListingsTable).values(job).returning({
     id: jobListingsTable.id,
     organizationId: jobListingsTable.organizationId,
   });
-  
+
   revalidateJobListingCache(result);
 
   return result;
 }
 
 // Update
-export async function updateJobListing(
+export async function updateJobListingToDb(
   id: string,
-  job: typeof jobListingsTable.$inferInsert
+  job: Partial<typeof jobListingsTable.$inferInsert>
 ) {
   const [result] = await db
     .update(jobListingsTable)
@@ -33,6 +33,23 @@ export async function updateJobListing(
       organizationId: jobListingsTable.organizationId,
     });
   revalidateJobListingCache(result);
+
+  return result;
+}
+
+// Get by id
+export async function getJobListingByIdFromDb(id: string, orgId: string) {
+  const [result] = await db
+    .select()
+    .from(jobListingsTable)
+    .where(
+      and(
+        eq(jobListingsTable.id, id),
+        eq(jobListingsTable.organizationId, orgId)
+      )
+    );
+  revalidateJobListingCache(result);
+  return result;
 }
 
 // Delete

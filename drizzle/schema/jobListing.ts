@@ -13,11 +13,11 @@ import { organizationsTable } from "./organization";
 import { relations } from "drizzle-orm";
 import { jobListingApplicationsTable } from "./jobListingApplication";
 
-export const wageIntervals = ["monthly", "yearly", "hourly"] as const;
-export type WageIntervalType = (typeof wageIntervals)[number];
-export const wageIntervalEnum = pgEnum(
-  "job_listing_wage_interval",
-  wageIntervals
+export const wageIntervels = ["monthly", "yearly", "hourly"] as const;
+export type WageIntervelType = (typeof wageIntervels)[number];
+export const wageIntervelEnum = pgEnum(
+  "job_listing_wage_intervel",
+  wageIntervels
 );
 
 export const locationRequirements = ["on-site", "hybrid", "remote"] as const;
@@ -59,14 +59,14 @@ export const jobListingsTable = pgTable(
     title: varchar({ length: 255 }).notNull(),
     description: text(),
     wage: integer(),
-    wageIntervel: wageIntervalEnum(),
+    wageIntervel: wageIntervelEnum().notNull(),
     stateAbbreviation: varchar(),
     city: varchar(),
     isFeatured: boolean().notNull().default(false),
-    locationRequirement: locationRequirementEnum(),
-    experienceLevel: experienceLevelEnum(),
+    locationRequirement: locationRequirementEnum().notNull(),
+    experienceLevel: experienceLevelEnum().notNull(),
     status: jobListingStatusEnum().notNull().default("draft"),
-    type: jobListingTypeEnum(),
+    type: jobListingTypeEnum().notNull(),
     posted: timestamp({ withTimezone: true }),
     createdAt,
     updatedAt,
