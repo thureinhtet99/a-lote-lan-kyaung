@@ -1,42 +1,31 @@
-import { db } from "@/drizzle/db";
-import { jobListingsTable } from "@/drizzle/schema";
+import { getMostRecentJobListingDb } from "@/features/jobListings/db/jobListings";
 import { APP_ROUTES } from "@/lib/appConfig";
+import { getIdTag } from "@/lib/dataCache";
 import { getCurrentOrg } from "@/services/clerk/lib/getCurrentAuth";
-import { eq } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
-
-// Fetch a most-recent-job from ORM and make cache
-const getMostRecentJobListing = (orgId: string) => {
-  const fetchMostRecentJobListingByOrgId = unstable_cache(
-    async () => {
-      return await db
-        .select({ id: jobListingsTable.id })
-        .from(jobListingsTable)
-        .where(eq(jobListingsTable.organizationId, orgId))
-        .orderBy(jobListingsTable.createdAt)
-        .then((res) => res[0]);
-    },
-    [`jobListings-${orgId}`],
-    {
-      tags: [`jobListings-${orgId}`],
-      revalidate: 3600, // 1 hour
-    }
-  );
-  
-  return fetchMostRecentJobListingByOrgId();
-};
 
 const SuspendedPage = async () => {
   const { orgId } = await getCurrentOrg();
   if (orgId == null) return null;
 
-  const recentJobListing = await getMostRecentJobListing(orgId);
+  const cachedData = unstable_cache(
+    async () => getMostRecentJobListingDb(orgId),
+    [orgId],
+    {
+      tags: [getIdTag("organizations", orgId)],
+    }
+  );
+
+  const jobListing = await cachedData();
+  if (jobListing == null) return notFound();
+
+  const recentJobListing = await getMostRecentJobListingDb(orgId);
   if (recentJobListing == null) {
-    redirect(`${APP_ROUTES.EMPLOYER_JOB_LISTING}/new`);
+    redirect(`${APP_ROUTES.EMPLOYER.JOB_LISTING}/new`);
   } else {
-    redirect(`${APP_ROUTES.EMPLOYER_JOB_LISTING}/${recentJobListing.id}`);
+    redirect(`${APP_ROUTES.EMPLOYER.JOB_LISTING}/${recentJobListing.id}`);
   }
 };
 

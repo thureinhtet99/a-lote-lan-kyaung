@@ -67,7 +67,7 @@ export const jobListingsTable = pgTable(
     experienceLevel: experienceLevelEnum().notNull(),
     status: jobListingStatusEnum().notNull().default("draft"),
     type: jobListingTypeEnum().notNull(),
-    posted: timestamp({ withTimezone: true }),
+    postedAt: timestamp({ withTimezone: true }),
     createdAt,
     updatedAt,
   },

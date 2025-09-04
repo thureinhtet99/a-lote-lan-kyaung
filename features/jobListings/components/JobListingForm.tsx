@@ -40,6 +40,8 @@ import { Button } from "@/components/ui/button";
 import LoadingSwap from "@/components/LoadingSwap";
 import { createJobListing, updateJobListing } from "../actions/actions";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { APP_ROUTES } from "@/lib/appConfig";
 
 const noneSelectedValue = "none";
 
@@ -60,6 +62,7 @@ export function JobListingForm({
     | "id"
   >;
 }) {
+  const router = useRouter();
   const form = useForm({
     resolver: zodResolver(jobListingSchema),
     defaultValues: jobListing ?? {
@@ -76,27 +79,17 @@ export function JobListingForm({
   });
 
   const onSubmit = async (data: z.infer<typeof jobListingSchema>) => {
-    try {
-      const submitAction = jobListing
-        ? updateJobListing.bind(null, jobListing.id)
-        : createJobListing;
+    const submitAction = jobListing
+      ? updateJobListing.bind(null, jobListing.id)
+      : createJobListing;
 
-      await submitAction(data);
-      // const res = await submitAction(data);
+    const result = await submitAction(data);
 
-      // if (res?.error) {
-      //   toast.error(res.message || "Something went wrong");
-      // } else {
-      //   toast.success(
-      //     jobListing
-      //       ? "Updated successfully"
-      //       : "Created successfully"
-      //   );
-      // }
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "An unexpected error occurred"
-      );
+    if (result.error) toast.error(result.message);
+    else {
+      toast.success(result.message);
+      if (result.data?.id)
+        router.push(`${APP_ROUTES.EMPLOYER.JOB_LISTING}/${result.data.id}`);
     }
   };
 
@@ -174,7 +167,6 @@ export function JobListingForm({
                   />
                 </div>
                 <FormDescription>optional</FormDescription>
-                {/* <FormMessage /> */}
               </FormItem>
             )}
           />

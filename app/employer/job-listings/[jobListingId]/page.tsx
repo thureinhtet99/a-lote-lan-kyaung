@@ -1,38 +1,227 @@
+import ActionButton from "@/components/ActionButton";
+import CheckCondition from "@/components/CheckCondition";
 import MarkdownPartial from "@/components/markdown/MarkdownPartial";
 import MarkdownRenderer from "@/components/markdown/MarkdownRenderer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { db } from "@/drizzle/db";
-import { jobListingsTable } from "@/drizzle/schema";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { JobListingStatusType } from "@/drizzle/schema";
+import {
+  deleteJobListing,
+  toggleJobListingFeaturedStatus,
+  toggleJobListingStatus,
+} from "@/features/jobListings/actions/actions";
 import JobListingBadges from "@/features/jobListings/components/JobListingBadges";
+import { getJobListingByOrgIdDb } from "@/features/jobListings/db/jobListings";
 import { formatJobListingStatus } from "@/features/jobListings/lib/formatters";
+import {
+  hasReachedMaxFeaturedJobListings,
+  hasReachedMaxPublishedJobListings,
+} from "@/features/jobListings/lib/planFeatureHelpers";
+import { getNextJobListingStatus } from "@/features/jobListings/lib/utils";
 import { APP_ROUTES } from "@/lib/appConfig";
+import { getGlobalTag, getIdTag } from "@/lib/dataCache";
 import { getCurrentOrg } from "@/services/clerk/lib/getCurrentAuth";
-import { eq } from "drizzle-orm";
-import { EditIcon } from "lucide-react";
+import { hasOrgUserPermission } from "@/services/clerk/lib/orgUserPermission";
+import {
+  EditIcon,
+  EyeIcon,
+  EyeOffIcon,
+  StarIcon,
+  StarOffIcon,
+  Trash2Icon,
+} from "lucide-react";
+import { unstable_cache } from "next/cache";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
+import { ReactNode, Suspense } from "react";
 
 type ParamsType = {
   params: Promise<{ jobListingId: string }>;
 };
 
-const getJobListingByOrgId = async (jobListingId: string) => {
-  const result = await db
-    .select()
-    .from(jobListingsTable)
-    .where(eq(jobListingsTable.id, jobListingId));
+const statusToggleButtonText = (status: JobListingStatusType) => {
+  switch (status) {
+    case "delisted":
+    case "draft":
+      return (
+        <>
+          <EyeIcon className="size-4" />
+          Publish
+        </>
+      );
+    case "published":
+      return (
+        <>
+          <EyeOffIcon className="size-4" />
+          Delist
+        </>
+      );
 
-  return result[0];
+    default:
+      throw new Error(`Invalid status: ${status satisfies never}`);
+  }
+};
+
+const featuredToggleButtonText = (isFeatured: boolean) => {
+  if (isFeatured) {
+    return (
+      <>
+        <StarOffIcon className="size-4" />
+        Unfeature
+      </>
+    );
+  }
+
+  return (
+    <>
+      <StarIcon className="size-4" />
+      Feature
+    </>
+  );
+};
+
+const UpgradePopOver = ({
+  buttonText,
+  popOverText,
+}: {
+  buttonText: ReactNode;
+  popOverText: ReactNode;
+}) => {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline">{buttonText}</Button>
+      </PopoverTrigger>
+      <PopoverContent className="flex flex-col gap-2">
+        {popOverText}
+        <Button asChild>
+          <Link href={APP_ROUTES.EMPLOYER.PRICING}>Upgrade Plan</Link>
+        </Button>
+      </PopoverContent>
+    </Popover>
+  );
+};
+
+const StatusToggleButton = ({
+  status,
+  id,
+}: {
+  status: JobListingStatusType;
+  id: string;
+}) => {
+  const nextStatus = getNextJobListingStatus(status);
+  const shouldShowAlert =
+    nextStatus === "published" || nextStatus === "delisted";
+  const alertDescription =
+    nextStatus === "published"
+      ? "This will immediately show this job listing to all users."
+      : "This will immediately hide this job listing from all users.";
+
+  return (
+    <CheckCondition
+      condition={() => hasOrgUserPermission("job_listing:change_status")}
+    >
+      {nextStatus === "published" ? (
+        <CheckCondition
+          condition={async () => {
+            const isMax = await hasReachedMaxPublishedJobListings();
+            return !isMax;
+          }}
+          otherwise={
+            <UpgradePopOver
+              buttonText={statusToggleButtonText(status)}
+              popOverText="You must upgrade your plan to publish more job listings"
+            />
+          }
+        >
+          <ActionButton
+            variant="outline"
+            action={toggleJobListingStatus.bind(null, id)}
+            areYouSure={shouldShowAlert}
+            sureDescription={alertDescription}
+          >
+            {statusToggleButtonText(status)}
+          </ActionButton>
+        </CheckCondition>
+      ) : (
+        <ActionButton
+          variant="outline"
+          action={toggleJobListingStatus.bind(null, id)}
+          areYouSure={shouldShowAlert}
+          sureDescription={alertDescription}
+        >
+          {statusToggleButtonText(status)}
+        </ActionButton>
+      )}
+    </CheckCondition>
+  );
+};
+
+const FeatureToggleButton = ({
+  isFeatured,
+  id,
+}: {
+  isFeatured: boolean;
+  id: string;
+}) => {
+  return (
+    <CheckCondition
+      condition={() => hasOrgUserPermission("job_listing:change_status")}
+    >
+      {isFeatured ? (
+        <ActionButton
+          variant="outline"
+          action={toggleJobListingFeaturedStatus.bind(null, id)}
+        >
+          {featuredToggleButtonText(isFeatured)}
+        </ActionButton>
+      ) : (
+        <CheckCondition
+          condition={async () => {
+            const isMax = await hasReachedMaxFeaturedJobListings();
+            return !isMax;
+          }}
+          otherwise={
+            <UpgradePopOver
+              buttonText={featuredToggleButtonText(isFeatured)}
+              popOverText="You must upgrade your plan to feature more job listings"
+            />
+          }
+        >
+          <ActionButton
+            variant="outline"
+            action={toggleJobListingFeaturedStatus.bind(null, id)}
+          >
+            {featuredToggleButtonText(isFeatured)}
+          </ActionButton>
+        </CheckCondition>
+      )}
+    </CheckCondition>
+  );
 };
 
 const SuspendedPage = async ({ params }: ParamsType) => {
   const { orgId } = await getCurrentOrg();
-  if (orgId == null) return null;
+  if (orgId == null) return notFound();
 
   const { jobListingId } = await params;
-  const jobListing = await getJobListingByOrgId(jobListingId);
+  const cachedData = unstable_cache(
+    async () => getJobListingByOrgIdDb(jobListingId),
+    [jobListingId],
+    {
+      tags: [
+        getGlobalTag("jobListings"),
+        getIdTag("jobListings", jobListingId),
+      ],
+    }
+  );
+
+  const jobListing = await cachedData();
   if (jobListing == null) return notFound();
 
   return (
@@ -53,14 +242,37 @@ const SuspendedPage = async ({ params }: ParamsType) => {
 
         {/* Right */}
         <div className="flex items-center gap-2 empty:-mt-4">
-          <Button asChild variant="outline">
-            <Link
-              href={`${APP_ROUTES.EMPLOYER_JOB_LISTING}/${jobListing.id}/edit`}
+          <CheckCondition
+            condition={() => hasOrgUserPermission("job_listing:update")}
+          >
+            <Button asChild variant="outline">
+              <Link
+                href={`${APP_ROUTES.EMPLOYER.JOB_LISTING}/${jobListing.id}/edit`}
+              >
+                <EditIcon className="size-4" />
+                Edit
+              </Link>
+            </Button>
+          </CheckCondition>
+          <StatusToggleButton status={jobListing.status} id={jobListing.id} />
+          {jobListing.status === "published" && (
+            <FeatureToggleButton
+              isFeatured={jobListing.isFeatured}
+              id={jobListing.id}
+            />
+          )}
+          <CheckCondition
+            condition={() => hasOrgUserPermission("job_listing:delete")}
+          >
+            <ActionButton
+              action={deleteJobListing.bind(null, jobListing.id)}
+              variant="destructive"
+              areYouSure
             >
-              <EditIcon className="size-4" />
-              Edit
-            </Link>
-          </Button>
+              <Trash2Icon className="size-4" />
+              Delete
+            </ActionButton>
+          </CheckCondition>
         </div>
       </div>
 

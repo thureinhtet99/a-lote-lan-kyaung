@@ -1,9 +1,9 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { db } from "@/drizzle/db";
-import { jobListingsTable } from "@/drizzle/schema";
 import { JobListingForm } from "@/features/jobListings/components/JobListingForm";
+import { getJobListingByOrgIdDb } from "@/features/jobListings/db/jobListings";
+import { getGlobalTag, getIdTag } from "@/lib/dataCache";
 import { getCurrentOrg } from "@/services/clerk/lib/getCurrentAuth";
-import { eq } from "drizzle-orm";
+import { unstable_cache } from "next/cache";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
@@ -11,21 +11,23 @@ type ParamsType = {
   params: Promise<{ jobListingId: string }>;
 };
 
-const getJobListingByOrgId = async (jobListingId: string) => {
-  const result = await db
-    .select()
-    .from(jobListingsTable)
-    .where(eq(jobListingsTable.id, jobListingId));
-
-  return result[0];
-};
-
 const SuspendedPage = async ({ params }: ParamsType) => {
   const { orgId } = await getCurrentOrg();
   if (orgId == null) return notFound();
 
   const { jobListingId } = await params;
-  const jobListing = await getJobListingByOrgId(jobListingId);
+  const cachedData = unstable_cache(
+    async () => getJobListingByOrgIdDb(jobListingId),
+    [jobListingId],
+    {
+      tags: [
+        getGlobalTag("jobListings"),
+        getIdTag("jobListings", jobListingId),
+      ],
+    }
+  );
+
+  const jobListing = await cachedData();
   if (jobListing == null) return notFound();
 
   return (

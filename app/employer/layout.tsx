@@ -25,7 +25,7 @@ async function LayoutSuspense({ children }: { children: ReactNode }) {
           <SidebarGroup>
             <SidebarGroupLabel>Job listings</SidebarGroupLabel>
             <SidebarGroupAction title="Add job listing" asChild>
-              <Link href={`${APP_ROUTES.EMPLOYER_JOB_LISTING}/new`}>
+              <Link href={`${APP_ROUTES.EMPLOYER.JOB_LISTING}/new`}>
                 <PlusIcon />
                 <span className="sr-only">Add Job Listing</span>
               </Link>

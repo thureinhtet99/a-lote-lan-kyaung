@@ -4,9 +4,9 @@ import states from "@/data/states.json";
 export function StateSelectItems() {
   return Object.entries(states)
     .sort(([, nameA], [, nameB]) => nameA.localeCompare(nameB))
-    .map(([abbre, name]) => (
-      <SelectItem key={abbre} value={abbre}>
-        {name}
+    .map(([key, value]) => (
+      <SelectItem key={key} value={value}>
+        {value}
       </SelectItem>
     ));
 }
