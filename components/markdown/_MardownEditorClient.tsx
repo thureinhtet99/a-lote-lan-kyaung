@@ -34,7 +34,6 @@ export default function InternalMarkdownEditorClient({
     <MDXEditor
       suppressHtmlProcessing
       plugins={[
-        // Example Plugin Usage
         headingsPlugin(),
         listsPlugin(),
         quotePlugin(),

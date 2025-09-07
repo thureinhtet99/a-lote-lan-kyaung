@@ -7,6 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
+import { APP_ROUTES } from "@/lib/appConfig";
 import { SignOutButton } from "@/services/clerk/component/AuthButtons";
 import { useClerk } from "@clerk/nextjs";
 import {
@@ -109,14 +110,14 @@ export default function SidebarOrgButtonClient({
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
-          <Link href="/employer/user-settings">
+          <Link href={APP_ROUTES.EMPLOYER.USER_SETTINGS}>
             <UserRoundCogIcon className="mr-1" />
             User settings
           </Link>
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
-          <Link href="/employer/pricing">
+          <Link href={APP_ROUTES.EMPLOYER.PRICING}>
             <CreditCardIcon className="mr-1" />
             Change plan
           </Link>
@@ -125,7 +126,7 @@ export default function SidebarOrgButtonClient({
         <DropdownMenuSeparator />
 
         <DropdownMenuItem asChild>
-          <Link href="/organizations/select">
+          <Link href={APP_ROUTES.ORG.SELECT}>
             <ArrowLeftRightIcon className="mr-1" />
             Switch organization
           </Link>

@@ -1,9 +1,8 @@
+import { SearchParamsType } from "@/types";
 import { OrganizationList } from "@clerk/nextjs";
 import { Suspense } from "react";
 
-type SearchParamsType = {
-  searchParams: Promise<{ redirect?: string }>;
-};
+
 
 const SuspendedPage = async ({ searchParams }: SearchParamsType) => {
   const { redirect } = await searchParams;  

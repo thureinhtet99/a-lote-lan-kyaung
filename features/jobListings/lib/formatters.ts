@@ -39,11 +39,11 @@ export function formatLocationRequirement(require: LocationRequirementType) {
 export function formatJobType(type: JobListingTypeType) {
   switch (type) {
     case "full-time":
-      return "Full time";
+      return "Full-time";
     case "internship":
       return "Internship";
     case "part-time":
-      return "Part time";
+      return "Part-time";
 
     default:
       throw new Error(`Invalid job type: ${type satisfies never}`);
@@ -66,7 +66,7 @@ export function formatExpLevel(exp: ExperienceLevelType) {
 export function formatJobListingStatus(status: JobListingStatusType) {
   switch (status) {
     case "published":
-      return "Active";
+      return "Published";
     case "draft":
       return "Draft";
     case "delisted":

@@ -3,9 +3,10 @@
 import { useEffect } from "react";
 import { useAuth, useOrganization } from "@clerk/nextjs";
 import { insertOrg } from "@/features/organizations/db/organizations";
+import { toast } from "sonner";
 
-// This component will run on the client side and sync the user data with our database
-export function OrgDatabaseSync() {
+// This component will run on the client side and sync user data with db
+export default function OrgDatabaseSync() {
   const { orgId, isLoaded, isSignedIn } = useAuth();
   const { organization } = useOrganization();
 
@@ -19,10 +20,9 @@ export function OrgDatabaseSync() {
             image: organization.imageUrl || "",
           });
         } catch (error) {
-          console.error("Error syncing organization with database:", error);
+          toast.error(error instanceof Error && error.message);
         }
       };
-
       syncUser();
     }
   }, [isLoaded, isSignedIn, orgId, organization]);

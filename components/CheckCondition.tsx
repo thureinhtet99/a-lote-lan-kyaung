@@ -1,11 +1,5 @@
-import { ReactNode, Suspense } from "react";
-
-type CheckConditionType = {
-  condition: () => Promise<boolean>;
-  children: ReactNode;
-  loadingFallback?: ReactNode;
-  otherwise?: ReactNode;
-};
+import { CheckConditionType } from "@/types";
+import { Suspense } from "react";
 
 const SuspendedComponent = async ({
   condition,
@@ -20,7 +14,7 @@ export default function CheckCondition({
   children,
   loadingFallback,
   otherwise,
-}: CheckConditionType) {    
+}: CheckConditionType) {
   return (
     <Suspense fallback={loadingFallback}>
       <SuspendedComponent condition={condition} otherwise={otherwise}>

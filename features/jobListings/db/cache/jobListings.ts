@@ -15,6 +15,7 @@ export function revalidateJobListingCache({
   organizationId: string;
 }) {
   revalidateTag(getGlobalTag("jobListings"));
-  revalidateTag(getIdTag("jobListings", id));
-  revalidateTag(getJobListingOrganizationTag("jobListings",jobListingId, organizationId));
+  revalidateTag(getIdTag("jobListings", id));  
+  revalidateTag(getJobListingOrganizationTag("jobListings", jobListingId, organizationId));  
+  revalidateTag(getGlobalTag("jobListingApplications"));
 }

@@ -45,7 +45,7 @@ import { APP_ROUTES } from "@/lib/appConfig";
 
 const noneSelectedValue = "none";
 
-export function JobListingForm({
+export default function JobListingForm({
   jobListing,
 }: {
   jobListing?: Pick<
@@ -202,7 +202,7 @@ export function JobListingForm({
                   >
                     <FormControl>
                       <SelectTrigger className="w-full">
-                        <SelectValue />
+                        <SelectValue placeholder="Select state"/>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>

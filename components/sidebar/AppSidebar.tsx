@@ -27,9 +27,9 @@ export default function AppSidebar({
       <AppSidebarClient>
         {/* Left */}
         <Sidebar collapsible="icon" className="overflow-hidden">
-          <SidebarHeader className="flex-row">
+          <SidebarHeader className="flex-row items-center">
             <SidebarTrigger />
-            <span className="text-xl text-nowrap">{APP_CONFIG.app_name}</span>
+            <span className="text-xl text-nowrap">{APP_CONFIG.APP_NAME}</span>
           </SidebarHeader>
 
           <SidebarContent>{content}</SidebarContent>

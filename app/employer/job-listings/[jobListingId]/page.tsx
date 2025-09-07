@@ -16,17 +16,18 @@ import {
   toggleJobListingStatus,
 } from "@/features/jobListings/actions/actions";
 import JobListingBadges from "@/features/jobListings/components/JobListingBadges";
-import { getJobListingByOrgIdDb } from "@/features/jobListings/db/jobListings";
+import { getJobListingByIdDb } from "@/features/jobListings/db/jobListings";
 import { formatJobListingStatus } from "@/features/jobListings/lib/formatters";
 import {
   hasReachedMaxFeaturedJobListings,
   hasReachedMaxPublishedJobListings,
 } from "@/features/jobListings/lib/planFeatureHelpers";
-import { getNextJobListingStatus } from "@/features/jobListings/lib/utils";
+import { nextJobListingStatus } from "@/features/jobListings/lib/utils";
 import { APP_ROUTES } from "@/lib/appConfig";
 import { getGlobalTag, getIdTag } from "@/lib/dataCache";
 import { getCurrentOrg } from "@/services/clerk/lib/getCurrentAuth";
 import { hasOrgUserPermission } from "@/services/clerk/lib/orgUserPermission";
+import { ParamsType } from "@/types";
 import {
   EditIcon,
   EyeIcon,
@@ -39,10 +40,6 @@ import { unstable_cache } from "next/cache";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ReactNode, Suspense } from "react";
-
-type ParamsType = {
-  params: Promise<{ jobListingId: string }>;
-};
 
 const statusToggleButtonText = (status: JobListingStatusType) => {
   switch (status) {
@@ -114,7 +111,7 @@ const StatusToggleButton = ({
   status: JobListingStatusType;
   id: string;
 }) => {
-  const nextStatus = getNextJobListingStatus(status);
+  const nextStatus = nextJobListingStatus(status);
   const shouldShowAlert =
     nextStatus === "published" || nextStatus === "delisted";
   const alertDescription =
@@ -205,13 +202,15 @@ const FeatureToggleButton = ({
   );
 };
 
-const SuspendedPage = async ({ params }: ParamsType) => {
+const SuspendedComponent = async ({ params }: ParamsType) => {
+  const { jobListingId } = await params;
+
   const { orgId } = await getCurrentOrg();
   if (orgId == null) return notFound();
 
-  const { jobListingId } = await params;
+  // Get job listing by organization id (cached)
   const cachedData = unstable_cache(
-    async () => getJobListingByOrgIdDb(jobListingId),
+    async () => await getJobListingByIdDb(jobListingId),
     [jobListingId],
     {
       tags: [
@@ -254,7 +253,9 @@ const SuspendedPage = async ({ params }: ParamsType) => {
               </Link>
             </Button>
           </CheckCondition>
+
           <StatusToggleButton status={jobListing.status} id={jobListing.id} />
+
           {jobListing.status === "published" && (
             <FeatureToggleButton
               isFeatured={jobListing.isFeatured}
@@ -296,7 +297,7 @@ const SuspendedPage = async ({ params }: ParamsType) => {
 export default function SingleJobListingPage(props: ParamsType) {
   return (
     <Suspense>
-      <SuspendedPage {...props} />
+      <SuspendedComponent {...props} />
     </Suspense>
   );
 }

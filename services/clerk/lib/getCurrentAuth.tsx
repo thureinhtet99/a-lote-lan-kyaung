@@ -3,8 +3,9 @@ import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 import { organizationsTable, usersTable } from "@/drizzle/schema";
 import { unstable_cache } from "next/cache";
+import { getGlobalTag, getIdTag } from "@/lib/dataCache";
 
-// Fetch a user from ORM and make cache
+// Fetch a user from db and make cache
 const getUserById = async (id: string) => {
   const fetchUserById = unstable_cache(
     async () => {
@@ -16,14 +17,14 @@ const getUserById = async (id: string) => {
     },
     [`users-${id}`],
     {
-      revalidate: 3600, // Cache for 1 hour
+      tags: [getGlobalTag("users"), getIdTag("users", id)],
     }
   );
 
   return fetchUserById();
 };
 
-// Fetch an org from ORM and make cache
+// Fetch an org from db and make cache
 const getOrgById = async (id: string) => {
   const fetchOrgById = unstable_cache(
     async () => {
@@ -36,7 +37,7 @@ const getOrgById = async (id: string) => {
 
     [`organizations-${id}`],
     {
-      revalidate: 3600, // Cache for 1 hour
+      tags: [getGlobalTag("organizations"), getIdTag("organizations", id)],
     }
   );
 

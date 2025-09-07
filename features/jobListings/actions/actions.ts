@@ -10,12 +10,12 @@ import { jobListingSchema } from "./schemas";
 import { getCurrentOrg } from "@/services/clerk/lib/getCurrentAuth";
 import {
   deleteJobListingDb,
-  getJobListingWithOrgIdDb,
+  getJobListingByOrgIdDb,
   insertJobListingDb,
   updateJobListingDb,
 } from "../db/jobListings";
 import { hasOrgUserPermission } from "@/services/clerk/lib/orgUserPermission";
-import { getNextJobListingStatus } from "../lib/utils";
+import { nextJobListingStatus } from "../lib/utils";
 
 // Create
 export const createJobListing = async (
@@ -48,17 +48,6 @@ export const createJobListing = async (
   };
 };
 
-// Create with redirect (for server components that need redirect)
-// export const createJobListingWithRedirect = async (
-//   unsafeData: z.infer<typeof jobListingSchema>
-// ) => {
-//   const result = await createJobListing(unsafeData);
-//   if (!result.error && result.data) {
-//     redirect(`${APP_ROUTES.EMPLOYER.JOB_LISTING}/${result.data.id}`);
-//   }
-//   return result;
-// };
-
 // Update
 export const updateJobListing = async (
   jobListingId: string,
@@ -78,13 +67,14 @@ export const updateJobListing = async (
       message: "There was an error updating your job listing data",
     };
 
-  const jobListing = await getJobListingWithOrgIdDb(jobListingId, orgId);
+  const jobListing = await getJobListingByOrgIdDb(jobListingId, orgId);
   if (jobListing == null) {
     return {
       error: true,
       message: "There was an error getting your job listing",
     };
   }
+
   const updatedJobListing = await updateJobListingDb(jobListingId, data);
 
   return {
@@ -106,6 +96,7 @@ export const updateJobListing = async (
 //   return result;
 // };
 
+// Toggle status
 export const toggleJobListingStatus = async (id: string) => {
   const output = {
     error: true,
@@ -115,10 +106,10 @@ export const toggleJobListingStatus = async (id: string) => {
   const { orgId } = await getCurrentOrg();
   if (orgId == null) return output;
 
-  const jobListing = await getJobListingWithOrgIdDb(id, orgId);
+  const jobListing = await getJobListingByOrgIdDb(id, orgId);
   if (jobListing == null) return output;
 
-  const newStatus = getNextJobListingStatus(jobListing.status);
+  const newStatus = nextJobListingStatus(jobListing.status);
   if (
     !(await hasOrgUserPermission("job_listing:change_status")) ||
     (newStatus === "published" && (await hasReachedMaxPublishedJobListings()))
@@ -143,6 +134,7 @@ export const toggleJobListingStatus = async (id: string) => {
   return { error: false, message: statusMessage };
 };
 
+// Toggle featured status
 export const toggleJobListingFeaturedStatus = async (id: string) => {
   const output = {
     error: true,
@@ -153,7 +145,7 @@ export const toggleJobListingFeaturedStatus = async (id: string) => {
   const { orgId } = await getCurrentOrg();
   if (orgId == null) return output;
 
-  const jobListing = await getJobListingWithOrgIdDb(id, orgId);
+  const jobListing = await getJobListingByOrgIdDb(id, orgId);
   if (jobListing == null) return output;
 
   const newFeaturedStatus = !jobListing.isFeatured;
@@ -184,7 +176,7 @@ export const deleteJobListing = async (id: string) => {
   const { orgId } = await getCurrentOrg();
   if (orgId == null) return output;
 
-  const jobListing = await getJobListingWithOrgIdDb(id, orgId);
+  const jobListing = await getJobListingByOrgIdDb(id, orgId);
   if (jobListing == null) return output;
 
   if (!(await hasOrgUserPermission("job_listing:delete"))) return output;

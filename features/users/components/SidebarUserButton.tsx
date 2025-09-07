@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/services/clerk/lib/getCurrentAuth";
 import { SignOutButton } from "@/services/clerk/component/AuthButtons";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { LogOutIcon } from "lucide-react";
+import Loading from "@/components/Loading";
 
 const SidebarUserSuspense = async () => {
   const { user } = await getCurrentUser({ allData: true });
@@ -25,7 +26,7 @@ const SidebarUserSuspense = async () => {
 
 export default function SidebarUserButton() {
   return (
-    <Suspense>
+    <Suspense fallback={<Loading />}>
       <SidebarUserSuspense />
     </Suspense>
   );
