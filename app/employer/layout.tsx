@@ -14,25 +14,25 @@ import AppSidebar from "@/components/sidebar/AppSidebar";
 import SidebarNavMenuGroup from "@/components/sidebar/SidebarNavMenuGroup";
 import SidebarOrgButton from "@/features/organizations/components/SidebarOrgButton";
 import { getCurrentOrg } from "@/services/clerk/lib/getCurrentAuth";
-import { APP_ROUTES } from "@/lib/appConfig";
+import { APP_ROUTES } from "@/config/appConfig";
 import OrgDatabaseSync from "@/services/clerk/component/OrgDatabaseSync";
 import CheckCondition from "@/components/CheckCondition";
 import { hasOrgUserPermission } from "@/services/clerk/lib/orgUserPermission";
-import { getJobListingsDb } from "@/features/jobListings/db/jobListings";
+import { getJobListingDb } from "@/features/jobListings/db/jobListings";
 import { unstable_cache } from "next/cache";
-import { getGlobalTag, getIdTag } from "@/lib/dataCache";
 import { redirect } from "next/navigation";
 import { sortJobListingsByStatus } from "@/features/jobListings/lib/utils";
 import { JobListingStatusType } from "@/drizzle/schema";
 import JobListingMenuGroup from "./_JobListingMenuGroup";
+import { jobListingGlobalTag } from "@/lib/dataCache";
 
 const JobListingMenu = async ({ orgId }: { orgId: string }) => {
   // Get job listings (cached)
   const cachedData = unstable_cache(
-    async () => await getJobListingsDb(orgId),
+    async () => await getJobListingDb(orgId),
     [orgId],
     {
-      tags: [getGlobalTag("jobListings"), getIdTag("organizations", orgId)],
+      tags: [jobListingGlobalTag(orgId, "jobListings")],
     }
   );
 

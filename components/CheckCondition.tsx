@@ -1,4 +1,4 @@
-import { CheckConditionType } from "@/types";
+import { CheckConditionType } from "@/types/check-condition.type";
 import { Suspense } from "react";
 
 const SuspendedComponent = async ({

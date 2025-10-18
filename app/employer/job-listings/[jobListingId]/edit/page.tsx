@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import JobListingForm from "@/features/jobListings/components/JobListingForm";
-import { getJobListingByIdDb } from "@/features/jobListings/db/jobListings";
-import { getGlobalTag, getIdTag } from "@/lib/dataCache";
+import { getJobListingByOrgIdDb } from "@/features/jobListings/db/jobListings";
+import { jobListingIdTag } from "@/lib/dataCache";
 import { getCurrentOrg } from "@/services/clerk/lib/getCurrentAuth";
 import { unstable_cache } from "next/cache";
 import { notFound } from "next/navigation";
@@ -16,14 +16,13 @@ const SuspendedPage = async ({ params }: ParamsType) => {
   if (orgId == null) return notFound();
 
   const { jobListingId } = await params;
+
+  // Get job listing by organization id (cached)
   const cachedData = unstable_cache(
-    async () => getJobListingByIdDb(jobListingId),
-    [jobListingId],
+    async () => getJobListingByOrgIdDb(jobListingId, orgId),
+    [jobListingId, orgId],
     {
-      tags: [
-        getGlobalTag("jobListings"),
-        getIdTag("jobListings", jobListingId),
-      ],
+      tags: [jobListingIdTag(orgId, "jobListings", jobListingId)],
     }
   );
 

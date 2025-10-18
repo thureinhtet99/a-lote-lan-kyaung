@@ -6,9 +6,12 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:push": "npx drizzle-kit push",
+    "db:seed": "npx tsx drizzle/seed.ts"
   },
   "dependencies": {
+    "@clerk/clerk-sdk-node": "^4.13.23",
     "@clerk/nextjs": "^6.31.1",
     "@clerk/themes": "^2.4.10",
     "@hookform/resolvers": "^5.2.1",
@@ -26,6 +29,7 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "dotenv": "^17.2.1",
     "drizzle-orm": "^0.44.4",
     "lucide-react": "^0.539.0",
@@ -36,6 +40,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.62.0",
+    "react-resizable-panels": "^3.0.6",
     "remark-gfm": "^4.0.1",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",

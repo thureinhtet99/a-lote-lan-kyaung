@@ -44,7 +44,6 @@ export function formatJobType(type: JobListingTypeType) {
       return "Internship";
     case "part-time":
       return "Part-time";
-
     default:
       throw new Error(`Invalid job type: ${type satisfies never}`);
   }
@@ -105,7 +104,7 @@ export function formatJobLisingLocation(
   const locationParts = [];
   if (city != null) locationParts.push(city);
   if (stateAbbreviation != null)
-    locationParts.push(stateAbbreviation.toUpperCase());
+    locationParts.push(stateAbbreviation);
 
   return locationParts.join(", ");
 }

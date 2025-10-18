@@ -10,10 +10,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
-import { APP_ROUTES } from "@/lib/appConfig";
+import { APP_ROUTES } from "@/config/appConfig";
 import { SignOutButton } from "@/services/clerk/component/AuthButtons";
 import { useClerk } from "@clerk/nextjs";
-
 import {
   ChevronsUpDown,
   LogOutIcon,
@@ -48,7 +47,7 @@ const UserInfo = ({ first_name, last_name, email, image }: UserType) => {
   );
 };
 
-export default function SidebarUserButtonClient({ user }: { user: UserType }) {
+function SidebarUserButtonClient({ user }: { user: UserType }) {
   const { isMobile, setOpenMobile } = useSidebar();
   const { openUserProfile } = useClerk();
 
@@ -104,3 +103,5 @@ export default function SidebarUserButtonClient({ user }: { user: UserType }) {
     </DropdownMenu>
   );
 }
+
+export default SidebarUserButtonClient;

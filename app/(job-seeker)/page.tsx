@@ -1,4 +1,13 @@
+import JobListingItem from "./_shared/JobListingItem";
 
-export default function JobSeekerHomePage(){
-    return <h1>homepage</h1>
+export default function JobSeekerHomePage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[]>>;
+}) {
+  return (
+    <div className="m-4">
+      <JobListingItem searchParams={searchParams} />
+    </div>
+  );
 }

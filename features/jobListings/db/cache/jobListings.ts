@@ -1,21 +1,17 @@
-import {
-  getGlobalTag,
-  getIdTag,
-  getJobListingOrganizationTag,
-} from "@/lib/dataCache";
+import { jobListingGlobalTag, idTag } from "@/lib/dataCache";
 import { revalidateTag } from "next/cache";
 
 export function revalidateJobListingCache({
-  id,
   jobListingId,
   organizationId,
 }: {
-  id: string;
-  jobListingId: string;
+  jobListingId?: string;
   organizationId: string;
 }) {
-  revalidateTag(getGlobalTag("jobListings"));
-  revalidateTag(getIdTag("jobListings", id));  
-  revalidateTag(getJobListingOrganizationTag("jobListings", jobListingId, organizationId));  
-  revalidateTag(getGlobalTag("jobListingApplications"));
+  try {
+    revalidateTag(jobListingGlobalTag(organizationId, "jobListings"));
+    if (jobListingId) revalidateTag(idTag("jobListings", jobListingId));
+  } catch (error) {
+    console.error("Failed to revalidate job listing cache: ", error);
+  }
 }

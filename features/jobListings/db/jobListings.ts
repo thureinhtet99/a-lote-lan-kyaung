@@ -16,10 +16,8 @@ export async function insertJobListingDb(
     id: jobListingsTable.id,
     organizationId: jobListingsTable.organizationId,
   });
-
   if (result) {
     revalidateJobListingCache({
-      id: result.id,
       jobListingId: result.id,
       organizationId: result.organizationId,
     });
@@ -44,7 +42,6 @@ export async function updateJobListingDb(
 
   if (result) {
     revalidateJobListingCache({
-      id: result.id,
       jobListingId: result.id,
       organizationId: result.organizationId,
     });
@@ -104,21 +101,16 @@ export const getFeaturedJobListingCountDb = async (orgId: string) => {
 
 // Get by org id
 export async function getJobListingByOrgIdDb(id: string, orgId: string) {
-  const [result] = await db
-    .select()
-    .from(jobListingsTable)
-    .where(
-      and(
-        eq(jobListingsTable.id, id),
-        eq(jobListingsTable.organizationId, orgId)
-      )
-    );
-
-  return result;
+  return await db.query.jobListingsTable.findFirst({
+    where: and(
+      eq(jobListingsTable.id, id),
+      eq(jobListingsTable.organizationId, orgId)
+    ),
+  });
 }
 
 // Get job listings
-export async function getJobListingsDb(orgId: string) {
+export async function getJobListingDb(orgId: string) {
   const result = await db
     .select({
       id: jobListingsTable.id,
@@ -138,6 +130,11 @@ export async function getJobListingsDb(orgId: string) {
   return result;
 }
 
+// Get applications
+// export async function getJobListingApplications(params:type) {
+
+// }
+
 // Delete
 export async function deleteJobListingDb(id: string) {
   const [result] = await db
@@ -150,7 +147,6 @@ export async function deleteJobListingDb(id: string) {
 
   if (result) {
     revalidateJobListingCache({
-      id: result.id,
       jobListingId: result.id,
       organizationId: result.organizationId,
     });

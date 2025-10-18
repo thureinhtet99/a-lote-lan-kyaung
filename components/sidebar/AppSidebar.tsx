@@ -11,7 +11,7 @@ import {
 import { ReactNode } from "react";
 import { SignedIn } from "@/services/clerk/component/AuthStatus";
 import { AppSidebarClient } from "./_AppSidebarClient";
-import { APP_CONFIG } from "@/lib/appConfig";
+import { APP_CONFIG } from "@/config/appConfig";
 
 export default function AppSidebar({
   content,

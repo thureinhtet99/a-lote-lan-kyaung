@@ -1,6 +1,6 @@
 import { getMostRecentJobListingDb } from "@/features/jobListings/db/jobListings";
-import { APP_ROUTES } from "@/lib/appConfig";
-import { getIdTag } from "@/lib/dataCache";
+import { APP_ROUTES } from "@/config/appConfig";
+import { idTag } from "@/lib/dataCache";
 import { getCurrentOrg } from "@/services/clerk/lib/getCurrentAuth";
 import { unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
@@ -15,7 +15,7 @@ const SuspendedPage = async () => {
     async () => await getMostRecentJobListingDb(orgId),
     [orgId],
     {
-      tags: [getIdTag("organizations", orgId)],
+      tags: [idTag("organizations", orgId)],
     }
   );
 

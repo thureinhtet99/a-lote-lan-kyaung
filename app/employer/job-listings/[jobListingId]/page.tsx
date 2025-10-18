@@ -16,18 +16,17 @@ import {
   toggleJobListingStatus,
 } from "@/features/jobListings/actions/actions";
 import JobListingBadges from "@/features/jobListings/components/JobListingBadges";
-import { getJobListingByIdDb } from "@/features/jobListings/db/jobListings";
+import { getJobListingByOrgIdDb } from "@/features/jobListings/db/jobListings";
 import { formatJobListingStatus } from "@/features/jobListings/lib/formatters";
 import {
   hasReachedMaxFeaturedJobListings,
   hasReachedMaxPublishedJobListings,
 } from "@/features/jobListings/lib/planFeatureHelpers";
 import { nextJobListingStatus } from "@/features/jobListings/lib/utils";
-import { APP_ROUTES } from "@/lib/appConfig";
-import { getGlobalTag, getIdTag } from "@/lib/dataCache";
+import { APP_ROUTES } from "@/config/appConfig";
+import { jobListingIdTag } from "@/lib/dataCache";
 import { getCurrentOrg } from "@/services/clerk/lib/getCurrentAuth";
 import { hasOrgUserPermission } from "@/services/clerk/lib/orgUserPermission";
-import { ParamsType } from "@/types";
 import {
   EditIcon,
   EyeIcon,
@@ -40,6 +39,7 @@ import { unstable_cache } from "next/cache";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ReactNode, Suspense } from "react";
+import { ParamsType } from "@/types/params.type";
 
 const statusToggleButtonText = (status: JobListingStatusType) => {
   switch (status) {
@@ -210,13 +210,10 @@ const SuspendedComponent = async ({ params }: ParamsType) => {
 
   // Get job listing by organization id (cached)
   const cachedData = unstable_cache(
-    async () => await getJobListingByIdDb(jobListingId),
-    [jobListingId],
+    async () => await getJobListingByOrgIdDb(jobListingId, orgId),
+    [jobListingId, orgId],
     {
-      tags: [
-        getGlobalTag("jobListings"),
-        getIdTag("jobListings", jobListingId),
-      ],
+      tags: [jobListingIdTag(orgId, "jobListings", jobListingId)],
     }
   );
 
@@ -233,7 +230,7 @@ const SuspendedComponent = async ({ params }: ParamsType) => {
           </h1>
 
           <div className="flex flex-wrap gap-2 mt-2">
-            {/* Custome edit Badge */}
+            {/* Custom edit Badge */}
             <Badge>{formatJobListingStatus(jobListing.status)}</Badge>
             <JobListingBadges jobListing={jobListing} />
           </div>

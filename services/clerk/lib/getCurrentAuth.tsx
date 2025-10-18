@@ -3,48 +3,37 @@ import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 import { organizationsTable, usersTable } from "@/drizzle/schema";
 import { unstable_cache } from "next/cache";
-import { getGlobalTag, getIdTag } from "@/lib/dataCache";
+import { idTag } from "@/lib/dataCache";
 
-// Fetch a user from db and make cache
+// Fetch a user from db (cached)
 const getUserById = async (id: string) => {
-  const fetchUserById = unstable_cache(
+  const cachedData = unstable_cache(
     async () => {
-      return await db
-        .select()
-        .from(usersTable)
-        .where(eq(usersTable.id, id))
-        .then((res) => res[0]);
+      return await db.query.usersTable.findFirst({
+        where: eq(usersTable.id, id),
+      });
     },
     [`users-${id}`],
-    {
-      tags: [getGlobalTag("users"), getIdTag("users", id)],
-    }
+    { tags: [idTag("users", id)] }
   );
-
-  return fetchUserById();
+  return await cachedData();
 };
 
-// Fetch an org from db and make cache
+// Fetch an org from db (cached)
 const getOrgById = async (id: string) => {
-  const fetchOrgById = unstable_cache(
+  const cachedData = unstable_cache(
     async () => {
-      return await db
-        .select()
-        .from(organizationsTable)
-        .where(eq(organizationsTable.id, id))
-        .then((res) => res[0]);
+      return await db.query.organizationsTable.findFirst({
+        where: eq(organizationsTable.id, id),
+      });
     },
-
     [`organizations-${id}`],
-    {
-      tags: [getGlobalTag("organizations"), getIdTag("organizations", id)],
-    }
+    { tags: [idTag("organizations", id)] }
   );
-
-  return fetchOrgById();
+  return await cachedData();
 };
 
-// Get current user from clerk
+// Get current-user from Clerk
 export async function getCurrentUser({ allData = false } = {}) {
   const { userId } = await auth();
 

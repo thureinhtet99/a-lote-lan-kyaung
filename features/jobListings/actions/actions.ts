@@ -167,6 +167,7 @@ export const toggleJobListingFeaturedStatus = async (id: string) => {
   return { error: false, message: featuredMessage };
 };
 
+// Delete
 export const deleteJobListing = async (id: string) => {
   const output = {
     error: true,

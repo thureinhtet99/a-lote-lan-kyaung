@@ -10,9 +10,9 @@ export function AppSidebarClient({ children }: { children: ReactNode }) {
   if (isMobile) {
     return (
       <div className="flex flex-col w-full">
-        <div className="p-2 border-b flex items-center gap-1">
+        <div className="p-2 border-b flex items-center gap-1 border">
           <SidebarTrigger />
-          <span className="text-xl">jobs</span>
+          <span className="text-xl">Job Listings</span>
         </div>
         <div className="flex-1 flex">{children}</div>
       </div> 

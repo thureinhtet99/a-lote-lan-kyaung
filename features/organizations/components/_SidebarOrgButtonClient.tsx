@@ -3,18 +3,16 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
+  DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
-import { APP_ROUTES } from "@/lib/appConfig";
+import { APP_ROUTES } from "@/config/appConfig";
 import { SignOutButton } from "@/services/clerk/component/AuthButtons";
 import { useClerk } from "@clerk/nextjs";
-import {
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "@radix-ui/react-dropdown-menu";
 import {
   ArrowLeftRightIcon,
   Building2Icon,

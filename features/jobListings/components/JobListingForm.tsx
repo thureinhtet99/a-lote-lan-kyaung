@@ -41,7 +41,7 @@ import LoadingSwap from "@/components/LoadingSwap";
 import { createJobListing, updateJobListing } from "../actions/actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { APP_ROUTES } from "@/lib/appConfig";
+import { APP_ROUTES } from "@/config/appConfig";
 
 const noneSelectedValue = "none";
 
@@ -84,7 +84,6 @@ export default function JobListingForm({
       : createJobListing;
 
     const result = await submitAction(data);
-
     if (result.error) toast.error(result.message);
     else {
       toast.success(result.message);
@@ -97,7 +96,7 @@ export default function JobListingForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-6 @container"
+        className="space-y-10 @container"
       >
         <div className="grid grid-cols-1 @md:grid-cols-2 gap-x-4 gap-y-6 items-start">
           {/* Title */}
@@ -108,7 +107,12 @@ export default function JobListingForm({
               <FormItem>
                 <FormLabel>Job Title</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input
+                    {...field}
+                    type="text"
+                    value={field.value ?? ""}
+                    placeholder="Enter job title"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -139,6 +143,7 @@ export default function JobListingForm({
                     />
                   </FormControl>
 
+                  {/* Wage Interval */}
                   <FormField
                     name="wageIntervel"
                     control={form.control}
@@ -182,12 +187,18 @@ export default function JobListingForm({
                 <FormItem>
                   <FormLabel>City</FormLabel>
                   <FormControl>
-                    <Input {...field} value={field.value ?? ""} />
+                    <Input
+                      {...field}
+                      type="text"
+                      value={field.value ?? ""}
+                      placeholder="Enter city"
+                    />
                   </FormControl>
                 </FormItem>
               )}
             />
 
+            {/* State */}
             <FormField
               name="stateAbbreviation"
               control={form.control}
@@ -202,7 +213,7 @@ export default function JobListingForm({
                   >
                     <FormControl>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select state"/>
+                        <SelectValue placeholder="Select state" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -222,7 +233,7 @@ export default function JobListingForm({
             />
           </div>
 
-          {/* LocationRequirement */}
+          {/* Location */}
           <FormField
             name="locationRequirement"
             control={form.control}
@@ -309,6 +320,7 @@ export default function JobListingForm({
           />
         </div>
 
+        {/* Description */}
         <FormField
           name="description"
           control={form.control}
@@ -316,7 +328,11 @@ export default function JobListingForm({
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <MarkdownEditor {...field} markdown={field.value ?? ""} />
+                <MarkdownEditor
+                  {...field}
+                  markdown={field.value ?? ""}
+                  placeholder="Enter description"
+                />
               </FormControl>
             </FormItem>
           )}

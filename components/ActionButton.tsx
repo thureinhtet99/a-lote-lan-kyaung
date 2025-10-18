@@ -16,7 +16,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
-import { APP_ROUTES } from "@/lib/appConfig";
+import { APP_ROUTES } from "@/config/appConfig";
 
 export default function ActionButton({
   action,

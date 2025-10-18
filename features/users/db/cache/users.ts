@@ -1,7 +1,10 @@
-import { getGlobalTag, getIdTag } from "@/lib/dataCache";
+import { idTag } from "@/lib/dataCache";
 import { revalidateTag } from "next/cache";
 
-export function revalidateUserCache(id: string) {
-  revalidateTag(getGlobalTag("users"));
-  revalidateTag(getIdTag("users", id));
+export function revalidateUserCache(userId: string) {
+  try {
+    if (userId) revalidateTag(idTag("users", userId));
+  } catch (error) {
+    console.error("Failed to revalidate user cache:", error);
+  }
 }

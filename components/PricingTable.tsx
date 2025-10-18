@@ -1,4 +1,4 @@
-import { APP_ROUTES } from "@/lib/appConfig";
+import { APP_ROUTES } from "@/config/appConfig";
 import { PricingTable as ClerkPricingTable } from "@clerk/nextjs";
 
 export default function PricingTable() {

@@ -18,7 +18,7 @@ import {
 import { formatJobListingStatus } from "@/features/jobListings/lib/formatters";
 import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
-import { APP_ROUTES } from "@/lib/appConfig";
+import { APP_ROUTES } from "@/config/appConfig";
 
 type JobListingMenuGroupType = Pick<
   typeof jobListingsTable.$inferInsert,
