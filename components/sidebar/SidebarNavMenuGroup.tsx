@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, Suspense } from "react";
+import { Suspense } from "react";
 import {
   SidebarGroup,
   SidebarMenu,
@@ -10,19 +10,13 @@ import {
 import { SignedIn, SignedOut } from "@/services/clerk/component/AuthStatus";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-type SidebarNavMenuItemType = {
-  href: string;
-  icon: ReactNode;
-  label: string;
-  authStatus?: "signedIn" | "signedOut";
-}[];
+import { SidebarNavMenuGroupType } from "@/types/sidebar-nav-menu-group.type";
 
 export default function SidebarNavMenuGroup({
   items,
   className,
 }: {
-  items: SidebarNavMenuItemType;
+  items: SidebarNavMenuGroupType;
   className?: string;
 }) {
   const pathname = usePathname();

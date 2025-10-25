@@ -3,11 +3,11 @@ import {
   JobListingStatusType,
   JobListingTypeType,
   LocationRequirementType,
-  WageIntervelType,
+  WageIntervalType,
 } from "@/drizzle/schema";
 
-export function formatWageIntervel(interval: WageIntervelType) {
-switch (interval) {
+export function formatWageInterval(interval: WageIntervalType) {
+  switch (interval) {
     case "hourly":
       return "Hour";
     case "yearly":
@@ -75,7 +75,7 @@ export function formatJobListingStatus(status: JobListingStatusType) {
   }
 }
 
-export function formatWage(wage: number, wageIntervel: WageIntervelType) {
+export function formatWage(wage: number, wageIntervel: WageIntervalType) {
   const wageFormatter = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "MMK",
@@ -95,7 +95,7 @@ export function formatWage(wage: number, wageIntervel: WageIntervelType) {
   }
 }
 
-export function formatJobLisingLocation(
+export function formatJobListingLocation(
   stateAbbreviation: string | null,
   city: string | null
 ) {
@@ -103,9 +103,7 @@ export function formatJobLisingLocation(
 
   const locationParts = [];
   if (city != null) locationParts.push(city);
-  if (stateAbbreviation != null)
-    locationParts.push(stateAbbreviation);
+  if (stateAbbreviation != null) locationParts.push(stateAbbreviation);
 
   return locationParts.join(", ");
 }
-

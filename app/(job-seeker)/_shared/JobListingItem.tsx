@@ -66,9 +66,7 @@ const getAllJobListings = async (
     whereConditions.push(ilike(jobListingsTable.city, searchParams.city));
 
   if (searchParams.state)
-    whereConditions.push(
-      eq(jobListingsTable.stateAbbreviation, searchParams.state)
-    );
+    whereConditions.push(eq(jobListingsTable.state, searchParams.state));
 
   if (searchParams.experience_level)
     whereConditions.push(
@@ -130,10 +128,10 @@ const JobListingListItem = ({
   jobListing: Pick<
     typeof jobListingsTable.$inferSelect,
     | "title"
-    | "stateAbbreviation"
+    | "state"
     | "city"
     | "wage"
-    | "wageIntervel"
+    | "wageInterval"
     | "experienceLevel"
     | "type"
     | "postedAt"
@@ -237,7 +235,7 @@ const SuspendedComponent = async ({
     }
   );
 
-  const jobListings = await cachedData(search, jobListingId);  
+  const jobListings = await cachedData(search, jobListingId);
   if (jobListings.length === 0)
     return (
       <div className="text-muted-foreground p-4">No job listings found</div>

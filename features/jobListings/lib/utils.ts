@@ -12,15 +12,15 @@ export const nextJobListingStatus = (status: JobListingStatusType) => {
   }
 };
 
-const jobListingStatusSortOrder: Record<JobListingStatusType, number> = {
-  published: 0,
-  draft: 1,
-  delisted: 2,
-};
-
 export const sortJobListingsByStatus = (
   a: JobListingStatusType,
   b: JobListingStatusType
 ) => {
   return jobListingStatusSortOrder[a] - jobListingStatusSortOrder[b];
+};
+
+const jobListingStatusSortOrder: Record<JobListingStatusType, number> = {
+  published: 0,
+  draft: 1,
+  delisted: 2,
 };

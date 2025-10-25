@@ -7,7 +7,7 @@ import { organizationUserSettingsTable } from "./organizationUserSetting";
 export const organizationsTable = pgTable("organizations", {
   id: varchar().primaryKey(),
   name: varchar({ length: 255 }).notNull(),
-  image: varchar({ length: 255 }).notNull(),
+  image: varchar(),
   createdAt,
   updatedAt,
 });

@@ -1,17 +1,25 @@
+import LoadingSpinner from "@/components/LoadingSpinner";
 import { Card, CardContent } from "@/components/ui/card";
+import { db } from "@/drizzle/db";
+import { jobListingsTable } from "@/drizzle/schema";
 import JobListingForm from "@/features/jobListings/components/JobListingForm";
-import { getJobListingByOrgIdDb } from "@/features/jobListings/db/jobListings";
 import { jobListingIdTag } from "@/lib/dataCache";
 import { getCurrentOrg } from "@/services/clerk/lib/getCurrentAuth";
+import { ParamsType } from "@/types/params.type";
+import { and, eq } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-type ParamsType = {
-  params: Promise<{ jobListingId: string }>;
-};
+export default function EditJobListingPage(props: ParamsType) {
+  return (
+    <Suspense fallback={<LoadingSpinner/>}>
+      <SuspendedComponent {...props} />
+    </Suspense>
+  );
+}
 
-const SuspendedPage = async ({ params }: ParamsType) => {
+const SuspendedComponent = async ({ params }: ParamsType) => {
   const { orgId } = await getCurrentOrg();
   if (orgId == null) return notFound();
 
@@ -45,10 +53,12 @@ const SuspendedPage = async ({ params }: ParamsType) => {
   );
 };
 
-export default function EditJobListingPage(props: ParamsType) {
-  return (
-    <Suspense>
-      <SuspendedPage {...props} />
-    </Suspense>
-  );
-}
+// Get job listing by org id
+const getJobListingByOrgIdDb = async (id: string, orgId: string) => {
+  return await db.query.jobListingsTable.findFirst({
+    where: and(
+      eq(jobListingsTable.id, id),
+      eq(jobListingsTable.organizationId, orgId)
+    ),
+  });
+};

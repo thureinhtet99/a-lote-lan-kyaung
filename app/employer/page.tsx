@@ -5,15 +5,24 @@ import { getCurrentOrg } from "@/services/clerk/lib/getCurrentAuth";
 import { unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
-const SuspendedPage = async () => {
+export default function EmployerHomePage() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <SuspendedComponent />
+    </Suspense>
+  );
+}
+
+const SuspendedComponent = async () => {
   const { orgId } = await getCurrentOrg();
   if (orgId == null) return null;
 
   // Get most recent job listings (cached)
   const cachedData = unstable_cache(
     async () => await getMostRecentJobListingDb(orgId),
-    [orgId],
+    [idTag("organizations", orgId)],
     {
       tags: [idTag("organizations", orgId)],
     }
@@ -21,14 +30,6 @@ const SuspendedPage = async () => {
 
   const recentJobListing = await cachedData();
   if (recentJobListing == null)
-    redirect(`${APP_ROUTES.EMPLOYER.JOB_LISTING_NEW}`);
-  else redirect(`${APP_ROUTES.EMPLOYER.JOB_LISTING}/${recentJobListing.id}`);
+    redirect(`${APP_ROUTES.EMPLOYER.JOB_LISTINGS_NEW}`);
+  else redirect(`${APP_ROUTES.EMPLOYER.JOB_LISTINGS}/${recentJobListing.id}`);
 };
-
-export default function EmployerHomePage() {
-  return (
-    <Suspense>
-      <SuspendedPage />
-    </Suspense>
-  );
-}

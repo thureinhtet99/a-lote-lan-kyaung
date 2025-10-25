@@ -1,10 +1,11 @@
-"use server"
+"use server";
 
 import { db } from "@/drizzle/db";
 import { organizationsTable } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
 import { revalidateOrgCache } from "./cache/organizations";
 
+// Insert
 export async function insertOrg(org: typeof organizationsTable.$inferInsert) {
   const existingOrg = await db
     .select()
@@ -17,6 +18,7 @@ export async function insertOrg(org: typeof organizationsTable.$inferInsert) {
   }
 }
 
+// Update
 export async function updateOrg(
   id: string,
   user: typeof organizationsTable.$inferInsert
@@ -28,6 +30,7 @@ export async function updateOrg(
   revalidateOrgCache(id);
 }
 
+// Delete
 export async function deleteOrg(id: string) {
   await db.delete(organizationsTable).where(eq(organizationsTable.id, id));
   revalidateOrgCache(id);

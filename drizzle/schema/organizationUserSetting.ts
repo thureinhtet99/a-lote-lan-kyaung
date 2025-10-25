@@ -19,7 +19,7 @@ export const organizationUserSettingsTable = pgTable(
     organizationId: varchar()
       .notNull()
       .references(() => organizationsTable.id),
-    newApplicationEmailNoti: boolean().notNull().default(false),
+    newApplicationEmailNotification: boolean().notNull().default(false),
     minimumRating: integer(),
     createdAt,
     updatedAt,
@@ -27,14 +27,14 @@ export const organizationUserSettingsTable = pgTable(
   (table) => [primaryKey({ columns: [table.userId, table.organizationId] })]
 );
 
-export const organizationUserSettingRelations = relations(
+export const organizationUserSettingsRelations = relations(
   organizationUserSettingsTable,
   ({ one }) => ({
     user: one(usersTable, {
       fields: [organizationUserSettingsTable.userId],
       references: [usersTable.id],
     }),
-    org: one(organizationsTable, {
+    organization: one(organizationsTable, {
       fields: [organizationUserSettingsTable.organizationId],
       references: [organizationsTable.id],
     }),

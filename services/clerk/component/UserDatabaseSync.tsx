@@ -3,8 +3,9 @@
 import { useEffect } from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { insertUser } from "@/features/users/db/users";
+import { toast } from "sonner";
 
-// This component will run on the client side and sync the user data with our database
+// This component will run on the client side and sync the user data with db
 export function UserDatabaseSync() {
   const { userId, isLoaded, isSignedIn } = useAuth();
   const { user } = useUser();
@@ -22,7 +23,7 @@ export function UserDatabaseSync() {
             image: user.imageUrl || "",
           });
         } catch (error) {
-          console.error("Error syncing user with database:", error);
+          toast.error(error instanceof Error && error.message);
         }
       };
 

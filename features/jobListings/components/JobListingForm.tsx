@@ -26,13 +26,13 @@ import {
   jobListingsTable,
   jobListingTypes,
   locationRequirements,
-  wageIntervels,
+  wageIntervals,
 } from "@/drizzle/schema";
 import {
   formatExpLevel,
   formatJobType,
   formatLocationRequirement,
-  formatWageIntervel,
+  formatWageInterval,
 } from "../lib/formatters";
 import { StateSelectItems } from "./StateSelectItems";
 import { MarkdownEditor } from "@/components/markdown/MarkdownEditor";
@@ -50,16 +50,16 @@ export default function JobListingForm({
 }: {
   jobListing?: Pick<
     typeof jobListingsTable.$inferSelect,
+    | "id"
     | "title"
-    | "description"
-    | "experienceLevel"
+    | "wage"
+    | "wageInterval"
+    | "city"
+    | "state"
     | "locationRequirement"
     | "type"
-    | "wage"
-    | "wageIntervel"
-    | "stateAbbreviation"
-    | "city"
-    | "id"
+    | "experienceLevel"
+    | "description"
   >;
 }) {
   const router = useRouter();
@@ -72,8 +72,8 @@ export default function JobListingForm({
       locationRequirement: "on-site",
       type: "full-time",
       wage: 0,
-      wageIntervel: "monthly",
-      stateAbbreviation: null,
+      wageInterval: "monthly",
+      state: null,
       city: null,
     },
   });
@@ -88,7 +88,7 @@ export default function JobListingForm({
     else {
       toast.success(result.message);
       if (result.data?.id)
-        router.push(`${APP_ROUTES.EMPLOYER.JOB_LISTING}/${result.data.id}`);
+        router.push(`${APP_ROUTES.EMPLOYER.JOB_LISTINGS}/${result.data.id}`);
     }
   };
 
@@ -145,7 +145,7 @@ export default function JobListingForm({
 
                   {/* Wage Interval */}
                   <FormField
-                    name="wageIntervel"
+                    name="wageInterval"
                     control={form.control}
                     render={({ field }) => (
                       <FormItem>
@@ -155,14 +155,14 @@ export default function JobListingForm({
                         >
                           <FormControl>
                             <SelectTrigger className="rounded-l-none">
-                              / <SelectValue placeholder="" />
+                              / <SelectValue />
                             </SelectTrigger>
                           </FormControl>
 
                           <SelectContent>
-                            {wageIntervels.map((wageItv, index) => (
+                            {wageIntervals.map((wageItv, index) => (
                               <SelectItem key={index} value={wageItv}>
-                                {formatWageIntervel(wageItv)}
+                                {formatWageInterval(wageItv)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -200,7 +200,7 @@ export default function JobListingForm({
 
             {/* State */}
             <FormField
-              name="stateAbbreviation"
+              name="state"
               control={form.control}
               render={({ field }) => (
                 <FormItem>

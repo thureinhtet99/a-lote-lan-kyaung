@@ -49,7 +49,7 @@ export default function MarkdownPartial({
 
   return (
     <>
-      <div ref={markdownRef} className="max-h-[300px] overflow-hidden relative">
+      <div ref={markdownRef} className="max-h-[500px] overflow-hidden relative">
         {mainMarkdown}
         {isOverFlowing && (
           <div className="bg-gradient-to-t from-background to-transparent to-15% inset-0 absolute pointer-events-none" />

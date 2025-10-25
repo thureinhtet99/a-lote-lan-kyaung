@@ -40,16 +40,17 @@ import { useSidebar } from "@/components/ui/sidebar";
 
 const ANY_VALUE = "any";
 
+// Schema
 const jobListingFilterSchema = z.object({
   title: z.string().optional(),
-  city: z.string().optional(),
-  stateAbbreviation: z.string().or(z.literal(ANY_VALUE)).optional(),
-  experienceLevel: z.enum(experienceLevels).or(z.literal(ANY_VALUE)).optional(),
-  type: z.enum(jobListingTypes).or(z.literal(ANY_VALUE)).optional(),
   locationRequirement: z
     .enum(locationRequirements)
     .or(z.literal(ANY_VALUE))
     .optional(),
+  city: z.string().optional(),
+  state: z.string().or(z.literal(ANY_VALUE)).optional(),
+  type: z.enum(jobListingTypes).or(z.literal(ANY_VALUE)).optional(),
+  experienceLevel: z.enum(experienceLevels).or(z.literal(ANY_VALUE)).optional(),
 });
 
 export default function JobListingFilterForm() {
@@ -58,6 +59,7 @@ export default function JobListingFilterForm() {
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
 
+  // Job listing filter schema form
   const form = useForm({
     resolver: zodResolver(jobListingFilterSchema),
     defaultValues: {
@@ -65,10 +67,9 @@ export default function JobListingFilterForm() {
       city: searchParams.get("city") ?? "",
       locationRequirement:
         (searchParams.get("location") as LocationRequirementType) ?? ANY_VALUE,
-      stateAbbreviation: searchParams.get("state") ?? ANY_VALUE,
+      state: searchParams.get("state") ?? ANY_VALUE,
       experienceLevel:
-        (searchParams.get("experience_level") as ExperienceLevelType) ??
-        ANY_VALUE,
+        (searchParams.get("experience") as ExperienceLevelType) ?? ANY_VALUE,
       type: (searchParams.get("type") as JobListingTypeType) ?? ANY_VALUE,
     },
   });
@@ -82,11 +83,11 @@ export default function JobListingFilterForm() {
     if (data.locationRequirement && data.locationRequirement !== ANY_VALUE)
       newParams.set("location", data.locationRequirement);
 
-    if (data.stateAbbreviation && data.stateAbbreviation !== ANY_VALUE)
-      newParams.set("state", data.stateAbbreviation);
+    if (data.state && data.state !== ANY_VALUE)
+      newParams.set("state", data.state);
 
     if (data.experienceLevel && data.experienceLevel !== ANY_VALUE)
-      newParams.set("experience_level", data.experienceLevel);
+      newParams.set("experience", data.experienceLevel);
 
     if (data.type && data.type !== ANY_VALUE) newParams.set("type", data.type);
 
@@ -157,7 +158,7 @@ export default function JobListingFilterForm() {
 
         {/* State */}
         <FormField
-          name="stateAbbreviation"
+          name="state"
           control={form.control}
           render={({ field }) => (
             <FormItem>

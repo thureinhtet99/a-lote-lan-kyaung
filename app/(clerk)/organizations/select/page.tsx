@@ -1,11 +1,19 @@
-import { SearchParamsType } from "@/types";
+import { SearchParamsType } from "@/types/params.type";
 import { OrganizationList } from "@clerk/nextjs";
 import { Suspense } from "react";
 
+export default async function OrganizationSelectPage(
+  searchParams: SearchParamsType
+) {
+  return (
+    <Suspense>
+      <SuspendedComponent {...searchParams} />
+    </Suspense>
+  );
+}
 
-
-const SuspendedPage = async ({ searchParams }: SearchParamsType) => {
-  const { redirect } = await searchParams;  
+const SuspendedComponent = async ({ searchParams }: SearchParamsType) => {
+  const { redirect } = await searchParams;
   const redirectedURL = redirect ?? "/employer";
 
   return (
@@ -18,13 +26,3 @@ const SuspendedPage = async ({ searchParams }: SearchParamsType) => {
     />
   );
 };
-
-export default async function OrganizationSelectPage(
-  searchParams: SearchParamsType
-) {
-  return (
-    <Suspense>
-      <SuspendedPage {...searchParams} />
-    </Suspense>
-  );
-}

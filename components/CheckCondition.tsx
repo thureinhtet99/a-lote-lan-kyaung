@@ -1,14 +1,6 @@
 import { CheckConditionType } from "@/types/check-condition.type";
 import { Suspense } from "react";
 
-const SuspendedComponent = async ({
-  condition,
-  children,
-  otherwise,
-}: Omit<CheckConditionType, "loadingFallback">) => {
-  return (await condition()) ? children : otherwise;
-};
-
 export default function CheckCondition({
   condition,
   children,
@@ -23,3 +15,11 @@ export default function CheckCondition({
     </Suspense>
   );
 }
+
+const SuspendedComponent = async ({
+  condition,
+  children,
+  otherwise,
+}: Omit<CheckConditionType, "loadingFallback">) => {
+  return (await condition()) ? children : otherwise;
+};

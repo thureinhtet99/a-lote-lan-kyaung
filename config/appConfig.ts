@@ -22,13 +22,14 @@ export const APP_ROUTES = {
 
   USER_SETTINGS: {
     HOME: "/user-settings",
+    RESUME: "/user-settings/resume",
     NOTIFICATIONS: "/user-settings/notifications",
   },
 
   EMPLOYER: {
     HOME: "/employer",
-    JOB_LISTING: "/employer/job-listings",
-    JOB_LISTING_NEW: "/employer/job-listings/new",
+    JOB_LISTINGS: "/employer/job-listings",
+    JOB_LISTINGS_NEW: "/employer/job-listings/new",
     PRICING: "/employer/pricing",
     USER_SETTINGS: "/employer/user-settings",
   },

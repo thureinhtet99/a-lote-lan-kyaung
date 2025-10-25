@@ -13,41 +13,32 @@ import { organizationsTable } from "./organization";
 import { relations } from "drizzle-orm";
 import { jobListingApplicationsTable } from "./jobListingApplication";
 
-export const wageIntervels = ["monthly", "yearly", "hourly"] as const;
-export type WageIntervelType = (typeof wageIntervels)[number];
-export const wageIntervelEnum = pgEnum(
-  "job_listing_wage_intervel",
-  wageIntervels
-);
+export const wageIntervals = ["monthly", "yearly", "hourly"] as const;
+export type WageIntervalType = (typeof wageIntervals)[number];
+export const wageIntervalEnum = pgEnum("wage_interval", wageIntervals);
 
 export const locationRequirements = ["on-site", "hybrid", "remote"] as const;
 export type LocationRequirementType = (typeof locationRequirements)[number];
 export const locationRequirementEnum = pgEnum(
-  "job_listing_location_requirement",
+  "location_requirement",
   locationRequirements
 );
 
 export const experienceLevels = ["junior", "mid-level", "senior"] as const;
 export type ExperienceLevelType = (typeof experienceLevels)[number];
-export const experienceLevelEnum = pgEnum(
-  "job_listing_experience_level",
-  experienceLevels
-);
+export const experienceLevelEnum = pgEnum("experience", experienceLevels);
 
 export const jobListingStatuses = ["draft", "published", "delisted"] as const;
 export type JobListingStatusType = (typeof jobListingStatuses)[number];
-export const jobListingStatusEnum = pgEnum(
-  "job_listing_status",
-  jobListingStatuses
-);
+export const jobListingStatusEnum = pgEnum("status", jobListingStatuses);
 
 export const jobListingTypes = [
-  "internship",
-  "part-time",
   "full-time",
+  "part-time",
+  "internship",
 ] as const;
 export type JobListingTypeType = (typeof jobListingTypes)[number];
-export const jobListingTypeEnum = pgEnum("job_listing_types", jobListingTypes);
+export const jobListingTypeEnum = pgEnum("type", jobListingTypes);
 
 export const jobListingsTable = pgTable(
   "job_listings",
@@ -58,9 +49,9 @@ export const jobListingsTable = pgTable(
       .notNull(),
     title: varchar({ length: 255 }).notNull(),
     description: text(),
-    wage: integer(),
-    wageIntervel: wageIntervelEnum().notNull(),
-    stateAbbreviation: varchar(),
+    wage: integer().notNull(),
+    wageInterval: wageIntervalEnum().notNull(),
+    state: varchar(),
     city: varchar(),
     isFeatured: boolean().notNull().default(false),
     locationRequirement: locationRequirementEnum().notNull(),
@@ -71,10 +62,10 @@ export const jobListingsTable = pgTable(
     createdAt,
     updatedAt,
   },
-  (table) => [index().on(table.stateAbbreviation)]
+  (table) => [index().on(table.state)]
 );
 
-export const jobListingRelations = relations(
+export const jobListingsRelations = relations(
   jobListingsTable,
   ({ one, many }) => ({
     organization: one(organizationsTable, {

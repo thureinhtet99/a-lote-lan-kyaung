@@ -3,7 +3,7 @@
 import { ClerkProvider as OriginalClerkProvider } from "@clerk/nextjs";
 import { ReactNode, Suspense } from "react";
 import { dark } from "@clerk/themes";
-import { useDarkMode } from "@/hooks/useDarkMode";
+import { useDarkMode } from "@/hooks/use-darkmode";
 import { UserDatabaseSync } from "./UserDatabaseSync";
 
 export function ClerkProvider({ children }: { children: ReactNode }) {
@@ -15,7 +15,7 @@ export function ClerkProvider({ children }: { children: ReactNode }) {
         appearance={isDarkMode ? { baseTheme: [dark] } : undefined}
       >
         {/* This component will sync user data with our database */}
-        <UserDatabaseSync />
+        <UserDatabaseSync /> 
         {children}
       </OriginalClerkProvider>
     </Suspense>

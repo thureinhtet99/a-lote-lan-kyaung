@@ -27,29 +27,6 @@ type JobListingMenuGroupType = Pick<
   applications: number;
 };
 
-const JobListingMenuItem = ({
-  id,
-  title,
-  applications,
-}: JobListingMenuGroupType) => {
-  const { jobListingId } = useParams();
-
-  return (
-    <SidebarMenuSubItem>
-      <SidebarMenuSubButton isActive={jobListingId === id} asChild>
-        <Link href={`${APP_ROUTES.EMPLOYER.JOB_LISTING}/${id}`}>
-          <span className="truncate">{title}</span>
-        </Link>
-      </SidebarMenuSubButton>
-      {applications > 0 && (
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-          {applications}
-        </div>
-      )}
-    </SidebarMenuSubItem>
-  );
-};
-
 export default function JobListingMenuGroup({
   status,
   jobListings,
@@ -87,3 +64,26 @@ export default function JobListingMenuGroup({
     </SidebarMenu>
   );
 }
+
+const JobListingMenuItem = ({
+  id,
+  title,
+  applications,
+}: JobListingMenuGroupType) => {
+  const { jobListingId } = useParams();
+
+  return (
+    <SidebarMenuSubItem>
+      <SidebarMenuSubButton isActive={jobListingId === id} asChild>
+        <Link href={`${APP_ROUTES.EMPLOYER.JOB_LISTINGS}/${id}`}>
+          <span className="truncate">{title}</span>
+        </Link>
+      </SidebarMenuSubButton>
+      {applications > 0 && (
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+          {applications}
+        </div>
+      )}
+    </SidebarMenuSubItem>
+  );
+};

@@ -3,7 +3,7 @@ import { jobListingsTable } from "@/drizzle/schema";
 import { ComponentProps } from "react";
 import {
   formatExpLevel,
-  formatJobLisingLocation,
+  formatJobListingLocation,
   formatJobType,
   formatLocationRequirement,
   formatWage,
@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils";
 export default function JobListingBadges({
   jobListing: {
     wage,
-    wageIntervel,
-    stateAbbreviation,
+    wageInterval,
+    state,
     city,
     type,
     experienceLevel,
@@ -27,8 +27,8 @@ export default function JobListingBadges({
   jobListing: Pick<
     typeof jobListingsTable.$inferSelect,
     | "wage"
-    | "wageIntervel"
-    | "stateAbbreviation"
+    | "wageInterval"
+    | "state"
     | "city"
     | "type"
     | "experienceLevel"
@@ -55,16 +55,16 @@ export default function JobListingBadges({
           Featured
         </Badge>
       )}
-      {wage != null && wageIntervel != null && (
+      {wage != null && wageInterval != null && (
         <Badge {...badgeType}>
           <Banknote />
-          {formatWage(wage, wageIntervel)}
+          {formatWage(wage, wageInterval)}
         </Badge>
       )}
-      {(stateAbbreviation != null || city != null) && (
+      {(state != null || city != null) && (
         <Badge {...badgeType}>
           <MapPinIcon className="size-10" />
-          {formatJobLisingLocation(stateAbbreviation, city)}
+          {formatJobListingLocation(state, city)}
         </Badge>
       )}
 

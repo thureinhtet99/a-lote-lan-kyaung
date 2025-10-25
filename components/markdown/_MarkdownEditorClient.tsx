@@ -1,58 +1,59 @@
 "use client";
 
-import "@mdxeditor/editor/style.css";
+import { cn } from "@/lib/utils";
 import {
+  BlockTypeSelect,
+  BoldItalicUnderlineToggles,
   headingsPlugin,
+  InsertTable,
+  InsertThematicBreak,
   listsPlugin,
-  quotePlugin,
-  thematicBreakPlugin,
+  ListsToggle,
   markdownShortcutPlugin,
   MDXEditor,
-  type MDXEditorMethods,
-  type MDXEditorProps,
+  MDXEditorMethods,
+  MDXEditorProps,
+  quotePlugin,
+  tablePlugin,
+  thematicBreakPlugin,
   toolbarPlugin,
-  UndoRedo,
-  BoldItalicUnderlineToggles,
-  BlockTypeSelect,
-  ListsToggle,
 } from "@mdxeditor/editor";
-import { cn } from "@/lib/utils";
-import { useDarkMode } from "@/hooks/useDarkMode";
-import { ForwardedRef } from "react";
+import { Ref } from "react";
+import { markdownClassNames } from "./MarkdownRenderer";
+import { useDarkMode } from "@/hooks/use-darkmode";
 
-export const markdownClassNames =
-  "max-w-none prose prose-neutral dark:prose-invert font-sans";
-
-export default function InternalMarkdownEditorClient({
-  editorRef,
+export default function InternalMarkdownEditor({
+  ref,
   className,
   ...props
-}: { editorRef?: ForwardedRef<MDXEditorMethods> | null } & MDXEditorProps) {
+}: MDXEditorProps & { ref?: Ref<MDXEditorMethods> }) {
   const isDarkMode = useDarkMode();
 
   return (
     <MDXEditor
+      {...props}
+      ref={ref}
+      className={cn(markdownClassNames, isDarkMode && "dark-theme", className)}
       suppressHtmlProcessing
       plugins={[
         headingsPlugin(),
         listsPlugin(),
         quotePlugin(),
         thematicBreakPlugin(),
+        markdownShortcutPlugin(),
+        tablePlugin(),
         toolbarPlugin({
           toolbarContents: () => (
             <>
               <BlockTypeSelect />
-              <ListsToggle/>
-              <UndoRedo />
               <BoldItalicUnderlineToggles />
+              <ListsToggle />
+              <InsertThematicBreak />
+              <InsertTable />
             </>
           ),
         }),
-        markdownShortcutPlugin(),
       ]}
-      {...props}
-      className={cn(markdownClassNames, isDarkMode && "dark-theme", className)}
-      ref={editorRef}
     />
   );
 }

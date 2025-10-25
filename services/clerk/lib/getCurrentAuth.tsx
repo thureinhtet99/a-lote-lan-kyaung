@@ -13,7 +13,7 @@ const getUserById = async (id: string) => {
         where: eq(usersTable.id, id),
       });
     },
-    [`users-${id}`],
+    [idTag("users", id)],
     { tags: [idTag("users", id)] }
   );
   return await cachedData();
@@ -27,7 +27,7 @@ const getOrgById = async (id: string) => {
         where: eq(organizationsTable.id, id),
       });
     },
-    [`organizations-${id}`],
+    [idTag("organizations", id)],
     { tags: [idTag("organizations", id)] }
   );
   return await cachedData();

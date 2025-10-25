@@ -1,7 +1,7 @@
 import { pgTable, varchar } from "drizzle-orm/pg-core";
 import { createdAt, updatedAt } from "../schemaHelpers";
 import { relations } from "drizzle-orm";
-import { userNotiSettingsTable } from "./userNotiSetting";
+import { userNotificationSettingsTable } from "./userNotiSetting";
 import { userResumesTable } from "./userResume";
 import { organizationUserSettingsTable } from "./organizationUserSetting";
 
@@ -17,7 +17,7 @@ export const usersTable = pgTable("users", {
 });
 
 export const userRelations = relations(usersTable, ({ one, many }) => ({
-  notiSetting: one(userNotiSettingsTable),
+  userNotificationSetting: one(userNotificationSettingsTable),
   resume: one(userResumesTable),
   orgUserSettings: many(organizationUserSettingsTable),
 }));

@@ -3,21 +3,24 @@ import { usersTable } from "./user";
 import { createdAt, updatedAt } from "../schemaHelpers";
 import { relations } from "drizzle-orm";
 
-export const userNotiSettingsTable = pgTable("user_noti_settings", {
-  userId: varchar()
-    .primaryKey()
-    .references(() => usersTable.id),
-  newJobEmailNoti: boolean().notNull().default(false),
-  aiPrompt: varchar(),
-  createdAt,
-  updatedAt,
-});
+export const userNotificationSettingsTable = pgTable(
+  "user_notification_settings",
+  {
+    userId: varchar()
+      .primaryKey()
+      .references(() => usersTable.id),
+    newJobEmailNotification: boolean().notNull().default(false),
+    aiPrompt: varchar(),
+    createdAt,
+    updatedAt,
+  }
+);
 
-export const userNotiSettingRelations = relations(
-  userNotiSettingsTable,
+export const userNotiSettingsRelations = relations(
+  userNotificationSettingsTable,
   ({ one }) => ({
     user: one(usersTable, {
-      fields: [userNotiSettingsTable.userId],
+      fields: [userNotificationSettingsTable.userId],
       references: [usersTable.id],
     }),
   })

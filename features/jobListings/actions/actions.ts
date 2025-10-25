@@ -4,18 +4,19 @@ import {
   hasReachedMaxFeaturedJobListings,
   hasReachedMaxPublishedJobListings,
 } from "@/features/jobListings/lib/planFeatureHelpers";
-
+import { nextJobListingStatus } from "@/features/jobListings/lib/utils";
 import z from "zod";
 import { jobListingSchema } from "./schemas";
 import { getCurrentOrg } from "@/services/clerk/lib/getCurrentAuth";
 import {
   deleteJobListingDb,
-  getJobListingByOrgIdDb,
   insertJobListingDb,
   updateJobListingDb,
 } from "../db/jobListings";
 import { hasOrgUserPermission } from "@/services/clerk/lib/orgUserPermission";
-import { nextJobListingStatus } from "../lib/utils";
+import { jobListingsTable } from "@/drizzle/schema";
+import { db } from "@/drizzle/db";
+import { and, eq } from "drizzle-orm";
 
 // Create
 export const createJobListing = async (
@@ -84,17 +85,15 @@ export const updateJobListing = async (
   };
 };
 
-// Update with redirect (for server components that need redirect)
-// export const updateJobListingWithRedirect = async (
-//   jobListingId: string,
-//   unsafeData: z.infer<typeof jobListingSchema>
-// ) => {
-//   const result = await updateJobListing(jobListingId, unsafeData);
-//   if (!result.error && result.data) {
-//     redirect(`${APP_ROUTES.EMPLOYER.JOB_LISTING}/${result.data.id}`);
-//   }
-//   return result;
-// };
+// Get by org id
+const getJobListingByOrgIdDb = async (id: string, orgId: string) => {
+  return await db.query.jobListingsTable.findFirst({
+    where: and(
+      eq(jobListingsTable.id, id),
+      eq(jobListingsTable.organizationId, orgId)
+    ),
+  });
+};
 
 // Toggle status
 export const toggleJobListingStatus = async (id: string) => {
