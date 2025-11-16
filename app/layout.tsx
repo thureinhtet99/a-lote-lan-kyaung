@@ -4,6 +4,7 @@ import "./globals.css";
 import { ClerkProvider } from "@/services/clerk/component/ClerkProvider";
 import { APP_CONFIG } from "@/config/appConfig";
 import { Toaster } from "@/components/ui/sonner";
+import { UploadThingSSR } from "@/services/uploadthing/components/UploadThingSSR";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +34,7 @@ export default function RootLayout({
         <ClerkProvider>
           {children}
           <Toaster />
+          <UploadThingSSR />
         </ClerkProvider>
       </body>
     </html>

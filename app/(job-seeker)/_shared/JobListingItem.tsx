@@ -214,6 +214,14 @@ const JobListingListItem = ({
   );
 };
 
+export default function JobListingItem(props: JobSeekerSearchParamsType) {
+  return (
+    <Suspense>
+      <SuspendedComponent {...props} />
+    </Suspense>
+  );
+}
+
 const SuspendedComponent = async ({
   searchParams,
   params,
@@ -260,11 +268,3 @@ const SuspendedComponent = async ({
     </div>
   );
 };
-
-export default function JobListingItem(props: JobSeekerSearchParamsType) {
-  return (
-    <Suspense>
-      <SuspendedComponent {...props} />
-    </Suspense>
-  );
-}

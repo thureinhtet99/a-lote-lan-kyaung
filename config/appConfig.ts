@@ -20,10 +20,10 @@ export const APP_ROUTES = {
     HOME: "/job-listings",
   },
 
-  USER_SETTINGS: {
-    HOME: "/user-settings",
-    RESUME: "/user-settings/resume",
-    NOTIFICATIONS: "/user-settings/notifications",
+  SETTINGS: {
+    HOME: "/settings",
+    RESUME: "/settings/resume",
+    NOTIFICATIONS: "/settings/notifications",
   },
 
   EMPLOYER: {
@@ -31,7 +31,7 @@ export const APP_ROUTES = {
     JOB_LISTINGS: "/employer/job-listings",
     JOB_LISTINGS_NEW: "/employer/job-listings/new",
     PRICING: "/employer/pricing",
-    USER_SETTINGS: "/employer/user-settings",
+    USER_SETTINGS: "/employer/settings",
   },
 
   ORG: {

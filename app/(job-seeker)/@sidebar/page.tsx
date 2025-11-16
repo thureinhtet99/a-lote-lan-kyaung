@@ -1,5 +1,5 @@
 import JobBoardSidebar from "../_shared/JobBoardSidebar";
 
-export default function DefaultSidebar() {
+export default function JobBoardSidebarPage() {
   return <JobBoardSidebar />;
 }

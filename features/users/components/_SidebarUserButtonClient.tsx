@@ -28,25 +28,6 @@ type UserType = {
   image: string;
 };
 
-const UserInfo = ({ first_name, last_name, email, image }: UserType) => {
-  const nameInitials = first_name.slice(0, 1) + last_name.slice(0, 1);
-
-  return (
-    <div className="flex items-center gap-2 overflow-hidden">
-      <Avatar className="rounded-lg size-8">
-        <AvatarImage src={image} alt={`${first_name} ${last_name}`} />
-        <AvatarFallback className="uppercase bg-primary text-primary-foreground">
-          {nameInitials}
-        </AvatarFallback>
-      </Avatar>
-      <div className="flex flex-col flex-1 min-w-0 leading-tight group-data-[state=collapsed]:hidden">
-        <span className="truncate text-sm font-semibold">{`${first_name} ${last_name}`}</span>
-        <span className="truncate text-xs">{email}</span>
-      </div>
-    </div>
-  );
-};
-
 function SidebarUserButtonClient({ user }: { user: UserType }) {
   const { isMobile, setOpenMobile } = useSidebar();
   const { openUserProfile } = useClerk();
@@ -63,7 +44,7 @@ function SidebarUserButtonClient({ user }: { user: UserType }) {
         </SidebarMenuButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        sideOffset={8}
+        sideOffset={4}
         align="end"
         side={isMobile ? "bottom" : "right"}
         className="min-w-64 max-w-80"
@@ -71,6 +52,7 @@ function SidebarUserButtonClient({ user }: { user: UserType }) {
         <DropdownMenuLabel className="font-normal p-1">
           <UserInfo {...user} />
         </DropdownMenuLabel>
+
         <DropdownMenuSeparator />
 
         <DropdownMenuItem
@@ -84,7 +66,7 @@ function SidebarUserButtonClient({ user }: { user: UserType }) {
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
-          <Link href={APP_ROUTES.USER_SETTINGS.NOTIFICATIONS}>
+          <Link href={APP_ROUTES.SETTINGS.NOTIFICATIONS}>
             <SettingsIcon className="mr-1" />
             Settings
           </Link>
@@ -105,3 +87,22 @@ function SidebarUserButtonClient({ user }: { user: UserType }) {
 }
 
 export default SidebarUserButtonClient;
+
+const UserInfo = ({ first_name, last_name, email, image }: UserType) => {
+  const nameInitials = first_name.slice(0, 1) + last_name.slice(0, 1);
+
+  return (
+    <div className="flex items-center gap-2 overflow-hidden">
+      <Avatar className="rounded-lg size-8">
+        <AvatarImage src={image} alt={`${first_name} ${last_name}`} />
+        <AvatarFallback className="uppercase bg-primary text-primary-foreground">
+          {nameInitials}
+        </AvatarFallback>
+      </Avatar>
+      <div className="flex flex-col flex-1 min-w-0 leading-tight group-data-[state=collapsed]:hidden">
+        <span className="truncate text-sm font-semibold">{`${first_name} ${last_name}`}</span>
+        <span className="truncate text-xs">{email}</span>
+      </div>
+    </div>
+  );
+};

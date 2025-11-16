@@ -298,7 +298,7 @@ const ApplyButton = async ({ jobListingId }: { jobListingId: string }) => {
         <PopoverContent className="flex flex-col gap-2">
           You need to upload your resume before applying for a job
           <Button asChild>
-            <Link href={APP_ROUTES.USER_SETTINGS.RESUME}>Upload Resume</Link>
+            <Link href={APP_ROUTES.SETTINGS.RESUME}>Upload Resume</Link>
           </Button>
         </PopoverContent>
       </Popover>
