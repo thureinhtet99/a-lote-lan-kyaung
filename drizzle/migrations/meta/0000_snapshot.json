@@ -1,5 +1,5 @@
 {
-  "id": "65d29392-8e0e-464f-b6c4-2f53d00a6cd6",
+  "id": "679ab1d0-d1f0-4e7d-b6d8-221fc4e3ef48",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -297,9 +297,9 @@
           "primaryKey": false,
           "notNull": false
         },
-        "stage": {
-          "name": "stage",
-          "type": "application_stage",
+        "status": {
+          "name": "status",
+          "type": "application_status",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
@@ -599,9 +599,9 @@
       "name": "type",
       "schema": "public",
       "values": [
-        "internship",
+        "full-time",
         "part-time",
-        "full-time"
+        "internship"
       ]
     },
     "public.location_requirement": {
@@ -622,8 +622,8 @@
         "hourly"
       ]
     },
-    "public.application_stage": {
-      "name": "application_stage",
+    "public.application_status": {
+      "name": "application_status",
       "schema": "public",
       "values": [
         "denied",

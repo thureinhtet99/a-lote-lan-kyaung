@@ -1,9 +1,4 @@
-import {
-  jobListingGlobalTag,
-  idTag,
-  jobListingApplicationGlobalTag,
-  jobListingIdTag,
-} from "@/lib/dataCache";
+import { jobListingGlobalTag, idTag, jobListingIdTag } from "@/lib/dataCache";
 import { revalidateTag } from "next/cache";
 
 export function revalidateJobListingCache({
@@ -15,9 +10,7 @@ export function revalidateJobListingCache({
 }) {
   try {
     revalidateTag(jobListingGlobalTag(organizationId, "jobListings"));
-    revalidateTag(
-      jobListingApplicationGlobalTag(organizationId, "jobListings")
-    );
+
     if (jobListingId) {
       revalidateTag(idTag("jobListings", jobListingId));
       revalidateTag(

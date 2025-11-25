@@ -1,6 +1,5 @@
 import ActionButton from "@/components/ActionButton";
 import CheckCondition from "@/components/CheckCondition";
-import MarkdownPartial from "@/components/markdown/MarkdownPartial";
 import MarkdownRenderer from "@/components/markdown/MarkdownRenderer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { jobListingsTable, JobListingStatusType } from "@/drizzle/schema";
+import {
+  jobListingApplicationsTable,
+  jobListingsTable,
+  JobListingStatusType,
+} from "@/drizzle/schema";
 import {
   deleteJobListing,
   toggleJobListingFeaturedStatus,
@@ -23,7 +26,7 @@ import {
 } from "@/features/jobListings/lib/planFeatureHelpers";
 import { nextJobListingStatus } from "@/features/jobListings/lib/utils";
 import { APP_ROUTES } from "@/config/appConfig";
-import { jobListingIdTag } from "@/lib/dataCache";
+import { jobListingApplicationIdTag, jobListingIdTag } from "@/lib/dataCache";
 import { getCurrentOrg } from "@/services/clerk/lib/getCurrentAuth";
 import { hasOrgUserPermission } from "@/services/clerk/lib/orgUserPermission";
 import {
@@ -42,6 +45,9 @@ import { ParamsType } from "@/types/params.type";
 import { db } from "@/drizzle/db";
 import { and, eq } from "drizzle-orm";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { Separator } from "@/components/ui/separator";
+import ApplicationTable from "@/features/jobListingApplications/components/ApplicationTable";
+import { MarkdownPartial } from "@/components/markdown/MarkdownPartial";
 
 export default function SingleJobListingPage(props: ParamsType) {
   return (
@@ -86,7 +92,6 @@ const SuspendedComponent = async ({ params }: ParamsType) => {
 
         {/* Right */}
         <div className="flex items-center gap-2 empty:-mt-4">
-          
           {/* Edit button */}
           <CheckCondition
             condition={() => hasOrgUserPermission("job_listing:update")}
@@ -149,6 +154,15 @@ const SuspendedComponent = async ({ params }: ParamsType) => {
         }
         dialogTitle="Description"
       />
+
+      <Separator />
+
+      <div className="space-y-6">
+        <h2 className="text-xl font-semibold">Applications</h2>
+        <Suspense fallback={<SkeletonApplicationTable />}>
+          <Applications jobListingId={jobListingId} />
+        </Suspense>
+      </div>
     </div>
   );
 };
@@ -321,4 +335,68 @@ const statusToggleButtonText = (status: JobListingStatusType) => {
     default:
       throw new Error(`Invalid status: ${status satisfies never}`);
   }
+};
+
+const SkeletonApplicationTable = () => {
+  return null;
+};
+
+const Applications = async ({ jobListingId }: { jobListingId: string }) => {
+  // Fetch applications by jobListingId from db (cached)
+  const cachedData = unstable_cache(
+    async () => await getJobListingApplications(jobListingId),
+    [jobListingApplicationIdTag("jobListingApplications", jobListingId)],
+    {
+      tags: [
+        jobListingApplicationIdTag("jobListingApplications", jobListingId),
+      ],
+    }
+  );
+
+  const applications = await cachedData();
+
+  return (
+    <ApplicationTable
+      applications={applications} // todo: fix applications
+      canUpdateRating={await hasOrgUserPermission(
+        "job_listing_application:change_rating"
+      )}
+      canUpdateStatus={await hasOrgUserPermission(
+        "job_listing_application:change_status"
+      )}
+    />
+  );
+};
+
+const getJobListingApplications = async (jobListingId: string) => {
+  const result = await db.query.jobListingApplicationsTable.findMany({
+    where: eq(jobListingApplicationsTable.jobListingId, jobListingId),
+    columns: {
+      jobListingId: true,
+      coverLetter: true,
+      rating: true,
+      status: true,
+      createdAt: true,
+    },
+    with: {
+      user: {
+        columns: {
+          id: true,
+          first_name: true,
+          last_name: true,
+          image: true,
+        },
+        with: {
+          resume: {
+            columns: {
+              resumeFileUrl: true,
+              aiSummary: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return result;
 };

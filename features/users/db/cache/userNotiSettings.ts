@@ -1,14 +1,12 @@
-import { getGlobalTag, getIdTag } from "@/lib/dataCache";
+import { userNotiTag } from "@/lib/dataCache";
 import { revalidateTag } from "next/cache";
 
-export function getUserNotiSettingGlobalTag() {
-  return getGlobalTag("userNotificationSettings");
-}
-
-export function getUserNotiSettingIdTag(userId: string) {
-  return getIdTag("userNotificationSettings", userId);
-}
-export function revalidateUserNotiSettingCache(userId: string) {
-  revalidateTag(getUserNotiSettingGlobalTag());
-  revalidateTag(getUserNotiSettingIdTag(userId));
+export function revalidateUserNotiCache(userId: string) {
+  try {
+    if (userId) {
+      revalidateTag(userNotiTag("userNotificationSettings", userId));
+    }
+  } catch (error) {
+    console.error("Failed to revalidate user notifications:", error);
+  }
 }

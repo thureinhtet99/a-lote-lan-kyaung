@@ -1,4 +1,4 @@
-import {  userResumeTag } from "@/lib/dataCache";
+import { userResumeTag } from "@/lib/dataCache";
 import { revalidateTag } from "next/cache";
 
 export function revalidateUserResumeCache(userId: string) {

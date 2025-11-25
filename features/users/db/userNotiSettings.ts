@@ -1,10 +1,29 @@
 import { db } from "@/drizzle/db";
-import { userNotiSettingsTable } from "@/drizzle/schema";
-import { revalidateUserCache } from "./cache/users";
+import { userNotificationSettingsTable } from "@/drizzle/schema";
+import { revalidateUserNotiCache } from "./cache/userNotiSettings";
 
-export async function insertUserNotiSettings(
-  settings: typeof userNotiSettingsTable.$inferInsert
+export async function insertUserNotiSettingsDb(
+  settings: typeof userNotificationSettingsTable.$inferInsert
 ) {
-  await db.insert(userNotiSettingsTable).values(settings).onConflictDoNothing();
-  revalidateUserCache(settings.userId);
+  await db
+    .insert(userNotificationSettingsTable)
+    .values(settings)
+    .onConflictDoNothing();
+  revalidateUserNotiCache(settings.userId);
+}
+
+export async function updateUserNotificationSettingDb(
+  userId: string,
+  settings: Partial<
+    Omit<typeof userNotificationSettingsTable.$inferInsert, "userId">
+  >
+) {
+  await db
+    .insert(userNotificationSettingsTable)
+    .values({ ...settings, userId })
+    .onConflictDoUpdate({
+      target: userNotificationSettingsTable.userId,
+      set: settings,
+    });
+  revalidateUserNotiCache(userId);
 }

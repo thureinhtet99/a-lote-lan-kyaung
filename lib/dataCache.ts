@@ -1,24 +1,14 @@
 import { CacheType } from "@/types/cache.type";
 
-// export function getGlobalTag(tag: CacheType) {
-//   return `${tag}` as const;
-// }
-
+// Application
 export const jobListingApplicationIdTag = (
   tag: CacheType,
-  jobListingId: string,
-  userId: string
+  jobListingId: string
 ) => {
-  return `${tag}-${jobListingId}-${userId}` as const;
+  return `${tag}-${jobListingId}` as const;
 };
 
-export const jobListingApplicationGlobalTag = (
-  orgId: string,
-  tag: CacheType
-) => {
-  return `${orgId}-${tag}-jobListingApplications`;
-};
-
+// JobListing
 export const jobListingGlobalTag = (orgId: string, tag: CacheType) => {
   return `${orgId}-${tag}` as const;
 };
@@ -31,30 +21,17 @@ export const jobListingIdTag = (
   return `${orgId}-${tag}-${jobListingId}` as const;
 };
 
+// Resume
 export const userResumeTag = (tag: CacheType, userId: string) => {
   return `${tag}-${userId}`;
 };
 
+// Notification
+export const userNotiTag = (tag: CacheType, userId: string) => {
+  return `${tag}-${userId}`;
+};
+
+// Id
 export const idTag = (tag: CacheType, id: string) => {
   return `${tag}-${id}` as const;
 };
-
-// export function getJobListingApplicationTag(
-//   tag: CacheType,
-//   jobListingId: string,
-//   userId: string
-// ) {
-//   return `${tag}-${jobListingId}-${userId}` as const;
-// }
-
-// export function getOrganizationJobListingTag(
-//   tag: CacheType,
-//   jobListingId: string,
-//   organizationId: string
-// ) {
-//   return `${tag}-${organizationId}-${jobListingId}` as const;
-// }
-
-// export function getIdTag(tag: CacheType, id: string) {
-//   return `${tag}-${id}` as const;
-// }

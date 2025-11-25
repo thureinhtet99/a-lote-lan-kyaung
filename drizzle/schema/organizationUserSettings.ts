@@ -5,8 +5,8 @@ import {
   primaryKey,
   varchar,
 } from "drizzle-orm/pg-core";
-import { usersTable } from "./user";
-import { organizationsTable } from "./organization";
+import { usersTable } from "./users";
+import { organizationsTable } from "./organizations";
 import { createdAt, updatedAt } from "../schemaHelpers";
 import { relations } from "drizzle-orm";
 

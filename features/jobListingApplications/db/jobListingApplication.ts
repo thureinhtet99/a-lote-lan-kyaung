@@ -26,8 +26,13 @@ export async function insertJobListingApplicationDb(
 
 // Update
 export async function updateJobListingApplicationDb(
-  jobListingId: string,
-  userId: string,
+  {
+    jobListingId,
+    userId,
+  }: {
+    jobListingId: string;
+    userId: string;
+  },
   data: Partial<typeof jobListingApplicationsTable.$inferInsert>
 ) {
   const [result] = await db

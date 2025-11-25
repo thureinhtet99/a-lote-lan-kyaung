@@ -18,6 +18,7 @@ import { userResumeTag } from "@/lib/dataCache";
 import { userResumesTable } from "@/drizzle/schema";
 import { unstable_cache } from "next/cache";
 import MarkdownRenderer from "@/components/markdown/MarkdownRenderer";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function ResumePage() {
   return (
@@ -28,7 +29,7 @@ export default function ResumePage() {
         <CardContent className="pt-6">
           <DropzoneClient />
         </CardContent>
-        <Suspense>
+        <Suspense fallback={<LoadingSpinner />}>
           <SuspendedComponent />
         </Suspense>
       </Card>
@@ -97,11 +98,10 @@ const AISummaryCard = async () => {
           This is an AI-generated summary of our resume. This is used by
           employers to quickly understand your qualifications and experiences.
         </CardDescription>
-
-        <CardContent>
-          <MarkdownRenderer source={userResume.aiSummary ?? "No summary"} />
-        </CardContent>
       </CardHeader>
+      <CardContent>
+        <MarkdownRenderer source={userResume.aiSummary ?? "No summary"} />
+      </CardContent>
     </Card>
   );
 };

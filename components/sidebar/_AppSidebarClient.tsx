@@ -15,7 +15,7 @@ export function AppSidebarClient({ children }: { children: ReactNode }) {
           <span className="text-xl">Job Listings</span>
         </div>
         <div className="flex-1 flex">{children}</div>
-      </div> 
+      </div>
     );
   }
 

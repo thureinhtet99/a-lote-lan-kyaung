@@ -7,22 +7,22 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { jobListingsTable } from "./jobListing";
-import { usersTable } from "./user";
+import { jobListingsTable } from "./jobListings";
+import { usersTable } from "./users";
 import { createdAt, updatedAt } from "../schemaHelpers";
 import { relations } from "drizzle-orm";
 
-export const applicationStages = [
+export const applicationStatus = [
   "denied",
   "applied",
   "interested",
   "interviewed",
   "hired",
 ] as const;
-export type ApplicationStageType = (typeof applicationStages)[number];
-export const applicationStageEnum = pgEnum(
-  "application_stage",
-  applicationStages
+export type ApplicationStatusType = (typeof applicationStatus)[number];
+export const applicationStatusEnum = pgEnum(
+  "application_status",
+  applicationStatus
 );
 export const jobListingApplicationsTable = pgTable(
   "job_listing_applications",
@@ -39,7 +39,7 @@ export const jobListingApplicationsTable = pgTable(
       .notNull(),
     coverLetter: text(),
     rating: integer(),
-    stage: applicationStageEnum().notNull().default("applied"),
+    status: applicationStatusEnum().notNull().default("applied"),
     createdAt,
     updatedAt,
   },

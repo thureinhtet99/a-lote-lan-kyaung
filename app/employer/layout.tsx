@@ -24,10 +24,7 @@ import {
   JobListingStatusType,
 } from "@/drizzle/schema";
 import JobListingMenuGroup from "./_JobListingMenuGroup";
-import {
-  jobListingApplicationGlobalTag,
-  jobListingGlobalTag,
-} from "@/lib/dataCache";
+import { jobListingGlobalTag } from "@/lib/dataCache";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { db } from "@/drizzle/db";
 import { count, desc, eq } from "drizzle-orm";
@@ -36,7 +33,6 @@ export default function EmployerLayout({ children }: { children: ReactNode }) {
   return (
     <>
       <OrganizationSyncWrapper>
-        {/* <OrgDatabaseSync /> */}
         <Suspense fallback={<LoadingSpinner />}>
           <SuspendedComponent>{children}</SuspendedComponent>
         </Suspense>
@@ -51,10 +47,10 @@ const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
 
   // Get all job listings (cached)
   const cachedData = unstable_cache(
-    async () => await getJobListingsWithApplicationsDb(orgId),
+    async () => await getJobListingsApplicationsDb(orgId),
     [orgId],
     {
-      tags: [jobListingApplicationGlobalTag(orgId, "jobListings")],
+      tags: [jobListingGlobalTag(orgId, "jobListings")],
     }
   );
 
@@ -137,7 +133,7 @@ const JobListingMenu = async ({
 };
 
 // Get all job listings
-const getJobListingsWithApplicationsDb = async (orgId: string) => {
+const getJobListingsApplicationsDb = async (orgId: string) => {
   const result = await db
     .select({
       id: jobListingsTable.id,

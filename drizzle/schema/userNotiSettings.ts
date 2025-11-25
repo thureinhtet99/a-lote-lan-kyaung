@@ -1,5 +1,5 @@
 import { boolean, pgTable, varchar } from "drizzle-orm/pg-core";
-import { usersTable } from "./user";
+import { usersTable } from "./users";
 import { createdAt, updatedAt } from "../schemaHelpers";
 import { relations } from "drizzle-orm";
 

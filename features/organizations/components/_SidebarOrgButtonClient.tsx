@@ -108,7 +108,7 @@ export default function SidebarOrgButtonClient({
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
-          <Link href={APP_ROUTES.EMPLOYER.USER_SETTINGS}>
+          <Link href={APP_ROUTES.EMPLOYER.SETTINGS}>
             <UserRoundCogIcon className="mr-1" />
             User settings
           </Link>

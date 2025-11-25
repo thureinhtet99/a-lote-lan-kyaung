@@ -1,7 +1,7 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 import { getCurrentUser } from "../clerk/lib/getCurrentAuth";
-import upsertUserResume from "@/features/users/db/userResume";
+import { upsertUserResumeDb } from "@/features/users/db/userResume";
 import { db } from "@/drizzle/db";
 import { eq } from "drizzle-orm";
 import { userResumesTable } from "@/drizzle/schema";
@@ -26,7 +26,7 @@ export const ourFileRouter = {
       const { userId } = metadata;
       const resumeFileKey = await getUserResumeFileKey(userId);
 
-      await upsertUserResume(userId, {
+      await upsertUserResumeDb(userId, {
         resumeFileUrl: file.ufsUrl,
         resumeFileKey: file.key,
       });

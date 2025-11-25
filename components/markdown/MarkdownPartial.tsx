@@ -10,23 +10,21 @@ import {
 } from "../ui/dialog";
 import { Button } from "../ui/button";
 
-type MarkdownPartialType = {
-  dialogMarkdown: ReactNode;
-  mainMarkdown: ReactNode;
-  dialogTitle?: string;
-};
-
-export default function MarkdownPartial({
-  dialogMarkdown,
+export function MarkdownPartial({
   mainMarkdown,
+  dialogMarkdown,
   dialogTitle,
-}: MarkdownPartialType) {
-  const [isOverFlowing, setIsOverFlowing] = useState(false);
-  const markdownRef = useRef<HTMLDivElement>(null);
+}: {
+  mainMarkdown: ReactNode;
+  dialogMarkdown: ReactNode;
+  dialogTitle: string;
+}) {
+  const [isOverflowing, setIsOverflowing] = useState(false);
 
-  const checkOverFlow = (node: HTMLDivElement) => {
-    setIsOverFlowing(node.scrollHeight > node.clientHeight);
-  };
+  const markdownRef = useRef<HTMLDivElement>(null);
+  function checkOverflow(node: HTMLDivElement) {
+    setIsOverflowing(node.scrollHeight > node.clientHeight);
+  }
 
   useEffect(() => {
     const controller = new AbortController();
@@ -34,30 +32,33 @@ export default function MarkdownPartial({
       "resize",
       () => {
         if (markdownRef.current == null) return;
-        checkOverFlow(markdownRef.current);
+        checkOverflow(markdownRef.current);
       },
       { signal: controller.signal }
     );
 
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   useLayoutEffect(() => {
     if (markdownRef.current == null) return;
-    checkOverFlow(markdownRef.current);
+    checkOverflow(markdownRef.current);
   }, []);
 
   return (
     <>
-      <div ref={markdownRef} className="max-h-[500px] overflow-hidden relative">
+      <div ref={markdownRef} className="max-h-[300px] overflow-hidden relative">
         {mainMarkdown}
-        {isOverFlowing && (
+        {isOverflowing && (
           <div className="bg-gradient-to-t from-background to-transparent to-15% inset-0 absolute pointer-events-none" />
         )}
       </div>
-      {isOverFlowing && (
+
+      {isOverflowing && (
         <Dialog>
-          <DialogTrigger asChild >
+          <DialogTrigger asChild>
             <Button variant="ghost" className="underline -ml-3">
               Read More
             </Button>

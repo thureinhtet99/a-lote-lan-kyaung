@@ -1,4 +1,3 @@
 
 delete export function of Enum in jobListing
 delete default file in (job-seeker)
-delete OrgDatabaseSync

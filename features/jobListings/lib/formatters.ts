@@ -6,7 +6,7 @@ import {
   WageIntervalType,
 } from "@/drizzle/schema";
 
-export function formatWageInterval(interval: WageIntervalType) {
+export const formatWageInterval = (interval: WageIntervalType) => {
   switch (interval) {
     case "hourly":
       return "Hour";
@@ -18,9 +18,9 @@ export function formatWageInterval(interval: WageIntervalType) {
     default:
       throw new Error(`Invalid wage interval: ${interval satisfies never}`);
   }
-}
+};
 
-export function formatLocationRequirement(require: LocationRequirementType) {
+export const formatLocationRequirement = (require: LocationRequirementType) => {
   switch (require) {
     case "on-site":
       return "On-site";
@@ -34,9 +34,9 @@ export function formatLocationRequirement(require: LocationRequirementType) {
         `Invalid location requirement: ${require satisfies never}`
       );
   }
-}
+};
 
-export function formatJobType(type: JobListingTypeType) {
+export const formatJobType = (type: JobListingTypeType) => {
   switch (type) {
     case "full-time":
       return "Full-time";
@@ -47,9 +47,9 @@ export function formatJobType(type: JobListingTypeType) {
     default:
       throw new Error(`Invalid job type: ${type satisfies never}`);
   }
-}
+};
 
-export function formatExpLevel(exp: ExperienceLevelType) {
+export const formatExpLevel = (exp: ExperienceLevelType) => {
   switch (exp) {
     case "junior":
       return "Junior";
@@ -60,9 +60,9 @@ export function formatExpLevel(exp: ExperienceLevelType) {
     default:
       throw new Error(`Invalid experience level: ${exp satisfies never}`);
   }
-}
+};
 
-export function formatJobListingStatus(status: JobListingStatusType) {
+export const formatJobListingStatus = (status: JobListingStatusType) => {
   switch (status) {
     case "published":
       return "Published";
@@ -73,9 +73,9 @@ export function formatJobListingStatus(status: JobListingStatusType) {
     default:
       throw new Error(`Invalid job-listing status: ${status satisfies never}`);
   }
-}
+};
 
-export function formatWage(wage: number, wageIntervel: WageIntervalType) {
+export const formatWage = (wage: number, wageIntervel: WageIntervalType) => {
   const wageFormatter = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "MMK",
@@ -93,12 +93,12 @@ export function formatWage(wage: number, wageIntervel: WageIntervalType) {
     default:
       throw new Error(`Invalid wage intervel: ${wageIntervel satisfies never}`);
   }
-}
+};
 
-export function formatJobListingLocation(
+export const formatJobListingLocation = (
   stateAbbreviation: string | null,
   city: string | null
-) {
+) => {
   if (stateAbbreviation == null && city == null) return "none";
 
   const locationParts = [];
@@ -106,4 +106,4 @@ export function formatJobListingLocation(
   if (stateAbbreviation != null) locationParts.push(stateAbbreviation);
 
   return locationParts.join(", ");
-}
+};

@@ -30,7 +30,7 @@ export default function LoadingSwap({
           className
         )}
       >
-        <Loader2Icon className="animate-spin"/>
+        <Loader2Icon className="animate-spin" />
       </div>
     </div>
   );

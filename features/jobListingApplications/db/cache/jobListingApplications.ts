@@ -3,14 +3,13 @@ import { revalidateTag } from "next/cache";
 
 export function revalidateJobListingApplicationCache({
   jobListingId,
-  userId,
 }: {
   jobListingId: string;
   userId: string;
 }) {
   try {
     revalidateTag(
-      jobListingApplicationIdTag("jobListingApplications", jobListingId, userId)
+      jobListingApplicationIdTag("jobListingApplications", jobListingId)
     );
   } catch (error) {
     console.error(

@@ -13,7 +13,7 @@ import { Suspense } from "react";
 
 export default function EditJobListingPage(props: ParamsType) {
   return (
-    <Suspense fallback={<LoadingSpinner/>}>
+    <Suspense fallback={<LoadingSpinner />}>
       <SuspendedComponent {...props} />
     </Suspense>
   );

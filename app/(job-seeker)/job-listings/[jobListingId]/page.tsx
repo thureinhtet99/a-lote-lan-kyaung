@@ -225,7 +225,6 @@ const getJobListingById = async (id: string) => {
 
 const ApplyButton = async ({ jobListingId }: { jobListingId: string }) => {
   const { userId } = await getCurrentUser();
-
   if (userId == null) {
     return (
       <Popover>
@@ -244,20 +243,10 @@ const ApplyButton = async ({ jobListingId }: { jobListingId: string }) => {
   const cachedJobApplication = unstable_cache(
     async (jobListingId: string, userId: string) =>
       getJobListingApplication({ jobListingId, userId }),
-    [
-      jobListingApplicationIdTag(
-        "jobListingApplications",
-        jobListingId,
-        userId
-      ),
-    ],
+    [jobListingApplicationIdTag("jobListingApplications", jobListingId)],
     {
       tags: [
-        jobListingApplicationIdTag(
-          "jobListingApplications",
-          jobListingId,
-          userId
-        ),
+        jobListingApplicationIdTag("jobListingApplications", jobListingId),
       ],
     }
   );

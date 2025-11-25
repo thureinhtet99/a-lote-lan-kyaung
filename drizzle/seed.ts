@@ -1,9 +1,9 @@
-import { jobListingsTable } from '@/drizzle/schema';
+import { jobListingsTable } from "@/drizzle/schema";
 import { db } from "./db";
 
 async function seed() {
   try {
-    await db.delete(jobListingsTable)
+    await db.delete(jobListingsTable);
     console.log("🌱 Starting seed...");
 
     // Specific organization ID to seed job listings for

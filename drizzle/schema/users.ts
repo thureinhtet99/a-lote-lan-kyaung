@@ -1,9 +1,9 @@
 import { pgTable, varchar } from "drizzle-orm/pg-core";
 import { createdAt, updatedAt } from "../schemaHelpers";
 import { relations } from "drizzle-orm";
-import { userNotificationSettingsTable } from "./userNotiSetting";
-import { userResumesTable } from "./userResume";
-import { organizationUserSettingsTable } from "./organizationUserSetting";
+import { userNotificationSettingsTable } from "./userNotiSettings";
+import { userResumesTable } from "./userResumes";
+import { organizationUserSettingsTable } from "./organizationUserSettings";
 
 export const usersTable = pgTable("users", {
   id: varchar().primaryKey(),

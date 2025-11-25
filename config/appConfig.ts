@@ -31,7 +31,7 @@ export const APP_ROUTES = {
     JOB_LISTINGS: "/employer/job-listings",
     JOB_LISTINGS_NEW: "/employer/job-listings/new",
     PRICING: "/employer/pricing",
-    USER_SETTINGS: "/employer/settings",
+    SETTINGS: "/employer/settings",
   },
 
   ORG: {
