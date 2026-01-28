@@ -7,32 +7,55 @@ import { ApplicationType } from "@/types/application.type";
 import { ColumnDef } from "@tanstack/react-table";
 import sortApplicationByStatus from "../lib/utils";
 import { applicationStatus, ApplicationStatusType } from "@/drizzle/schema";
-import { useOptimistic, useTransition } from "react";
+import { ReactNode, useOptimistic, useState, useTransition } from "react";
 import StatusIcon from "./StatusIcon";
 import { formatApplicationStatus } from "../lib/formatters";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ChevronDownIcon } from "lucide-react";
-import { updateJobListingApplicationStatus } from "../actions/actions";
+import { ChevronDownIcon, MoreHorizontalIcon } from "lucide-react";
+import {
+  updateJobListingApplicationRating,
+  updateJobListingApplicationStatus,
+} from "../actions/actions";
 import { toast } from "sonner";
+import RatingIcon from "./RatingIcon";
+import { RATING_OPTIONS } from "../data/constants";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import Link from "next/link";
 
 export default function ApplicationTable({
   applications,
+  canUpdateRating,
+  canUpdateStatus,
 }: {
   applications: ApplicationType[];
+  canUpdateRating: boolean;
+  canUpdateStatus: boolean;
 }) {
-  return <DataTable columns={getColumns(true, true)} data={applications} />;
+  return (
+    <DataTable
+      columns={getColumns(canUpdateRating, canUpdateStatus)}
+      data={applications}
+    />
+  );
 }
 
 const getColumns = (
   canUpdateRating: boolean,
-  canUpdateStatus: boolean
+  canUpdateStatus: boolean,
 ): ColumnDef<ApplicationType>[] => {
   return [
     {
@@ -64,6 +87,7 @@ const getColumns = (
         );
       },
     },
+
     {
       accessorKey: "status",
       header: ({ column }) => (
@@ -83,6 +107,50 @@ const getColumns = (
           userId={row.original.user.id}
         />
       ),
+    },
+
+    {
+      accessorKey: "rating",
+      header: ({ column }) => (
+        <DataTableSortableColumnHeader column={column} title="Rating" />
+      ),
+      filterFn: ({ original }, _, value) => {
+        return value.includes(original.rating);
+      },
+      cell: ({ row }) => (
+        <RatingCell
+          canUpdate={canUpdateRating}
+          rating={row.original.rating}
+          jobListingId={row.original.jobListingId}
+          userId={row.original.user.id}
+        />
+      ),
+    },
+
+    {
+      accessorKey: "createdAt",
+      accessorFn: (row) => row.createdAt,
+      header: ({ column }) => (
+        <DataTableSortableColumnHeader column={column} title="Applied On" />
+      ),
+      cell: ({ row }) => new Date(row.original.createdAt).toLocaleDateString(),
+    },
+
+    {
+      id: "actions",
+      cell: ({ row }) => {
+        const jobListing = row.original;
+        const resume = jobListing.user.resume;
+
+        return (
+          <ActionCell
+            coverLetterMarkDown={jobListing.coverLetterMarkDown}
+            resumeMarkDown={resume?.markdownSummary}
+            resumeUrl={resume?.resumeFileUrl}
+            userName={`${jobListing.user.first_name}${jobListing.user.last_name}`}
+          />
+        );
+      },
     },
   ];
 };
@@ -123,7 +191,7 @@ const StatusCell = ({
                 setOptimisticStatus(status);
                 const response = await updateJobListingApplicationStatus(
                   { jobListingId, userId },
-                  status
+                  status,
                 );
 
                 if (response?.error) toast.error(response.message);
@@ -135,6 +203,151 @@ const StatusCell = ({
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+};
+
+const RatingCell = ({
+  canUpdate,
+  rating,
+  jobListingId,
+  userId,
+}: {
+  canUpdate: boolean;
+  rating: number | null;
+  jobListingId: string;
+  userId: string;
+}) => {
+  const [optimisticRating, setOptimisticRating] = useOptimistic(rating);
+  const [isPending, startTransition] = useTransition();
+
+  if (!canUpdate) return <RatingIcon rating={optimisticRating} />;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className={cn("-ml-3", isPending && "opacity-50")}
+        >
+          <RatingIcon rating={optimisticRating} />
+          <ChevronDownIcon />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        {RATING_OPTIONS.map((rating) => (
+          <DropdownMenuItem
+            key={rating}
+            onClick={() => {
+              startTransition(async () => {
+                setOptimisticRating(rating);
+                const response = await updateJobListingApplicationRating(
+                  { jobListingId, userId },
+                  rating,
+                );
+
+                if (response?.error) toast.error(response.message);
+              });
+            }}
+          >
+            <RatingIcon rating={rating} />
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+const ActionCell = ({
+  coverLetterMarkDown,
+  resumeMarkDown,
+  resumeUrl,
+  userName,
+}: {
+  coverLetterMarkDown: ReactNode | null;
+  resumeMarkDown: ReactNode | null;
+  resumeUrl: string | null | undefined;
+  userName: string;
+}) => {
+  const [openModal, setOpenModal] = useState<"resume" | "cover-letter" | null>(
+    null,
+  );
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon">
+            <span className="sr-only">Open Menu</span>
+            <MoreHorizontalIcon className="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          {resumeMarkDown != null || resumeUrl != null ? (
+            <DropdownMenuItem onClick={() => setOpenModal("resume")}>
+              View Resume
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuLabel className="text-muted-foreground">
+              No Resume
+            </DropdownMenuLabel>
+          )}
+
+          {coverLetterMarkDown ? (
+            <DropdownMenuItem onClick={() => setOpenModal("cover-letter")}>
+              View Cover Letter
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuLabel className="text-muted-foreground">
+              No Cover Letter
+            </DropdownMenuLabel>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {coverLetterMarkDown && (
+        <Dialog
+          open={openModal === "cover-letter"}
+          onOpenChange={(open) => setOpenModal(open ? "cover-letter" : null)}
+        >
+          <DialogContent className="lg:max-w-5xl md:max-w-3xl max-h-[calc(100%-2rem)] overflow-hidden flex flex-col">
+            <DialogHeader>
+              <DialogTitle>Cover Letter</DialogTitle>
+              <DialogDescription>{userName}</DialogDescription>
+            </DialogHeader>
+            <div className="flex-1 overflow-y-auto">{coverLetterMarkDown}</div>
+          </DialogContent>
+        </Dialog>
+      )}
+      {resumeMarkDown ||
+        (resumeUrl && (
+          <Dialog
+            open={openModal === "resume"}
+            onOpenChange={(open) => setOpenModal(open ? "resume" : null)}
+          >
+            <DialogContent className="lg:max-w-5xl md:max-w-3xl max-h-[calc(100%-2rem)] overflow-hidden flex flex-col">
+              <DialogHeader>
+                <DialogTitle>Resume</DialogTitle>
+                <DialogDescription>{userName}</DialogDescription>
+                {resumeUrl && (
+                  <Button asChild className="self-start">
+                    <Link
+                      href={resumeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Original Resume
+                    </Link>
+                  </Button>
+                )}
+                <DialogDescription>
+                  This is AI-generated summary of the applicant&apos;s resume
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex-1 overflow-y-auto">{resumeMarkDown}</div>
+            </DialogContent>
+          </Dialog>
+        ))}
+    </>
   );
 };
 

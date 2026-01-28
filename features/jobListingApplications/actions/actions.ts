@@ -9,7 +9,7 @@ import {
 import {
   insertJobListingApplicationDb,
   updateJobListingApplicationDb,
-} from "../db/jobListingApplication";
+} from "../db/jobListingApplications";
 import { db } from "@/drizzle/db";
 import { and, eq } from "drizzle-orm";
 import {
@@ -25,7 +25,7 @@ import { hasOrgUserPermission } from "@/services/clerk/lib/orgUserPermission";
 // Create
 export const createJobListingApplication = async (
   jobListingId: string,
-  unsafeData: z.infer<typeof newJobListingApplicationSchema>
+  unsafeData: z.infer<typeof newJobListingApplicationSchema>,
 ) => {
   const permissionError = {
     error: true,
@@ -43,7 +43,7 @@ export const createJobListingApplication = async (
     [userResumeTag("userResumes", userId)],
     {
       tags: [userResumeTag("userResumes", userId)],
-    }
+    },
   );
 
   const jobListingCached = unstable_cache(
@@ -51,7 +51,7 @@ export const createJobListingApplication = async (
     [jobListingIdTag(orgId, "jobListings", jobListingId)],
     {
       tags: [jobListingIdTag(orgId, "jobListings", jobListingId)],
-    }
+    },
   );
 
   const userResume = await userResumeCached(userId);
@@ -89,7 +89,7 @@ const getJobListingById = async (id: string) => {
   return await db.query.jobListingsTable.findFirst({
     where: and(
       eq(jobListingsTable.id, id),
-      eq(jobListingsTable.status, "published")
+      eq(jobListingsTable.status, "published"),
     ),
     columns: { id: true },
   });
@@ -103,7 +103,7 @@ export const updateJobListingApplicationStatus = async (
     jobListingId: string;
     userId: string;
   },
-  unsafeStatus: ApplicationStatusType
+  unsafeStatus: ApplicationStatusType,
 ) => {
   const { success, data: status } = z
     .enum(applicationStatus)
@@ -121,8 +121,12 @@ export const updateJobListingApplicationStatus = async (
     };
 
   const { orgId } = await getCurrentOrg();
-  const jobListing = await getJobListing(jobListingId);
-  if (orgId == null || jobListing == null || orgId != jobListing.organizationId)
+  const orgIdByJobListing = await getOrgIdByJobListing(jobListingId);
+  if (
+    orgId == null ||
+    orgIdByJobListing == null ||
+    orgId != orgIdByJobListing.organizationId
+  )
     return {
       error: true,
       message: "You don't have permission to update the status",
@@ -131,7 +135,50 @@ export const updateJobListingApplicationStatus = async (
   await updateJobListingApplicationDb({ jobListingId, userId }, { status });
 };
 
-const getJobListing = async (id: string) => {
+export const updateJobListingApplicationRating = async (
+  {
+    jobListingId,
+    userId,
+  }: {
+    jobListingId: string;
+    userId: string;
+  },
+  unsafeRating: number | null,
+) => {
+  const { success, data: rating } = z
+    .number()
+    .min(1)
+    .max(5)
+    .nullish()
+    .safeParse(unsafeRating);
+  if (!success)
+    return {
+      error: true,
+      message: "Invalid rating",
+    };
+
+  if (!(await hasOrgUserPermission("job_listing_application:change_rating")))
+    return {
+      error: true,
+      message: "You don't have permission to update the rating",
+    };
+
+  const { orgId } = await getCurrentOrg();
+  const orgIdByJobListing = await getOrgIdByJobListing(jobListingId);
+  if (
+    orgId == null ||
+    orgIdByJobListing == null ||
+    orgId != orgIdByJobListing.organizationId
+  )
+    return {
+      error: true,
+      message: "You don't have permission to update the rating",
+    };
+
+  await updateJobListingApplicationDb({ jobListingId, userId }, { rating });
+};
+
+const getOrgIdByJobListing = async (id: string) => {
   return db.query.jobListingsTable.findFirst({
     where: eq(jobListingsTable.id, id),
     columns: { organizationId: true },

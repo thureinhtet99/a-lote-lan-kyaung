@@ -32,6 +32,8 @@ const getIcon = (status: ApplicationStatusType) => {
       return HandshakeIcon;
 
     default:
-      throw new Error(`Unknown application status ${status satisfies never}`);
+      throw new Error(
+        `Unknown application status icon ${status satisfies never}`,
+      );
   }
 };

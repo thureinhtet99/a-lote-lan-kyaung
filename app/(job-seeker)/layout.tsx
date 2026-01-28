@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import SidebarUserButton from "@/features/users/components/SidebarUserButton";
 import AppSidebar from "@/components/sidebar/AppSidebar";
-import JobSeekerSidebar from "./_components/JobSeekerSidebar";
+// import JobSeekerSidebar from "./_components/JobSeekerSidebar";
 import SidebarNavMenuGroup from "@/components/sidebar/SidebarNavMenuGroup";
 import { APP_ROUTES } from "@/config/appConfig";
 import {

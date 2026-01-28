@@ -31,13 +31,11 @@ import { count, desc, eq } from "drizzle-orm";
 
 export default function EmployerLayout({ children }: { children: ReactNode }) {
   return (
-    <>
-      <OrganizationSyncWrapper>
-        <Suspense fallback={<LoadingSpinner />}>
-          <SuspendedComponent>{children}</SuspendedComponent>
-        </Suspense>
-      </OrganizationSyncWrapper>
-    </>
+    <OrganizationSyncWrapper>
+      <Suspense fallback={<LoadingSpinner />}>
+        <SuspendedComponent>{children}</SuspendedComponent>
+      </Suspense>
+    </OrganizationSyncWrapper>
   );
 }
 
@@ -51,7 +49,7 @@ const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
     [orgId],
     {
       tags: [jobListingGlobalTag(orgId, "jobListings")],
-    }
+    },
   );
 
   const jobListings = await cachedData();
@@ -120,7 +118,7 @@ const JobListingMenu = async ({
     .sort(([a], [b]) => {
       return sortJobListingsByStatus(
         a as JobListingStatusType,
-        b as JobListingStatusType
+        b as JobListingStatusType,
       );
     })
     .map(([status, jobListings]) => (
@@ -145,7 +143,7 @@ const getJobListingsApplicationsDb = async (orgId: string) => {
     .where(eq(jobListingsTable.organizationId, orgId))
     .leftJoin(
       jobListingApplicationsTable,
-      eq(jobListingsTable.id, jobListingApplicationsTable.jobListingId)
+      eq(jobListingsTable.id, jobListingApplicationsTable.jobListingId),
     )
     .groupBy(jobListingApplicationsTable.jobListingId, jobListingsTable.id)
     .orderBy(desc(jobListingsTable.createdAt));

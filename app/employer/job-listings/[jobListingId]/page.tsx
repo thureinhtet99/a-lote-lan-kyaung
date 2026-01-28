@@ -68,7 +68,7 @@ const SuspendedComponent = async ({ params }: ParamsType) => {
     [jobListingId, orgId],
     {
       tags: [jobListingIdTag(orgId, "jobListings", jobListingId)],
-    }
+    },
   );
 
   const jobListing = await cachedData();
@@ -172,7 +172,7 @@ const getJobListingByOrgIdDb = async (id: string, orgId: string) => {
   return await db.query.jobListingsTable.findFirst({
     where: and(
       eq(jobListingsTable.id, id),
-      eq(jobListingsTable.organizationId, orgId)
+      eq(jobListingsTable.organizationId, orgId),
     ),
   });
 };
@@ -350,19 +350,35 @@ const Applications = async ({ jobListingId }: { jobListingId: string }) => {
       tags: [
         jobListingApplicationIdTag("jobListingApplications", jobListingId),
       ],
-    }
+    },
   );
 
   const applications = await cachedData();
 
   return (
     <ApplicationTable
-      applications={applications} // todo: fix applications
+      applications={applications.map((app) => ({
+        ...app,
+        user: {
+          ...app.user,
+          resume: app.user.resume
+            ? {
+                ...app.user.resume,
+                markdownSummary: app.user.resume.aiSummary ? (
+                  <MarkdownRenderer source={app.user.resume.aiSummary} />
+                ) : null,
+              }
+            : null,
+        },
+        coverLetterMarkDown: app.coverLetter ? (
+          <MarkdownRenderer source={app.coverLetter} />
+        ) : null,
+      }))}
       canUpdateRating={await hasOrgUserPermission(
-        "job_listing_application:change_rating"
+        "job_listing_application:change_rating",
       )}
       canUpdateStatus={await hasOrgUserPermission(
-        "job_listing_application:change_status"
+        "job_listing_application:change_status",
       )}
     />
   );
