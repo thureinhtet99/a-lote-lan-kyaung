@@ -12,15 +12,15 @@ import {
   deleteJobListingDb,
   insertJobListingDb,
   updateJobListingDb,
-} from "../db/jobListings";
-import { hasOrgUserPermission } from "@/services/clerk/lib/orgUserPermission";
+} from "../db/job-listing-db";
+import { hasOrgUserPermission } from "@/services/clerk/lib/org-user-permission";
 import { jobListingsTable } from "@/drizzle/schema";
 import { db } from "@/drizzle/db";
 import { and, eq } from "drizzle-orm";
 
 // Create
 export const createJobListing = async (
-  unsafeData: z.infer<typeof jobListingSchema>
+  unsafeData: z.infer<typeof jobListingSchema>,
 ) => {
   const { orgId } = await getCurrentOrg();
   if (orgId == null || !(await hasOrgUserPermission("job_listing:create")))
@@ -52,7 +52,7 @@ export const createJobListing = async (
 // Update
 export const updateJobListing = async (
   jobListingId: string,
-  unsafeData: z.infer<typeof jobListingSchema>
+  unsafeData: z.infer<typeof jobListingSchema>,
 ) => {
   const { orgId } = await getCurrentOrg();
   if (orgId == null || !(await hasOrgUserPermission("job_listing:update")))
@@ -90,7 +90,7 @@ const getJobListingByOrgIdDb = async (id: string, orgId: string) => {
   return await db.query.jobListingsTable.findFirst({
     where: and(
       eq(jobListingsTable.id, id),
-      eq(jobListingsTable.organizationId, orgId)
+      eq(jobListingsTable.organizationId, orgId),
     ),
   });
 };

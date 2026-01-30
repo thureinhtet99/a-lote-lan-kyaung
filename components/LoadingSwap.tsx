@@ -17,7 +17,7 @@ export default function LoadingSwap({
         className={cn(
           "col-start-1 col-end-1 row-start-1 row-end-1",
           isLoading ? "invisible" : "visible",
-          className
+          className,
         )}
       >
         {children}
@@ -27,7 +27,7 @@ export default function LoadingSwap({
         className={cn(
           "col-start-1 col-end-1 row-start-1 row-end-1",
           isLoading ? "visible" : "invisible",
-          className
+          className,
         )}
       >
         <Loader2Icon className="animate-spin" />

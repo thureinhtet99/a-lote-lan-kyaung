@@ -137,7 +137,7 @@ export default function JobListingForm({
                         field.onChange(
                           isNaN(e.target.valueAsNumber)
                             ? null
-                            : e.target.valueAsNumber
+                            : e.target.valueAsNumber,
                         )
                       }
                     />
@@ -171,7 +171,6 @@ export default function JobListingForm({
                     )}
                   />
                 </div>
-                <FormDescription>optional</FormDescription>
               </FormItem>
             )}
           />
@@ -194,6 +193,7 @@ export default function JobListingForm({
                       placeholder="Enter city"
                     />
                   </FormControl>
+                  <FormDescription>optional</FormDescription>
                 </FormItem>
               )}
             />
@@ -228,6 +228,7 @@ export default function JobListingForm({
                       <StateSelectItems />
                     </SelectContent>
                   </Select>
+                  <FormDescription>optional</FormDescription>
                 </FormItem>
               )}
             />

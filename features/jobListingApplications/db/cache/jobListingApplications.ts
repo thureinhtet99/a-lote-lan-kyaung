@@ -1,4 +1,4 @@
-import { jobListingApplicationIdTag } from "@/lib/dataCache";
+import { jobListingApplicationsTag } from "@/lib/dataCache";
 import { revalidateTag } from "next/cache";
 
 export function revalidateJobListingApplicationCache({
@@ -9,12 +9,12 @@ export function revalidateJobListingApplicationCache({
 }) {
   try {
     revalidateTag(
-      jobListingApplicationIdTag("jobListingApplications", jobListingId)
+      jobListingApplicationsTag("jobListingApplications", jobListingId),
     );
   } catch (error) {
     console.error(
       "Failed to revalidate job listing application cache: ",
-      error
+      error,
     );
   }
 }

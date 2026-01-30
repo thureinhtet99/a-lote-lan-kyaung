@@ -1,12 +1,12 @@
-import LoadingSpinner from "@/components/LoadingSpinner";
+import Loading from "@/components/Loading";
 import { Card, CardContent } from "@/components/ui/card";
 import { APP_ROUTES } from "@/config/appConfig";
 import { db } from "@/drizzle/db";
 import { jobListingsTable } from "@/drizzle/schema";
 import JobListingForm from "@/features/jobListings/components/JobListingForm";
-import { jobListingGlobalTag } from "@/lib/dataCache";
+import { jobListingsTag } from "@/lib/dataCache";
 import { getCurrentOrg } from "@/services/clerk/lib/getCurrentAuth";
-import { hasOrgUserPermission } from "@/services/clerk/lib/orgUserPermission";
+import { hasOrgUserPermission } from "@/services/clerk/lib/org-user-permission";
 import { eq } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
@@ -14,7 +14,7 @@ import { Suspense } from "react";
 
 export default function NewJobListingPage() {
   return (
-    <Suspense fallback={<LoadingSpinner />}>
+    <Suspense fallback={<Loading />}>
       <SuspendedComponent />
     </Suspense>
   );
@@ -29,8 +29,8 @@ const SuspendedComponent = async () => {
     async () => await getAllJobListingsDb(orgId),
     [orgId],
     {
-      tags: [jobListingGlobalTag(orgId, "jobListings")],
-    }
+      tags: [jobListingsTag(orgId, "jobListings")],
+    },
   );
 
   const jobListings = await cachedData();

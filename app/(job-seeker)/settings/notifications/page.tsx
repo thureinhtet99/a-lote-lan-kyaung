@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { db } from "@/drizzle/db";
 import { userNotificationSettingsTable } from "@/drizzle/schema";
 import NotificationsForm from "@/features/users/components/NotificationsForm";
-import { userNotiTag } from "@/lib/dataCache";
+import { userNotificationTag } from "@/lib/dataCache";
 import { getCurrentUser } from "@/services/clerk/lib/getCurrentAuth";
 import { eq } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
@@ -54,8 +54,8 @@ const getNotiSettingsByUserId = async (userId: string) => {
         },
       });
     },
-    [userNotiTag("userNotificationSettings", userId)],
-    { tags: [userNotiTag("userNotificationSettings", userId)] }
+    [userNotificationTag("userNotificationSettings", userId)],
+    { tags: [userNotificationTag("userNotificationSettings", userId)] },
   );
   return await cachedData();
 };

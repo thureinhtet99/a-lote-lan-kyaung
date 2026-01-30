@@ -18,7 +18,6 @@ import {
   toggleJobListingFeaturedStatus,
   toggleJobListingStatus,
 } from "@/features/jobListings/actions/actions";
-import JobListingBadges from "@/features/jobListings/components/JobListingBadges";
 import { formatJobListingStatus } from "@/features/jobListings/lib/formatters";
 import {
   hasReachedMaxFeaturedJobListings,
@@ -26,9 +25,9 @@ import {
 } from "@/features/jobListings/lib/planFeatureHelpers";
 import { nextJobListingStatus } from "@/features/jobListings/lib/utils";
 import { APP_ROUTES } from "@/config/appConfig";
-import { jobListingApplicationIdTag, jobListingIdTag } from "@/lib/dataCache";
+import { jobListingApplicationsTag, jobListingIdTag } from "@/lib/dataCache";
 import { getCurrentOrg } from "@/services/clerk/lib/getCurrentAuth";
-import { hasOrgUserPermission } from "@/services/clerk/lib/orgUserPermission";
+import { hasOrgUserPermission } from "@/services/clerk/lib/org-user-permission";
 import {
   EditIcon,
   EyeIcon,
@@ -41,17 +40,19 @@ import { unstable_cache } from "next/cache";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ReactNode, Suspense } from "react";
-import { ParamsType } from "@/types/params.type";
 import { db } from "@/drizzle/db";
 import { and, eq } from "drizzle-orm";
-import LoadingSpinner from "@/components/LoadingSpinner";
 import { Separator } from "@/components/ui/separator";
 import ApplicationTable from "@/features/jobListingApplications/components/ApplicationTable";
 import { MarkdownPartial } from "@/components/markdown/MarkdownPartial";
+import JobListingBadges from "@/features/jobListings/components/job-listing-badges";
+import Loading from "@/components/Loading";
+import { ParamsType } from "@/types/index.type";
+import SkeletonApplicationTable from "@/features/jobListingApplications/components/skeleton-application-table";
 
-export default function SingleJobListingPage(props: ParamsType) {
+export default function JobListingByIdPage(props: ParamsType) {
   return (
-    <Suspense fallback={<LoadingSpinner />}>
+    <Suspense fallback={<Loading />}>
       <SuspendedComponent {...props} />
     </Suspense>
   );
@@ -337,19 +338,13 @@ const statusToggleButtonText = (status: JobListingStatusType) => {
   }
 };
 
-const SkeletonApplicationTable = () => {
-  return null;
-};
-
 const Applications = async ({ jobListingId }: { jobListingId: string }) => {
   // Fetch applications by jobListingId from db (cached)
   const cachedData = unstable_cache(
     async () => await getJobListingApplications(jobListingId),
-    [jobListingApplicationIdTag("jobListingApplications", jobListingId)],
+    [jobListingApplicationsTag("jobListingApplications", jobListingId)],
     {
-      tags: [
-        jobListingApplicationIdTag("jobListingApplications", jobListingId),
-      ],
+      tags: [jobListingApplicationsTag("jobListingApplications", jobListingId)],
     },
   );
 

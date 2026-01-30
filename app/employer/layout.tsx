@@ -13,7 +13,7 @@ import SidebarOrgButton from "@/features/organizations/components/SidebarOrgButt
 import { getCurrentOrg } from "@/services/clerk/lib/getCurrentAuth";
 import { APP_ROUTES } from "@/config/appConfig";
 import CheckCondition from "@/components/CheckCondition";
-import { hasOrgUserPermission } from "@/services/clerk/lib/orgUserPermission";
+import { hasOrgUserPermission } from "@/services/clerk/lib/org-user-permission";
 import OrganizationSyncWrapper from "@/services/clerk/component/OrganizationSyncWrapper";
 import { unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
@@ -23,16 +23,16 @@ import {
   jobListingsTable,
   JobListingStatusType,
 } from "@/drizzle/schema";
-import JobListingMenuGroup from "./_JobListingMenuGroup";
-import { jobListingGlobalTag } from "@/lib/dataCache";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import JobListingMenuGroup from "./components/_job-listing-menu-group";
+import { jobListingsTag } from "@/lib/dataCache";
 import { db } from "@/drizzle/db";
 import { count, desc, eq } from "drizzle-orm";
+import Loading from "@/components/Loading";
 
 export default function EmployerLayout({ children }: { children: ReactNode }) {
   return (
     <OrganizationSyncWrapper>
-      <Suspense fallback={<LoadingSpinner />}>
+      <Suspense>
         <SuspendedComponent>{children}</SuspendedComponent>
       </Suspense>
     </OrganizationSyncWrapper>
@@ -43,12 +43,12 @@ const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
   const { orgId } = await getCurrentOrg();
   if (orgId == null) return redirect(APP_ROUTES.ORG.SELECT);
 
-  // Get all job listings (cached)
+  // Get all job listings with applications(cached)
   const cachedData = unstable_cache(
     async () => await getJobListingsApplicationsDb(orgId),
     [orgId],
     {
-      tags: [jobListingGlobalTag(orgId, "jobListings")],
+      tags: [jobListingsTag(orgId, "jobListings")],
     },
   );
 
@@ -73,7 +73,7 @@ const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
               </CheckCondition>
             )}
             <SidebarGroupContent className="group-data-[state=collapsed]:hidden">
-              <Suspense>
+              <Suspense fallback={<Loading />}>
                 <JobListingMenu jobListings={jobListings} />
               </Suspense>
             </SidebarGroupContent>
@@ -130,7 +130,7 @@ const JobListingMenu = async ({
     ));
 };
 
-// Get all job listings
+// Get all job listings with applications
 const getJobListingsApplicationsDb = async (orgId: string) => {
   const result = await db
     .select({

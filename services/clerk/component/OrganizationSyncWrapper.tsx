@@ -1,10 +1,10 @@
-import { ensureOrganizationExists } from "@/services/clerk/lib/syncOrganization";
+import { ensureOrganizationExists } from "@/services/clerk/lib/sync-organization";
 import { ReactNode } from "react";
 
-interface OrganizationSyncWrapperProps {
+type OrganizationSyncWrapperProps = {
   children: ReactNode;
   fallback?: ReactNode;
-}
+};
 
 /**
  * Server component that ensures the current organization is synced to the database
@@ -18,7 +18,7 @@ export default async function OrganizationSyncWrapper({
     const result = await ensureOrganizationExists();
 
     if (!result.success) {
-      console.warn("Organization sync warning:", result.reason);
+      console.warn("Organization sync warning:", result.message);
       // Don't block rendering for sync failures
     }
 

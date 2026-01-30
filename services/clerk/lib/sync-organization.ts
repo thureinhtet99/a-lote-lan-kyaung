@@ -19,7 +19,7 @@ const checkOrgExists = unstable_cache(
   {
     tags: [`org-exists`],
     revalidate: 300, // Cache for 5 minutes
-  }
+  },
 );
 
 // One-time organization sync - only runs if org doesn't exist in DB
@@ -27,13 +27,13 @@ export async function ensureOrganizationExists() {
   const { orgId } = await auth();
 
   if (!orgId) {
-    return { success: false, reason: "No organization ID" };
+    return { success: false, message: "No organization ID" };
   }
 
   // First check if organization already exists (cached)
   const exists = await checkOrgExists(orgId);
   if (exists) {
-    return { success: true, reason: "Organization already exists", orgId };
+    return { success: true, message: "Organization already exists", orgId };
   }
 
   try {
@@ -56,12 +56,12 @@ export async function ensureOrganizationExists() {
     // Revalidate cache
     revalidateOrgCache(orgId);
 
-    return { success: true, reason: "Organization synced", orgId };
+    return { success: true, message: "Organization synced", orgId };
   } catch (error) {
     console.error("Failed to sync organization:", error);
     return {
       success: false,
-      reason: "Sync failed",
+      message: "Sync failed",
       error: error instanceof Error ? error.message : "Unknown error",
     };
   }

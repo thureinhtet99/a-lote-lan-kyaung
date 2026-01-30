@@ -49,18 +49,20 @@ export default function JobListingBadges({
         <Badge
           className={cn(
             className,
-            "border-featured bg-featured/50 text-featured-foreground"
+            "border-featured bg-featured/50 text-featured-foreground",
           )}
         >
           Featured
         </Badge>
       )}
+
       {wage != null && wageInterval != null && (
         <Badge {...badgeType}>
           <Banknote />
           {formatWage(wage, wageInterval)}
         </Badge>
       )}
+
       {(state != null || city != null) && (
         <Badge {...badgeType}>
           <MapPinIcon className="size-10" />

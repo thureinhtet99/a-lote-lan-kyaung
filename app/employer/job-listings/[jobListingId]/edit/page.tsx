@@ -1,11 +1,11 @@
-import LoadingSpinner from "@/components/LoadingSpinner";
+import Loading from "@/components/Loading";
 import { Card, CardContent } from "@/components/ui/card";
 import { db } from "@/drizzle/db";
 import { jobListingsTable } from "@/drizzle/schema";
 import JobListingForm from "@/features/jobListings/components/JobListingForm";
 import { jobListingIdTag } from "@/lib/dataCache";
 import { getCurrentOrg } from "@/services/clerk/lib/getCurrentAuth";
-import { ParamsType } from "@/types/params.type";
+import { ParamsType } from "@/types/index.type";
 import { and, eq } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 import { notFound } from "next/navigation";
@@ -13,7 +13,7 @@ import { Suspense } from "react";
 
 export default function EditJobListingPage(props: ParamsType) {
   return (
-    <Suspense fallback={<LoadingSpinner />}>
+    <Suspense fallback={<Loading />}>
       <SuspendedComponent {...props} />
     </Suspense>
   );
@@ -31,7 +31,7 @@ const SuspendedComponent = async ({ params }: ParamsType) => {
     [jobListingId, orgId],
     {
       tags: [jobListingIdTag(orgId, "jobListings", jobListingId)],
-    }
+    },
   );
 
   const jobListing = await cachedData();
@@ -58,7 +58,7 @@ const getJobListingByOrgIdDb = async (id: string, orgId: string) => {
   return await db.query.jobListingsTable.findFirst({
     where: and(
       eq(jobListingsTable.id, id),
-      eq(jobListingsTable.organizationId, orgId)
+      eq(jobListingsTable.organizationId, orgId),
     ),
   });
 };

@@ -9,7 +9,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { createdAt, id, updatedAt } from "../schemaHelpers";
-import { organizationsTable } from "./organizations";
+import { organizationsTable } from "./organization-schema";
 import { relations } from "drizzle-orm";
 import { jobListingApplicationsTable } from "./jobListingApplications";
 
@@ -21,7 +21,7 @@ export const locationRequirements = ["on-site", "hybrid", "remote"] as const;
 export type LocationRequirementType = (typeof locationRequirements)[number];
 export const locationRequirementEnum = pgEnum(
   "location_requirement",
-  locationRequirements
+  locationRequirements,
 );
 
 export const experienceLevels = ["junior", "mid-level", "senior"] as const;
@@ -62,7 +62,7 @@ export const jobListingsTable = pgTable(
     createdAt,
     updatedAt,
   },
-  (table) => [index().on(table.state)]
+  (table) => [index().on(table.state)],
 );
 
 export const jobListingsRelations = relations(
@@ -73,5 +73,5 @@ export const jobListingsRelations = relations(
       references: [organizationsTable.id],
     }),
     applications: many(jobListingApplicationsTable),
-  })
+  }),
 );

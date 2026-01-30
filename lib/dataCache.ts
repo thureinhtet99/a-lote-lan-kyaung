@@ -1,24 +1,25 @@
 import { CacheType } from "@/types/cache.type";
 
-// Application
-export const jobListingApplicationIdTag = (
-  tag: CacheType,
-  jobListingId: string
-) => {
-  return `${tag}-${jobListingId}` as const;
-};
-
 // JobListing
-export const jobListingGlobalTag = (orgId: string, tag: CacheType) => {
+export const jobListingsTag = (orgId: string, tag: CacheType) => {
   return `${orgId}-${tag}` as const;
 };
 
+// JobListing Id
 export const jobListingIdTag = (
   orgId: string,
   tag: CacheType,
-  jobListingId: string
+  jobListingId: string,
 ) => {
   return `${orgId}-${tag}-${jobListingId}` as const;
+};
+
+// JobListing Application
+export const jobListingApplicationsTag = (
+  tag: CacheType,
+  jobListingId: string,
+) => {
+  return `${tag}-${jobListingId}` as const;
 };
 
 // Resume
@@ -27,7 +28,7 @@ export const userResumeTag = (tag: CacheType, userId: string) => {
 };
 
 // Notification
-export const userNotiTag = (tag: CacheType, userId: string) => {
+export const userNotificationTag = (tag: CacheType, userId: string) => {
   return `${tag}-${userId}`;
 };
 

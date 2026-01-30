@@ -7,7 +7,7 @@ import { revalidateJobListingCache } from "./cache/jobListings";
 
 // Create
 export async function insertJobListingDb(
-  job: typeof jobListingsTable.$inferInsert
+  job: typeof jobListingsTable.$inferInsert,
 ) {
   const [result] = await db.insert(jobListingsTable).values(job).returning({
     id: jobListingsTable.id,
@@ -24,7 +24,7 @@ export async function insertJobListingDb(
 // Update
 export async function updateJobListingDb(
   id: string,
-  job: Partial<typeof jobListingsTable.$inferInsert>
+  job: Partial<typeof jobListingsTable.$inferInsert>,
 ) {
   const [result] = await db
     .update(jobListingsTable)
@@ -43,7 +43,7 @@ export async function updateJobListingDb(
   return result;
 }
 
-// Get most recent job listings
+// Get most recent job listing
 export const getMostRecentJobListingDb = async (orgId: string) => {
   const [result] = await db
     .select({ id: jobListingsTable.id })

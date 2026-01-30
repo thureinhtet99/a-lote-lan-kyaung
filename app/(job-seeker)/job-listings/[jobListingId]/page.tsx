@@ -22,7 +22,6 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { convertSearchParamsToString } from "@/lib/convertSearchParamsToString";
 import { XIcon } from "lucide-react";
-import JobListingBadges from "@/features/jobListings/components/JobListingBadges";
 import MarkdownRenderer from "@/components/markdown/MarkdownRenderer";
 import {
   Popover,
@@ -34,7 +33,7 @@ import { SignUpButton } from "@/services/clerk/component/AuthButtons";
 import { unstable_cache } from "next/cache";
 import {
   idTag,
-  jobListingApplicationIdTag,
+  jobListingApplicationsTag,
   userResumeTag,
 } from "@/lib/dataCache";
 import { differenceInDays } from "date-fns";
@@ -48,6 +47,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { NewJobListingApplicationForm } from "@/features/jobListingApplications/components/NewJobListingApplicationForm";
+import JobListingBadges from "@/features/jobListings/components/job-listing-badges";
 
 export default function JobListingPage({
   params,
@@ -118,7 +118,7 @@ const getJobListingApplication = async ({
   return await db.query.jobListingApplicationsTable.findFirst({
     where: and(
       eq(jobListingApplicationsTable.jobListingId, jobListingId),
-      eq(jobListingApplicationsTable.userId, userId)
+      eq(jobListingApplicationsTable.userId, userId),
     ),
   });
 };
@@ -138,7 +138,7 @@ const JobListingDetails = async ({
     [idTag("jobListings", jobListingId)],
     {
       tags: [idTag("jobListings", jobListingId)],
-    }
+    },
   );
   const jobListing = await cachedData(jobListingId);
   if (jobListing == null) return notFound();
@@ -209,7 +209,7 @@ const getJobListingById = async (id: string) => {
   return await db.query.jobListingsTable.findFirst({
     where: and(
       eq(jobListingsTable.id, id),
-      eq(jobListingsTable.status, "published")
+      eq(jobListingsTable.status, "published"),
     ),
     with: {
       organization: {
@@ -243,12 +243,10 @@ const ApplyButton = async ({ jobListingId }: { jobListingId: string }) => {
   const cachedJobApplication = unstable_cache(
     async (jobListingId: string, userId: string) =>
       getJobListingApplication({ jobListingId, userId }),
-    [jobListingApplicationIdTag("jobListingApplications", jobListingId)],
+    [jobListingApplicationsTag("jobListingApplications", jobListingId)],
     {
-      tags: [
-        jobListingApplicationIdTag("jobListingApplications", jobListingId),
-      ],
-    }
+      tags: [jobListingApplicationsTag("jobListingApplications", jobListingId)],
+    },
   );
 
   const application = await cachedJobApplication(jobListingId, userId);
@@ -274,7 +272,7 @@ const ApplyButton = async ({ jobListingId }: { jobListingId: string }) => {
   const cachedUserResume = unstable_cache(
     async (userId: string) => getUserResume(userId),
     [userResumeTag("userResumes", userId)],
-    { tags: [userResumeTag("userResumes", userId)] }
+    { tags: [userResumeTag("userResumes", userId)] },
   );
 
   const resume = await cachedUserResume(userId);
@@ -299,7 +297,7 @@ const ApplyButton = async ({ jobListingId }: { jobListingId: string }) => {
       <DialogTrigger asChild>
         <Button>Apply</Button>
       </DialogTrigger>
-      <DialogContent className="md:max-w-3xl max-h[calc(100%-2rem)] overflow-hidden flex flex-col">
+      <DialogContent className="md:max-w-3xl max-h-[calc(100%-2rem)] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Application</DialogTitle>
           <DialogDescription>

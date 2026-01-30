@@ -31,7 +31,7 @@ export const formatLocationRequirement = (require: LocationRequirementType) => {
 
     default:
       throw new Error(
-        `Invalid location requirement: ${require satisfies never}`
+        `Invalid location requirement: ${require satisfies never}`,
       );
   }
 };
@@ -75,29 +75,29 @@ export const formatJobListingStatus = (status: JobListingStatusType) => {
   }
 };
 
-export const formatWage = (wage: number, wageIntervel: WageIntervalType) => {
+export const formatWage = (wage: number, wageInterval: WageIntervalType) => {
   const wageFormatter = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "MMK",
     minimumFractionDigits: 0,
-  });
+  }).format(wage);
 
-  switch (wageIntervel) {
+  switch (wageInterval) {
     case "hourly":
-      return `${wageFormatter.format(wage)} / hr`;
+      return `${wageFormatter} / hr`;
     case "monthly":
-      return `${wageFormatter.format(wage)} / mth`;
+      return `${wageFormatter} / month`;
     case "yearly":
-      return wageFormatter.format(wage);
+      return `${wageFormatter} / year`;
 
     default:
-      throw new Error(`Invalid wage intervel: ${wageIntervel satisfies never}`);
+      throw new Error(`Invalid wage interval: ${wageInterval satisfies never}`);
   }
 };
 
 export const formatJobListingLocation = (
   stateAbbreviation: string | null,
-  city: string | null
+  city: string | null,
 ) => {
   if (stateAbbreviation == null && city == null) return "none";
 

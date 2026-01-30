@@ -7,7 +7,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { jobListingsTable } from "./jobListings";
+import { jobListingsTable } from "./job-listing-schema";
 import { usersTable } from "./users";
 import { createdAt, updatedAt } from "../schemaHelpers";
 import { relations } from "drizzle-orm";
@@ -22,7 +22,7 @@ export const applicationStatus = [
 export type ApplicationStatusType = (typeof applicationStatus)[number];
 export const applicationStatusEnum = pgEnum(
   "application_status",
-  applicationStatus
+  applicationStatus,
 );
 export const jobListingApplicationsTable = pgTable(
   "job_listing_applications",
@@ -43,7 +43,7 @@ export const jobListingApplicationsTable = pgTable(
     createdAt,
     updatedAt,
   },
-  (table) => [primaryKey({ columns: [table.jobListingId, table.userId] })]
+  (table) => [primaryKey({ columns: [table.jobListingId, table.userId] })],
 );
 
 export const jobListingApplicationsRelations = relations(
@@ -57,5 +57,5 @@ export const jobListingApplicationsRelations = relations(
       fields: [jobListingApplicationsTable.userId],
       references: [usersTable.id],
     }),
-  })
+  }),
 );

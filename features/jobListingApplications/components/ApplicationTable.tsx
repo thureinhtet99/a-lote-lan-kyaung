@@ -3,7 +3,6 @@
 import { DataTable } from "@/components/data-table/DataTable";
 import { DataTableSortableColumnHeader } from "@/components/data-table/DataTableSortableColumnHeader";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ApplicationType } from "@/types/application.type";
 import { ColumnDef } from "@tanstack/react-table";
 import sortApplicationByStatus from "../lib/utils";
 import { applicationStatus, ApplicationStatusType } from "@/drizzle/schema";
@@ -35,28 +34,93 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import Link from "next/link";
+import { Table } from "@tanstack/react-table";
+import { JobListingApplicationType } from "@/types/index.type";
+import DataTableFacetedFilter from "@/components/data-table/data-table-faceted-filter";
 
 export default function ApplicationTable({
   applications,
   canUpdateRating,
   canUpdateStatus,
+  noResultMessage = "No applications",
+  disableToolbar = false,
 }: {
-  applications: ApplicationType[];
+  applications: JobListingApplicationType[];
   canUpdateRating: boolean;
   canUpdateStatus: boolean;
+  noResultMessage?: ReactNode;
+  disableToolbar?: boolean;
 }) {
   return (
     <DataTable
       columns={getColumns(canUpdateRating, canUpdateStatus)}
       data={applications}
+      noResultMessage={noResultMessage}
+      ToolbarComponent={disableToolbar ? DisabledToolbar : Toolbar}
+      initialFilters={[
+        {
+          id: "status",
+          value: applicationStatus.filter((status) => status !== "denied"),
+        },
+      ]}
     />
+  );
+}
+
+function DisabledToolbar<T>({ table }: { table: Table<T> }) {
+  return <Toolbar table={table} disabled />;
+}
+
+function Toolbar<T>({
+  table,
+  disabled,
+}: {
+  table: Table<T>;
+  disabled?: boolean;
+}) {
+  const hiddenRow = table.getCoreRowModel().rows.length - table.getRowCount();
+
+  return (
+    <div className="flex items-center gap-2">
+      {table.getColumn("status") && (
+        <DataTableFacetedFilter
+          column={table.getColumn("status")}
+          title="Status"
+          disabled={disabled}
+          options={applicationStatus
+            .toSorted(sortApplicationByStatus)
+            .map((status) => ({
+              label: <StatusDetail status={status} />,
+              value: status,
+              key: status,
+            }))}
+        />
+      )}
+      {table.getColumn("rating") && (
+        <DataTableFacetedFilter
+          column={table.getColumn("rating")}
+          title="Rating"
+          disabled={disabled}
+          options={RATING_OPTIONS.map((rating, index) => ({
+            label: <RatingIcon rating={rating} />,
+            value: rating,
+            key: index,
+          }))}
+        />
+      )}
+      {hiddenRow > 0 && (
+        <div className="text-sm text-muted-foreground ml-2">
+          {hiddenRow} {hiddenRow > 1 ? "rows" : "row"} hidden
+        </div>
+      )}
+    </div>
   );
 }
 
 const getColumns = (
   canUpdateRating: boolean,
   canUpdateStatus: boolean,
-): ColumnDef<ApplicationType>[] => {
+): ColumnDef<JobListingApplicationType>[] => {
   return [
     {
       accessorFn: (row) => row.user.first_name,

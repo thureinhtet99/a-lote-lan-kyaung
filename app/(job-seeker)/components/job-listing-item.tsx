@@ -22,13 +22,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { differenceInDays } from "date-fns";
 import { connection } from "next/server";
 import { Badge } from "@/components/ui/badge";
-import JobListingBadges from "@/features/jobListings/components/JobListingBadges";
 import z from "zod";
 import { unstable_cache } from "next/cache";
-import { jobListingGlobalTag } from "@/lib/dataCache";
+import { jobListingsTag } from "@/lib/dataCache";
 import { convertSearchParamsToString } from "@/lib/convertSearchParamsToString";
 import { JobSeekerSearchParamsType } from "@/types/params.type";
 import { getCurrentOrg } from "@/services/clerk/lib/getCurrentAuth";
+import Loading from "@/components/Loading";
+import JobListingBadges from "@/features/jobListings/components/job-listing-badges";
 
 // Search params schema
 const searchParamsSchema = z.object({
@@ -48,18 +49,18 @@ const searchParamsSchema = z.object({
 // Get all job listings
 const getAllJobListings = async (
   searchParams: z.infer<typeof searchParamsSchema>,
-  jobListingId: string | undefined
+  jobListingId: string | undefined,
 ) => {
   const whereConditions: (SQL | undefined)[] = [];
 
   if (searchParams.title)
     whereConditions.push(
-      ilike(jobListingsTable.title, `%${searchParams.title}%`)
+      ilike(jobListingsTable.title, `%${searchParams.title}%`),
     );
 
   if (searchParams.location)
     whereConditions.push(
-      eq(jobListingsTable.locationRequirement, searchParams.location)
+      eq(jobListingsTable.locationRequirement, searchParams.location),
     );
 
   if (searchParams.city)
@@ -70,7 +71,7 @@ const getAllJobListings = async (
 
   if (searchParams.experience_level)
     whereConditions.push(
-      eq(jobListingsTable.experienceLevel, searchParams.experience_level)
+      eq(jobListingsTable.experienceLevel, searchParams.experience_level),
     );
 
   if (searchParams.type)
@@ -78,7 +79,7 @@ const getAllJobListings = async (
 
   if (searchParams.jobIds)
     whereConditions.push(
-      or(...searchParams.jobIds.map((jobId) => eq(jobListingsTable.id, jobId)))
+      or(...searchParams.jobIds.map((jobId) => eq(jobListingsTable.id, jobId))),
     );
 
   return await db.query.jobListingsTable.findMany({
@@ -86,10 +87,10 @@ const getAllJobListings = async (
       jobListingId
         ? and(
             eq(jobListingsTable.status, "published"),
-            eq(jobListingsTable.id, jobListingId)
+            eq(jobListingsTable.id, jobListingId),
           )
         : undefined,
-      and(eq(jobListingsTable.status, "published"), ...whereConditions)
+      and(eq(jobListingsTable.status, "published"), ...whereConditions),
     ),
     with: {
       organization: {
@@ -119,6 +120,63 @@ const DaySincePosting = async ({ postedAt }: { postedAt: Date }) => {
     style: "narrow",
     numeric: "always",
   }).format(daySincePosted, "days");
+};
+
+export default function JobListingItem(props: JobSeekerSearchParamsType) {
+  return (
+    <Suspense fallback={<Loading />}>
+      <SuspendedComponent {...props} />
+    </Suspense>
+  );
+}
+
+const SuspendedComponent = async ({
+  searchParams,
+  params,
+}: JobSeekerSearchParamsType) => {
+  const { orgId } = await getCurrentOrg();
+  const jobListingId = params ? (await params).jobListingId : undefined;
+  const { success, data } = searchParamsSchema.safeParse(await searchParams);
+  const search = success ? data : {};
+
+  // Get all job listings (cached)
+  const cachedData = unstable_cache(
+    async (
+      searchParams: z.infer<typeof searchParamsSchema>,
+      jobListingId: string | undefined,
+    ) => getAllJobListings(searchParams, jobListingId),
+    [jobListingsTag(orgId || "", "jobListings")],
+    {
+      tags: [jobListingsTag(orgId || "", "jobListings")],
+    },
+  );
+
+  const jobListings = await cachedData(search, jobListingId);
+  if (jobListings.length === 0)
+    return (
+      <div className="text-muted-foreground p-4 text-center">
+        No job listings found
+      </div>
+    );
+
+  return (
+    <div className="space-y-4">
+      {jobListings.map((job) => (
+        <Link
+          className="block"
+          key={job.id}
+          href={`${APP_ROUTES.JOB_LISTINGS.HOME}/${
+            job.id
+          }?${convertSearchParamsToString(search)}`}
+        >
+          <JobListingListItem
+            jobListing={job}
+            organization={job.organization}
+          />
+        </Link>
+      ))}
+    </div>
+  );
 };
 
 const JobListingListItem = ({
@@ -154,7 +212,7 @@ const JobListingListItem = ({
     <Card
       className={cn(
         "@container",
-        jobListing.isFeatured && "border-featured bg-featured/20"
+        jobListing.isFeatured && "border-featured bg-featured/20",
       )}
     >
       <CardHeader>
@@ -211,60 +269,5 @@ const JobListingListItem = ({
         />
       </CardContent>
     </Card>
-  );
-};
-
-export default function JobListingItem(props: JobSeekerSearchParamsType) {
-  return (
-    <Suspense>
-      <SuspendedComponent {...props} />
-    </Suspense>
-  );
-}
-
-const SuspendedComponent = async ({
-  searchParams,
-  params,
-}: JobSeekerSearchParamsType) => {
-  const { orgId } = await getCurrentOrg(); // Get from auth/session
-  const jobListingId = params ? (await params).jobListingId : undefined;
-  const { success, data } = searchParamsSchema.safeParse(await searchParams);
-  const search = success ? data : {};
-
-  // Get all job listings (cached)
-  const cachedData = unstable_cache(
-    async (
-      searchParams: z.infer<typeof searchParamsSchema>,
-      jobListingId: string | undefined
-    ) => getAllJobListings(searchParams, jobListingId),
-    ["jobListings"],
-    {
-      tags: [jobListingGlobalTag(orgId || "", "jobListings")],
-    }
-  );
-
-  const jobListings = await cachedData(search, jobListingId);
-  if (jobListings.length === 0)
-    return (
-      <div className="text-muted-foreground p-4">No job listings found</div>
-    );
-
-  return (
-    <div className="space-y-4">
-      {jobListings.map((job) => (
-        <Link
-          className="block"
-          key={job.id}
-          href={`${APP_ROUTES.JOB_LISTINGS.HOME}/${
-            job.id
-          }?${convertSearchParamsToString(search)}`}
-        >
-          <JobListingListItem
-            jobListing={job}
-            organization={job.organization}
-          />
-        </Link>
-      ))}
-    </div>
   );
 };

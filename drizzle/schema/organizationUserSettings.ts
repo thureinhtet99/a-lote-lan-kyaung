@@ -6,7 +6,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
-import { organizationsTable } from "./organizations";
+import { organizationsTable } from "./organization-schema";
 import { createdAt, updatedAt } from "../schemaHelpers";
 import { relations } from "drizzle-orm";
 
@@ -24,7 +24,7 @@ export const organizationUserSettingsTable = pgTable(
     createdAt,
     updatedAt,
   },
-  (table) => [primaryKey({ columns: [table.userId, table.organizationId] })]
+  (table) => [primaryKey({ columns: [table.userId, table.organizationId] })],
 );
 
 export const organizationUserSettingsRelations = relations(
@@ -38,5 +38,5 @@ export const organizationUserSettingsRelations = relations(
       fields: [organizationUserSettingsTable.organizationId],
       references: [organizationsTable.id],
     }),
-  })
+  }),
 );

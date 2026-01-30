@@ -1,4 +1,4 @@
-import JobListingItem from "./_shared/JobListingItem";
+import JobListingItem from "./components/job-listing-item";
 
 export default function JobSeekerHomePage({
   searchParams,

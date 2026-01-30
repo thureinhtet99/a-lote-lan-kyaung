@@ -3,7 +3,7 @@ import { OrganizationList } from "@clerk/nextjs";
 import { Suspense } from "react";
 
 export default async function OrganizationSelectPage(
-  searchParams: SearchParamsType
+  searchParams: SearchParamsType,
 ) {
   return (
     <Suspense>

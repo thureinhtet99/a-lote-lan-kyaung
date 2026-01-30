@@ -1,4 +1,4 @@
-import SettingsSidebar from "@/app/(job-seeker)/_shared/SettingsSidebar";
+import SettingsSidebar from "@/app/(job-seeker)/shared/SettingsSidebar";
 
 export default function NotiSidebar() {
   return <SettingsSidebar />;
