@@ -1,6 +1,6 @@
 "use client";
 
-import { ComponentPropsWithRef, useTransition } from "react";
+import { ComponentPropsWithRef, useTransition, useState } from "react";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
 import LoadingSwap from "./LoadingSwap";
@@ -33,6 +33,8 @@ export default function ActionButton({
   sureDescription?: string;
 }) {
   const router = useRouter();
+  const [open, setOpen] = useState(false);
+
   const [isPending, startTransition] = useTransition();
 
   const performAction = () => {
@@ -48,9 +50,18 @@ export default function ActionButton({
 
   if (areYouSure) {
     return (
-      <AlertDialog>
+      <AlertDialog
+        open={open}
+        onOpenChange={(v) => {
+          if (!isPending) setOpen(v);
+        }}
+      >
         <AlertDialogTrigger asChild>
-          <Button {...props} />
+          <Button
+            className="cursor-pointer"
+            {...props}
+            onClick={() => setOpen(true)}
+          />
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -58,8 +69,21 @@ export default function ActionButton({
             <AlertDialogDescription>{sureDescription}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction disabled={isPending} onClick={performAction}>
+            <AlertDialogCancel
+              className="cursor-pointer"
+              disabled={isPending}
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="cursor-pointer"
+              disabled={isPending}
+              onClick={async () => {
+                performAction();
+                // Do not close dialog while loading
+              }}
+            >
               <LoadingSwap isLoading={isPending}>Yes</LoadingSwap>
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -69,7 +93,12 @@ export default function ActionButton({
   }
 
   return (
-    <Button {...props} disabled={isPending} onClick={performAction}>
+    <Button
+      className="cursor-pointer"
+      {...props}
+      disabled={isPending}
+      onClick={performAction}
+    >
       <LoadingSwap
         isLoading={isPending}
         className="inline-flex items-center gap-2"

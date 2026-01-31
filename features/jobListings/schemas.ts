@@ -13,16 +13,14 @@ export const jobListingSchema = z
     experienceLevel: z.enum(experienceLevels),
     locationRequirement: z.enum(locationRequirements),
     type: z.enum(jobListingTypes),
-    wage: z.number().int().positive().min(1),
+    wage: z
+      .number()
+      .int({ message: "Wage must be a whole number" })
+      .positive({ message: "Wage must be greater than zero" })
+      .min(1, { message: "Wage must be at least 1" }),
     wageInterval: z.enum(wageIntervals),
-    state: z
-      .string()
-      .transform((val) => (val.trim() === "" ? null : val))
-      .nullable(),
-    city: z
-      .string()
-      .transform((val) => (val.trim() === "" ? null : val))
-      .nullable(),
+    state: z.string().nullable(),
+    city: z.string().nullable(),
   })
   .refine(
     (listing) => {
@@ -31,7 +29,7 @@ export const jobListingSchema = z
     {
       message: "Required for non-remote listings",
       path: ["city"],
-    }
+    },
   )
   .refine(
     (listing) => {
@@ -40,7 +38,7 @@ export const jobListingSchema = z
     {
       message: "Required for non-remote listings",
       path: ["state"],
-    }
+    },
   );
 
 // Ai

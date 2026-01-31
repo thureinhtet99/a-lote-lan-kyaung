@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { jobListingSchema } from "../actions/schemas";
+import { jobListingSchema } from "../schemas";
 import z from "zod";
 import {
   Form,
@@ -35,10 +35,10 @@ import {
   formatWageInterval,
 } from "../lib/formatters";
 import { StateSelectItems } from "./StateSelectItems";
-import { MarkdownEditor } from "@/components/markdown/MarkdownEditor";
+import { MarkdownEditor } from "@/components/markdown/markdown-editor";
 import { Button } from "@/components/ui/button";
 import LoadingSwap from "@/components/LoadingSwap";
-import { createJobListing, updateJobListing } from "../actions/actions";
+import { createJobListing, updateJobListing } from "../actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES } from "@/config/appConfig";
@@ -73,8 +73,8 @@ export default function JobListingForm({
       type: "full-time",
       wage: 0,
       wageInterval: "monthly",
-      state: null,
-      city: null,
+      state: "",
+      city: "",
     },
   });
 
@@ -171,6 +171,7 @@ export default function JobListingForm({
                     )}
                   />
                 </div>
+                <FormMessage />
               </FormItem>
             )}
           />

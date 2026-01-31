@@ -10,7 +10,7 @@ import { Suspense } from "react";
 import DropzoneClient from "./_DropzoneClient";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { getCurrentUser } from "@/services/clerk/lib/getCurrentAuth";
+import { getCurrentUser } from "@/services/clerk/lib/get-current-auth";
 import { notFound } from "next/navigation";
 import { db } from "@/drizzle/db";
 import { eq } from "drizzle-orm";
@@ -73,7 +73,7 @@ const getResumeByUserId = async (userId: string) => {
       });
     },
     [userResumeTag("userResumes", userId)],
-    { tags: [userResumeTag("userResumes", userId)] }
+    { tags: [userResumeTag("userResumes", userId)] },
   );
   return await cachedData();
 };

@@ -1,5 +1,5 @@
 import Loading from "@/components/Loading";
-import ApplicationTable from "./ApplicationTable";
+import ApplicationTable from "./application-table";
 
 export default function SkeletonApplicationTable() {
   return (

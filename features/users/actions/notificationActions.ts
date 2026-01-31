@@ -2,11 +2,11 @@
 
 import z from "zod";
 import { userNotificationSettingsSchema } from "./schema";
-import { getCurrentUser } from "@/services/clerk/lib/getCurrentAuth";
+import { getCurrentUser } from "@/services/clerk/lib/get-current-auth";
 import { updateUserNotificationSettingDb } from "../db/userNotiSettings";
 
 export const updateNotificationSetting = async (
-  unsafeData: z.infer<typeof userNotificationSettingsSchema>
+  unsafeData: z.infer<typeof userNotificationSettingsSchema>,
 ) => {
   const { userId } = await getCurrentUser();
   if (userId == null) {

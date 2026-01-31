@@ -14,7 +14,7 @@ export const nextJobListingStatus = (status: JobListingStatusType) => {
 
 export const sortJobListingsByStatus = (
   a: JobListingStatusType,
-  b: JobListingStatusType
+  b: JobListingStatusType,
 ) => {
   return jobListingStatusSortOrder[a] - jobListingStatusSortOrder[b];
 };
@@ -23,4 +23,11 @@ const jobListingStatusSortOrder: Record<JobListingStatusType, number> = {
   published: 0,
   draft: 1,
   delisted: 2,
+};
+
+export const isUUID = (id: string): boolean => {
+  const regex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+  return regex.test(id);
 };

@@ -1,8 +1,9 @@
-import { getCurrentOrg } from "@/services/clerk/lib/getCurrentAuth";
-import { hasPlanFeature } from "@/services/clerk/lib/planFeature";
+import { getCurrentOrg } from "@/services/clerk/lib/get-current-auth";
+import { hasPlanFeature } from "@/services/clerk/lib/plan-feature";
 import { db } from "@/drizzle/db";
 import { and, count, eq } from "drizzle-orm";
 import { jobListingsTable } from "@/drizzle/schema";
+import { getPublishedJobListingCountDb } from "../db/job-listing-db";
 
 export const hasReachedMaxPublishedJobListings = async () => {
   const { orgId } = await getCurrentOrg();
@@ -34,20 +35,6 @@ export const hasReachedMaxFeaturedJobListings = async () => {
   return !canFeature.some(Boolean);
 };
 
-// Get published job listings count
-const getPublishedJobListingCountDb = async (orgId: string) => {
-  const [result] = await db
-    .select({ count: count() })
-    .from(jobListingsTable)
-    .where(
-      and(
-        eq(jobListingsTable.organizationId, orgId),
-        eq(jobListingsTable.status, "published")
-      )
-    );
-  return result?.count ?? 0;
-};
-
 // Get featured job listings count
 const getFeaturedJobListingCountDb = async (orgId: string) => {
   const [result] = await db
@@ -56,8 +43,8 @@ const getFeaturedJobListingCountDb = async (orgId: string) => {
     .where(
       and(
         eq(jobListingsTable.organizationId, orgId),
-        eq(jobListingsTable.isFeatured, true)
-      )
+        eq(jobListingsTable.isFeatured, true),
+      ),
     );
   return result?.count ?? 0;
 };

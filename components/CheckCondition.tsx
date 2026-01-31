@@ -1,6 +1,6 @@
-import { CheckConditionType } from "@/types/check-condition.type";
 import { Suspense } from "react";
 import Loading from "./Loading";
+import { CheckConditionType } from "@/types/index.type";
 
 export default function CheckCondition({
   condition,

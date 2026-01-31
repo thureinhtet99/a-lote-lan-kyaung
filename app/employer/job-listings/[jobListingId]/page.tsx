@@ -3,56 +3,34 @@ import CheckCondition from "@/components/CheckCondition";
 import MarkdownRenderer from "@/components/markdown/MarkdownRenderer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  jobListingApplicationsTable,
-  jobListingsTable,
-  JobListingStatusType,
-} from "@/drizzle/schema";
-import {
-  deleteJobListing,
-  toggleJobListingFeaturedStatus,
-  toggleJobListingStatus,
-} from "@/features/jobListings/actions/actions";
+import { deleteJobListing } from "@/features/jobListings/actions";
 import { formatJobListingStatus } from "@/features/jobListings/lib/formatters";
-import {
-  hasReachedMaxFeaturedJobListings,
-  hasReachedMaxPublishedJobListings,
-} from "@/features/jobListings/lib/planFeatureHelpers";
-import { nextJobListingStatus } from "@/features/jobListings/lib/utils";
+import { isUUID } from "@/features/jobListings/lib/utils";
 import { APP_ROUTES } from "@/config/appConfig";
 import { jobListingApplicationsTag, jobListingIdTag } from "@/lib/dataCache";
-import { getCurrentOrg } from "@/services/clerk/lib/getCurrentAuth";
+import { getCurrentOrg } from "@/services/clerk/lib/get-current-auth";
 import { hasOrgUserPermission } from "@/services/clerk/lib/org-user-permission";
-import {
-  EditIcon,
-  EyeIcon,
-  EyeOffIcon,
-  StarIcon,
-  StarOffIcon,
-  Trash2Icon,
-} from "lucide-react";
+import { EditIcon, Trash2Icon } from "lucide-react";
 import { unstable_cache } from "next/cache";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ReactNode, Suspense } from "react";
-import { db } from "@/drizzle/db";
-import { and, eq } from "drizzle-orm";
+import { Suspense } from "react";
 import { Separator } from "@/components/ui/separator";
-import ApplicationTable from "@/features/jobListingApplications/components/ApplicationTable";
+import ApplicationTable from "@/features/jobListingApplications/components/application-table";
 import { MarkdownPartial } from "@/components/markdown/MarkdownPartial";
 import JobListingBadges from "@/features/jobListings/components/job-listing-badges";
-import Loading from "@/components/Loading";
 import { ParamsType } from "@/types/index.type";
 import SkeletonApplicationTable from "@/features/jobListingApplications/components/skeleton-application-table";
+import EmployerLoading from "../../loading";
+import { getJobListingByIdByOrgIdDb } from "@/features/jobListings/db/job-listing-db";
+import StatusToggleButton from "../../components/status-toggle-button";
+import FeatureToggleButton from "../../components/feature-toggle-button";
+import Loading from "@/components/Loading";
+import { getJobListingApplicationsDb } from "@/features/jobListingApplications/db/job-listing-application-db";
 
 export default function JobListingByIdPage(props: ParamsType) {
   return (
-    <Suspense fallback={<Loading />}>
+    <Suspense fallback={<EmployerLoading />}>
       <SuspendedComponent {...props} />
     </Suspense>
   );
@@ -60,13 +38,15 @@ export default function JobListingByIdPage(props: ParamsType) {
 
 const SuspendedComponent = async ({ params }: ParamsType) => {
   const { jobListingId } = await params;
+  if (!isUUID(jobListingId)) notFound();
+
   const { orgId } = await getCurrentOrg();
   if (orgId == null) return notFound();
 
-  // Get job listing by organization id (cached)
+  // Get job listing by id by organization id (cached)
   const cachedData = unstable_cache(
-    async () => await getJobListingByOrgIdDb(jobListingId, orgId),
-    [jobListingId, orgId],
+    async () => await getJobListingByIdByOrgIdDb(jobListingId, orgId),
+    [jobListingIdTag(orgId, "jobListings", jobListingId)],
     {
       tags: [jobListingIdTag(orgId, "jobListings", jobListingId)],
     },
@@ -76,9 +56,8 @@ const SuspendedComponent = async ({ params }: ParamsType) => {
   if (jobListing == null) return notFound();
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto p-4 @container">
+    <div className="space-y-8 max-w-8xl mx-auto p-4 @container">
       <div className="flex items-center justify-between gap-4 @max-4xl:flex-col @max-4xl:items-start">
-        {/* Left */}
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
             {jobListing.title}
@@ -91,7 +70,6 @@ const SuspendedComponent = async ({ params }: ParamsType) => {
           </div>
         </div>
 
-        {/* Right */}
         <div className="flex items-center gap-2 empty:-mt-4">
           {/* Edit button */}
           <CheckCondition
@@ -111,7 +89,7 @@ const SuspendedComponent = async ({ params }: ParamsType) => {
           <Suspense
             fallback={
               <Button variant="outline" disabled>
-                Loading...
+                <Loading />
               </Button>
             }
           >
@@ -136,7 +114,6 @@ const SuspendedComponent = async ({ params }: ParamsType) => {
               areYouSure
             >
               <Trash2Icon className="size-4" />
-              Delete
             </ActionButton>
           </CheckCondition>
         </div>
@@ -148,200 +125,24 @@ const SuspendedComponent = async ({ params }: ParamsType) => {
           <MarkdownRenderer source={jobListing.description ?? ""} />
         }
         mainMarkdown={
-          <MarkdownRenderer
-            className="prose-sm"
-            source={jobListing.description ?? ""}
-          />
+          <MarkdownRenderer source={jobListing.description ?? ""} />
         }
-        dialogTitle="Description"
       />
 
       <Separator />
 
-      <div className="space-y-6">
-        <h2 className="text-xl font-semibold">Applications</h2>
-        <Suspense fallback={<SkeletonApplicationTable />}>
-          <Applications jobListingId={jobListingId} />
-        </Suspense>
-      </div>
+      <h2 className="text-xl font-semibold">Applications</h2>
+      <Suspense fallback={<SkeletonApplicationTable />}>
+        <Applications jobListingId={jobListingId} />
+      </Suspense>
     </div>
   );
-};
-
-// Get job listing by org id
-const getJobListingByOrgIdDb = async (id: string, orgId: string) => {
-  return await db.query.jobListingsTable.findFirst({
-    where: and(
-      eq(jobListingsTable.id, id),
-      eq(jobListingsTable.organizationId, orgId),
-    ),
-  });
-};
-
-const StatusToggleButton = ({
-  status,
-  id,
-}: {
-  status: JobListingStatusType;
-  id: string;
-}) => {
-  const nextStatus = nextJobListingStatus(status);
-  const shouldShowAlert =
-    nextStatus === "published" || nextStatus === "delisted";
-  const alertDescription =
-    nextStatus === "published"
-      ? "This will immediately show this job listing to all users."
-      : "This will immediately hide this job listing from all users.";
-
-  return (
-    <CheckCondition
-      condition={() => hasOrgUserPermission("job_listing:change_status")}
-    >
-      {nextStatus === "published" ? (
-        <CheckCondition
-          condition={async () => {
-            const isMax = await hasReachedMaxPublishedJobListings();
-            return !isMax;
-          }}
-          otherwise={
-            <UpgradePopOver
-              buttonText={statusToggleButtonText(status)}
-              popOverText="You must upgrade your plan to publish more job listings"
-            />
-          }
-        >
-          <ActionButton
-            variant="outline"
-            action={toggleJobListingStatus.bind(null, id)}
-            areYouSure={shouldShowAlert}
-            sureDescription={alertDescription}
-          >
-            {statusToggleButtonText(status)}
-          </ActionButton>
-        </CheckCondition>
-      ) : (
-        <ActionButton
-          variant="outline"
-          action={toggleJobListingStatus.bind(null, id)}
-          areYouSure={shouldShowAlert}
-          sureDescription={alertDescription}
-        >
-          {statusToggleButtonText(status)}
-        </ActionButton>
-      )}
-    </CheckCondition>
-  );
-};
-
-const UpgradePopOver = ({
-  buttonText,
-  popOverText,
-}: {
-  buttonText: ReactNode;
-  popOverText: ReactNode;
-}) => {
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="outline">{buttonText}</Button>
-      </PopoverTrigger>
-      <PopoverContent className="flex flex-col gap-2">
-        {popOverText}
-        <Button asChild>
-          <Link href={APP_ROUTES.EMPLOYER.PRICING}>Upgrade Plan</Link>
-        </Button>
-      </PopoverContent>
-    </Popover>
-  );
-};
-
-const featuredToggleButtonText = (isFeatured: boolean) => {
-  if (isFeatured) {
-    return (
-      <>
-        <StarOffIcon className="size-4" />
-        Unfeature
-      </>
-    );
-  }
-
-  return (
-    <>
-      <StarIcon className="size-4" />
-      Feature
-    </>
-  );
-};
-
-const FeatureToggleButton = ({
-  isFeatured,
-  id,
-}: {
-  isFeatured: boolean;
-  id: string;
-}) => {
-  return (
-    <CheckCondition
-      condition={() => hasOrgUserPermission("job_listing:change_status")}
-    >
-      {isFeatured ? (
-        <ActionButton
-          variant="outline"
-          action={toggleJobListingFeaturedStatus.bind(null, id)}
-        >
-          {featuredToggleButtonText(isFeatured)}
-        </ActionButton>
-      ) : (
-        <CheckCondition
-          condition={async () => {
-            const isMax = await hasReachedMaxFeaturedJobListings();
-            return !isMax;
-          }}
-          otherwise={
-            <UpgradePopOver
-              buttonText={featuredToggleButtonText(isFeatured)}
-              popOverText="You must upgrade your plan to feature more job listings"
-            />
-          }
-        >
-          <ActionButton
-            variant="outline"
-            action={toggleJobListingFeaturedStatus.bind(null, id)}
-          >
-            {featuredToggleButtonText(isFeatured)}
-          </ActionButton>
-        </CheckCondition>
-      )}
-    </CheckCondition>
-  );
-};
-
-const statusToggleButtonText = (status: JobListingStatusType) => {
-  switch (status) {
-    case "delisted":
-    case "draft":
-      return (
-        <>
-          <EyeIcon className="size-4" />
-          Publish
-        </>
-      );
-    case "published":
-      return (
-        <>
-          <EyeOffIcon className="size-4" />
-          Delist
-        </>
-      );
-    default:
-      throw new Error(`Invalid status: ${status satisfies never}`);
-  }
 };
 
 const Applications = async ({ jobListingId }: { jobListingId: string }) => {
   // Fetch applications by jobListingId from db (cached)
   const cachedData = unstable_cache(
-    async () => await getJobListingApplications(jobListingId),
+    async () => await getJobListingApplicationsDb(jobListingId),
     [jobListingApplicationsTag("jobListingApplications", jobListingId)],
     {
       tags: [jobListingApplicationsTag("jobListingApplications", jobListingId)],
@@ -377,37 +178,4 @@ const Applications = async ({ jobListingId }: { jobListingId: string }) => {
       )}
     />
   );
-};
-
-const getJobListingApplications = async (jobListingId: string) => {
-  const result = await db.query.jobListingApplicationsTable.findMany({
-    where: eq(jobListingApplicationsTable.jobListingId, jobListingId),
-    columns: {
-      jobListingId: true,
-      coverLetter: true,
-      rating: true,
-      status: true,
-      createdAt: true,
-    },
-    with: {
-      user: {
-        columns: {
-          id: true,
-          first_name: true,
-          last_name: true,
-          image: true,
-        },
-        with: {
-          resume: {
-            columns: {
-              resumeFileUrl: true,
-              aiSummary: true,
-            },
-          },
-        },
-      },
-    },
-  });
-
-  return result;
 };

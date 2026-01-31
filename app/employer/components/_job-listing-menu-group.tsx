@@ -19,6 +19,7 @@ import { formatJobListingStatus } from "@/features/jobListings/lib/formatters";
 import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 import { APP_ROUTES } from "@/config/appConfig";
+import { Badge } from "@/components/ui/badge";
 
 type JobListingMenuGroupType = Pick<
   typeof jobListingsTable.$inferInsert,
@@ -53,7 +54,7 @@ export default function JobListingMenuGroup({
             </SidebarMenuButton>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <SidebarMenuSub>
+            <SidebarMenuSub className="p-1">
               {jobListings.map((job) => (
                 <JobListingMenuItem key={job.id} {...job} />
               ))}
@@ -73,16 +74,20 @@ const JobListingMenuItem = ({
   const { jobListingId } = useParams();
 
   return (
-    <SidebarMenuSubItem>
-      <SidebarMenuSubButton isActive={jobListingId === id} asChild>
-        <Link href={`${APP_ROUTES.EMPLOYER.JOB_LISTINGS}/${id}`}>
+    <SidebarMenuSubItem className="flex items-center gap-2">
+      <Link href={`${APP_ROUTES.EMPLOYER.JOB_LISTINGS}/${id}`}>
+        <SidebarMenuSubButton
+          isActive={jobListingId === id}
+          asChild
+          className="truncate"
+        >
           <span className="truncate">{title}</span>
-        </Link>
-      </SidebarMenuSubButton>
+        </SidebarMenuSubButton>
+      </Link>
       {applications > 0 && (
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+        <Badge variant="outline" className="text-xs text-muted-foreground">
           {applications}
-        </div>
+        </Badge>
       )}
     </SidebarMenuSubItem>
   );

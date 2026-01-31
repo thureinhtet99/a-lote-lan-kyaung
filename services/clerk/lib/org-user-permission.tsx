@@ -1,4 +1,4 @@
-import { UserPermissionType } from "@/types/user-permission.type";
+import { UserPermissionType } from "@/types/index.type";
 import { auth } from "@clerk/nextjs/server";
 
 export async function hasOrgUserPermission(permission: UserPermissionType) {

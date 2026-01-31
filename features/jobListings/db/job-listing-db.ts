@@ -2,8 +2,8 @@
 
 import { db } from "@/drizzle/db";
 import { jobListingsTable } from "@/drizzle/schema";
-import { eq } from "drizzle-orm";
-import { revalidateJobListingCache } from "./cache/jobListings";
+import { and, count, desc, eq } from "drizzle-orm";
+import { revalidateJobListingCache } from "./cache/job-listing-cache";
 
 // Create
 export async function insertJobListingDb(
@@ -43,13 +43,34 @@ export async function updateJobListingDb(
   return result;
 }
 
+// Get all job listings
+export const getAllJobListingsDb = async (orgId: string) => {
+  const result = await db.query.jobListingsTable.findMany({
+    where: eq(jobListingsTable.organizationId, orgId),
+  });
+
+  return result;
+};
+
+// Get job listing by org id
+export const getJobListingByIdByOrgIdDb = async (id: string, orgId: string) => {
+  const result = await db.query.jobListingsTable.findFirst({
+    where: and(
+      eq(jobListingsTable.id, id),
+      eq(jobListingsTable.organizationId, orgId),
+    ),
+  });
+
+  return result;
+};
+
 // Get most recent job listing
 export const getMostRecentJobListingDb = async (orgId: string) => {
-  const [result] = await db
-    .select({ id: jobListingsTable.id })
-    .from(jobListingsTable)
-    .where(eq(jobListingsTable.organizationId, orgId))
-    .orderBy(jobListingsTable.createdAt);
+  const result = await db.query.jobListingsTable.findFirst({
+    where: eq(jobListingsTable.organizationId, orgId),
+    orderBy: desc(jobListingsTable.createdAt),
+    columns: { id: true },
+  });
 
   return result;
 };
@@ -81,3 +102,17 @@ export async function deleteJobListingDb(id: string) {
 
   return result;
 }
+
+// Get published job listings count
+export const getPublishedJobListingCountDb = async (orgId: string) => {
+  const [result] = await db
+    .select({ count: count() })
+    .from(jobListingsTable)
+    .where(
+      and(
+        eq(jobListingsTable.organizationId, orgId),
+        eq(jobListingsTable.status, "published"),
+      ),
+    );
+  return result?.count ?? 0;
+};

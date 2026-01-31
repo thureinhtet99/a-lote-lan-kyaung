@@ -5,11 +5,11 @@ import { newJobListingApplicationSchema } from "./schema";
 import {
   getCurrentOrg,
   getCurrentUser,
-} from "@/services/clerk/lib/getCurrentAuth";
+} from "@/services/clerk/lib/get-current-auth";
 import {
   insertJobListingApplicationDb,
   updateJobListingApplicationDb,
-} from "../db/jobListingApplications";
+} from "../db/job-listing-application-db";
 import { db } from "@/drizzle/db";
 import { and, eq } from "drizzle-orm";
 import {

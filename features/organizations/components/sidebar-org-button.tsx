@@ -1,12 +1,21 @@
 import { Suspense } from "react";
-import SidebarOrgButtonClient from "./_SidebarOrgButtonClient";
+import SidebarOrgButtonClient from "./_sidebar-org-button-client";
 import {
   getCurrentOrg,
   getCurrentUser,
-} from "@/services/clerk/lib/getCurrentAuth";
+} from "@/services/clerk/lib/get-current-auth";
 import { SignOutButton } from "@/services/clerk/component/AuthButtons";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { LogOutIcon } from "lucide-react";
+import Loading from "@/components/Loading";
+
+export default function SidebarOrgButton() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <SuspendedComponent />
+    </Suspense>
+  );
+}
 
 const SuspendedComponent = async () => {
   const [{ user }, { organization }] = await Promise.all([
@@ -26,11 +35,3 @@ const SuspendedComponent = async () => {
 
   return <SidebarOrgButtonClient user={user} organization={organization} />;
 };
-
-export default function SidebarOrgButton() {
-  return (
-    <Suspense>
-      <SuspendedComponent />
-    </Suspense>
-  );
-}

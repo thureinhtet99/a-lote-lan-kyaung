@@ -123,15 +123,17 @@ const getColumns = (
 ): ColumnDef<JobListingApplicationType>[] => {
   return [
     {
-      accessorFn: (row) => row.user.first_name,
+      accessorFn: (row) => row.user.first_name + row.user.last_name,
       header: "Name",
       cell: ({ row }) => {
         const user = row.original.user;
-        const nameInitial = user.first_name
-          .split(" ")
-          .slice(0, 2)
-          .map((name) => name.charAt(0).toUpperCase())
-          .join("");
+        const nameInitial =
+          user.first_name +
+          user.last_name
+            .split(" ")
+            .slice(0, 2)
+            .map((name) => name.charAt(0).toUpperCase())
+            .join("");
 
         return (
           <div className="flex items-center gap-2">
@@ -197,7 +199,13 @@ const getColumns = (
       header: ({ column }) => (
         <DataTableSortableColumnHeader column={column} title="Applied On" />
       ),
-      cell: ({ row }) => new Date(row.original.createdAt).toLocaleDateString(),
+      cell: ({ row }) => {
+        return (
+          <div className="flex items-center justify-center">
+            {new Date(row.original.createdAt).toLocaleDateString()}
+          </div>
+        );
+      },
     },
 
     {
@@ -236,37 +244,39 @@ const StatusCell = ({
   if (!canUpdate) return <StatusDetail status={optimisticStatus} />;
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          className={cn("-ml-3", isPending && "opacity-50")}
-        >
-          <StatusDetail status={optimisticStatus} />
-          <ChevronDownIcon />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        {applicationStatus.toSorted(sortApplicationByStatus).map((status) => (
-          <DropdownMenuItem
-            key={status}
-            onClick={() => {
-              startTransition(async () => {
-                setOptimisticStatus(status);
-                const response = await updateJobListingApplicationStatus(
-                  { jobListingId, userId },
-                  status,
-                );
-
-                if (response?.error) toast.error(response.message);
-              });
-            }}
+    <div className="flex items-center justify-center">
+      <DropdownMenu>
+        <DropdownMenuTrigger className="min-w-40" asChild>
+          <Button
+            variant="ghost"
+            className={cn("-ml-3", isPending && "opacity-50")}
           >
-            <StatusDetail status={status} />
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+            <StatusDetail status={optimisticStatus} />
+            <ChevronDownIcon />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          {applicationStatus.toSorted(sortApplicationByStatus).map((status) => (
+            <DropdownMenuItem
+              key={status}
+              onClick={() => {
+                startTransition(async () => {
+                  setOptimisticStatus(status);
+                  const response = await updateJobListingApplicationStatus(
+                    { jobListingId, userId },
+                    status,
+                  );
+
+                  if (response?.error) toast.error(response.message);
+                });
+              }}
+            >
+              <StatusDetail status={status} />
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 };
 
@@ -287,37 +297,39 @@ const RatingCell = ({
   if (!canUpdate) return <RatingIcon rating={optimisticRating} />;
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          className={cn("-ml-3", isPending && "opacity-50")}
-        >
-          <RatingIcon rating={optimisticRating} />
-          <ChevronDownIcon />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        {RATING_OPTIONS.map((rating) => (
-          <DropdownMenuItem
-            key={rating}
-            onClick={() => {
-              startTransition(async () => {
-                setOptimisticRating(rating);
-                const response = await updateJobListingApplicationRating(
-                  { jobListingId, userId },
-                  rating,
-                );
-
-                if (response?.error) toast.error(response.message);
-              });
-            }}
+    <div className="flex items-center justify-center">
+      <DropdownMenu>
+        <DropdownMenuTrigger className="min-w-40" asChild>
+          <Button
+            variant="ghost"
+            className={cn("-ml-3", isPending && "opacity-50")}
           >
-            <RatingIcon rating={rating} />
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+            <RatingIcon rating={optimisticRating} />
+            <ChevronDownIcon />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          {RATING_OPTIONS.map((rating) => (
+            <DropdownMenuItem
+              key={rating}
+              onClick={() => {
+                startTransition(async () => {
+                  setOptimisticRating(rating);
+                  const response = await updateJobListingApplicationRating(
+                    { jobListingId, userId },
+                    rating,
+                  );
+
+                  if (response?.error) toast.error(response.message);
+                });
+              }}
+            >
+              <RatingIcon rating={rating} />
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 };
 
@@ -338,35 +350,37 @@ const ActionCell = ({
 
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon">
-            <span className="sr-only">Open Menu</span>
-            <MoreHorizontalIcon className="size-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          {resumeMarkDown != null || resumeUrl != null ? (
-            <DropdownMenuItem onClick={() => setOpenModal("resume")}>
-              View Resume
-            </DropdownMenuItem>
-          ) : (
-            <DropdownMenuLabel className="text-muted-foreground">
-              No Resume
-            </DropdownMenuLabel>
-          )}
+      <div className="flex items-center justify-end">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <span className="sr-only">Open Menu</span>
+              <MoreHorizontalIcon className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            {resumeMarkDown != null || resumeUrl != null ? (
+              <DropdownMenuItem onClick={() => setOpenModal("resume")}>
+                View Resume
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuLabel className="text-muted-foreground">
+                No Resume
+              </DropdownMenuLabel>
+            )}
 
-          {coverLetterMarkDown ? (
-            <DropdownMenuItem onClick={() => setOpenModal("cover-letter")}>
-              View Cover Letter
-            </DropdownMenuItem>
-          ) : (
-            <DropdownMenuLabel className="text-muted-foreground">
-              No Cover Letter
-            </DropdownMenuLabel>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+            {coverLetterMarkDown ? (
+              <DropdownMenuItem onClick={() => setOpenModal("cover-letter")}>
+                View Cover Letter
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuLabel className="text-muted-foreground">
+                No Cover Letter
+              </DropdownMenuLabel>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
       {coverLetterMarkDown && (
         <Dialog

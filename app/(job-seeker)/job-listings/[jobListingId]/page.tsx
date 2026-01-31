@@ -28,7 +28,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { getCurrentUser } from "@/services/clerk/lib/getCurrentAuth";
+import { getCurrentUser } from "@/services/clerk/lib/get-current-auth";
 import { SignUpButton } from "@/services/clerk/component/AuthButtons";
 import { unstable_cache } from "next/cache";
 import {

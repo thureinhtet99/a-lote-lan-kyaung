@@ -27,7 +27,7 @@ import { unstable_cache } from "next/cache";
 import { jobListingsTag } from "@/lib/dataCache";
 import { convertSearchParamsToString } from "@/lib/convertSearchParamsToString";
 import { JobSeekerSearchParamsType } from "@/types/params.type";
-import { getCurrentOrg } from "@/services/clerk/lib/getCurrentAuth";
+import { getCurrentOrg } from "@/services/clerk/lib/get-current-auth";
 import Loading from "@/components/Loading";
 import JobListingBadges from "@/features/jobListings/components/job-listing-badges";
 

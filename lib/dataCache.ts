@@ -1,4 +1,4 @@
-import { CacheType } from "@/types/cache.type";
+import { CacheType } from "@/types/index.type";
 
 // JobListing
 export const jobListingsTag = (orgId: string, tag: CacheType) => {

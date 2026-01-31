@@ -1,6 +1,6 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
-import { getCurrentUser } from "../clerk/lib/getCurrentAuth";
+import { getCurrentUser } from "../clerk/lib/get-current-auth";
 import { upsertUserResumeDb } from "@/features/users/db/userResume";
 import { db } from "@/drizzle/db";
 import { eq } from "drizzle-orm";

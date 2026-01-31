@@ -9,8 +9,8 @@ import { ReactNode, Suspense } from "react";
 import Link from "next/link";
 import AppSidebar from "@/components/sidebar/AppSidebar";
 import SidebarNavMenuGroup from "@/components/sidebar/SidebarNavMenuGroup";
-import SidebarOrgButton from "@/features/organizations/components/SidebarOrgButton";
-import { getCurrentOrg } from "@/services/clerk/lib/getCurrentAuth";
+import SidebarOrgButton from "@/features/organizations/components/sidebar-org-button";
+import { getCurrentOrg } from "@/services/clerk/lib/get-current-auth";
 import { APP_ROUTES } from "@/config/appConfig";
 import CheckCondition from "@/components/CheckCondition";
 import { hasOrgUserPermission } from "@/services/clerk/lib/org-user-permission";
@@ -18,16 +18,11 @@ import OrganizationSyncWrapper from "@/services/clerk/component/OrganizationSync
 import { unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
 import { sortJobListingsByStatus } from "@/features/jobListings/lib/utils";
-import {
-  jobListingApplicationsTable,
-  jobListingsTable,
-  JobListingStatusType,
-} from "@/drizzle/schema";
+import { JobListingStatusType } from "@/drizzle/schema";
 import JobListingMenuGroup from "./components/_job-listing-menu-group";
 import { jobListingsTag } from "@/lib/dataCache";
-import { db } from "@/drizzle/db";
-import { count, desc, eq } from "drizzle-orm";
 import Loading from "@/components/Loading";
+import { getJobListingWithApplicationsDb } from "@/features/jobListingApplications/db/job-listing-application-db";
 
 export default function EmployerLayout({ children }: { children: ReactNode }) {
   return (
@@ -45,7 +40,7 @@ const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
 
   // Get all job listings with applications(cached)
   const cachedData = unstable_cache(
-    async () => await getJobListingsApplicationsDb(orgId),
+    async () => await getJobListingWithApplicationsDb(orgId),
     [orgId],
     {
       tags: [jobListingsTag(orgId, "jobListings")],
@@ -59,7 +54,12 @@ const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
       content={
         <>
           <SidebarGroup>
-            <SidebarGroupLabel>Job listings</SidebarGroupLabel>
+            <SidebarGroupLabel className="mb-4">
+              <Link href={`${APP_ROUTES.EMPLOYER.JOB_LISTINGS_NEW}`}>
+                Create job listings here
+              </Link>
+            </SidebarGroupLabel>
+
             {jobListings.length > 0 && (
               <CheckCondition
                 condition={() => hasOrgUserPermission("job_listing:create")}
@@ -128,25 +128,4 @@ const JobListingMenu = async ({
         jobListings={jobListings}
       />
     ));
-};
-
-// Get all job listings with applications
-const getJobListingsApplicationsDb = async (orgId: string) => {
-  const result = await db
-    .select({
-      id: jobListingsTable.id,
-      title: jobListingsTable.title,
-      status: jobListingsTable.status,
-      applications: count(jobListingApplicationsTable.userId),
-    })
-    .from(jobListingsTable)
-    .where(eq(jobListingsTable.organizationId, orgId))
-    .leftJoin(
-      jobListingApplicationsTable,
-      eq(jobListingsTable.id, jobListingApplicationsTable.jobListingId),
-    )
-    .groupBy(jobListingApplicationsTable.jobListingId, jobListingsTable.id)
-    .orderBy(desc(jobListingsTable.createdAt));
-
-  return result;
 };

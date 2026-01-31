@@ -3,16 +3,16 @@
 import {
   hasReachedMaxFeaturedJobListings,
   hasReachedMaxPublishedJobListings,
-} from "@/features/jobListings/lib/planFeatureHelpers";
+} from "@/features/jobListings/lib/plan-feature-helpers";
 import { nextJobListingStatus } from "@/features/jobListings/lib/utils";
 import z from "zod";
 import { jobListingSchema } from "./schemas";
-import { getCurrentOrg } from "@/services/clerk/lib/getCurrentAuth";
+import { getCurrentOrg } from "@/services/clerk/lib/get-current-auth";
 import {
   deleteJobListingDb,
   insertJobListingDb,
   updateJobListingDb,
-} from "../db/job-listing-db";
+} from "./db/job-listing-db";
 import { hasOrgUserPermission } from "@/services/clerk/lib/org-user-permission";
 import { jobListingsTable } from "@/drizzle/schema";
 import { db } from "@/drizzle/db";

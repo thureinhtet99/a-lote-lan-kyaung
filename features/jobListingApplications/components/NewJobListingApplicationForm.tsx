@@ -9,7 +9,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { MarkdownEditor } from "@/components/markdown/MarkdownEditor";
+import { MarkdownEditor } from "@/components/markdown/markdown-editor";
 import { Button } from "@/components/ui/button";
 import LoadingSwap from "@/components/LoadingSwap";
 import z from "zod";
@@ -30,7 +30,7 @@ export function NewJobListingApplicationForm({
   });
 
   const onSubmit = async (
-    data: z.infer<typeof newJobListingApplicationSchema>
+    data: z.infer<typeof newJobListingApplicationSchema>,
   ) => {
     const result = await createJobListingApplication(jobListingId, data);
     if (result.error) {

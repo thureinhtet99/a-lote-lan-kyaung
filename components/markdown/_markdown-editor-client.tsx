@@ -21,6 +21,7 @@ import {
 import { Ref } from "react";
 import { markdownClassNames } from "./MarkdownRenderer";
 import { useDarkMode } from "@/hooks/use-darkmode";
+import "@mdxeditor/editor/style.css";
 
 export default function InternalMarkdownEditor({
   ref,

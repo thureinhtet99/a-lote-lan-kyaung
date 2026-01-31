@@ -1,4 +1,4 @@
-import { jobListingsTag, idTag, jobListingIdTag } from "@/lib/dataCache";
+import { jobListingsTag, jobListingIdTag } from "@/lib/dataCache";
 import { revalidateTag } from "next/cache";
 
 export function revalidateJobListingCache({
@@ -11,12 +11,10 @@ export function revalidateJobListingCache({
   try {
     revalidateTag(jobListingsTag(organizationId, "jobListings"));
 
-    if (jobListingId) {
-      revalidateTag(idTag("jobListings", jobListingId));
+    if (jobListingId)
       revalidateTag(
         jobListingIdTag(organizationId, "jobListings", jobListingId),
       );
-    }
   } catch (error) {
     console.error("Failed to revalidate job listing cache: ", error);
   }
