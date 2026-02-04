@@ -25,7 +25,7 @@ import EmployerLoading from "../../loading";
 import { getJobListingByIdByOrgIdDb } from "@/features/jobListings/db/job-listing-db";
 import StatusToggleButton from "../../components/status-toggle-button";
 import FeatureToggleButton from "../../components/feature-toggle-button";
-import Loading from "@/components/Loading";
+import Loading from "@/components/loading";
 import { getJobListingApplicationsDb } from "@/features/jobListingApplications/db/job-listing-application-db";
 
 export default function JobListingByIdPage(props: ParamsType) {

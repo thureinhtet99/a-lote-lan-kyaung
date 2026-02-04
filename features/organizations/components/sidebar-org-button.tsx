@@ -4,7 +4,7 @@ import { getCurrentOrg, getCurrentUser } from "@/lib/auth-helpers";
 import { SignOutButton } from "@/components/auth/AuthButtons";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { LogOutIcon } from "lucide-react";
-import Loading from "@/components/Loading";
+import Loading from "@/components/loading";
 
 export default function SidebarOrgButton() {
   return (

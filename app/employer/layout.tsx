@@ -21,7 +21,7 @@ import { sortJobListingsByStatus } from "@/features/jobListings/lib/utils";
 import { JobListingStatusType } from "@/drizzle/schema";
 import JobListingMenuGroup from "./components/_job-listing-menu-group";
 import { jobListingsTag } from "@/lib/dataCache";
-import Loading from "@/components/Loading";
+import Loading from "@/components/loading";
 import { getJobListingWithApplicationsDb } from "@/features/jobListingApplications/db/job-listing-application-db";
 
 export default function EmployerLayout({ children }: { children: ReactNode }) {

@@ -26,7 +26,7 @@ import z from "zod";
 import { unstable_cache } from "next/cache";
 import { jobListingsTag } from "@/lib/dataCache";
 import { convertSearchParamsToString } from "@/lib/convertSearchParamsToString";
-import Loading from "@/components/Loading";
+import Loading from "@/components/loading";
 import JobListingBadges from "@/features/jobListings/components/job-listing-badges";
 import { getCurrentOrg } from "@/lib/auth-helpers";
 import { JobSeekerSearchParamsType } from "@/types/index.type";
