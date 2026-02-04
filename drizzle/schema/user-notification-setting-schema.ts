@@ -1,6 +1,6 @@
 import { boolean, pgTable, varchar } from "drizzle-orm/pg-core";
-import { usersTable } from "./users";
-import { createdAt, updatedAt } from "../schemaHelpers";
+import { usersTable } from "./user-schema";
+import { createdAt, updatedAt } from "../schema-helpers";
 import { relations } from "drizzle-orm";
 
 export const userNotificationSettingsTable = pgTable(
@@ -13,7 +13,7 @@ export const userNotificationSettingsTable = pgTable(
     aiPrompt: varchar(),
     createdAt,
     updatedAt,
-  }
+  },
 );
 
 export const userNotiSettingsRelations = relations(
@@ -23,5 +23,5 @@ export const userNotiSettingsRelations = relations(
       fields: [userNotificationSettingsTable.userId],
       references: [usersTable.id],
     }),
-  })
+  }),
 );

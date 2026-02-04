@@ -7,10 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "db:drop": "npx drizzle-kit drop",
     "db:generate": "npx drizzle-kit generate",
     "db:migrate": "npx drizzle-kit migrate",
     "db:push": "npx drizzle-kit push",
     "db:studio": "npx drizzle-kit studio",
+    "db:reset": "npx drizzle-kit drop && npx drizzle-kit push",
+    "db:reset:migrate": "npx drizzle-kit drop && npx drizzle-kit generate && npx drizzle-kit migrate",
     "db:seed": "npx tsx drizzle/seed.ts"
   },
   "dependencies": {

@@ -10,6 +10,3 @@ const pool = new Pool({
 
 // Create a drizzle client with query
 export const db = drizzle(pool, { schema });
-
-// Create a normal drizzle client
-// export const db = drizzle({ client: pool });

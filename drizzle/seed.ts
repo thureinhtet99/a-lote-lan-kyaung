@@ -209,7 +209,7 @@ This position was for developing cross-platform mobile applications using React 
     ];
 
     console.log(
-      `📝 Inserting ${jobListings.length} job listings for organization: ${organizationId}`
+      `📝 Inserting ${jobListings.length} job listings for organization: ${organizationId}`,
     );
 
     // Insert job listings

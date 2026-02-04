@@ -8,8 +8,8 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { jobListingsTable } from "./job-listing-schema";
-import { usersTable } from "./users";
-import { createdAt, updatedAt } from "../schemaHelpers";
+import { usersTable } from "./user-schema";
+import { createdAt, updatedAt } from "../schema-helpers";
 import { relations } from "drizzle-orm";
 
 export const applicationStatus = [

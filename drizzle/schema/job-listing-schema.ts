@@ -8,10 +8,10 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
-import { createdAt, id, updatedAt } from "../schemaHelpers";
+import { createdAt, id, updatedAt } from "../schema-helpers";
 import { organizationsTable } from "./organization-schema";
 import { relations } from "drizzle-orm";
-import { jobListingApplicationsTable } from "./jobListingApplications";
+import { jobListingApplicationsTable } from "./job-listing-application-schema";
 
 export const wageIntervals = ["monthly", "yearly", "hourly"] as const;
 export type WageIntervalType = (typeof wageIntervals)[number];

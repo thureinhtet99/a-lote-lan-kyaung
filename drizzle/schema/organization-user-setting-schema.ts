@@ -5,9 +5,9 @@ import {
   primaryKey,
   varchar,
 } from "drizzle-orm/pg-core";
-import { usersTable } from "./users";
+import { usersTable } from "./user-schema";
 import { organizationsTable } from "./organization-schema";
-import { createdAt, updatedAt } from "../schemaHelpers";
+import { createdAt, updatedAt } from "../schema-helpers";
 import { relations } from "drizzle-orm";
 
 export const organizationUserSettingsTable = pgTable(
