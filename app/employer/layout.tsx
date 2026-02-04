@@ -7,8 +7,8 @@ import {
 import { ClipboardListIcon, LogInIcon, PlusIcon } from "lucide-react";
 import { ReactNode, Suspense } from "react";
 import Link from "next/link";
-import AppSidebar from "@/components/sidebar/AppSidebar";
-import SidebarNavMenuGroup from "@/components/sidebar/SidebarNavMenuGroup";
+import AppSidebar from "@/components/sidebar/app-sidebar";
+import SidebarNavMenuGroup from "@/components/sidebar/sidebar-nav-menu";
 import SidebarOrgButton from "@/features/organizations/components/sidebar-org-button";
 import { getCurrentOrg } from "@/services/clerk/lib/get-current-auth";
 import { APP_ROUTES } from "@/config/appConfig";

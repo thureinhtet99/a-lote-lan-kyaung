@@ -10,13 +10,13 @@ import {
 import { SignedIn, SignedOut } from "@/services/clerk/component/AuthStatus";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SidebarNavMenuGroupType } from "@/types/sidebar-nav-menu-group.type";
+import { SidebarNavMenuType } from "@/types/index.type";
 
-export default function SidebarNavMenuGroup({
+export default function SidebarNavMenu({
   items,
   className,
 }: {
-  items: SidebarNavMenuGroupType;
+  items: SidebarNavMenuType;
   className?: string;
 }) {
   const pathname = usePathname();

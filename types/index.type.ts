@@ -6,6 +6,13 @@ import {
 import { Column } from "@tanstack/react-table";
 import { Key, ReactNode } from "react";
 
+export type UserType = {
+  first_name: string;
+  last_name: string;
+  email: string;
+  image: string;
+};
+
 export type CacheType =
   | "users"
   | "organizations"
@@ -31,7 +38,7 @@ export type PlanFeatureType =
   | "3_featured_job_listing"
   | "unlimited_featured_job_listings";
 
-export type SidebarNavMenuGroupType = {
+export type SidebarNavMenuType = {
   href: string;
   icon: ReactNode;
   label: string;

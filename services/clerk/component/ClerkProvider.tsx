@@ -12,7 +12,7 @@ export function ClerkProvider({ children }: { children: ReactNode }) {
   return (
     <Suspense>
       <OriginalClerkProvider
-        appearance={isDarkMode ? { baseTheme: [dark] } : undefined}
+        appearance={isDarkMode ? { theme: [dark] } : undefined}
       >
         {/* This component will sync user data with our database */}
         <UserDatabaseSync />

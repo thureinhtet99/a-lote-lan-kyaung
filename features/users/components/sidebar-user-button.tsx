@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import SidebarUserButtonClient from "./_SidebarUserButtonClient";
+import SidebarUserButtonClient from "./_sidebar-user-button-client";
 import { getCurrentUser } from "@/services/clerk/lib/get-current-auth";
 import { SignOutButton } from "@/services/clerk/component/AuthButtons";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
@@ -9,7 +9,7 @@ import Loading from "@/components/Loading";
 const SidebarUserSuspense = async () => {
   const { user } = await getCurrentUser({ allData: true });
 
-  // Check if there is a user to show UserButton
+  // Check if there is a user to show user button
   if (user == null) {
     return (
       <SignOutButton>

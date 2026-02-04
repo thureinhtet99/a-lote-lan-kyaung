@@ -1,8 +1,7 @@
 import { ReactNode } from "react";
-import SidebarUserButton from "@/features/users/components/SidebarUserButton";
-import AppSidebar from "@/components/sidebar/AppSidebar";
-// import JobSeekerSidebar from "./_components/JobSeekerSidebar";
-import SidebarNavMenuGroup from "@/components/sidebar/SidebarNavMenuGroup";
+import SidebarUserButton from "@/features/users/components/sidebar-user-button";
+import AppSidebar from "@/components/sidebar/app-sidebar";
+import SidebarNavMenu from "@/components/sidebar/sidebar-nav-menu";
 import { APP_ROUTES } from "@/config/appConfig";
 import {
   BrainCircuitIcon,
@@ -23,7 +22,7 @@ export default function JobSeekerLayout({
       content={
         <>
           {sidebar}
-          <SidebarNavMenuGroup
+          <SidebarNavMenu
             className="mt-auto"
             items={[
               {

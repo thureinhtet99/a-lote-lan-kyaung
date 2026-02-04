@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/sidebar";
 import { ReactNode } from "react";
 import { SignedIn } from "@/services/clerk/component/AuthStatus";
-import { AppSidebarClient } from "./_AppSidebarClient";
+import { AppSidebarClient } from "./_app-sidebar-client";
 import { APP_CONFIG } from "@/config/appConfig";
 
 export default function AppSidebar({

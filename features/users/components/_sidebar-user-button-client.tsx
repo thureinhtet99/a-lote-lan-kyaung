@@ -12,6 +12,7 @@ import {
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import { APP_ROUTES } from "@/config/appConfig";
 import { SignOutButton } from "@/services/clerk/component/AuthButtons";
+import { UserType } from "@/types/index.type";
 import { useClerk } from "@clerk/nextjs";
 import {
   ChevronsUpDown,
@@ -21,14 +22,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-type UserType = {
-  first_name: string;
-  last_name: string;
-  email: string;
-  image: string;
-};
-
-function SidebarUserButtonClient({ user }: { user: UserType }) {
+export default function SidebarUserButtonClient({ user }: { user: UserType }) {
   const { isMobile, setOpenMobile } = useSidebar();
   const { openUserProfile } = useClerk();
 
@@ -85,8 +79,6 @@ function SidebarUserButtonClient({ user }: { user: UserType }) {
     </DropdownMenu>
   );
 }
-
-export default SidebarUserButtonClient;
 
 const UserInfo = ({ first_name, last_name, email, image }: UserType) => {
   const nameInitials = first_name.slice(0, 1) + last_name.slice(0, 1);
