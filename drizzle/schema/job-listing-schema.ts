@@ -9,7 +9,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { createdAt, id, updatedAt } from "../schema-helpers";
-import { organizationsTable } from "./organization-schema";
+import { organization } from "./better-auth-organization-schema";
 import { relations } from "drizzle-orm";
 import { jobListingApplicationsTable } from "./job-listing-application-schema";
 
@@ -44,8 +44,8 @@ export const jobListingsTable = pgTable(
   "job_listings",
   {
     id,
-    organizationId: varchar({ length: 255 })
-      .references(() => organizationsTable.id, { onDelete: "cascade" })
+    organizationId: text()
+      .references(() => organization.id, { onDelete: "cascade" })
       .notNull(),
     title: varchar({ length: 255 }).notNull(),
     description: text(),
@@ -68,9 +68,9 @@ export const jobListingsTable = pgTable(
 export const jobListingsRelations = relations(
   jobListingsTable,
   ({ one, many }) => ({
-    organization: one(organizationsTable, {
+    organization: one(organization, {
       fields: [jobListingsTable.organizationId],
-      references: [organizationsTable.id],
+      references: [organization.id],
     }),
     applications: many(jobListingApplicationsTable),
   }),

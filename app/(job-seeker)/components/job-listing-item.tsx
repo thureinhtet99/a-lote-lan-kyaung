@@ -5,7 +5,7 @@ import {
   jobListingsTable,
   jobListingTypes,
   locationRequirements,
-  organizationsTable,
+  organization,
 } from "@/drizzle/schema";
 import { Suspense } from "react";
 import Link from "next/link";
@@ -26,10 +26,10 @@ import z from "zod";
 import { unstable_cache } from "next/cache";
 import { jobListingsTag } from "@/lib/dataCache";
 import { convertSearchParamsToString } from "@/lib/convertSearchParamsToString";
-import { JobSeekerSearchParamsType } from "@/types/params.type";
-import { getCurrentOrg } from "@/services/clerk/lib/get-current-auth";
 import Loading from "@/components/Loading";
 import JobListingBadges from "@/features/jobListings/components/job-listing-badges";
+import { getCurrentOrg } from "@/lib/auth-helpers";
+import { JobSeekerSearchParamsType } from "@/types/index.type";
 
 // Search params schema
 const searchParamsSchema = z.object({
@@ -96,7 +96,7 @@ const getAllJobListings = async (
       organization: {
         columns: {
           name: true,
-          image: true,
+          logo: true,
         },
       },
     },
@@ -135,7 +135,7 @@ const SuspendedComponent = async ({
   params,
 }: JobSeekerSearchParamsType) => {
   const { orgId } = await getCurrentOrg();
-  const jobListingId = params ? (await params).jobListingId : undefined;
+  const jobListingId = params ? (await params.params).jobListingId : undefined;
   const { success, data } = searchParamsSchema.safeParse(await searchParams);
   const search = success ? data : {};
 
@@ -181,7 +181,7 @@ const SuspendedComponent = async ({
 
 const JobListingListItem = ({
   jobListing,
-  organization,
+  organization: org,
 }: {
   jobListing: Pick<
     typeof jobListingsTable.$inferSelect,
@@ -196,16 +196,13 @@ const JobListingListItem = ({
     | "locationRequirement"
     | "isFeatured"
   >;
-  organization: Pick<
-    typeof organizationsTable.$inferSelect,
-    "name" | "image"
-  > | null;
+  organization: Pick<typeof organization.$inferSelect, "name" | "logo"> | null;
 }) => {
   const orgNameInitial =
-    organization?.name
+    org?.name
       ?.split(" ")
       .splice(0, 4)
-      .map((word) => word[0])
+      .map((word: string) => word[0])
       .join("") || "";
 
   return (
@@ -220,8 +217,8 @@ const JobListingListItem = ({
           <Avatar className="size-14 @max-sm:hidden">
             <AvatarImage
               className="object-cover"
-              src={organization?.image ?? undefined}
-              alt={organization?.name ?? ""}
+              src={org?.logo ?? undefined}
+              alt={org?.name ?? ""}
             />
             <AvatarFallback className="uppercase bg-primary text-primary-foreground">
               {orgNameInitial}
@@ -230,7 +227,7 @@ const JobListingListItem = ({
           <div className="flex flex-col gap-2">
             <CardTitle className="text-xl">{jobListing.title}</CardTitle>
             <CardDescription className="text-base">
-              {organization?.name ?? "Unknown Organization"}
+              {org?.name ?? "Unknown Organization"}
             </CardDescription>
             {jobListing.postedAt != null && (
               <div className="text-sm font-medium text-pretty @min-md:hidden">

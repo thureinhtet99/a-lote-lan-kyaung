@@ -7,10 +7,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "../ui/sidebar";
-import { SignedIn, SignedOut } from "@/services/clerk/component/AuthStatus";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SidebarNavMenuType } from "@/types/index.type";
+import { SignedIn, SignedOut } from "@/components/auth/AuthStatus";
 
 export default function SidebarNavMenu({
   items,

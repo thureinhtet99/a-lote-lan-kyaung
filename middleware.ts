@@ -1,19 +1,44 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-const isPublicRoute = createRouteMatcher([
-  "/sign-in(.*)",
-  "/sign-up(.*)",
+const publicRoutes = [
+  "/sign-in",
+  "/sign-up",
   "/",
-  "/job-listings(.*)",
-  "/api(.*)",
-  "/ai-search",
-]);
+  "/job-listings",
+  "/api/auth",
+];
 
-export default clerkMiddleware(async (auth, req) => {
-  if (!isPublicRoute(req)) {
-    await auth.protect();
+export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  // Check if route is public
+  const isPublicRoute = publicRoutes.some((route) =>
+    pathname.startsWith(route),
+  );
+
+  // Edge-safe check: only rely on presence of the session cookie.
+  // Full validation happens in route handlers / server components.
+  const sessionToken = request.cookies.get("better-auth.session_token")?.value;
+  const hasSession = Boolean(sessionToken);
+
+  // Redirect to sign-in if accessing protected route without session
+  if (!isPublicRoute && !hasSession) {
+    const signInUrl = new URL("/sign-in", request.url);
+    signInUrl.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(signInUrl);
   }
-});
+
+  // Redirect to home if accessing auth routes while logged in
+  if (
+    (pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up")) &&
+    hasSession
+  ) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  return NextResponse.next();
+}
 
 export const config = {
   matcher: [

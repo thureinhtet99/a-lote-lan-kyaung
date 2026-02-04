@@ -5,10 +5,9 @@ import {
   primaryKey,
   text,
   uuid,
-  varchar,
 } from "drizzle-orm/pg-core";
 import { jobListingsTable } from "./job-listing-schema";
-import { usersTable } from "./user-schema";
+import { user } from "./auth-schema";
 import { createdAt, updatedAt } from "../schema-helpers";
 import { relations } from "drizzle-orm";
 
@@ -32,8 +31,8 @@ export const jobListingApplicationsTable = pgTable(
         onDelete: "cascade",
       })
       .notNull(),
-    userId: varchar()
-      .references(() => usersTable.id, {
+    userId: text()
+      .references(() => user.id, {
         onDelete: "cascade",
       })
       .notNull(),
@@ -53,9 +52,9 @@ export const jobListingApplicationsRelations = relations(
       fields: [jobListingApplicationsTable.jobListingId],
       references: [jobListingsTable.id],
     }),
-    user: one(usersTable, {
+    user: one(user, {
       fields: [jobListingApplicationsTable.userId],
-      references: [usersTable.id],
+      references: [user.id],
     }),
   }),
 );

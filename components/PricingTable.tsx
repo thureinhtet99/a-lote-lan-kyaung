@@ -1,11 +1,14 @@
 import { APP_ROUTES } from "@/config/appConfig";
-import { PricingTable as ClerkPricingTable } from "@clerk/nextjs";
 
 export default function PricingTable() {
+  // TODO: Implement custom pricing table
+  // For now, return a placeholder
   return (
-    <ClerkPricingTable
-      forOrganizations
-      newSubscriptionRedirectUrl={APP_ROUTES.EMPLOYER.PRICING}
-    />
+    <div className="text-center p-8">
+      <h2 className="text-2xl font-bold mb-4">Pricing Plans</h2>
+      <p className="text-muted-foreground">
+        Custom pricing implementation coming soon.
+      </p>
+    </div>
   );
 }

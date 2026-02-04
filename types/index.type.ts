@@ -1,7 +1,7 @@
 import {
   jobListingApplicationsTable,
   userResumesTable,
-  usersTable,
+  user,
 } from "@/drizzle/schema";
 import { Column } from "@tanstack/react-table";
 import { Key, ReactNode } from "react";
@@ -10,7 +10,7 @@ export type UserType = {
   first_name: string;
   last_name: string;
   email: string;
-  image: string;
+  image: string | null;
 };
 
 export type CacheType =
@@ -23,20 +23,13 @@ export type CacheType =
   | "userResumes";
 
 export type UserPermissionType =
-  | "job_listing_application:change_status"
-  | "job_listing_application:change_rating"
-  | "job_listing:change_status"
-  | "job_listing:create"
-  | "job_listing:update"
-  | "job_listing:delete";
-
-export type PlanFeatureType =
-  | "post_1_job_listing"
-  | "post_3_job_listings"
-  | "post_50_job_listings"
-  | "1_featured_job_listing"
-  | "3_featured_job_listing"
-  | "unlimited_featured_job_listings";
+  | "org:job_listing:create"
+  | "org:job_listing:update"
+  | "org:job_listing:delete"
+  | "org:application:read"
+  | "org:application:update"
+  | "org:member:invite"
+  | "org:member:remove";
 
 export type SidebarNavMenuType = {
   href: string;
@@ -70,8 +63,8 @@ export type JobListingApplicationType = Pick<
 > & {
   coverLetterMarkDown: ReactNode | null;
   user: Pick<
-    typeof usersTable.$inferSelect,
-    "id" | "first_name" | "last_name" | "image"
+    typeof user.$inferSelect,
+    "id" | "firstName" | "lastName" | "image"
   > & {
     resume:
       | (Pick<typeof userResumesTable.$inferSelect, "resumeFileUrl"> & {

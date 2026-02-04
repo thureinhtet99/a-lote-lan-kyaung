@@ -1,7 +1,0 @@
-import { PlanFeatureType } from "@/types/index.type";
-import { auth } from "@clerk/nextjs/server";
-
-export async function hasPlanFeature(feature: PlanFeatureType) {
-  const { has } = await auth();
-  return has({ feature });
-}

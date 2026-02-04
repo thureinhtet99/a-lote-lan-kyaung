@@ -9,9 +9,9 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { ReactNode } from "react";
-import { SignedIn } from "@/services/clerk/component/AuthStatus";
 import { AppSidebarClient } from "./_app-sidebar-client";
 import { APP_CONFIG } from "@/config/appConfig";
+import { SignedIn } from "@/components/auth/AuthStatus";
 
 export default function AppSidebar({
   content,

@@ -2,7 +2,7 @@
 
 import z from "zod";
 import { userNotificationSettingsSchema } from "./schema";
-import { getCurrentUser } from "@/services/clerk/lib/get-current-auth";
+import { getCurrentUser } from "@/lib/auth-helpers";
 import { updateUserNotificationSettingDb } from "../db/userNotiSettings";
 
 export const updateNotificationSetting = async (

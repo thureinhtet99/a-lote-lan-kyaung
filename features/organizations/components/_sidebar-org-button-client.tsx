@@ -11,8 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import { APP_ROUTES } from "@/config/appConfig";
-import { SignOutButton } from "@/services/clerk/component/AuthButtons";
-import { useClerk } from "@clerk/nextjs";
+import { SignOutButton } from "@/components/auth/AuthButtons";
 import {
   ArrowLeftRightIcon,
   Building2Icon,
@@ -22,13 +21,14 @@ import {
   UserRoundCogIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type UserType = {
   email: string;
 };
 type OrganizationType = {
   name: string;
-  image: string | null;
+  logo: string | null;
 };
 
 export default function SidebarOrgButtonClient({
@@ -39,7 +39,12 @@ export default function SidebarOrgButtonClient({
   organization: OrganizationType;
 }) {
   const { isMobile, setOpenMobile } = useSidebar();
-  const { openOrganizationProfile } = useClerk();
+  const router = useRouter();
+
+  const openOrganizationProfile = () => {
+    router.push("/organizations");
+    setOpenMobile(false);
+  };
 
   return (
     <DropdownMenu>
@@ -64,12 +69,7 @@ export default function SidebarOrgButtonClient({
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem
-          onClick={() => {
-            openOrganizationProfile();
-            setOpenMobile(false);
-          }}
-        >
+        <DropdownMenuItem onClick={openOrganizationProfile}>
           <Building2Icon className="mr-1" />
           Manage organization
         </DropdownMenuItem>
@@ -91,7 +91,7 @@ export default function SidebarOrgButtonClient({
         <DropdownMenuSeparator />
 
         <DropdownMenuItem asChild>
-          <Link href={APP_ROUTES.ORG.SELECT}>
+          <Link href="/organizations">
             <ArrowLeftRightIcon className="mr-1" />
             Switch organization
           </Link>
@@ -126,7 +126,7 @@ const OrgInfo = ({
     <div className="flex items-center gap-2 overflow-hidden">
       <Avatar className="rounded-lg size-8">
         <AvatarImage
-          src={organization.image ?? undefined}
+          src={organization.logo ?? undefined}
           alt={organization.name}
         />
         <AvatarFallback className="uppercase bg-primary text-primary-foreground">

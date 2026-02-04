@@ -2,10 +2,7 @@
 
 import z from "zod";
 import { newJobListingApplicationSchema } from "./schema";
-import {
-  getCurrentOrg,
-  getCurrentUser,
-} from "@/services/clerk/lib/get-current-auth";
+import { getCurrentOrg, getCurrentUser } from "@/lib/auth-helpers";
 import {
   insertJobListingApplicationDb,
   updateJobListingApplicationDb,
@@ -20,7 +17,7 @@ import {
 } from "@/drizzle/schema";
 import { unstable_cache } from "next/cache";
 import { jobListingIdTag, userResumeTag } from "@/lib/dataCache";
-import { hasOrgUserPermission } from "@/services/clerk/lib/org-user-permission";
+import { hasOrgUserPermission } from "@/lib/org-user-permission";
 
 // Create
 export const createJobListingApplication = async (
@@ -114,7 +111,7 @@ export const updateJobListingApplicationStatus = async (
       message: "Invalid status",
     };
 
-  if (!(await hasOrgUserPermission("job_listing_application:change_status")))
+  if (!(await hasOrgUserPermission("org:application:update")))
     return {
       error: true,
       message: "You don't have permission to update the status",
@@ -157,7 +154,7 @@ export const updateJobListingApplicationRating = async (
       message: "Invalid rating",
     };
 
-  if (!(await hasOrgUserPermission("job_listing_application:change_rating")))
+  if (!(await hasOrgUserPermission("org:application:update")))
     return {
       error: true,
       message: "You don't have permission to update the rating",

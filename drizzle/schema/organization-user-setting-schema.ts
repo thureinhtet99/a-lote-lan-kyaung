@@ -3,22 +3,22 @@ import {
   integer,
   pgTable,
   primaryKey,
-  varchar,
+  text,
 } from "drizzle-orm/pg-core";
-import { usersTable } from "./user-schema";
-import { organizationsTable } from "./organization-schema";
+import { user } from "./auth-schema";
+import { organization } from "./better-auth-organization-schema";
 import { createdAt, updatedAt } from "../schema-helpers";
 import { relations } from "drizzle-orm";
 
 export const organizationUserSettingsTable = pgTable(
   "organization_user_settings",
   {
-    userId: varchar()
+    userId: text()
       .notNull()
-      .references(() => usersTable.id),
-    organizationId: varchar()
+      .references(() => user.id, { onDelete: "cascade" }),
+    organizationId: text()
       .notNull()
-      .references(() => organizationsTable.id),
+      .references(() => organization.id, { onDelete: "cascade" }),
     newApplicationEmailNotification: boolean().notNull().default(false),
     minimumRating: integer(),
     createdAt,
@@ -30,13 +30,13 @@ export const organizationUserSettingsTable = pgTable(
 export const organizationUserSettingsRelations = relations(
   organizationUserSettingsTable,
   ({ one }) => ({
-    user: one(usersTable, {
+    user: one(user, {
       fields: [organizationUserSettingsTable.userId],
-      references: [usersTable.id],
+      references: [user.id],
     }),
-    organization: one(organizationsTable, {
+    organization: one(organization, {
       fields: [organizationUserSettingsTable.organizationId],
-      references: [organizationsTable.id],
+      references: [organization.id],
     }),
   }),
 );

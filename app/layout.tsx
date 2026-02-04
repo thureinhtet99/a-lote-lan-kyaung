@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ClerkProvider } from "@/services/clerk/component/ClerkProvider";
 import { APP_CONFIG } from "@/config/appConfig";
 import { Toaster } from "@/components/ui/sonner";
 import { UploadThingSSR } from "@/services/uploadthing/components/UploadThingSSR";
@@ -31,11 +30,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
       >
-        <ClerkProvider>
-          {children}
-          <Toaster />
-          <UploadThingSSR />
-        </ClerkProvider>
+        {children}
+        <Toaster />
+        <UploadThingSSR />
       </body>
     </html>
   );

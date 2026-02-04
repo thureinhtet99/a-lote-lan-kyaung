@@ -11,9 +11,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import { APP_ROUTES } from "@/config/appConfig";
-import { SignOutButton } from "@/services/clerk/component/AuthButtons";
+import { SignOutButton } from "@/components/auth/AuthButtons";
 import { UserType } from "@/types/index.type";
-import { useClerk } from "@clerk/nextjs";
 import {
   ChevronsUpDown,
   LogOutIcon,
@@ -21,10 +20,16 @@ import {
   UserIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function SidebarUserButtonClient({ user }: { user: UserType }) {
   const { isMobile, setOpenMobile } = useSidebar();
-  const { openUserProfile } = useClerk();
+  const router = useRouter();
+
+  const openUserProfile = () => {
+    router.push("/settings/profile");
+    setOpenMobile(false);
+  };
 
   return (
     <DropdownMenu>
@@ -49,12 +54,7 @@ export default function SidebarUserButtonClient({ user }: { user: UserType }) {
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem
-          onClick={() => {
-            openUserProfile();
-            setOpenMobile(false);
-          }}
-        >
+        <DropdownMenuItem onClick={openUserProfile}>
           <UserIcon className="mr-1" />
           Profile
         </DropdownMenuItem>
@@ -86,7 +86,10 @@ const UserInfo = ({ first_name, last_name, email, image }: UserType) => {
   return (
     <div className="flex items-center gap-2 overflow-hidden">
       <Avatar className="rounded-lg size-8">
-        <AvatarImage src={image} alt={`${first_name} ${last_name}`} />
+        <AvatarImage
+          src={image || undefined}
+          alt={`${first_name} ${last_name}`}
+        />
         <AvatarFallback className="uppercase bg-primary text-primary-foreground">
           {nameInitials}
         </AvatarFallback>

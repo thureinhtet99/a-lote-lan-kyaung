@@ -1,22 +1,22 @@
-import { pgTable, varchar } from "drizzle-orm/pg-core";
-import { usersTable } from "./user-schema";
+import { pgTable, varchar, text } from "drizzle-orm/pg-core";
+import { user } from "./auth-schema";
 import { createdAt, updatedAt } from "../schema-helpers";
 import { relations } from "drizzle-orm";
 
 export const userResumesTable = pgTable("user_resumes", {
-  userId: varchar()
+  userId: text()
     .primaryKey()
-    .references(() => usersTable.id),
-  resumeFileUrl: varchar().notNull(),
-  resumeFileKey: varchar().notNull(),
-  aiSummary: varchar(),
+    .references(() => user.id, { onDelete: "cascade" }),
+  resumeFileUrl: text().notNull(),
+  resumeFileKey: text().notNull(),
+  aiSummary: text(),
   createdAt,
   updatedAt,
 });
 
 export const userResumesRelations = relations(userResumesTable, ({ one }) => ({
-  user: one(usersTable, {
+  user: one(user, {
     fields: [userResumesTable.userId],
-    references: [usersTable.id],
+    references: [user.id],
   }),
 }));
