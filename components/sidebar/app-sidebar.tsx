@@ -10,8 +10,8 @@ import {
 } from "@/components/ui/sidebar";
 import { ReactNode } from "react";
 import { AppSidebarClient } from "./_app-sidebar-client";
-import { APP_CONFIG } from "@/config/appConfig";
 import { SignedIn } from "@/components/auth/AuthStatus";
+import { Logo } from "@/components/Logo";
 
 export default function AppSidebar({
   content,
@@ -23,19 +23,21 @@ export default function AppSidebar({
   children: ReactNode;
 }) {
   return (
-    <SidebarProvider className="overflow-y-hidden">
+    <SidebarProvider className="overflow-hidden">
       <AppSidebarClient>
         {/* Left */}
-        <Sidebar collapsible="icon" className="overflow-hidden">
-          <SidebarHeader className="flex-row items-center lg:space-x-4">
-            <SidebarTrigger />
-            <span className="text-2xl text-nowrap">{APP_CONFIG.APP_NAME}</span>
+        <Sidebar
+          collapsible="icon"
+          className="overflow-hidden border-r border-primary/10"
+        >
+          <SidebarHeader className="flex-row items-center justify-center gap-2 py-4 border-b border-primary/10">
+            <Logo size="sm" showText={true} />
           </SidebarHeader>
 
           <SidebarContent>{content}</SidebarContent>
 
           <SignedIn>
-            <SidebarFooter>
+            <SidebarFooter className="border-t border-primary/10">
               <SidebarMenu>
                 <SidebarMenuItem>{footerButton}</SidebarMenuItem>
               </SidebarMenu>
@@ -44,7 +46,11 @@ export default function AppSidebar({
         </Sidebar>
 
         {/* Right */}
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 bg-gradient-to-br from-background via-primary/[0.02] to-secondary/[0.02] relative">
+          <SidebarTrigger className="absolute" />
+
+          {children}
+        </main>
       </AppSidebarClient>
     </SidebarProvider>
   );

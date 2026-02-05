@@ -208,29 +208,39 @@ const JobListingListItem = ({
   return (
     <Card
       className={cn(
-        "@container",
-        jobListing.isFeatured && "border-featured bg-featured/20",
+        "@container transition-all hover:shadow-lg hover:border-primary/30",
+        jobListing.isFeatured &&
+          "border-secondary bg-gradient-to-r from-secondary/10 to-tertiary/5 shadow-md",
       )}
     >
-      <CardHeader>
-        <div className="flex gap-4">
-          <Avatar className="size-14 @max-sm:hidden">
+      <CardHeader className="pb-3">
+        <div className="flex gap-4 items-start">
+          <Avatar className="size-16 @max-sm:hidden border-2 border-primary/10">
             <AvatarImage
               className="object-cover"
               src={org?.logo ?? undefined}
               alt={org?.name ?? ""}
             />
-            <AvatarFallback className="uppercase bg-primary text-primary-foreground">
+            <AvatarFallback className="uppercase bg-primary text-primary-foreground text-lg font-semibold">
               {orgNameInitial}
             </AvatarFallback>
           </Avatar>
-          <div className="flex flex-col gap-2">
-            <CardTitle className="text-xl">{jobListing.title}</CardTitle>
-            <CardDescription className="text-base">
+          <div className="flex flex-col gap-2 flex-1">
+            <div className="flex items-start justify-between gap-2">
+              <CardTitle className="text-xl font-bold text-primary hover:text-primary/80 transition-colors">
+                {jobListing.title}
+              </CardTitle>
+              {jobListing.isFeatured && (
+                <Badge className="bg-secondary text-secondary-foreground hover:bg-secondary/90 whitespace-nowrap">
+                  ⭐ Featured
+                </Badge>
+              )}
+            </div>
+            <CardDescription className="text-base font-medium">
               {org?.name ?? "Unknown Organization"}
             </CardDescription>
             {jobListing.postedAt != null && (
-              <div className="text-sm font-medium text-pretty @min-md:hidden">
+              <div className="text-sm font-medium text-muted-foreground @min-md:hidden">
                 <Suspense
                   fallback={
                     jobListing.postedAt
@@ -245,7 +255,7 @@ const JobListingListItem = ({
           </div>
 
           {jobListing.postedAt != null && (
-            <div className="text-sm font-medium text-pretty ml-auto @max-md:hidden">
+            <div className="text-sm font-semibold text-muted-foreground @max-md:hidden bg-secondary/10 px-3 py-1 rounded-md">
               <Suspense
                 fallback={
                   jobListing.postedAt
@@ -259,10 +269,14 @@ const JobListingListItem = ({
           )}
         </div>
       </CardHeader>
-      <CardContent className="flex flex-wrap gap-2">
+      <CardContent className="flex flex-wrap gap-2 pt-0">
         <JobListingBadges
           jobListing={jobListing}
-          className={jobListing.isFeatured ? "border-primary/35" : undefined}
+          className={
+            jobListing.isFeatured
+              ? "border-secondary/40 bg-secondary/5"
+              : undefined
+          }
         />
       </CardContent>
     </Card>

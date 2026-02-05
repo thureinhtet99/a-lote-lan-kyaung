@@ -1,10 +1,9 @@
-import LoadingSpinner from "@/components/LoadingSpinner";
+import Loading from "@/components/loading";
 import { Card, CardContent } from "@/components/ui/card";
 import { db } from "@/drizzle/db";
 import { userNotificationSettingsTable } from "@/drizzle/schema";
 import NotificationsForm from "@/features/users/components/NotificationsForm";
 import { userNotificationTag } from "@/lib/dataCache";
-import { getCurrentUser } from "@/services/clerk/lib/get-current-auth";
 import { eq } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 import { notFound } from "next/navigation";
@@ -12,14 +11,15 @@ import { Suspense } from "react";
 
 export default function NotificationPage() {
   return (
-    <Suspense fallback={<LoadingSpinner />}>
+    <Suspense fallback={<Loading />}>
       <SuspendedComponent />
     </Suspense>
   );
 }
 
 const SuspendedComponent = async () => {
-  const { userId } = await getCurrentUser();
+  // const { userId } = await getCurrentUser();
+  const userId = "5g4X3I2v2EVlFXUb0SrcBRBtQZPtOj80";
   if (userId == null) return notFound();
 
   return (
@@ -27,7 +27,7 @@ const SuspendedComponent = async () => {
       <h1 className="text-2xl font-bold mb-6">Notification Settings</h1>
       <Card>
         <CardContent>
-          <Suspense fallback={<LoadingSpinner />}>
+          <Suspense fallback={<Loading />}>
             <SuspendedForm userId={userId} />
           </Suspense>
         </CardContent>

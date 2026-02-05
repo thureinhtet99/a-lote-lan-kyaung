@@ -23,6 +23,7 @@ export const APP_ROUTES = {
 
   SETTINGS: {
     HOME: "/settings",
+    PROFILE: "/settings/profile",
     RESUME: "/settings/resume",
     NOTIFICATIONS: "/settings/notifications",
   },

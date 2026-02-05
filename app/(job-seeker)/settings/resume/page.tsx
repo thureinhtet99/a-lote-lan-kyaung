@@ -10,7 +10,6 @@ import { Suspense } from "react";
 import DropzoneClient from "./_DropzoneClient";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { getCurrentUser } from "@/services/clerk/lib/get-current-auth";
 import { notFound } from "next/navigation";
 import { db } from "@/drizzle/db";
 import { eq } from "drizzle-orm";
@@ -18,7 +17,7 @@ import { userResumeTag } from "@/lib/dataCache";
 import { userResumesTable } from "@/drizzle/schema";
 import { unstable_cache } from "next/cache";
 import MarkdownRenderer from "@/components/markdown/MarkdownRenderer";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import Loading from "@/components/loading";
 
 export default function ResumePage() {
   return (
@@ -29,7 +28,7 @@ export default function ResumePage() {
         <CardContent className="pt-6">
           <DropzoneClient />
         </CardContent>
-        <Suspense fallback={<LoadingSpinner />}>
+        <Suspense fallback={<Loading />}>
           <SuspendedComponent />
         </Suspense>
       </Card>
@@ -43,7 +42,8 @@ export default function ResumePage() {
 }
 
 const SuspendedComponent = async () => {
-  const { userId } = await getCurrentUser();
+  // const { userId } = await getCurrentUser();
+  const userId = "5g4X3I2v2EVlFXUb0SrcBRBtQZPtOj80";
   if (userId == null) return notFound();
 
   const userResume = await getCurrentResume(userId);
@@ -84,7 +84,8 @@ const getCurrentResume = async (userId: string) => {
 };
 
 const AISummaryCard = async () => {
-  const { userId } = await getCurrentUser();
+  // const { userId } = await getCurrentUser();
+  const userId = "5g4X3I2v2EVlFXUb0SrcBRBtQZPtOj80";
   if (userId == null) return notFound();
 
   const userResume = await getCurrentResume(userId);
