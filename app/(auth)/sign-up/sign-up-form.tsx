@@ -66,7 +66,7 @@ export default function SignUpForm() {
                 <Input
                   {...field}
                   type="text"
-                  placeholder="johndoe"
+                  placeholder="Enter your name"
                   disabled={form.formState.isSubmitting}
                 />
               </FormControl>
@@ -84,7 +84,7 @@ export default function SignUpForm() {
                 <Input
                   {...field}
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder="Enter your email"
                   disabled={form.formState.isSubmitting}
                 />
               </FormControl>
@@ -102,7 +102,7 @@ export default function SignUpForm() {
                 <Input
                   {...field}
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="Enter your password"
                   disabled={form.formState.isSubmitting}
                 />
               </FormControl>
@@ -120,7 +120,7 @@ export default function SignUpForm() {
                 <Input
                   {...field}
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="Confirm password"
                   disabled={form.formState.isSubmitting}
                 />
               </FormControl>
@@ -130,7 +130,7 @@ export default function SignUpForm() {
         />
         <Button
           type="submit"
-          className="w-full"
+          className="w-full mt-4"
           disabled={form.formState.isSubmitting}
         >
           <LoadingSwap isLoading={form.formState.isSubmitting}>

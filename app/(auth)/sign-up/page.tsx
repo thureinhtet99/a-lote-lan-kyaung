@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import SignUpForm from "./sign-up-form";
+import { APP_ROUTES } from "@/config/appConfig";
 
 export default function SignUpPage() {
   return (
@@ -22,7 +23,7 @@ export default function SignUpPage() {
           <SignUpForm />
           <div className="mt-4 text-center text-sm">
             Already have an account?{" "}
-            <Link href="/sign-in" className="text-primary hover:underline">
+            <Link href={APP_ROUTES.SIGN_IN} className="hover:underline">
               Sign in
             </Link>
           </div>
