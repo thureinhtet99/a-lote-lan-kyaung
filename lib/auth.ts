@@ -9,6 +9,7 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    autoSignIn: true,
     requireEmailVerification: false, // Set to true if you want email verification
   },
   plugins: [

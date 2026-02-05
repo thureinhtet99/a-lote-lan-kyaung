@@ -15,19 +15,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import LoadingSwap from "@/components/LoadingSwap";
 import { authClient } from "@/lib/auth-client";
-import { Suspense } from "react";
-import Loading from "@/components/loading";
 import { SignUpFormData, signUpSchema } from "../schemas";
+import { useRouter } from "next/navigation";
 
 export default function SignUpForm() {
-  return (
-    <Suspense fallback={<Loading className="py-10" />}>
-      <SuspendedComponent />
-    </Suspense>
-  );
-}
-
-const SuspendedComponent = () => {
+  const router = useRouter();
   const form = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
@@ -52,6 +44,7 @@ const SuspendedComponent = () => {
         },
         onSuccess: () => {
           toast.success("Account created successfully!");
+          router.push("/");
         },
         onError: (ctx) => {
           toast.error(ctx.error.message);
@@ -147,4 +140,4 @@ const SuspendedComponent = () => {
       </form>
     </Form>
   );
-};
+}

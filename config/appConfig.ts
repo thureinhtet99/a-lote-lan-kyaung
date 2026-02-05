@@ -11,6 +11,7 @@ export const APP_ROUTES = {
   SIGN_IN: "/sign-in",
   SIGN_UP: "/sign-up",
   SIGN_OUT: "/sign-out",
+  FORGOT_PASSWORD: "/forgot-password",
 
   HOME: "/",
   AI_SEARCH: "/ai-search",

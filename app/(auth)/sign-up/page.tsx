@@ -6,7 +6,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Link from "next/link";
-
 import SignUpForm from "./sign-up-form";
 
 export default function SignUpPage() {

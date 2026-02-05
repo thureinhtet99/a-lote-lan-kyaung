@@ -1,5 +1,5 @@
 {
-  "id": "51535b01-7a21-4e05-a1ec-2ba7b899b553",
+  "id": "43202919-a2b8-4101-901e-44f560853bf3",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -91,10 +91,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "account_userId_user_id_fk": {
-          "name": "account_userId_user_id_fk",
+        "account_userId_users_id_fk": {
+          "name": "account_userId_users_id_fk",
           "tableFrom": "account",
-          "tableTo": "user",
+          "tableTo": "users",
           "columnsFrom": [
             "userId"
           ],
@@ -168,10 +168,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "session_userId_user_id_fk": {
-          "name": "session_userId_user_id_fk",
+        "session_userId_users_id_fk": {
+          "name": "session_userId_users_id_fk",
           "tableFrom": "session",
-          "tableTo": "user",
+          "tableTo": "users",
           "columnsFrom": [
             "userId"
           ],
@@ -196,8 +196,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.user": {
-      "name": "user",
+    "public.users": {
+      "name": "users",
       "schema": "",
       "columns": {
         "id": {
@@ -250,8 +250,8 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "user_email_unique": {
-          "name": "user_email_unique",
+        "users_email_unique": {
+          "name": "users_email_unique",
           "nullsNotDistinct": false,
           "columns": [
             "email"
@@ -389,10 +389,10 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "invitation_inviterId_user_id_fk": {
-          "name": "invitation_inviterId_user_id_fk",
+        "invitation_inviterId_users_id_fk": {
+          "name": "invitation_inviterId_users_id_fk",
           "tableFrom": "invitation",
-          "tableTo": "user",
+          "tableTo": "users",
           "columnsFrom": [
             "inviterId"
           ],
@@ -467,10 +467,10 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "member_userId_user_id_fk": {
-          "name": "member_userId_user_id_fk",
+        "member_userId_users_id_fk": {
+          "name": "member_userId_users_id_fk",
           "tableFrom": "member",
-          "tableTo": "user",
+          "tableTo": "users",
           "columnsFrom": [
             "userId"
           ],
@@ -767,10 +767,10 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "job_listing_applications_userId_user_id_fk": {
-          "name": "job_listing_applications_userId_user_id_fk",
+        "job_listing_applications_userId_users_id_fk": {
+          "name": "job_listing_applications_userId_users_id_fk",
           "tableFrom": "job_listing_applications",
-          "tableTo": "user",
+          "tableTo": "users",
           "columnsFrom": [
             "userId"
           ],
@@ -840,10 +840,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "user_resumes_userId_user_id_fk": {
-          "name": "user_resumes_userId_user_id_fk",
+        "user_resumes_userId_users_id_fk": {
+          "name": "user_resumes_userId_users_id_fk",
           "tableFrom": "user_resumes",
-          "tableTo": "user",
+          "tableTo": "users",
           "columnsFrom": [
             "userId"
           ],
@@ -900,10 +900,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "user_notification_settings_userId_user_id_fk": {
-          "name": "user_notification_settings_userId_user_id_fk",
+        "user_notification_settings_userId_users_id_fk": {
+          "name": "user_notification_settings_userId_users_id_fk",
           "tableFrom": "user_notification_settings",
-          "tableTo": "user",
+          "tableTo": "users",
           "columnsFrom": [
             "userId"
           ],
@@ -966,10 +966,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "organization_user_settings_userId_user_id_fk": {
-          "name": "organization_user_settings_userId_user_id_fk",
+        "organization_user_settings_userId_users_id_fk": {
+          "name": "organization_user_settings_userId_users_id_fk",
           "tableFrom": "organization_user_settings",
-          "tableTo": "user",
+          "tableTo": "users",
           "columnsFrom": [
             "userId"
           ],
