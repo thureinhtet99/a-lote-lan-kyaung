@@ -1,36 +1,39 @@
+import { getSession } from "./auth-helpers";
 import { db } from "@/drizzle/db";
 import { member } from "@/drizzle/schema";
 import { eq, and } from "drizzle-orm";
-import { getSession } from "./auth-helpers";
 
 export type UserPermissionType =
-  | "org:job_listing:create"
-  | "org:job_listing:update"
-  | "org:job_listing:delete"
-  | "org:application:read"
-  | "org:application:update"
-  | "org:member:invite"
-  | "org:member:remove";
+  | "job_listing.create"
+  | "job_listing.update"
+  | "job_listing.delete"
+  | "application.read"
+  | "application.update"
+  | "member.invite"
+  | "member.remove";
 
+// Role-based permissions mapping
 const rolePermissions: Record<string, UserPermissionType[]> = {
   admin: [
-    "org:job_listing:create",
-    "org:job_listing:update",
-    "org:job_listing:delete",
-    "org:application:read",
-    "org:application:update",
-    "org:member:invite",
-    "org:member:remove",
+    "job_listing.create",
+    "job_listing.update",
+    "job_listing.delete",
+    "application.read",
+    "application.update",
+    "member.invite",
+    "member.remove",
   ],
   member: [
-    "org:job_listing:create",
-    "org:job_listing:update",
-    "org:application:read",
-    "org:application:update",
+    "job_listing.create",
+    "job_listing.update",
+    "application.read",
+    "application.update",
   ],
 };
 
-export async function hasOrgUserPermission(permission: UserPermissionType) {
+export async function hasOrgUserPermission(
+  permission: UserPermissionType,
+): Promise<boolean> {
   const session = await getSession();
 
   if (!session) {
@@ -45,7 +48,7 @@ export async function hasOrgUserPermission(permission: UserPermissionType) {
     return false;
   }
 
-  // Get user's role in the organization
+  // Get user's role in the organization from database
   const membership = await db.query.member.findFirst({
     where: and(
       eq(member.userId, session.user.id),
@@ -57,7 +60,7 @@ export async function hasOrgUserPermission(permission: UserPermissionType) {
     return false;
   }
 
-  // Check if role has the required permission
+  // Check if the user's role has the required permission
   const permissions = rolePermissions[membership.role] || [];
   return permissions.includes(permission);
 }

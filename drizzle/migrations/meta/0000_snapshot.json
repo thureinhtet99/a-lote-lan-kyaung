@@ -1,5 +1,5 @@
 {
-  "id": "43202919-a2b8-4101-901e-44f560853bf3",
+  "id": "238e2b83-a45e-45c2-8ea5-31261818be6b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -164,6 +164,12 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "activeOrganizationId": {
+          "name": "activeOrganizationId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},

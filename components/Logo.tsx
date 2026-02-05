@@ -17,8 +17,13 @@ const textSizes = {
 
 export function Logo({ className, size = "md", showText = true }: LogoProps) {
   return (
-    <div className={cn("flex items-center gap-4", className)}>
-      <BriefcaseBusiness className="shrink-0 size-12" />
+    <div
+      className={cn(
+        "flex items-center justify-center gap-4 group-data-[state=collapsed]:gap-0",
+        className,
+      )}
+    >
+      <BriefcaseBusiness className="shrink-0 size-12 group-data-[state=collapsed]:size-8" />
 
       {/* Logo Text */}
       {showText && (

@@ -29,11 +29,10 @@ const getUserById = async (id: string) => {
 };
 
 // Get current organization from better-auth session
-export const getCurrentOrg = cache(async ({ allData = false } = {}) => {
+export const getCurrentOrg = async () => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
-
   if (!session) {
     return { orgId: null, organization: undefined };
   }
@@ -49,9 +48,9 @@ export const getCurrentOrg = cache(async ({ allData = false } = {}) => {
 
   return {
     orgId: activeOrgId,
-    organization: allData ? await getOrgById(activeOrgId) : undefined,
+    organization: (await getOrgById(activeOrgId)) ?? undefined,
   };
-});
+};
 
 // Fetch an org from db
 const getOrgById = async (id: string) => {

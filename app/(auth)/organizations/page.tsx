@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,14 +21,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Building2, Plus, Users, Settings, Trash2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Building2, Plus, Settings, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import Image from "next/image";
 
 interface Organization {
   id: string;
@@ -40,13 +39,13 @@ interface Organization {
   metadata: string | null;
 }
 
-interface Member {
-  id: string;
-  role: string;
-  userId: string;
-  organizationId: string;
-  createdAt: Date;
-}
+// interface Member {
+//   id: string;
+//   role: string;
+//   userId: string;
+//   organizationId: string;
+//   createdAt: Date;
+// }
 
 export default function OrganizationsPage() {
   const router = useRouter();
@@ -176,12 +175,14 @@ export default function OrganizationsPage() {
             </p>
           </div>
           <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Create Organization
-              </Button>
-            </DialogTrigger>
+            {organizations.length > 0 && (
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Organization
+                </Button>
+              </DialogTrigger>
+            )}
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Create New Organization</DialogTitle>
@@ -233,7 +234,7 @@ export default function OrganizationsPage() {
                 <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-3">
                     {org.logo ? (
-                      <img
+                      <Image
                         src={org.logo}
                         alt={org.name}
                         className="h-10 w-10 rounded-lg"

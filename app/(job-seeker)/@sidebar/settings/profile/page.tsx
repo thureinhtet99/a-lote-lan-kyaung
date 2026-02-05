@@ -1,5 +1,5 @@
 import SettingsSidebar from "@/app/(job-seeker)/shared/SettingsSidebar";
 
-export default function NotificationSidebar() {
+export default function ProfileSidebar() {
   return <SettingsSidebar />;
 }

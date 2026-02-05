@@ -29,6 +29,7 @@ CREATE TABLE "session" (
 	"ipAddress" text,
 	"userAgent" text,
 	"userId" text NOT NULL,
+	"activeOrganizationId" text,
 	CONSTRAINT "session_token_unique" UNIQUE("token")
 );
 --> statement-breakpoint

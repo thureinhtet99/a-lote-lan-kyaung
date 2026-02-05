@@ -37,6 +37,7 @@ export const APP_ROUTES = {
   },
 
   ORG: {
+    HOME: "/organizations",
     SELECT: "/organizations/select",
   },
 };

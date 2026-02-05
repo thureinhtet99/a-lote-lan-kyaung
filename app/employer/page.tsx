@@ -1,11 +1,11 @@
 import { getMostRecentJobListingDb } from "@/features/jobListings/db/job-listing-db";
 import { APP_ROUTES } from "@/config/appConfig";
 import { jobListingIdTag } from "@/lib/dataCache";
-import { getCurrentOrg } from "@/services/clerk/lib/get-current-auth";
 import { unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import EmployerLoading from "./loading";
+import { getCurrentOrg } from "@/lib/auth-helpers";
 
 export default function EmployerHomePage() {
   return (
