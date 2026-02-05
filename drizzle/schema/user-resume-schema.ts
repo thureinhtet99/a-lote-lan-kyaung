@@ -1,4 +1,4 @@
-import { pgTable, varchar, text } from "drizzle-orm/pg-core";
+import { pgTable, text } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
 import { createdAt, updatedAt } from "../schema-helpers";
 import { relations } from "drizzle-orm";

@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "db:drop": "npx drizzle-kit drop",
-    "db:full-reset": "npx tsx drizzle/reset.ts",
+    "db:clean": "npx tsx drizzle/reset.ts",
     "db:reset": "npx drizzle-kit drop && npx drizzle-kit generate && npx drizzle-kit migrate && npx drizzle-kit push",
     "db:studio": "npx drizzle-kit studio",
     "db:seed": "npx tsx drizzle/seed.ts"
@@ -63,7 +63,7 @@
     "@types/pg": "^8.15.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "drizzle-kit": "^0.31.5",
+    "drizzle-kit": "^0.31.8",
     "eslint": "^9",
     "eslint-config-next": "15.4.2-canary.51",
     "tailwindcss": "^4",

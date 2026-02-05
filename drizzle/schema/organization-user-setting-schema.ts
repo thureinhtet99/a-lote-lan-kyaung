@@ -5,8 +5,7 @@ import {
   primaryKey,
   text,
 } from "drizzle-orm/pg-core";
-import { user } from "./auth-schema";
-import { organization } from "./better-auth-organization-schema";
+import { organization, user } from "./auth-schema";
 import { createdAt, updatedAt } from "../schema-helpers";
 import { relations } from "drizzle-orm";
 
