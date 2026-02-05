@@ -17,7 +17,7 @@ import LoadingSwap from "@/components/LoadingSwap";
 import { authClient } from "@/lib/auth-client";
 import { Suspense } from "react";
 import Loading from "@/components/loading";
-import { SignUpFormData, signUpSchema } from "../auth-schemas";
+import { SignUpFormData, signUpSchema } from "../schemas";
 
 export default function SignUpForm() {
   return (

@@ -23,23 +23,6 @@ export const auth = betterAuth({
       maxAge: 5 * 60, // 5 minutes
     },
   },
-  // user: {
-  //   additionalFields: {
-  //     firstName: {
-  //       type: "string",
-  //       required: true,
-  //     },
-  //     lastName: {
-  //       type: "string",
-  //       required: true,
-  //     },
-  //     username: {
-  //       type: "string",
-  //       required: true,
-  //       unique: true,
-  //     },
-  //   },
-  // },
 });
 
 export type Session = typeof auth.$Infer.Session.session;

@@ -23,8 +23,7 @@ const SidebarUserSuspense = async () => {
 
   // Map better-auth user to UserType
   const mappedUser = {
-    first_name: user.firstName,
-    last_name: user.lastName,
+    name: user.name,
     email: user.email,
     image: user.image,
   };

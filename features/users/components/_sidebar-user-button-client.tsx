@@ -80,22 +80,19 @@ export default function SidebarUserButtonClient({ user }: { user: UserType }) {
   );
 }
 
-const UserInfo = ({ first_name, last_name, email, image }: UserType) => {
-  const nameInitials = first_name.slice(0, 1) + last_name.slice(0, 1);
+const UserInfo = ({ name, email, image }: UserType) => {
+  const nameInitials = name.slice(0, 1);
 
   return (
     <div className="flex items-center gap-2 overflow-hidden">
       <Avatar className="rounded-lg size-8">
-        <AvatarImage
-          src={image || undefined}
-          alt={`${first_name} ${last_name}`}
-        />
+        <AvatarImage src={image || undefined} alt={name} />
         <AvatarFallback className="uppercase bg-primary text-primary-foreground">
           {nameInitials}
         </AvatarFallback>
       </Avatar>
       <div className="flex flex-col flex-1 min-w-0 leading-tight group-data-[state=collapsed]:hidden">
-        <span className="truncate text-sm font-semibold">{`${first_name} ${last_name}`}</span>
+        <span className="truncate text-sm font-semibold">{name}</span>
         <span className="truncate text-xs">{email}</span>
       </div>
     </div>

@@ -7,8 +7,7 @@ import { Column } from "@tanstack/react-table";
 import { Key, ReactNode } from "react";
 
 export type UserType = {
-  first_name: string;
-  last_name: string;
+  name: string;
   email: string;
   image: string | null;
 };
@@ -62,10 +61,7 @@ export type JobListingApplicationType = Pick<
   "jobListingId" | "rating" | "status" | "createdAt"
 > & {
   coverLetterMarkDown: ReactNode | null;
-  user: Pick<
-    typeof user.$inferSelect,
-    "id" | "firstName" | "lastName" | "image"
-  > & {
+  user: Pick<typeof user.$inferSelect, "id" | "name" | "image"> & {
     resume:
       | (Pick<typeof userResumesTable.$inferSelect, "resumeFileUrl"> & {
           markdownSummary: ReactNode | null;

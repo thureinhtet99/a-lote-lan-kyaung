@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import { toast } from "sonner";
-import { signInSchema, type SignInFormData } from "../auth-schemas";
+import { signInSchema, type SignInFormData } from "../schemas";
 import LoadingSwap from "@/components/LoadingSwap";
 
 export default function SignInPage() {
