@@ -1,6 +1,6 @@
 import { pgTable, text } from "drizzle-orm/pg-core";
 import { userTable } from "./auth-schema";
-import { createdAt, updatedAt } from "../schema-helpers";
+import { created_at, updated_at } from "../schema-helpers";
 import { relations } from "drizzle-orm";
 
 export const resumeTable = pgTable("resumes", {
@@ -10,8 +10,8 @@ export const resumeTable = pgTable("resumes", {
   resumeFileUrl: text("resume_file_url").notNull(),
   resumeFileKey: text("resume_file_key").notNull(),
   // aiSummary: text("ai_summary"),
-  createdAt,
-  updatedAt,
+  created_at,
+  updated_at,
 });
 
 export const userResumesRelations = relations(resumeTable, ({ one }) => ({

@@ -12,8 +12,8 @@ import { and, eq } from "drizzle-orm";
 import {
   applicationStatus,
   ApplicationStatusType,
-  jobListingsTable,
-  userResumesTable,
+  jobListingTable,
+  resumeTable,
 } from "@/drizzle/schema";
 import { unstable_cache } from "next/cache";
 import { jobListingIdTag, userResumeTag } from "@/lib/dataCache";
@@ -76,17 +76,17 @@ export const createJobListingApplication = async (
 };
 
 const getUserResume = async (userId: string) => {
-  return await db.query.userResumesTable.findFirst({
-    where: eq(userResumesTable.userId, userId),
+  return await db.query.resumeTable.findFirst({
+    where: eq(resumeTable.userId, userId),
     columns: { userId: true },
   });
 };
 
 const getJobListingById = async (id: string) => {
-  return await db.query.jobListingsTable.findFirst({
+  return await db.query.jobListingTable.findFirst({
     where: and(
-      eq(jobListingsTable.id, id),
-      eq(jobListingsTable.status, "published"),
+      eq(jobListingTable.id, id),
+      eq(jobListingTable.status, "published"),
     ),
     columns: { id: true },
   });
@@ -111,7 +111,7 @@ export const updateJobListingApplicationStatus = async (
       message: "Invalid status",
     };
 
-  if (!(await hasOrgUserPermission("org:application:update")))
+  if (!(await hasOrgUserPermission("application.update")))
     return {
       error: true,
       message: "You don't have permission to update the status",
@@ -154,7 +154,7 @@ export const updateJobListingApplicationRating = async (
       message: "Invalid rating",
     };
 
-  if (!(await hasOrgUserPermission("org:application:update")))
+  if (!(await hasOrgUserPermission("application.update")))
     return {
       error: true,
       message: "You don't have permission to update the rating",
@@ -176,8 +176,8 @@ export const updateJobListingApplicationRating = async (
 };
 
 const getOrgIdByJobListing = async (id: string) => {
-  return db.query.jobListingsTable.findFirst({
-    where: eq(jobListingsTable.id, id),
+  return db.query.jobListingTable.findFirst({
+    where: eq(jobListingTable.id, id),
     columns: { organizationId: true },
   });
 };

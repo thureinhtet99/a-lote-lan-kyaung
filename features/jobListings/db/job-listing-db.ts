@@ -1,17 +1,17 @@
 "use server";
 
 import { db } from "@/drizzle/db";
-import { jobListingsTable } from "@/drizzle/schema";
+import { jobListingTable } from "@/drizzle/schema";
 import { and, count, desc, eq } from "drizzle-orm";
 import { revalidateJobListingCache } from "./cache/job-listing-cache";
 
 // Create
 export async function insertJobListingDb(
-  job: typeof jobListingsTable.$inferInsert,
+  job: typeof jobListingTable.$inferInsert,
 ) {
-  const [result] = await db.insert(jobListingsTable).values(job).returning({
-    id: jobListingsTable.id,
-    organizationId: jobListingsTable.organizationId,
+  const [result] = await db.insert(jobListingTable).values(job).returning({
+    id: jobListingTable.id,
+    organizationId: jobListingTable.organizationId,
   });
   revalidateJobListingCache({
     jobListingId: result.id,
@@ -24,15 +24,15 @@ export async function insertJobListingDb(
 // Update
 export async function updateJobListingDb(
   id: string,
-  job: Partial<typeof jobListingsTable.$inferInsert>,
+  job: Partial<typeof jobListingTable.$inferInsert>,
 ) {
   const [result] = await db
-    .update(jobListingsTable)
+    .update(jobListingTable)
     .set(job)
-    .where(eq(jobListingsTable.id, id))
+    .where(eq(jobListingTable.id, id))
     .returning({
-      id: jobListingsTable.id,
-      organizationId: jobListingsTable.organizationId,
+      id: jobListingTable.id,
+      organizationId: jobListingTable.organizationId,
     });
 
   revalidateJobListingCache({
@@ -45,8 +45,8 @@ export async function updateJobListingDb(
 
 // Get all job listings
 export const getAllJobListingsDb = async (orgId: string) => {
-  const result = await db.query.jobListingsTable.findMany({
-    where: eq(jobListingsTable.organizationId, orgId),
+  const result = await db.query.jobListingTable.findMany({
+    where: eq(jobListingTable.organizationId, orgId),
   });
 
   return result;
@@ -54,10 +54,10 @@ export const getAllJobListingsDb = async (orgId: string) => {
 
 // Get job listing by org id
 export const getJobListingByIdByOrgIdDb = async (id: string, orgId: string) => {
-  const result = await db.query.jobListingsTable.findFirst({
+  const result = await db.query.jobListingTable.findFirst({
     where: and(
-      eq(jobListingsTable.id, id),
-      eq(jobListingsTable.organizationId, orgId),
+      eq(jobListingTable.id, id),
+      eq(jobListingTable.organizationId, orgId),
     ),
   });
 
@@ -66,9 +66,9 @@ export const getJobListingByIdByOrgIdDb = async (id: string, orgId: string) => {
 
 // Get most recent job listing
 export const getMostRecentJobListingDb = async (orgId: string) => {
-  const result = await db.query.jobListingsTable.findFirst({
-    where: eq(jobListingsTable.organizationId, orgId),
-    orderBy: desc(jobListingsTable.createdAt),
+  const result = await db.query.jobListingTable.findFirst({
+    where: eq(jobListingTable.organizationId, orgId),
+    orderBy: desc(jobListingTable.created_at),
     columns: { id: true },
   });
 
@@ -79,8 +79,8 @@ export const getMostRecentJobListingDb = async (orgId: string) => {
 export const getJobListingByIdDb = async (jobListingId: string) => {
   const [result] = await db
     .select()
-    .from(jobListingsTable)
-    .where(eq(jobListingsTable.id, jobListingId));
+    .from(jobListingTable)
+    .where(eq(jobListingTable.id, jobListingId));
 
   return result;
 };
@@ -88,11 +88,11 @@ export const getJobListingByIdDb = async (jobListingId: string) => {
 // Delete
 export async function deleteJobListingDb(id: string) {
   const [result] = await db
-    .delete(jobListingsTable)
-    .where(eq(jobListingsTable.id, id))
+    .delete(jobListingTable)
+    .where(eq(jobListingTable.id, id))
     .returning({
-      id: jobListingsTable.id,
-      organizationId: jobListingsTable.organizationId,
+      id: jobListingTable.id,
+      organizationId: jobListingTable.organizationId,
     });
 
   revalidateJobListingCache({
@@ -105,14 +105,19 @@ export async function deleteJobListingDb(id: string) {
 
 // Get published job listings count
 export const getPublishedJobListingCountDb = async (orgId: string) => {
-  const [result] = await db
-    .select({ count: count() })
-    .from(jobListingsTable)
-    .where(
-      and(
-        eq(jobListingsTable.organizationId, orgId),
-        eq(jobListingsTable.status, "published"),
-      ),
-    );
-  return result?.count ?? 0;
+  try {
+    const [result] = await db
+      .select({ count: count() })
+      .from(jobListingTable)
+      .where(
+        and(
+          eq(jobListingTable.organizationId, orgId),
+          eq(jobListingTable.status, "published"),
+        ),
+      );
+    return result?.count ?? 0;
+  } catch (error) {
+    console.error("Error getting published job listing count:", error);
+    return 0;
+  }
 };

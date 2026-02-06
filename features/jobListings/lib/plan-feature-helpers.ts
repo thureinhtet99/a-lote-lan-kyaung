@@ -1,7 +1,7 @@
 import { getCurrentOrg } from "@/lib/auth-helpers";
 import { db } from "@/drizzle/db";
 import { and, count, eq } from "drizzle-orm";
-import { jobListingsTable } from "@/drizzle/schema";
+import { jobListingTable } from "@/drizzle/schema";
 import { getPublishedJobListingCountDb } from "../db/job-listing-db";
 
 // For now, we'll use simple limits. In the future, this can be integrated with a pricing/plan system
@@ -28,11 +28,11 @@ export const hasReachedMaxFeaturedJobListings = async () => {
 const getFeaturedJobListingCountDb = async (orgId: string) => {
   const [result] = await db
     .select({ count: count() })
-    .from(jobListingsTable)
+    .from(jobListingTable)
     .where(
       and(
-        eq(jobListingsTable.organizationId, orgId),
-        eq(jobListingsTable.isFeatured, true),
+        eq(jobListingTable.organizationId, orgId),
+        eq(jobListingTable.isFeatured, true),
       ),
     );
   return result?.count ?? 0;

@@ -11,36 +11,42 @@ async function seed() {
     await db.delete(organizationTable);
     console.log("Starting seed...");
 
-    const organizations = [
+    const allOrganizations = [
       {
-        id: generateId(),
+        id: "1",
         name: "first organization",
-        slug: "organization-1",
+        slug: `org-1-${generateId()}`,
         logo: null,
         metadata: null,
         createdAt: new Date(),
       },
       {
-        id: generateId(),
+        id: "2",
         name: "second organization",
-        slug: "organization-1",
+        slug: `org-2-${generateId()}`,
         logo: null,
         metadata: null,
         createdAt: new Date(),
       },
       {
-        id: generateId(),
+        id: "3",
         name: "third organization",
-        slug: "organization-1",
+        slug: `org-3-${generateId()}`,
         logo: null,
         metadata: null,
         createdAt: new Date(),
       },
     ];
 
+    // Insert job listings
+    for (const organizations of allOrganizations) {
+      await db.insert(organizationTable).values(organizations);
+      console.log(`✅ Inserted: ${organizations.name} (${organizations.slug})`);
+    }
+
     const insertedOrganizations = await db
       .insert(organizationTable)
-      .values(organizations)
+      .values(allOrganizations)
       .returning();
 
     const allJobListings = insertedOrganizations.flatMap((org) => [
@@ -67,12 +73,12 @@ We are looking for a Senior Full Stack Developer to join our growing engineering
         wageInterval: "yearly" as const,
         state: "California",
         city: "San Francisco",
-        isFeatured: true,
+        is_featured: true,
         locationRequirement: "hybrid" as const,
         experienceLevel: "senior" as const,
         status: "published" as const,
         type: "full-time" as const,
-        postedAt: new Date(),
+        posted_at: new Date(),
       },
       {
         organizationId: org.id,
@@ -95,12 +101,12 @@ Join our team as a Frontend Developer and help build amazing user experiences wi
         wageInterval: "yearly" as const,
         state: "New York",
         city: "New York",
-        isFeatured: false,
+        is_featured: false,
         locationRequirement: "remote" as const,
         experienceLevel: "mid-level" as const,
         status: "published" as const,
         type: "full-time" as const,
-        postedAt: new Date(),
+        posted_at: new Date(),
       },
       {
         organizationId: org.id,
@@ -123,12 +129,12 @@ We're seeking a motivated Junior Backend Developer to join our team and grow the
         wageInterval: "yearly" as const,
         state: "Texas",
         city: "Austin",
-        isFeatured: false,
+        is_featured: false,
         locationRequirement: "on-site" as const,
         experienceLevel: "junior" as const,
         status: "published" as const,
         type: "full-time" as const,
-        postedAt: new Date(),
+        posted_at: new Date(),
       },
       {
         organizationId: org.id,
@@ -151,12 +157,12 @@ We're looking for a talented UI/UX Designer to work part-time on exciting projec
         wageInterval: "hourly" as const,
         state: "Washington",
         city: "Seattle",
-        isFeatured: false,
+        is_featured: false,
         locationRequirement: "hybrid" as const,
         experienceLevel: "mid-level" as const,
         status: "published" as const,
         type: "part-time" as const,
-        postedAt: new Date(),
+        posted_at: new Date(),
       },
       {
         organizationId: org.id,
@@ -179,12 +185,12 @@ Join our engineering team for a hands-on internship experience where you'll work
         wageInterval: "hourly" as const,
         state: "California",
         city: "Palo Alto",
-        isFeatured: false,
+        is_featured: false,
         locationRequirement: "on-site" as const,
         experienceLevel: "junior" as const,
         status: "published" as const,
         type: "internship" as const,
-        postedAt: new Date(),
+        posted_at: new Date(),
       },
       {
         organizationId: org.id,
@@ -207,7 +213,7 @@ We are planning to hire a DevOps Engineer to help scale our infrastructure and i
         wageInterval: "yearly" as const,
         state: "Colorado",
         city: "Denver",
-        isFeatured: false,
+        is_featured: false,
         locationRequirement: "remote" as const,
         experienceLevel: "senior" as const,
         status: "draft" as const,
@@ -234,7 +240,7 @@ This position was for developing cross-platform mobile applications using React 
         wageInterval: "yearly" as const,
         state: "Florida",
         city: "Miami",
-        isFeatured: false,
+        is_featured: false,
         locationRequirement: "hybrid" as const,
         experienceLevel: "mid-level" as const,
         status: "delisted" as const,

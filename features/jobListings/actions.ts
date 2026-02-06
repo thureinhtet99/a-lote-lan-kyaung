@@ -14,7 +14,7 @@ import {
   updateJobListingDb,
 } from "./db/job-listing-db";
 import { hasOrgUserPermission } from "@/lib/permission";
-import { jobListingsTable } from "@/drizzle/schema";
+import { jobListingTable } from "@/drizzle/schema";
 import { db } from "@/drizzle/db";
 import { and, eq } from "drizzle-orm";
 
@@ -23,7 +23,7 @@ export const createJobListing = async (
   unsafeData: z.infer<typeof jobListingSchema>,
 ) => {
   const { orgId } = await getCurrentOrg();
-  if (orgId == null || !(await hasOrgUserPermission("org:job_listing:create")))
+  if (orgId == null || !(await hasOrgUserPermission("job_listing.create")))
     return {
       error: true,
       message: "You don't have permission to create this job listing",
@@ -55,7 +55,7 @@ export const updateJobListing = async (
   unsafeData: z.infer<typeof jobListingSchema>,
 ) => {
   const { orgId } = await getCurrentOrg();
-  if (orgId == null || !(await hasOrgUserPermission("org:job_listing:update")))
+  if (orgId == null || !(await hasOrgUserPermission("job_listing.update")))
     return {
       error: true,
       message: "You don't have permission to update this job listing",
@@ -87,10 +87,10 @@ export const updateJobListing = async (
 
 // Get by org id
 const getJobListingByOrgIdDb = async (id: string, orgId: string) => {
-  return await db.query.jobListingsTable.findFirst({
+  return await db.query.jobListingTable.findFirst({
     where: and(
-      eq(jobListingsTable.id, id),
-      eq(jobListingsTable.organizationId, orgId),
+      eq(jobListingTable.id, id),
+      eq(jobListingTable.organizationId, orgId),
     ),
   });
 };
@@ -110,7 +110,7 @@ export const toggleJobListingStatus = async (id: string) => {
 
   const newStatus = nextJobListingStatus(jobListing.status);
   if (
-    !(await hasOrgUserPermission("org:job_listing:update")) ||
+    !(await hasOrgUserPermission("job_listing.update")) ||
     (newStatus === "published" && (await hasReachedMaxPublishedJobListings()))
   ) {
     return output;
@@ -119,8 +119,8 @@ export const toggleJobListingStatus = async (id: string) => {
   await updateJobListingDb(id, {
     status: newStatus,
     isFeatured: newStatus === "published" ? undefined : false,
-    postedAt:
-      newStatus === "published" && jobListing.postedAt == null
+    posted_at:
+      newStatus === "published" && jobListing.posted_at == null
         ? new Date()
         : undefined,
   });
@@ -149,7 +149,7 @@ export const toggleJobListingFeaturedStatus = async (id: string) => {
 
   const newFeaturedStatus = !jobListing.isFeatured;
   if (
-    !(await hasOrgUserPermission("org:job_listing:update")) ||
+    !(await hasOrgUserPermission("job_listing.update")) ||
     (newFeaturedStatus && (await hasReachedMaxFeaturedJobListings()))
   ) {
     return output;
@@ -179,7 +179,7 @@ export const deleteJobListing = async (id: string) => {
   const jobListing = await getJobListingByOrgIdDb(id, orgId);
   if (jobListing == null) return output;
 
-  if (!(await hasOrgUserPermission("org:job_listing:delete"))) return output;
+  if (!(await hasOrgUserPermission("job_listing.delete"))) return output;
 
   await deleteJobListingDb(id);
 

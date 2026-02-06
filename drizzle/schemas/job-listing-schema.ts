@@ -8,7 +8,7 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
-import { createdAt, id, updatedAt } from "../schema-helpers";
+import { created_at, id, updated_at } from "../schema-helpers";
 import { relations } from "drizzle-orm";
 import { applicationTable } from "./application-schema";
 import { organizationTable } from "./auth-schema";
@@ -44,7 +44,7 @@ export const jobListingTable = pgTable(
   "job_listings",
   {
     id,
-    organizationId: text()
+    organizationId: text("organization_id")
       .references(() => organizationTable.id, { onDelete: "cascade" })
       .notNull(),
     title: varchar({ length: 255 }).notNull(),
@@ -53,14 +53,14 @@ export const jobListingTable = pgTable(
     wageInterval: wageIntervalEnum().notNull(),
     state: varchar(),
     city: varchar(),
-    isFeatured: boolean().notNull().default(false),
+    isFeatured: boolean("is_featured").notNull().default(false),
     locationRequirement: locationRequirementEnum().notNull(),
     experienceLevel: experienceLevelEnum().notNull(),
     status: jobListingStatusEnum().notNull().default("draft"),
     type: jobListingTypeEnum().notNull(),
-    postedAt: timestamp({ withTimezone: true }),
-    createdAt,
-    updatedAt,
+    posted_at: timestamp("posted_at", { withTimezone: true }),
+    created_at,
+    updated_at,
   },
   (table) => [index().on(table.state)],
 );

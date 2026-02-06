@@ -4,7 +4,7 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
 } from "@/components/ui/sidebar";
-import { ClipboardListIcon, LogInIcon, Plus, PlusIcon } from "lucide-react";
+import { ClipboardListIcon, LogInIcon, PlusIcon } from "lucide-react";
 import { ReactNode, Suspense } from "react";
 import Link from "next/link";
 import AppSidebar from "@/components/sidebar/app-sidebar";
@@ -57,7 +57,6 @@ const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
                 className="w-full flex items-center justify-between"
               >
                 Create job listings here
-                <Plus />
               </Link>
             </SidebarGroupLabel>
 

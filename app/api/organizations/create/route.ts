@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/drizzle/db";
-import { organization, member } from "@/drizzle/schema";
+import { organizationTable, memberTable } from "@/drizzle/schema";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -31,26 +31,24 @@ export async function POST(request: Request) {
 
     // Create organization
     const newOrg = await db
-      .insert(organization)
+      .insert(organizationTable)
       .values({
         id: generateId(),
         name,
         slug: slug || name.toLowerCase().replace(/\s+/g, "-"),
         logo: null,
         createdAt: new Date(),
-        updatedAt: new Date(),
         metadata: null,
       })
       .returning();
 
     // Add creator as admin member
-    await db.insert(member).values({
+    await db.insert(memberTable).values({
       id: generateId(),
       organizationId: newOrg[0].id,
       userId: session.user.id,
       role: "admin",
       createdAt: new Date(),
-      updatedAt: new Date(),
     });
 
     return NextResponse.json(newOrg[0], { status: 201 });

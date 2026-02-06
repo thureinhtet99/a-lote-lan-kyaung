@@ -63,7 +63,7 @@ export const getJobListingApplicationsDb = async (jobListingId: string) => {
       coverLetter: true,
       rating: true,
       status: true,
-      createdAt: true,
+      created_at: true,
     },
     with: {
       user: {
@@ -103,7 +103,7 @@ export const getJobListingWithApplicationsDb = async (orgId: string) => {
       eq(jobListingTable.id, applicationTable.jobListingId),
     )
     .groupBy(applicationTable.jobListingId, jobListingTable.id)
-    .orderBy(desc(jobListingTable.createdAt));
+    .orderBy(desc(jobListingTable.created_at));
 
   return result;
 };

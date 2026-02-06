@@ -84,21 +84,21 @@ CREATE TABLE "verifications" (
 --> statement-breakpoint
 CREATE TABLE "job_listings" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"organizationId" text NOT NULL,
+	"organization_id" text NOT NULL,
 	"title" varchar(255) NOT NULL,
 	"description" text,
 	"wage" integer NOT NULL,
 	"wageInterval" "wage_interval" NOT NULL,
 	"state" varchar,
 	"city" varchar,
-	"isFeatured" boolean DEFAULT false NOT NULL,
+	"is_featured" boolean DEFAULT false NOT NULL,
 	"locationRequirement" "location_requirement" NOT NULL,
 	"experienceLevel" "experience" NOT NULL,
 	"status" "status" DEFAULT 'draft' NOT NULL,
 	"type" "type" NOT NULL,
-	"postedAt" timestamp with time zone,
-	"createdAt" timestamp with time zone DEFAULT now() NOT NULL,
-	"updatedAt" timestamp with time zone DEFAULT now() NOT NULL
+	"posted_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "applications" (
@@ -107,8 +107,8 @@ CREATE TABLE "applications" (
 	"cover_letter" text,
 	"rating" integer,
 	"status" "application_status" DEFAULT 'applied' NOT NULL,
-	"createdAt" timestamp with time zone DEFAULT now() NOT NULL,
-	"updatedAt" timestamp with time zone DEFAULT now() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "applications_job_listing_id_user_id_pk" PRIMARY KEY("job_listing_id","user_id")
 );
 --> statement-breakpoint
@@ -116,15 +116,15 @@ CREATE TABLE "resumes" (
 	"user_id" text PRIMARY KEY NOT NULL,
 	"resume_file_url" text NOT NULL,
 	"resume_file_key" text NOT NULL,
-	"createdAt" timestamp with time zone DEFAULT now() NOT NULL,
-	"updatedAt" timestamp with time zone DEFAULT now() NOT NULL
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "user_notification_settings" (
 	"user_id" text PRIMARY KEY NOT NULL,
 	"new_job_email_notification" boolean DEFAULT false NOT NULL,
-	"createdAt" timestamp with time zone DEFAULT now() NOT NULL,
-	"updatedAt" timestamp with time zone DEFAULT now() NOT NULL
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "organization_user_settings" (
@@ -132,8 +132,8 @@ CREATE TABLE "organization_user_settings" (
 	"organization_id" text NOT NULL,
 	"new_application_email_notification" boolean DEFAULT false NOT NULL,
 	"minimumRating" integer,
-	"createdAt" timestamp with time zone DEFAULT now() NOT NULL,
-	"updatedAt" timestamp with time zone DEFAULT now() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "organization_user_settings_user_id_organization_id_pk" PRIMARY KEY("user_id","organization_id")
 );
 --> statement-breakpoint
@@ -143,7 +143,7 @@ ALTER TABLE "invitations" ADD CONSTRAINT "invitations_inviter_id_users_id_fk" FO
 ALTER TABLE "members" ADD CONSTRAINT "members_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "members" ADD CONSTRAINT "members_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "job_listings" ADD CONSTRAINT "job_listings_organizationId_organizations_id_fk" FOREIGN KEY ("organizationId") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "job_listings" ADD CONSTRAINT "job_listings_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "applications" ADD CONSTRAINT "applications_job_listing_id_job_listings_id_fk" FOREIGN KEY ("job_listing_id") REFERENCES "public"."job_listings"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "applications" ADD CONSTRAINT "applications_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "resumes" ADD CONSTRAINT "resumes_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

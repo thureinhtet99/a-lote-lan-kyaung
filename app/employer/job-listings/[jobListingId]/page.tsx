@@ -56,7 +56,7 @@ const SuspendedComponent = async ({ params }: ParamsType) => {
   if (jobListing == null) return notFound();
 
   return (
-    <div className="space-y-8 max-w-8xl mx-auto p-4 @container">
+    <div className="space-y-8 max-w-7xl mx-auto p-4 @container">
       <div className="flex items-center justify-between gap-4 @max-4xl:flex-col @max-4xl:items-start">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
@@ -155,6 +155,7 @@ const Applications = async ({ jobListingId }: { jobListingId: string }) => {
     <ApplicationTable
       applications={applications.map((app) => ({
         ...app,
+        createdAt: app.created_at,
         user: {
           ...app.user,
           resume: app.user.resume

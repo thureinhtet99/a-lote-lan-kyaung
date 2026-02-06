@@ -8,7 +8,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { jobListingTable } from "./job-listing-schema";
 import { userTable } from "./auth-schema";
-import { createdAt, updatedAt } from "../schema-helpers";
+import { created_at, updated_at } from "../schema-helpers";
 import { relations } from "drizzle-orm";
 
 export const applicationStatus = [
@@ -39,8 +39,8 @@ export const applicationTable = pgTable(
     coverLetter: text("cover_letter"),
     rating: integer(),
     status: applicationStatusEnum().notNull().default("applied"),
-    createdAt,
-    updatedAt,
+    created_at,
+    updated_at,
   },
   (table) => [primaryKey({ columns: [table.jobListingId, table.userId] })],
 );

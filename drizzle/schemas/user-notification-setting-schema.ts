@@ -1,6 +1,6 @@
 import { boolean, pgTable, text } from "drizzle-orm/pg-core";
 import { userTable } from "./auth-schema";
-import { createdAt, updatedAt } from "../schema-helpers";
+import { created_at, updated_at } from "../schema-helpers";
 import { relations } from "drizzle-orm";
 
 export const userNotificationSettingsTable = pgTable(
@@ -13,8 +13,8 @@ export const userNotificationSettingsTable = pgTable(
       .notNull()
       .default(false),
     // aiPrompt: text("ai_prompt"),
-    createdAt,
-    updatedAt,
+    created_at,
+    updated_at,
   },
 );
 

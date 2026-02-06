@@ -6,7 +6,7 @@ import {
   text,
 } from "drizzle-orm/pg-core";
 import { organizationTable, userTable } from "./auth-schema";
-import { createdAt, updatedAt } from "../schema-helpers";
+import { created_at, updated_at } from "../schema-helpers";
 import { relations } from "drizzle-orm";
 
 export const organizationUserSettingsTable = pgTable(
@@ -24,8 +24,8 @@ export const organizationUserSettingsTable = pgTable(
       .notNull()
       .default(false),
     minimumRating: integer(),
-    createdAt,
-    updatedAt,
+    created_at,
+    updated_at,
   },
   (table) => [primaryKey({ columns: [table.userId, table.organizationId] })],
 );
