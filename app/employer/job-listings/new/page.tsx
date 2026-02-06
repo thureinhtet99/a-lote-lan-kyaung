@@ -8,7 +8,7 @@ import { Suspense } from "react";
 import EmployerLoading from "../../loading";
 import { getAllJobListingsDb } from "@/features/jobListings/db/job-listing-db";
 import { getCurrentOrg } from "@/lib/auth-helpers";
-import { hasOrgUserPermission } from "@/lib/org-user-permission";
+import { hasOrgUserPermission } from "@/lib/permission";
 
 export default function NewJobListingPage() {
   return (

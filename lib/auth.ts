@@ -1,12 +1,13 @@
-import { betterAuth } from "better-auth";
+import { betterAuth } from "better-auth/minimal";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/drizzle/db";
-import { organization } from "better-auth/plugins";
+import { admin, organization } from "better-auth/plugins";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
   }),
+  usePlural: true,
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
@@ -15,7 +16,6 @@ export const auth = betterAuth({
   plugins: [
     organization({
       allowUserToCreateOrganization: true,
-      organizationLimit: 3,
     }),
   ],
   session: {

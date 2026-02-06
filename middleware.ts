@@ -1,38 +1,31 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getSessionCookie } from "better-auth/cookies";
+import { APP_ROUTES } from "./config/appConfig";
 
-const publicRoutes = [
-  "/sign-in",
-  "/sign-up",
-  "/",
-  "/job-listings",
-  "/api/auth",
-];
+const publicRoutes = ["/sign-in", "/sign-up", "/", "/job-listings"];
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const sessionCookie = getSessionCookie(request);
 
   // Check if route is public
   const isPublicRoute = publicRoutes.some((route) =>
     pathname.startsWith(route),
   );
 
-  // Edge-safe check: only rely on presence of the session cookie.
-  // Full validation happens in route handlers / server components.
-  const sessionToken = request.cookies.get("better-auth.session_token")?.value;
-  const hasSession = Boolean(sessionToken);
-
   // Redirect to sign-in if accessing protected route without session
-  if (!isPublicRoute && !hasSession) {
-    const signInUrl = new URL("/sign-in", request.url);
+  if (!isPublicRoute && !sessionCookie) {
+    const signInUrl = new URL(APP_ROUTES.SIGN_IN, request.url);
     signInUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(signInUrl);
   }
 
   // Redirect to home if accessing auth routes while logged in
   if (
-    (pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up")) &&
-    hasSession
+    (pathname.startsWith(APP_ROUTES.SIGN_IN) ||
+      pathname.startsWith(APP_ROUTES.SIGN_UP)) &&
+    sessionCookie
   ) {
     return NextResponse.redirect(new URL("/", request.url));
   }

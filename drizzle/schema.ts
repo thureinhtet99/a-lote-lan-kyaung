@@ -1,9 +1,9 @@
 // Better Auth schemas
-export * from "./schema/auth-schema";
+export * from "./schemas/auth-schema";
 
 // Application schemas
-export * from "./schema/job-listing-schema";
-export * from "./schema/job-listing-application-schema";
-export * from "./schema/user-resume-schema";
-export * from "./schema/user-notification-setting-schema";
-export * from "./schema/organization-user-setting-schema";
+export * from "./schemas/job-listing-schema";
+export * from "./schemas/application-schema";
+export * from "./schemas/resume-schema";
+export * from "./schemas/user-notification-setting-schema";
+export * from "./schemas/organization-user-setting-schema";
