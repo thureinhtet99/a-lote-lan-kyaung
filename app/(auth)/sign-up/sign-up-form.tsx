@@ -17,6 +17,7 @@ import LoadingSwap from "@/components/LoadingSwap";
 import { authClient } from "@/lib/auth-client";
 import { SignUpFormData, signUpSchema } from "../schemas";
 import { useRouter } from "next/navigation";
+import { APP_ROUTES } from "@/config/appConfig";
 
 export default function SignUpForm() {
   const router = useRouter();
@@ -36,7 +37,7 @@ export default function SignUpForm() {
         name: data.name,
         email: data.email,
         password: data.password,
-        callbackURL: "/",
+        callbackURL: APP_ROUTES.SIGN_IN,
       },
       {
         onRequest: () => {

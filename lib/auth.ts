@@ -2,15 +2,33 @@ import { betterAuth } from "better-auth/minimal";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/drizzle/db";
 import { organization } from "better-auth/plugins";
+import {
+  accountTable,
+  invitationTable,
+  memberTable,
+  organizationTable,
+  sessionTable,
+  userTable,
+  verificationTable,
+} from "@/drizzle/schema";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
+    schema: {
+      user: userTable,
+      session: sessionTable,
+      account: accountTable,
+      verification: verificationTable,
+      organization: organizationTable,
+      member: memberTable,
+      invitation: invitationTable,
+    },
   }),
   usePlural: true,
   emailAndPassword: {
     enabled: true,
-    autoSignIn: true,
+    autoSignIn: false,
     requireEmailVerification: false, // Set to true if you want email verification
   },
   plugins: [
