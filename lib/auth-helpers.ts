@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/drizzle/db";
 import { eq } from "drizzle-orm";
-import { user, organization } from "@/drizzle/schema";
+import { userTable, organizationTable } from "@/drizzle/schema";
 import { headers } from "next/headers";
 import { cache } from "react";
 
@@ -23,8 +23,8 @@ export const getCurrentUser = cache(async ({ allData = false } = {}) => {
 
 // Fetch a user from db
 const getUserById = async (id: string) => {
-  return await db.query.user.findFirst({
-    where: eq(user.id, id),
+  return await db.query.userTable.findFirst({
+    where: eq(userTable.id, id),
   });
 };
 
@@ -54,8 +54,8 @@ export const getCurrentOrg = async () => {
 
 // Fetch an org from db
 const getOrgById = async (id: string) => {
-  return await db.query.organization.findFirst({
-    where: eq(organization.id, id),
+  return await db.query.organizationTable.findFirst({
+    where: eq(organizationTable.id, id),
   });
 };
 

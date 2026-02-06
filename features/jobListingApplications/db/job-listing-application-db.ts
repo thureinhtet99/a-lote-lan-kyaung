@@ -1,24 +1,18 @@
 "use server";
 
 import { db } from "@/drizzle/db";
-import {
-  jobListingApplicationsTable,
-  jobListingsTable,
-} from "@/drizzle/schema";
+import { applicationTable, jobListingTable } from "@/drizzle/schema";
 import { revalidateJobListingApplicationCache } from "./cache/jobListingApplications";
 import { and, count, desc, eq } from "drizzle-orm";
 
 // Create
 export async function insertJobListingApplicationDb(
-  data: typeof jobListingApplicationsTable.$inferInsert,
+  data: typeof applicationTable.$inferInsert,
 ) {
-  const [result] = await db
-    .insert(jobListingApplicationsTable)
-    .values(data)
-    .returning({
-      jobListingId: jobListingApplicationsTable.jobListingId,
-      userId: jobListingApplicationsTable.userId,
-    });
+  const [result] = await db.insert(applicationTable).values(data).returning({
+    jobListingId: applicationTable.jobListingId,
+    userId: applicationTable.userId,
+  });
   revalidateJobListingApplicationCache({
     jobListingId: result.jobListingId,
     userId: result.userId,
@@ -36,20 +30,20 @@ export async function updateJobListingApplicationDb(
     jobListingId: string;
     userId: string;
   },
-  data: Partial<typeof jobListingApplicationsTable.$inferInsert>,
+  data: Partial<typeof applicationTable.$inferInsert>,
 ) {
   const [result] = await db
-    .update(jobListingApplicationsTable)
+    .update(applicationTable)
     .set(data)
     .where(
       and(
-        eq(jobListingApplicationsTable.jobListingId, jobListingId),
-        eq(jobListingApplicationsTable.userId, userId),
+        eq(applicationTable.jobListingId, jobListingId),
+        eq(applicationTable.userId, userId),
       ),
     )
     .returning({
-      jobListingId: jobListingApplicationsTable.jobListingId,
-      userId: jobListingApplicationsTable.userId,
+      jobListingId: applicationTable.jobListingId,
+      userId: applicationTable.userId,
     });
 
   revalidateJobListingApplicationCache({
@@ -62,8 +56,8 @@ export async function updateJobListingApplicationDb(
 
 // Get applications by job listing id db
 export const getJobListingApplicationsDb = async (jobListingId: string) => {
-  const result = await db.query.jobListingApplicationsTable.findMany({
-    where: eq(jobListingApplicationsTable.jobListingId, jobListingId),
+  const result = await db.query.applicationTable.findMany({
+    where: eq(applicationTable.jobListingId, jobListingId),
     columns: {
       jobListingId: true,
       coverLetter: true,
@@ -75,15 +69,14 @@ export const getJobListingApplicationsDb = async (jobListingId: string) => {
       user: {
         columns: {
           id: true,
-          first_name: true,
-          last_name: true,
+          name: true,
           image: true,
         },
         with: {
           resume: {
             columns: {
               resumeFileUrl: true,
-              aiSummary: true,
+              // aiSummary: true,
             },
           },
         },
@@ -98,19 +91,19 @@ export const getJobListingApplicationsDb = async (jobListingId: string) => {
 export const getJobListingWithApplicationsDb = async (orgId: string) => {
   const result = await db
     .select({
-      id: jobListingsTable.id,
-      title: jobListingsTable.title,
-      status: jobListingsTable.status,
-      applications: count(jobListingApplicationsTable.userId),
+      id: jobListingTable.id,
+      title: jobListingTable.title,
+      status: jobListingTable.status,
+      applications: count(applicationTable.userId),
     })
-    .from(jobListingsTable)
-    .where(eq(jobListingsTable.organizationId, orgId))
+    .from(jobListingTable)
+    .where(eq(jobListingTable.organizationId, orgId))
     .leftJoin(
-      jobListingApplicationsTable,
-      eq(jobListingsTable.id, jobListingApplicationsTable.jobListingId),
+      applicationTable,
+      eq(jobListingTable.id, applicationTable.jobListingId),
     )
-    .groupBy(jobListingApplicationsTable.jobListingId, jobListingsTable.id)
-    .orderBy(desc(jobListingsTable.createdAt));
+    .groupBy(applicationTable.jobListingId, jobListingTable.id)
+    .orderBy(desc(jobListingTable.createdAt));
 
   return result;
 };

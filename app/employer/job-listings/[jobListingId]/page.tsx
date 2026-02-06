@@ -8,8 +8,6 @@ import { formatJobListingStatus } from "@/features/jobListings/lib/formatters";
 import { isUUID } from "@/features/jobListings/lib/utils";
 import { APP_ROUTES } from "@/config/appConfig";
 import { jobListingApplicationsTag, jobListingIdTag } from "@/lib/dataCache";
-import { getCurrentOrg } from "@/services/clerk/lib/get-current-auth";
-import { hasOrgUserPermission } from "@/services/clerk/lib/org-user-permission";
 import { EditIcon, Trash2Icon } from "lucide-react";
 import { unstable_cache } from "next/cache";
 import Link from "next/link";
@@ -27,6 +25,8 @@ import StatusToggleButton from "../../components/status-toggle-button";
 import FeatureToggleButton from "../../components/feature-toggle-button";
 import Loading from "@/components/loading";
 import { getJobListingApplicationsDb } from "@/features/jobListingApplications/db/job-listing-application-db";
+import { hasOrgUserPermission } from "@/lib/permission";
+import { getCurrentOrg } from "@/lib/auth-helpers";
 
 export default function JobListingByIdPage(props: ParamsType) {
   return (
@@ -73,7 +73,7 @@ const SuspendedComponent = async ({ params }: ParamsType) => {
         <div className="flex items-center gap-2 empty:-mt-4">
           {/* Edit button */}
           <CheckCondition
-            condition={() => hasOrgUserPermission("job_listing:update")}
+            condition={() => hasOrgUserPermission("job_listing.update")}
           >
             <Button asChild variant="outline">
               <Link
@@ -106,7 +106,7 @@ const SuspendedComponent = async ({ params }: ParamsType) => {
 
           {/* Delete button */}
           <CheckCondition
-            condition={() => hasOrgUserPermission("job_listing:delete")}
+            condition={() => hasOrgUserPermission("job_listing.delete")}
           >
             <ActionButton
               action={deleteJobListing.bind(null, jobListing.id)}
@@ -160,8 +160,8 @@ const Applications = async ({ jobListingId }: { jobListingId: string }) => {
           resume: app.user.resume
             ? {
                 ...app.user.resume,
-                markdownSummary: app.user.resume.aiSummary ? (
-                  <MarkdownRenderer source={app.user.resume.aiSummary} />
+                markdownSummary: app.user.resume.resumeFileUrl ? ( // replace resumeFileUrl wit aiSummary later
+                  <MarkdownRenderer source={app.user.resume.resumeFileUrl} />
                 ) : null,
               }
             : null,
@@ -170,12 +170,8 @@ const Applications = async ({ jobListingId }: { jobListingId: string }) => {
           <MarkdownRenderer source={app.coverLetter} />
         ) : null,
       }))}
-      canUpdateRating={await hasOrgUserPermission(
-        "job_listing_application:change_rating",
-      )}
-      canUpdateStatus={await hasOrgUserPermission(
-        "job_listing_application:change_status",
-      )}
+      canUpdateRating={await hasOrgUserPermission("application.change_rating")}
+      canUpdateStatus={await hasOrgUserPermission("application.change_status")}
     />
   );
 };

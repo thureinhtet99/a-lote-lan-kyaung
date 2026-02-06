@@ -1,9 +1,9 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
-import { upsertUserResumeDb } from "@/features/users/db/userResume";
+import { upsertUserResumeDb } from "@/features/users/db/resume";
 import { db } from "@/drizzle/db";
 import { eq } from "drizzle-orm";
-import { userResumesTable } from "@/drizzle/schema";
+import { resumeTable } from "@/drizzle/schema";
 import { utapi } from "./client";
 import { getCurrentUser } from "@/lib/auth-helpers";
 
@@ -40,8 +40,8 @@ export const ourFileRouter = {
 } satisfies FileRouter;
 
 const getUserResumeFileKey = async (userId: string) => {
-  const data = await db.query.userResumesTable.findFirst({
-    where: eq(userResumesTable.userId, userId),
+  const data = await db.query.resumeTable.findFirst({
+    where: eq(resumeTable.userId, userId),
     columns: { resumeFileKey: true },
   });
 

@@ -2,10 +2,10 @@ import { and, desc, eq, ilike, or, SQL } from "drizzle-orm";
 import { db } from "@/drizzle/db";
 import {
   experienceLevels,
-  jobListingsTable,
+  jobListingTable,
   jobListingTypes,
   locationRequirements,
-  organization,
+  organizationTable,
 } from "@/drizzle/schema";
 import { Suspense } from "react";
 import Link from "next/link";
@@ -55,42 +55,42 @@ const getAllJobListings = async (
 
   if (searchParams.title)
     whereConditions.push(
-      ilike(jobListingsTable.title, `%${searchParams.title}%`),
+      ilike(jobListingTable.title, `%${searchParams.title}%`),
     );
 
   if (searchParams.location)
     whereConditions.push(
-      eq(jobListingsTable.locationRequirement, searchParams.location),
+      eq(jobListingTable.locationRequirement, searchParams.location),
     );
 
   if (searchParams.city)
-    whereConditions.push(ilike(jobListingsTable.city, searchParams.city));
+    whereConditions.push(ilike(jobListingTable.city, searchParams.city));
 
   if (searchParams.state)
-    whereConditions.push(eq(jobListingsTable.state, searchParams.state));
+    whereConditions.push(eq(jobListingTable.state, searchParams.state));
 
   if (searchParams.experience_level)
     whereConditions.push(
-      eq(jobListingsTable.experienceLevel, searchParams.experience_level),
+      eq(jobListingTable.experienceLevel, searchParams.experience_level),
     );
 
   if (searchParams.type)
-    whereConditions.push(eq(jobListingsTable.type, searchParams.type));
+    whereConditions.push(eq(jobListingTable.type, searchParams.type));
 
   if (searchParams.jobIds)
     whereConditions.push(
-      or(...searchParams.jobIds.map((jobId) => eq(jobListingsTable.id, jobId))),
+      or(...searchParams.jobIds.map((jobId) => eq(jobListingTable.id, jobId))),
     );
 
-  return await db.query.jobListingsTable.findMany({
+  return await db.query.jobListingTable.findMany({
     where: or(
       jobListingId
         ? and(
-            eq(jobListingsTable.status, "published"),
-            eq(jobListingsTable.id, jobListingId),
+            eq(jobListingTable.status, "published"),
+            eq(jobListingTable.id, jobListingId),
           )
         : undefined,
-      and(eq(jobListingsTable.status, "published"), ...whereConditions),
+      and(eq(jobListingTable.status, "published"), ...whereConditions),
     ),
     with: {
       organization: {
@@ -100,10 +100,7 @@ const getAllJobListings = async (
         },
       },
     },
-    orderBy: [
-      desc(jobListingsTable.isFeatured),
-      desc(jobListingsTable.postedAt),
-    ],
+    orderBy: [desc(jobListingTable.isFeatured), desc(jobListingTable.postedAt)],
   });
 };
 
@@ -184,7 +181,7 @@ const JobListingListItem = ({
   organization: org,
 }: {
   jobListing: Pick<
-    typeof jobListingsTable.$inferSelect,
+    typeof jobListingTable.$inferSelect,
     | "title"
     | "state"
     | "city"
@@ -196,7 +193,10 @@ const JobListingListItem = ({
     | "locationRequirement"
     | "isFeatured"
   >;
-  organization: Pick<typeof organization.$inferSelect, "name" | "logo"> | null;
+  organization: Pick<
+    typeof organizationTable.$inferSelect,
+    "name" | "logo"
+  > | null;
 }) => {
   const orgNameInitial =
     org?.name
