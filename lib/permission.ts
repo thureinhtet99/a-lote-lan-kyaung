@@ -11,8 +11,11 @@ export type UserPermissionType =
   | "job_listing.create"
   | "job_listing.update"
   | "job_listing.delete"
+  | "job_listing.change_status"
   | "application.read"
   | "application.update"
+  | "application.change_rating"
+  | "application.change_status"
   | "member.invite"
   | "member.remove";
 
@@ -26,8 +29,11 @@ const rolePermissions: Record<string, UserPermissionType[]> = {
     "job_listing.create",
     "job_listing.update",
     "job_listing.delete",
+    "job_listing.change_status",
     "application.read",
     "application.update",
+    "application.change_rating",
+    "application.change_status",
     "member.invite",
     "member.remove",
   ],
@@ -35,8 +41,11 @@ const rolePermissions: Record<string, UserPermissionType[]> = {
     "job_listing.create",
     "job_listing.update",
     "job_listing.delete",
+    "job_listing.change_status",
     "application.read",
     "application.update",
+    "application.change_rating",
+    "application.change_status",
     "member.invite",
     "member.remove",
   ],

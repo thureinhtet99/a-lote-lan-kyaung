@@ -2,11 +2,11 @@ import CheckCondition from "@/components/CheckCondition";
 import { JobListingStatusType } from "@/drizzle/schema";
 import { hasReachedMaxPublishedJobListings } from "@/features/jobListings/lib/plan-feature-helpers";
 import { nextJobListingStatus } from "@/features/jobListings/lib/utils";
-import { hasOrgUserPermission } from "@/services/clerk/lib/org-user-permission";
 import UpgradePopOver from "./upgrade-popover";
 import ActionButton from "@/components/ActionButton";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { toggleJobListingStatus } from "@/features/jobListings/actions";
+import { hasOrgUserPermission } from "@/lib/permission";
 
 export default function StatusToggleButton({
   status,
@@ -25,7 +25,7 @@ export default function StatusToggleButton({
 
   return (
     <CheckCondition
-      condition={() => hasOrgUserPermission("job_listing:change_status")}
+      condition={() => hasOrgUserPermission("job_listing.change_status")}
     >
       {nextStatus === "published" ? (
         <CheckCondition

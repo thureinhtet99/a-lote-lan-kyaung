@@ -2,9 +2,9 @@ import ActionButton from "@/components/ActionButton";
 import CheckCondition from "@/components/CheckCondition";
 import { toggleJobListingFeaturedStatus } from "@/features/jobListings/actions";
 import { hasReachedMaxFeaturedJobListings } from "@/features/jobListings/lib/plan-feature-helpers";
-import { hasOrgUserPermission } from "@/services/clerk/lib/org-user-permission";
 import UpgradePopOver from "./upgrade-popover";
 import { StarIcon, StarOffIcon } from "lucide-react";
+import { hasOrgUserPermission } from "@/lib/permission";
 
 export default function FeatureToggleButton({
   isFeatured,
@@ -15,7 +15,7 @@ export default function FeatureToggleButton({
 }) {
   return (
     <CheckCondition
-      condition={() => hasOrgUserPermission("job_listing:change_status")}
+      condition={() => hasOrgUserPermission("job_listing.change_status")}
     >
       {isFeatured ? (
         <ActionButton

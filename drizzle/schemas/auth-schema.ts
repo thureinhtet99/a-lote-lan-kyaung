@@ -7,6 +7,7 @@ import {
   index,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
+import { resumeTable } from "./resume-schema";
 
 export const userTable = pgTable("users", {
   id: text("id").primaryKey(),
@@ -135,11 +136,12 @@ export const invitationTable = pgTable(
   ],
 );
 
-export const userRelations = relations(userTable, ({ many }) => ({
+export const userRelations = relations(userTable, ({ one, many }) => ({
   sessions: many(sessionTable),
   accounts: many(accountTable),
   members: many(memberTable),
   invitations: many(invitationTable),
+  resume: one(resumeTable),
 }));
 
 export const sessionRelations = relations(sessionTable, ({ one }) => ({
