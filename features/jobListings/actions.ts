@@ -13,7 +13,7 @@ import {
   insertJobListingDb,
   updateJobListingDb,
 } from "./db/job-listing-db";
-import { hasOrgUserPermission } from "@/lib/org-user-permission";
+import { hasOrgUserPermission } from "@/lib/permission";
 import { jobListingsTable } from "@/drizzle/schema";
 import { db } from "@/drizzle/db";
 import { and, eq } from "drizzle-orm";

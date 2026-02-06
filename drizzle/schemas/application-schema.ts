@@ -6,8 +6,8 @@ import {
   text,
   uuid,
 } from "drizzle-orm/pg-core";
-import { jobListingsTable } from "./job-listing-schema";
-import { user } from "./auth-schema";
+import { jobListingTable } from "./job-listing-schema";
+import { userTable } from "./auth-schema";
 import { createdAt, updatedAt } from "../schema-helpers";
 import { relations } from "drizzle-orm";
 
@@ -23,20 +23,20 @@ export const applicationStatusEnum = pgEnum(
   "application_status",
   applicationStatus,
 );
-export const jobListingApplicationsTable = pgTable(
-  "job_listing_applications",
+export const applicationTable = pgTable(
+  "applications",
   {
-    jobListingId: uuid()
-      .references(() => jobListingsTable.id, {
+    jobListingId: uuid("job_listing_id")
+      .references(() => jobListingTable.id, {
         onDelete: "cascade",
       })
       .notNull(),
-    userId: text()
-      .references(() => user.id, {
+    userId: text("user_id")
+      .references(() => userTable.id, {
         onDelete: "cascade",
       })
       .notNull(),
-    coverLetter: text(),
+    coverLetter: text("cover_letter"),
     rating: integer(),
     status: applicationStatusEnum().notNull().default("applied"),
     createdAt,
@@ -46,15 +46,15 @@ export const jobListingApplicationsTable = pgTable(
 );
 
 export const jobListingApplicationsRelations = relations(
-  jobListingApplicationsTable,
+  applicationTable,
   ({ one }) => ({
-    jobListing: one(jobListingsTable, {
-      fields: [jobListingApplicationsTable.jobListingId],
-      references: [jobListingsTable.id],
+    jobListing: one(jobListingTable, {
+      fields: [applicationTable.jobListingId],
+      references: [jobListingTable.id],
     }),
-    user: one(user, {
-      fields: [jobListingApplicationsTable.userId],
-      references: [user.id],
+    user: one(userTable, {
+      fields: [applicationTable.userId],
+      references: [userTable.id],
     }),
   }),
 );

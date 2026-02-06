@@ -1,9 +1,13 @@
 import { getSession } from "./auth-helpers";
 import { db } from "@/drizzle/db";
-import { member } from "@/drizzle/schema";
+import { memberTable } from "@/drizzle/schema";
 import { eq, and } from "drizzle-orm";
 
 export type UserPermissionType =
+  | "owner.update"
+  | "organization.create"
+  | "organization.delete"
+  | "organization.update"
   | "job_listing.create"
   | "job_listing.update"
   | "job_listing.delete"
@@ -14,6 +18,19 @@ export type UserPermissionType =
 
 // Role-based permissions mapping
 const rolePermissions: Record<string, UserPermissionType[]> = {
+  owner: [
+    "owner.update",
+    "organization.create",
+    "organization.delete",
+    "organization.update",
+    "job_listing.create",
+    "job_listing.update",
+    "job_listing.delete",
+    "application.read",
+    "application.update",
+    "member.invite",
+    "member.remove",
+  ],
   admin: [
     "job_listing.create",
     "job_listing.update",
@@ -49,10 +66,10 @@ export async function hasOrgUserPermission(
   }
 
   // Get user's role in the organization from database
-  const membership = await db.query.member.findFirst({
+  const membership = await db.query.memberTable.findFirst({
     where: and(
-      eq(member.userId, session.user.id),
-      eq(member.organizationId, activeOrgId),
+      eq(memberTable.userId, session.user.id),
+      eq(memberTable.organizationId, activeOrgId),
     ),
   });
 

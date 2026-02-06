@@ -5,21 +5,24 @@ import {
   primaryKey,
   text,
 } from "drizzle-orm/pg-core";
-import { user } from "./auth-schema";
-import { organization } from "./better-auth-organization-schema";
+import { organizationTable, userTable } from "./auth-schema";
 import { createdAt, updatedAt } from "../schema-helpers";
 import { relations } from "drizzle-orm";
 
 export const organizationUserSettingsTable = pgTable(
   "organization_user_settings",
   {
-    userId: text()
+    userId: text("user_id")
       .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-    organizationId: text()
+      .references(() => userTable.id, { onDelete: "cascade" }),
+    organizationId: text("organization_id")
       .notNull()
-      .references(() => organization.id, { onDelete: "cascade" }),
-    newApplicationEmailNotification: boolean().notNull().default(false),
+      .references(() => organizationTable.id, { onDelete: "cascade" }),
+    newApplicationEmailNotification: boolean(
+      "new_application_email_notification",
+    )
+      .notNull()
+      .default(false),
     minimumRating: integer(),
     createdAt,
     updatedAt,
@@ -30,13 +33,13 @@ export const organizationUserSettingsTable = pgTable(
 export const organizationUserSettingsRelations = relations(
   organizationUserSettingsTable,
   ({ one }) => ({
-    user: one(user, {
+    user: one(userTable, {
       fields: [organizationUserSettingsTable.userId],
-      references: [user.id],
+      references: [userTable.id],
     }),
-    organization: one(organization, {
+    organization: one(organizationTable, {
       fields: [organizationUserSettingsTable.organizationId],
-      references: [organization.id],
+      references: [organizationTable.id],
     }),
   }),
 );

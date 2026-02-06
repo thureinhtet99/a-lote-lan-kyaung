@@ -6,7 +6,6 @@ import {
 import { APP_CONFIG, APP_ROUTES } from "@/config/appConfig";
 import BreakPoint from "@/components/BreakPoint";
 import { Suspense } from "react";
-import LoadingSpinner from "@/components/LoadingSpinner";
 import { SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import ClientSheet from "./_ClientSheet";
 import { db } from "@/drizzle/db";
@@ -28,8 +27,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { getCurrentUser } from "@/services/clerk/lib/get-current-auth";
-import { SignUpButton } from "@/services/clerk/component/AuthButtons";
 import { unstable_cache } from "next/cache";
 import {
   idTag,
@@ -48,6 +45,8 @@ import {
 } from "@/components/ui/dialog";
 import { NewJobListingApplicationForm } from "@/features/jobListingApplications/components/NewJobListingApplicationForm";
 import JobListingBadges from "@/features/jobListings/components/job-listing-badges";
+import { getCurrentUser } from "@/lib/auth-helpers";
+import Loading from "@/components/loading";
 
 export default function JobListingPage({
   params,
@@ -77,7 +76,7 @@ export default function JobListingPage({
                   <SheetTitle>Job Listing Details</SheetTitle>
                 </SheetHeader>
                 <div className="flex-1 overflow-y-auto p-4">
-                  <Suspense fallback={<LoadingSpinner />}>
+                  <Suspense fallback={<Loading />}>
                     <JobListingDetails
                       searchParams={searchParams}
                       params={params}
@@ -93,7 +92,7 @@ export default function JobListingPage({
           {/* Right  */}
           <ResizablePanel id="right" order={2} defaultSize={40} minSize={30}>
             <div className="p-4 h-screen overflow-y-auto">
-              <Suspense fallback={<LoadingSpinner />}>
+              <Suspense fallback={<Loading />}>
                 <JobListingDetails
                   searchParams={searchParams}
                   params={params}
@@ -155,7 +154,7 @@ const JobListingDetails = async ({
         <div className="flex gap-4 items-start">
           <Avatar className="size-14 @max-md:hidden">
             <AvatarImage
-              src={jobListing.organization.image ?? undefined}
+              src={jobListing.organization.logo ?? undefined}
               alt={jobListing.organization.name}
             />
             <AvatarFallback className="uppercase bg-primary text-primary-foreground">
@@ -233,7 +232,7 @@ const ApplyButton = async ({ jobListingId }: { jobListingId: string }) => {
         </PopoverTrigger>
         <PopoverContent className="flex flex-col gap-2">
           You need to create an account before applying for a job
-          <SignUpButton />
+          {/* <SignUpButton /> */}
         </PopoverContent>
       </Popover>
     );

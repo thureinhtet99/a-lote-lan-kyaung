@@ -1,17 +1,51 @@
-import { jobListingsTable } from "@/drizzle/schema";
+import { jobListingTable, organizationTable } from "@/drizzle/schema";
 import { db } from "./db";
+
+function generateId() {
+  return `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+}
 
 async function seed() {
   try {
-    await db.delete(jobListingsTable);
-    console.log("🌱 Starting seed...");
+    await db.delete(jobListingTable);
+    await db.delete(organizationTable);
+    console.log("Starting seed...");
 
-    // Specific organization ID to seed job listings for
-    const organizationId = "org_34WNHVj5vGkcW1HoeM8khJlNwwO";
-
-    const jobListings = [
+    const organizations = [
       {
-        organizationId,
+        id: generateId(),
+        name: "first organization",
+        slug: "organization-1",
+        logo: null,
+        metadata: null,
+        createdAt: new Date(),
+      },
+      {
+        id: generateId(),
+        name: "second organization",
+        slug: "organization-1",
+        logo: null,
+        metadata: null,
+        createdAt: new Date(),
+      },
+      {
+        id: generateId(),
+        name: "third organization",
+        slug: "organization-1",
+        logo: null,
+        metadata: null,
+        createdAt: new Date(),
+      },
+    ];
+
+    const insertedOrganizations = await db
+      .insert(organizationTable)
+      .values(organizations)
+      .returning();
+
+    const allJobListings = insertedOrganizations.flatMap((org) => [
+      {
+        organizationId: org.id,
         title: "Senior Full Stack Developer",
         description: `## About the Role
 We are looking for a Senior Full Stack Developer to join our growing engineering team. You will be responsible for developing and maintaining our web applications using modern technologies.
@@ -41,7 +75,7 @@ We are looking for a Senior Full Stack Developer to join our growing engineering
         postedAt: new Date(),
       },
       {
-        organizationId,
+        organizationId: org.id,
         title: "Frontend Developer (React)",
         description: `## Frontend Developer Opportunity
 Join our team as a Frontend Developer and help build amazing user experiences with React and modern web technologies.
@@ -69,7 +103,7 @@ Join our team as a Frontend Developer and help build amazing user experiences wi
         postedAt: new Date(),
       },
       {
-        organizationId,
+        organizationId: org.id,
         title: "Junior Backend Developer",
         description: `## Start Your Backend Development Career
 We're seeking a motivated Junior Backend Developer to join our team and grow their skills in server-side development.
@@ -97,7 +131,7 @@ We're seeking a motivated Junior Backend Developer to join our team and grow the
         postedAt: new Date(),
       },
       {
-        organizationId,
+        organizationId: org.id,
         title: "Part-time UI/UX Designer",
         description: `## Creative UI/UX Designer (Part-time)
 We're looking for a talented UI/UX Designer to work part-time on exciting projects and help shape our product experience.
@@ -125,7 +159,7 @@ We're looking for a talented UI/UX Designer to work part-time on exciting projec
         postedAt: new Date(),
       },
       {
-        organizationId,
+        organizationId: org.id,
         title: "Software Engineering Intern",
         description: `## Summer Software Engineering Internship
 Join our engineering team for a hands-on internship experience where you'll work on real projects and learn from experienced developers.
@@ -153,7 +187,7 @@ Join our engineering team for a hands-on internship experience where you'll work
         postedAt: new Date(),
       },
       {
-        organizationId,
+        organizationId: org.id,
         title: "DevOps Engineer - Draft",
         description: `## DevOps Engineer Position
 We are planning to hire a DevOps Engineer to help scale our infrastructure and improve our deployment processes.
@@ -180,7 +214,7 @@ We are planning to hire a DevOps Engineer to help scale our infrastructure and i
         type: "full-time" as const,
       },
       {
-        organizationId,
+        organizationId: org.id,
         title: "Mobile App Developer (Delisted)",
         description: `## Mobile App Developer
 This position was for developing cross-platform mobile applications using React Native.
@@ -206,19 +240,19 @@ This position was for developing cross-platform mobile applications using React 
         status: "delisted" as const,
         type: "full-time" as const,
       },
-    ];
+    ]);
 
     console.log(
-      `📝 Inserting ${jobListings.length} job listings for organization: ${organizationId}`,
+      `📝 Inserting ${allJobListings.length} job listings for ${insertedOrganizations.length} organization`,
     );
 
     // Insert job listings
-    for (const jobListing of jobListings) {
-      await db.insert(jobListingsTable).values(jobListing);
+    for (const jobListing of allJobListings) {
+      await db.insert(jobListingTable).values(jobListing);
       console.log(`✅ Inserted: ${jobListing.title} (${jobListing.status})`);
     }
 
-    console.log("🎉 Seeding completed successfully!");
+    console.log("Seeding completed successfully!");
   } catch (error) {
     console.error("❌ Error during seeding:", error);
     throw error;

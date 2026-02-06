@@ -20,7 +20,7 @@ import { jobListingsTag } from "@/lib/dataCache";
 import Loading from "@/components/loading";
 import { getJobListingWithApplicationsDb } from "@/features/jobListingApplications/db/job-listing-application-db";
 import { getCurrentOrg } from "@/lib/auth-helpers";
-import { hasOrgUserPermission } from "@/lib/org-user-permission";
+import { hasOrgUserPermission } from "@/lib/permission";
 
 export default function EmployerLayout({ children }: { children: ReactNode }) {
   return (
