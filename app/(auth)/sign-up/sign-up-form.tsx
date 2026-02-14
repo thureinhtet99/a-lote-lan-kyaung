@@ -45,7 +45,7 @@ export default function SignUpForm() {
         },
         onSuccess: () => {
           toast.success("Account created successfully!");
-          router.push("/");
+          router.push(APP_ROUTES.SIGN_IN);
         },
         onError: (ctx) => {
           toast.error(ctx.error.message);
