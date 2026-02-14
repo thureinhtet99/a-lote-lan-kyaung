@@ -11,13 +11,14 @@ import DropzoneClient from "./_DropzoneClient";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { db } from "@/drizzle/db";
+import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
-import { userResumeTag } from "@/lib/dataCache";
-import { userResumesTable } from "@/drizzle/schema";
+import { userResumeTag } from "@/lib/utils/dataCache";
+import { resumeTable } from "@/drizzle/schema";
 import { unstable_cache } from "next/cache";
-import MarkdownRenderer from "@/components/markdown/MarkdownRenderer";
-import Loading from "@/components/loading";
+import MarkdownRenderer from "@/components/features/markdown/MarkdownRenderer";
+import Loading from "@/components/shared/loading";
+import { getCurrentUser } from "@/lib/auth";
 
 export default function ResumePage() {
   return (
@@ -42,8 +43,7 @@ export default function ResumePage() {
 }
 
 const SuspendedComponent = async () => {
-  // const { userId } = await getCurrentUser();
-  const userId = "5g4X3I2v2EVlFXUb0SrcBRBtQZPtOj80";
+  const { userId } = await getCurrentUser();
   if (userId == null) return notFound();
 
   const userResume = await getCurrentResume(userId);
@@ -68,8 +68,8 @@ const SuspendedComponent = async () => {
 const getResumeByUserId = async (userId: string) => {
   const cachedData = unstable_cache(
     async () => {
-      return await db.query.userResumesTable.findFirst({
-        where: eq(userResumesTable.userId, userId),
+      return await db.query.resumeTable.findFirst({
+        where: eq(resumeTable.userId, userId),
       });
     },
     [userResumeTag("userResumes", userId)],
@@ -101,7 +101,8 @@ const AISummaryCard = async () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <MarkdownRenderer source={userResume.aiSummary ?? "No summary"} />
+        {/* <MarkdownRenderer source={userResume.aiSummary ?? "No summary"} /> */}
+        <MarkdownRenderer source={"No summary"} />
       </CardContent>
     </Card>
   );

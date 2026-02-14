@@ -7,16 +7,16 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  // FormMessage,
 } from "@/components/ui/form";
 import { userNotificationSettingsTable } from "@/drizzle/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { userNotificationSettingsSchema } from "../actions/schema";
 import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
+// import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import LoadingSwap from "@/components/LoadingSwap";
+import LoadingSwap from "@/components/shared/LoadingSwap";
 import z from "zod";
 import { toast } from "sonner";
 import { updateNotificationSetting } from "../actions/notificationActions";
@@ -26,19 +26,19 @@ export default function NotificationsForm({
 }: {
   notificationSettings?: Pick<
     typeof userNotificationSettingsTable.$inferSelect,
-    "newJobEmailNotification" | "aiPrompt"
+    "newJobEmailNotification"
   >;
 }) {
   const form = useForm({
     resolver: zodResolver(userNotificationSettingsSchema),
     defaultValues: notificationSettings ?? {
-      aiPrompt: "",
+      // aiPrompt: "",
       newJobEmailNotification: false,
     },
   });
 
   const onSubmit = async (
-    data: z.infer<typeof userNotificationSettingsSchema>
+    data: z.infer<typeof userNotificationSettingsSchema>,
   ) => {
     const result = await updateNotificationSetting(data);
 
@@ -49,7 +49,7 @@ export default function NotificationsForm({
     }
   };
 
-  const newJobEmailNotification = form.watch("newJobEmailNotification"); // To get values of notification in real-time
+  // const newJobEmailNotification = form.watch("newJobEmailNotification"); // To get values of notification in real-time
 
   return (
     <Form {...form}>
@@ -78,7 +78,7 @@ export default function NotificationsForm({
               </FormItem>
             )}
           />
-          {newJobEmailNotification && (
+          {/* {newJobEmailNotification && (
             <FormField
               name="aiPrompt"
               control={form.control}
@@ -108,7 +108,7 @@ export default function NotificationsForm({
                 </FormItem>
               )}
             />
-          )}
+          )} */}
         </div>
         <Button
           type="submit"

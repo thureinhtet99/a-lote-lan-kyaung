@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { db } from "@/drizzle/db";
+import { db } from "@/lib/db";
 import { organizationTable, memberTable } from "@/drizzle/schema";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";

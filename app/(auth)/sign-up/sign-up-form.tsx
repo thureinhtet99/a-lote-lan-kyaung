@@ -13,15 +13,15 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import LoadingSwap from "@/components/LoadingSwap";
-import { authClient } from "@/lib/auth-client";
-import { SignUpFormData, signUpSchema } from "../schemas";
+import LoadingSwap from "@/components/shared/LoadingSwap";
+import { authClient } from "@/lib/auth/auth-client";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES } from "@/config/appConfig";
+import { SignUpFormType, signUpSchema } from "@/drizzle/schema";
 
 export default function SignUpForm() {
   const router = useRouter();
-  const form = useForm<SignUpFormData>({
+  const form = useForm<SignUpFormType>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
       name: "",
@@ -31,7 +31,7 @@ export default function SignUpForm() {
     },
   });
 
-  const onSubmit = async (data: SignUpFormData) => {
+  const onSubmit = async (data: SignUpFormType) => {
     await authClient.signUp.email(
       {
         name: data.name,

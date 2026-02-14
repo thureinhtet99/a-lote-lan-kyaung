@@ -7,20 +7,21 @@ import {
 import { ClipboardListIcon, LogInIcon, PlusIcon } from "lucide-react";
 import { ReactNode, Suspense } from "react";
 import Link from "next/link";
-import AppSidebar from "@/components/sidebar/app-sidebar";
-import SidebarNavMenuGroup from "@/components/sidebar/sidebar-nav-menu";
-import SidebarOrgButton from "@/features/organizations/components/sidebar-org-button";
+import AppSidebar from "@/components/layout/sidebar/app-sidebar";
+import SidebarNavMenuGroup from "@/components/layout/sidebar/sidebar-nav-menu";
+
 import { APP_ROUTES } from "@/config/appConfig";
 import { unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
-import { sortJobListingsByStatus } from "@/features/jobListings/lib/utils";
+import { sortJobListingsByStatus } from "@/features/job-listings/lib/utils";
 import { JobListingStatusType } from "@/drizzle/schema";
-import JobListingMenuGroup from "./components/_job-listing-menu-group";
-import { jobListingsTag } from "@/lib/dataCache";
-import Loading from "@/components/loading";
-import { getJobListingWithApplicationsDb } from "@/features/jobListingApplications/db/job-listing-application-db";
-import { getCurrentOrg } from "@/lib/auth-helpers";
-import { hasOrgUserPermission } from "@/lib/permissions";
+import JobListingMenuGroup from "@/components/features/organizations/_job-listing-menu-group";
+import { jobListingsTag } from "@/lib/utils/dataCache";
+import Loading from "@/components/shared/loading";
+import { getJobListingWithApplicationsDb } from "@/features/applications/db/job-listing-application-db";
+import { getCurrentOrg } from "@/lib/auth";
+import SidebarOrgButton from "@/components/features/organizations/sidebar-org-button";
+import { hasOrgUserPermission } from "@/lib/utils/permissions";
 
 export default function EmployerLayout({ children }: { children: ReactNode }) {
   return (

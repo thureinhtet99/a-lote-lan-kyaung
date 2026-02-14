@@ -1,6 +1,6 @@
 "use server";
 
-import { db } from "@/drizzle/db";
+import { db } from "@/lib/db";
 import { resumeTable } from "@/drizzle/schema";
 import { revalidateUserResumeCache } from "./cache/userResumes";
 import { eq } from "drizzle-orm";

@@ -1,13 +1,14 @@
-import Loading from "@/components/loading";
+import Loading from "@/components/shared/loading";
 import { Card, CardContent } from "@/components/ui/card";
-import { db } from "@/drizzle/db";
+import { db } from "@/lib/db";
 import { userNotificationSettingsTable } from "@/drizzle/schema";
 import NotificationsForm from "@/features/users/components/NotificationsForm";
-import { userNotificationTag } from "@/lib/dataCache";
+import { userNotificationTag } from "@/lib/utils/dataCache";
 import { eq } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { getCurrentUser } from "@/lib/auth";
 
 export default function NotificationPage() {
   return (
@@ -18,8 +19,7 @@ export default function NotificationPage() {
 }
 
 const SuspendedComponent = async () => {
-  // const { userId } = await getCurrentUser();
-  const userId = "5g4X3I2v2EVlFXUb0SrcBRBtQZPtOj80";
+  const { userId } = await getCurrentUser();
   if (userId == null) return notFound();
 
   return (
@@ -49,7 +49,7 @@ const getNotiSettingsByUserId = async (userId: string) => {
       return await db.query.userNotificationSettingsTable.findFirst({
         where: eq(userNotificationSettingsTable.userId, userId),
         columns: {
-          aiPrompt: true,
+          // aiPrompt: true,
           newJobEmailNotification: true,
         },
       });

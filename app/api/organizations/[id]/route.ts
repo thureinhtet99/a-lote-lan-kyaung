@@ -1,13 +1,13 @@
 import { auth } from "@/lib/auth";
-import { db } from "@/drizzle/db";
-import { organization, member } from "@/drizzle/schema";
+import { db } from "@/lib/db";
+import { organizationTable, memberTable } from "@/drizzle/schema";
 import { eq, and } from "drizzle-orm";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth.api.getSession({
@@ -18,14 +18,14 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = params.id;
+    const { id: orgId } = await params;
 
     // Check if user is an admin of the organization
-    const membership = await db.query.member.findFirst({
+    const membership = await db.query.memberTable.findFirst({
       where: and(
-        eq(member.userId, session.user.id),
-        eq(member.organizationId, orgId),
-        eq(member.role, "admin"),
+        eq(memberTable.userId, session.user.id),
+        eq(memberTable.organizationId, orgId),
+        eq(memberTable.role, "admin"),
       ),
     });
 
@@ -37,7 +37,7 @@ export async function DELETE(
     }
 
     // Delete the organization (cascade will delete members)
-    await db.delete(organization).where(eq(organization.id, orgId));
+    await db.delete(organizationTable).where(eq(organizationTable.id, orgId));
 
     return NextResponse.json({ success: true });
   } catch (error) {

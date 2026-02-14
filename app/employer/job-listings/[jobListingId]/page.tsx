@@ -1,32 +1,35 @@
-import ActionButton from "@/components/ActionButton";
-import CheckCondition from "@/components/CheckCondition";
-import MarkdownRenderer from "@/components/markdown/MarkdownRenderer";
+import ActionButton from "@/components/shared/ActionButton";
+import CheckCondition from "@/components/shared/CheckCondition";
+import MarkdownRenderer from "@/components/features/markdown/MarkdownRenderer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { deleteJobListing } from "@/features/jobListings/actions";
-import { formatJobListingStatus } from "@/features/jobListings/lib/formatters";
-import { isUUID } from "@/features/jobListings/lib/utils";
+import { deleteJobListing } from "@/features/job-listings/actions";
+import { formatJobListingStatus } from "@/features/job-listings/lib/formatters";
+import { isUUID } from "@/features/job-listings/lib/utils";
 import { APP_ROUTES } from "@/config/appConfig";
-import { jobListingApplicationsTag, jobListingIdTag } from "@/lib/dataCache";
+import {
+  jobListingApplicationsTag,
+  jobListingIdTag,
+} from "@/lib/utils/dataCache";
 import { EditIcon, Trash2Icon } from "lucide-react";
 import { unstable_cache } from "next/cache";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Separator } from "@/components/ui/separator";
-import ApplicationTable from "@/features/jobListingApplications/components/application-table";
-import { MarkdownPartial } from "@/components/markdown/MarkdownPartial";
-import JobListingBadges from "@/features/jobListings/components/job-listing-badges";
+import ApplicationTable from "@/features/applications/components/application-table";
+import { MarkdownPartial } from "@/components/features/markdown/MarkdownPartial";
+import JobListingBadges from "@/components/features/job-listings/job-listing-badges";
 import { ParamsType } from "@/types/index.type";
-import SkeletonApplicationTable from "@/features/jobListingApplications/components/skeleton-application-table";
+import SkeletonApplicationTable from "@/features/applications/components/skeleton-application-table";
 import EmployerLoading from "../../loading";
-import { getJobListingByIdByOrgIdDb } from "@/features/jobListings/db/job-listing-db";
-import StatusToggleButton from "../../components/status-toggle-button";
-import FeatureToggleButton from "../../components/feature-toggle-button";
-import Loading from "@/components/loading";
-import { getJobListingApplicationsDb } from "@/features/jobListingApplications/db/job-listing-application-db";
-import { hasOrgUserPermission } from "@/lib/permissions";
-import { getCurrentOrg } from "@/lib/auth-helpers";
+import { getJobListingByIdByOrgIdDb } from "@/features/job-listings/db/job-listing-db";
+import StatusToggleButton from "@/components/features/organizations/status-toggle-button";
+import FeatureToggleButton from "@/components/features/organizations/feature-toggle-button";
+import Loading from "@/components/shared/loading";
+import { getJobListingApplicationsDb } from "@/features/applications/db/job-listing-application-db";
+import { hasOrgUserPermission } from "@/lib/utils/permissions";
+import { getCurrentOrg } from "@/lib/auth";
 
 export default function JobListingByIdPage(props: ParamsType) {
   return (
@@ -143,9 +146,9 @@ const Applications = async ({ jobListingId }: { jobListingId: string }) => {
   // Fetch applications by jobListingId from db (cached)
   const cachedData = unstable_cache(
     async () => await getJobListingApplicationsDb(jobListingId),
-    [jobListingApplicationsTag("jobListingApplications", jobListingId)],
+    [jobListingApplicationsTag("applications", jobListingId)],
     {
-      tags: [jobListingApplicationsTag("jobListingApplications", jobListingId)],
+      tags: [jobListingApplicationsTag("applications", jobListingId)],
     },
   );
 

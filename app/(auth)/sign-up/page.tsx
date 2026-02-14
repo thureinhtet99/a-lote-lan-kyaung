@@ -7,7 +7,7 @@ import {
 import Link from "next/link";
 import SignUpForm from "./sign-up-form";
 import { APP_CONFIG, APP_ROUTES } from "@/config/appConfig";
-import { Logo } from "@/components/Logo";
+import { Logo } from "@/components/shared/Logo";
 
 export default function SignUpPage() {
   return (

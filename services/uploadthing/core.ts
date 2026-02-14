@@ -1,11 +1,11 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 import { upsertUserResumeDb } from "@/features/users/db/resume";
-import { db } from "@/drizzle/db";
+import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { resumeTable } from "@/drizzle/schema";
 import { utapi } from "./client";
-import { getCurrentUser } from "@/lib/auth-helpers";
+import { getCurrentUser } from "@/lib/auth";
 
 const f = createUploadthing();
 

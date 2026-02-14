@@ -1,4 +1,4 @@
-import { userNotificationTag } from "@/lib/dataCache";
+import { userNotificationTag } from "@/lib/utils/dataCache";
 import { revalidateTag } from "next/cache";
 
 export function revalidateUserNotiCache(userId: string) {

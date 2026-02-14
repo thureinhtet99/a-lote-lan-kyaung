@@ -1,5 +1,5 @@
 import { jobListingTable, organizationTable } from "@/drizzle/schema";
-import { db } from "./db";
+import { db } from "@/lib/db";
 
 function generateId() {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;

@@ -1,4 +1,4 @@
-import { db } from "@/drizzle/db";
+import { db } from "@/lib/db";
 import { userNotificationSettingsTable } from "@/drizzle/schema";
 import { revalidateUserNotiCache } from "./cache/userNotiSettings";
 

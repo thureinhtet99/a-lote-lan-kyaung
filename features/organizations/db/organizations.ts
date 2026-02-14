@@ -1,19 +1,19 @@
 "use server";
 
-import { db } from "@/drizzle/db";
-import { organizationsTable } from "@/drizzle/schema";
+import { db } from "@/lib/db";
+import { organizationTable } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
 import { revalidateOrgCache } from "./cache/organizations";
 
 // Insert
-export async function insertOrg(org: typeof organizationsTable.$inferInsert) {
+export async function insertOrg(org: typeof organizationTable.$inferInsert) {
   const existingOrg = await db
     .select()
-    .from(organizationsTable)
-    .where(eq(organizationsTable.id, org.id));
+    .from(organizationTable)
+    .where(eq(organizationTable.id, org.id));
 
   if (existingOrg.length === 0) {
-    await db.insert(organizationsTable).values(org).onConflictDoNothing();
+    await db.insert(organizationTable).values(org).onConflictDoNothing();
     revalidateOrgCache(org.id);
   }
 }
@@ -21,17 +21,17 @@ export async function insertOrg(org: typeof organizationsTable.$inferInsert) {
 // Update
 export async function updateOrg(
   id: string,
-  user: typeof organizationsTable.$inferInsert
+  user: typeof organizationTable.$inferInsert,
 ) {
   await db
-    .update(organizationsTable)
+    .update(organizationTable)
     .set(user)
-    .where(eq(organizationsTable.id, id));
+    .where(eq(organizationTable.id, id));
   revalidateOrgCache(id);
 }
 
 // Delete
 export async function deleteOrg(id: string) {
-  await db.delete(organizationsTable).where(eq(organizationsTable.id, id));
+  await db.delete(organizationTable).where(eq(organizationTable.id, id));
   revalidateOrgCache(id);
 }

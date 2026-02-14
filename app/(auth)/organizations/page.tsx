@@ -100,8 +100,12 @@ export default function OrganizationsPage() {
       setShowCreateDialog(false);
       setNewOrgName("");
       await fetchOrganizations();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to create organization");
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to create organization";
+      toast.error(errorMessage);
     } finally {
       setIsCreating(false);
     }
@@ -148,8 +152,12 @@ export default function OrganizationsPage() {
       toast.success("Switched organization successfully!");
       router.push("/employer");
       router.refresh();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to switch organization");
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to switch organization";
+      toast.error(errorMessage);
     }
   };
 

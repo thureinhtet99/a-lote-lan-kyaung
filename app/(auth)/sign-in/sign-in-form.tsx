@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -14,11 +14,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "sonner";
-import LoadingSwap from "@/components/LoadingSwap";
-import { SignInFormData, signInSchema } from "../schemas";
+import LoadingSwap from "@/components/shared/LoadingSwap";
+import { SignInFormType, signInSchema } from "@/drizzle/schema";
 
 export default function SignInForm() {
-  const form = useForm<SignInFormData>({
+  const form = useForm<SignInFormType>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
       email: "",
@@ -26,7 +26,7 @@ export default function SignInForm() {
     },
   });
 
-  const onSubmit = async (data: SignInFormData) => {
+  const onSubmit = async (data: SignInFormType) => {
     await authClient.signIn.email(
       {
         email: data.email,

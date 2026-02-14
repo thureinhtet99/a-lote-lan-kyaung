@@ -12,7 +12,7 @@ export const userNotificationSettingsTable = pgTable(
     newJobEmailNotification: boolean("new_job_email_notification")
       .notNull()
       .default(false),
-    // aiPrompt: text("ai_prompt"),
+    aiPrompt: text("ai_prompt"),
     created_at,
     updated_at,
   },

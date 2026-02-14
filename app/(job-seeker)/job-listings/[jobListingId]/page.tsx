@@ -4,24 +4,24 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { APP_CONFIG, APP_ROUTES } from "@/config/appConfig";
-import BreakPoint from "@/components/BreakPoint";
+import BreakPoint from "@/components/shared/BreakPoint";
 import { Suspense } from "react";
 import { SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import ClientSheet from "./_ClientSheet";
-import { db } from "@/drizzle/db";
+import { db } from "@/lib/db";
 import { and, eq } from "drizzle-orm";
 import {
-  jobListingApplicationsTable,
-  jobListingsTable,
-  userResumesTable,
+  applicationTable,
+  jobListingTable,
+  resumeTable,
 } from "@/drizzle/schema";
 import { notFound } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { convertSearchParamsToString } from "@/lib/convertSearchParamsToString";
+import { convertSearchParamsToString } from "@/lib/utils/convertSearchParamsToString";
 import { XIcon } from "lucide-react";
-import MarkdownRenderer from "@/components/markdown/MarkdownRenderer";
+import MarkdownRenderer from "@/components/features/markdown/MarkdownRenderer";
 import {
   Popover,
   PopoverContent,
@@ -32,7 +32,7 @@ import {
   idTag,
   jobListingApplicationsTag,
   userResumeTag,
-} from "@/lib/dataCache";
+} from "@/lib/utils/dataCache";
 import { differenceInDays } from "date-fns";
 import { connection } from "next/server";
 import {
@@ -43,10 +43,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { NewJobListingApplicationForm } from "@/features/jobListingApplications/components/NewJobListingApplicationForm";
-import JobListingBadges from "@/features/jobListings/components/job-listing-badges";
-import { getCurrentUser } from "@/lib/auth-helpers";
-import Loading from "@/components/loading";
+import { NewJobListingApplicationForm } from "@/features/applications/components/NewJobListingApplicationForm";
+import JobListingBadges from "@/components/features/job-listings/job-listing-badges";
+import { getCurrentUser } from "@/lib/auth";
+import Loading from "@/components/shared/loading";
 
 export default function JobListingPage({
   params,
@@ -114,10 +114,10 @@ const getJobListingApplication = async ({
   jobListingId: string;
   userId: string;
 }) => {
-  return await db.query.jobListingApplicationsTable.findFirst({
+  return await db.query.applicationTable.findFirst({
     where: and(
-      eq(jobListingApplicationsTable.jobListingId, jobListingId),
-      eq(jobListingApplicationsTable.userId, userId),
+      eq(applicationTable.jobListingId, jobListingId),
+      eq(applicationTable.userId, userId),
     ),
   });
 };
@@ -169,9 +169,9 @@ const JobListingDetails = async ({
             <div className="text-base text-muted-foreground">
               {jobListing.organization.name}
             </div>
-            {jobListing.postedAt != null && (
+            {jobListing.posted_at != null && (
               <div className="text-sm text-muted-foreground @max-lg:hidden">
-                {new Date(jobListing.postedAt).toLocaleDateString()}
+                {new Date(jobListing.posted_at).toLocaleDateString()}
               </div>
             )}
           </div>
@@ -205,17 +205,17 @@ const JobListingDetails = async ({
 
 // Get job listing by id
 const getJobListingById = async (id: string) => {
-  return await db.query.jobListingsTable.findFirst({
+  return await db.query.jobListingTable.findFirst({
     where: and(
-      eq(jobListingsTable.id, id),
-      eq(jobListingsTable.status, "published"),
+      eq(jobListingTable.id, id),
+      eq(jobListingTable.status, "published"),
     ),
     with: {
       organization: {
         columns: {
           id: true,
           name: true,
-          image: true,
+          logo: true,
         },
       },
     },
@@ -242,9 +242,9 @@ const ApplyButton = async ({ jobListingId }: { jobListingId: string }) => {
   const cachedJobApplication = unstable_cache(
     async (jobListingId: string, userId: string) =>
       getJobListingApplication({ jobListingId, userId }),
-    [jobListingApplicationsTag("jobListingApplications", jobListingId)],
+    [jobListingApplicationsTag("applications", jobListingId)],
     {
-      tags: [jobListingApplicationsTag("jobListingApplications", jobListingId)],
+      tags: [jobListingApplicationsTag("applications", jobListingId)],
     },
   );
 
@@ -257,7 +257,7 @@ const ApplyButton = async ({ jobListingId }: { jobListingId: string }) => {
     // undefined = user’s current system/browser locale.
 
     await connection();
-    const difference = differenceInDays(application.createdAt, new Date());
+    const difference = differenceInDays(application.created_at, new Date());
 
     return (
       <div className="text-muted-foreground text-sm">
@@ -314,7 +314,7 @@ const ApplyButton = async ({ jobListingId }: { jobListingId: string }) => {
 
 // Get user resume by userId
 const getUserResume = async (userId: string) => {
-  return await db.query.userResumesTable.findFirst({
-    where: eq(userResumesTable.userId, userId),
+  return await db.query.resumeTable.findFirst({
+    where: eq(resumeTable.userId, userId),
   });
 };
