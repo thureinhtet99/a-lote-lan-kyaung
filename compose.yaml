@@ -1,22 +1,59 @@
-# Comments are provided throughout this file to help you get started.
-# If you need more help, visit the Docker Compose reference guide at
-# https://docs.docker.com/go/compose-spec-reference/
+name: a-lote-lann-kyaung
 
-# Here the instructions define your application as a service called "server".
-# This service is built from the Dockerfile in the current directory.
-# You can add other services your application may depend on here, such as a
-# database or a cache. For examples, see the Awesome Compose repository:
-# https://github.com/docker/awesome-compose
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: a-lote-lann-kyaung-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: a-lote-lann-kyaung
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_is ready -U ${POSTGRES_USER:-postgres} -d a-lote-lann-kyaung",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
   server:
     build:
       context: .
+      dockerfile: Dockerfile
+      # target: development # Uncomment if using multi-stage build
+    container_name: a-lote-lann-kyaung-server
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
     environment:
       NODE_ENV: development
-      # NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@db:5432/a-lote-lann-kyaung
+    env_file:
+      - .env
     ports:
-      - 3000:3000
+      - "3000:3000"
     volumes:
       - .:/app
       - /app/node_modules
       - /app/.next
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
