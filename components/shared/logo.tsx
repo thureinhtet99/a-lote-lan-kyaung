@@ -1,4 +1,4 @@
-import { APP_CONFIG } from "@/config/appConfig";
+import { APP_CONFIG } from "@/config/app-config";
 import { cn } from "@/lib/utils";
 import { BriefcaseBusiness } from "lucide-react";
 
@@ -19,11 +19,11 @@ export function Logo({ className, size = "md", showText = true }: LogoProps) {
   return (
     <div
       className={cn(
-        "flex items-center justify-center gap-4 group-data-[state=collapsed]:gap-0",
+        "flex items-center justify-center gap-4 group-data-[state=collapsed]:gap-0 transition-all duration-300 ease-in-out",
         className,
       )}
     >
-      <BriefcaseBusiness className="shrink-0 size-12 group-data-[state=collapsed]:size-8" />
+      <BriefcaseBusiness className="shrink-0 size-10 group-data-[state=collapsed]:size-8 transition-all duration-300 ease-in-out" />
 
       {/* Logo Text */}
       {showText && (

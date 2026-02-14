@@ -44,7 +44,7 @@ import {
 } from "@/features/job-listings/actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { APP_ROUTES } from "@/config/appConfig";
+import { APP_ROUTES } from "@/config/app-config";
 
 const noneSelectedValue = "none";
 

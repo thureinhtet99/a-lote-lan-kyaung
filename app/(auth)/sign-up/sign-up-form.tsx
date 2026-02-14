@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import LoadingSwap from "@/components/shared/LoadingSwap";
 import { authClient } from "@/lib/auth/auth-client";
 import { useRouter } from "next/navigation";
-import { APP_ROUTES } from "@/config/appConfig";
+import { APP_ROUTES } from "@/config/app-config";
 import { SignUpFormType, signUpSchema } from "@/drizzle/schema";
 
 export default function SignUpForm() {

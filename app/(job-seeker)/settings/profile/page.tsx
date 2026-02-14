@@ -28,7 +28,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
-import { APP_ROUTES } from "@/config/appConfig";
+import { APP_ROUTES } from "@/config/app-config";
 import { differenceInDays } from "date-fns";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -125,7 +125,7 @@ export default function ProfilePage() {
             {!isEditing ? (
               <Button onClick={() => setIsEditing(true)} className="gap-2">
                 <Edit className="h-4 w-4" />
-                Edit Profile
+                <span className="hidden md:inline">Edit Profile</span>
               </Button>
             ) : (
               <div className="flex gap-2">

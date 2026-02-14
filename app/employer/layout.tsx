@@ -10,7 +10,7 @@ import Link from "next/link";
 import AppSidebar from "@/components/layout/sidebar/app-sidebar";
 import SidebarNavMenuGroup from "@/components/layout/sidebar/sidebar-nav-menu";
 
-import { APP_ROUTES } from "@/config/appConfig";
+import { APP_ROUTES } from "@/config/app-config";
 import { unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
 import { sortJobListingsByStatus } from "@/features/job-listings/lib/utils";
@@ -19,7 +19,7 @@ import JobListingMenuGroup from "@/components/features/organizations/_job-listin
 import { jobListingsTag } from "@/lib/utils/dataCache";
 import Loading from "@/components/shared/loading";
 import { getJobListingWithApplicationsDb } from "@/features/applications/db/job-listing-application-db";
-import { getCurrentOrg } from "@/lib/auth";
+import { getCurrentOrg } from "@/lib/auth/auth-helpers";
 import SidebarOrgButton from "@/components/features/organizations/sidebar-org-button";
 import { hasOrgUserPermission } from "@/lib/utils/permissions";
 

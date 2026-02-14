@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { APP_ROUTES } from "@/config/appConfig";
+import { APP_ROUTES } from "@/config/app-config";
 import { jobListingsTag } from "@/lib/utils/dataCache";
 import { unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";

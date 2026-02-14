@@ -18,7 +18,7 @@ import {
 import { formatJobListingStatus } from "@/features/job-listings/lib/formatters";
 import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
-import { APP_ROUTES } from "@/config/appConfig";
+import { APP_ROUTES } from "@/config/app-config";
 import { Badge } from "@/components/ui/badge";
 
 type JobListingMenuGroupType = Pick<

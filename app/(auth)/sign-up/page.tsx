@@ -6,8 +6,8 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import SignUpForm from "./sign-up-form";
-import { APP_CONFIG, APP_ROUTES } from "@/config/appConfig";
-import { Logo } from "@/components/shared/Logo";
+import { APP_CONFIG, APP_ROUTES } from "@/config/app-config";
+import { Logo } from "@/components/shared/logo";
 
 export default function SignUpPage() {
   return (

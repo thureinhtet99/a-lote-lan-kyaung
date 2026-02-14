@@ -8,7 +8,7 @@ import { eq } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth/auth-helpers";
 
 export default function NotificationPage() {
   return (

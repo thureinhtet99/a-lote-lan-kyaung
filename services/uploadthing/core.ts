@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { resumeTable } from "@/drizzle/schema";
 import { utapi } from "./client";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth/auth-helpers";
 
 const f = createUploadthing();
 

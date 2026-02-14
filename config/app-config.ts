@@ -14,7 +14,7 @@ export const APP_ROUTES = {
   FORGOT_PASSWORD: "/forgot-password",
 
   HOME: "/",
-  AI_SEARCH: "/ai-search",
+  // AI_SEARCH: "/ai-search",
   JOB_BOARD: "/job-board",
 
   JOB_LISTINGS: {

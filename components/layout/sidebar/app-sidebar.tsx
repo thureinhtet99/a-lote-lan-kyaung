@@ -10,8 +10,8 @@ import {
 } from "@/components/ui/sidebar";
 import { ReactNode } from "react";
 import { AppSidebarClient } from "./_app-sidebar-client";
-import { SignedIn } from "@/components/features/auth/AuthStatus";
-import { Logo } from "@/components/shared/Logo";
+import { SignedIn } from "@/components/features/auth/auth-status";
+import { Logo } from "@/components/shared/logo";
 
 export default function AppSidebar({
   content,
@@ -30,7 +30,7 @@ export default function AppSidebar({
           collapsible="icon"
           className="overflow-hidden border-r border-primary/10"
         >
-          <SidebarHeader className="flex-row items-center justify-center gap-2 py-4 border-b border-primary/10">
+          <SidebarHeader className="flex-row items-center justify-center gap-2 py-4">
             <Logo size="sm" showText={true} />
           </SidebarHeader>
 
@@ -47,8 +47,7 @@ export default function AppSidebar({
 
         {/* Right */}
         <main className="flex-1 bg-gradient-to-br from-background via-primary/[0.02] to-secondary/[0.02] relative">
-          <SidebarTrigger className="absolute" />
-
+          <SidebarTrigger className="absolute hidden md:inline-flex" />
           {children}
         </main>
       </AppSidebarClient>

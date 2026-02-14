@@ -5,11 +5,6 @@ import { userTable } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
 import { revalidateUserCache } from "./cache/users";
 
-export async function insertUser(user: typeof userTable.$inferInsert) {
-  await db.insert(userTable).values(user).onConflictDoNothing();
-  revalidateUserCache(user.id);
-}
-
 export async function updateUser(
   id: string,
   user: typeof userTable.$inferInsert,

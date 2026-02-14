@@ -3,7 +3,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { APP_CONFIG, APP_ROUTES } from "@/config/appConfig";
+import { APP_CONFIG, APP_ROUTES } from "@/config/app-config";
 import BreakPoint from "@/components/shared/BreakPoint";
 import { Suspense } from "react";
 import { SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -45,7 +45,7 @@ import {
 } from "@/components/ui/dialog";
 import { NewJobListingApplicationForm } from "@/features/applications/components/NewJobListingApplicationForm";
 import JobListingBadges from "@/components/features/job-listings/job-listing-badges";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth/auth-helpers";
 import Loading from "@/components/shared/loading";
 
 export default function JobListingPage({

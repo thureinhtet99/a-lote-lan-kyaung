@@ -18,7 +18,7 @@ import { resumeTable } from "@/drizzle/schema";
 import { unstable_cache } from "next/cache";
 import MarkdownRenderer from "@/components/features/markdown/MarkdownRenderer";
 import Loading from "@/components/shared/loading";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth/auth-helpers";
 
 export default function ResumePage() {
   return (

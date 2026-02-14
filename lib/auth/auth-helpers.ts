@@ -1,16 +1,28 @@
 "use server";
 
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { organizationTable } from "@/drizzle/schema";
 import { headers } from "next/headers";
 
 // Session
-export const getSession = async () => {
+const getSession = async () => {
   return await auth.api.getSession({
     headers: await headers(),
   });
+};
+
+// Get current session from better-auth session
+export const getCurrentSession = async ({ allData = false } = {}) => {
+  const session = await getSession();
+
+  if (!session) return { sessionId: null, session: undefined };
+
+  return {
+    sessionId: session.session.id,
+    session: allData ? session : undefined,
+  };
 };
 
 // Get current user from better-auth session

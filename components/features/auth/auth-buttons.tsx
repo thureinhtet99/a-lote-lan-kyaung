@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth/auth-client";
 import { toast } from "sonner";
+import { APP_ROUTES } from "@/config/app-config";
 
 export function SignOutButton({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -10,7 +11,7 @@ export function SignOutButton({ children }: { children: React.ReactNode }) {
   const handleSignOut = async () => {
     try {
       await authClient.signOut();
-      router.push("/sign-in");
+      router.push(APP_ROUTES.SIGN_IN);
       router.refresh();
       toast.success("Signed out successfully");
     } catch {

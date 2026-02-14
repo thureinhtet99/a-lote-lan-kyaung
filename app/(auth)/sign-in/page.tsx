@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Link from "next/link";
 import SignInForm from "./sign-in-form";
-import { APP_ROUTES } from "@/config/appConfig";
-import { Logo } from "@/components/shared/Logo";
+import { APP_ROUTES } from "@/config/app-config";
+import { Logo } from "@/components/shared/logo";
 import { FieldSeparator } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 

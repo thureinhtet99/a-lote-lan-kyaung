@@ -9,7 +9,7 @@ import {
 } from "@/drizzle/schema";
 import { Suspense } from "react";
 import Link from "next/link";
-import { APP_ROUTES } from "@/config/appConfig";
+import { APP_ROUTES } from "@/config/app-config";
 import { cn } from "@/lib/utils";
 import {
   Card,
@@ -28,7 +28,7 @@ import { jobListingsTag } from "@/lib/utils/dataCache";
 import { convertSearchParamsToString } from "@/lib/utils/convertSearchParamsToString";
 import Loading from "@/components/shared/loading";
 import JobListingBadges from "@/components/features/job-listings/job-listing-badges";
-import { getCurrentOrg } from "@/lib/auth";
+import { getCurrentOrg } from "@/lib/auth/auth-helpers";
 import { JobSeekerSearchParamsType } from "@/types/index.type";
 
 // Search params schema

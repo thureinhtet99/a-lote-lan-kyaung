@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
-import { APP_ROUTES } from "./config/appConfig";
+import { APP_ROUTES } from "./config/app-config";
 
 const publicRoutes = ["/sign-in", "/sign-up", "/", "/job-listings"];
 

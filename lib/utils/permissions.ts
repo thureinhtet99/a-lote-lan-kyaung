@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { memberTable } from "@/drizzle/schema";
 import { eq, and } from "drizzle-orm";
 import { headers } from "next/headers";
-import { auth } from "../auth";
+import { auth } from "../auth/auth";
 
 export type UserPermissionType =
   | "owner.update"

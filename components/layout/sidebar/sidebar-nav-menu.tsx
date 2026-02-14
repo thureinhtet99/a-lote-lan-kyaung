@@ -10,7 +10,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SidebarNavMenuType } from "@/types/index.type";
-import { SignedIn, SignedOut } from "@/components/features/auth/AuthStatus";
+import { SignedIn, SignedOut } from "@/components/features/auth/auth-status";
 
 export default function SidebarNavMenu({
   items,

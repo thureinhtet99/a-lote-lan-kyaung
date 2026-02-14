@@ -10,8 +10,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
-import { APP_ROUTES } from "@/config/appConfig";
-import { SignOutButton } from "@/components/features/auth/AuthButtons";
+import { APP_ROUTES } from "@/config/app-config";
+import { SignOutButton } from "@/components/features/auth/auth-buttons";
 import { UserType } from "@/types/index.type";
 import {
   ChevronsUpDown,
@@ -27,7 +27,7 @@ export default function SidebarUserButtonClient({ user }: { user: UserType }) {
   const router = useRouter();
 
   const openUserProfile = () => {
-    router.push("/settings/profile");
+    router.push(APP_ROUTES.SETTINGS.PROFILE);
     setOpenMobile(false);
   };
 

@@ -1,4 +1,4 @@
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { db } from "@/lib/db";
 import { organizationTable, memberTable } from "@/drizzle/schema";
 import { eq, and } from "drizzle-orm";
