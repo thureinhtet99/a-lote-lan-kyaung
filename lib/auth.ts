@@ -11,6 +11,7 @@ import {
   userTable,
   verificationTable,
 } from "@/drizzle/schema";
+import { ac, owner, admin, member } from "./permissions";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -34,6 +35,12 @@ export const auth = betterAuth({
   plugins: [
     organization({
       allowUserToCreateOrganization: true,
+      ac,
+      roles: {
+        owner,
+        admin,
+        member,
+      },
     }),
   ],
   session: {

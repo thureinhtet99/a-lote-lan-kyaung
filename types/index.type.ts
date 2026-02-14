@@ -1,8 +1,4 @@
-import {
-  jobListingApplicationsTable,
-  userResumesTable,
-  user,
-} from "@/drizzle/schema";
+import { applicationTable, resumeTable, userTable } from "@/drizzle/schema";
 import { Column } from "@tanstack/react-table";
 import { Key, ReactNode } from "react";
 
@@ -16,7 +12,7 @@ export type CacheType =
   | "users"
   | "organizations"
   | "jobListings"
-  | "jobListingApplications"
+  | "applications"
   | "organizationUserSettings"
   | "userNotificationSettings"
   | "userResumes";
@@ -56,14 +52,14 @@ export type CheckConditionType = {
   otherwise?: ReactNode;
 };
 
-export type JobListingApplicationType = Pick<
-  typeof jobListingApplicationsTable.$inferSelect,
-  "jobListingId" | "rating" | "status" | "createdAt"
+export type ApplicationType = Pick<
+  typeof applicationTable.$inferSelect,
+  "jobListingId" | "rating" | "status" | "created_at"
 > & {
   coverLetterMarkDown: ReactNode | null;
-  user: Pick<typeof user.$inferSelect, "id" | "name" | "image"> & {
+  user: Pick<typeof userTable.$inferSelect, "id" | "name" | "image"> & {
     resume:
-      | (Pick<typeof userResumesTable.$inferSelect, "resumeFileUrl"> & {
+      | (Pick<typeof resumeTable.$inferSelect, "resumeFileUrl"> & {
           markdownSummary: ReactNode | null;
         })
       | null;

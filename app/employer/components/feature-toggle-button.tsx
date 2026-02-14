@@ -4,7 +4,7 @@ import { toggleJobListingFeaturedStatus } from "@/features/jobListings/actions";
 import { hasReachedMaxFeaturedJobListings } from "@/features/jobListings/lib/plan-feature-helpers";
 import UpgradePopOver from "./upgrade-popover";
 import { StarIcon, StarOffIcon } from "lucide-react";
-import { hasOrgUserPermission } from "@/lib/permission";
+import { hasOrgUserPermission } from "@/lib/permissions";
 
 export default function FeatureToggleButton({
   isFeatured,

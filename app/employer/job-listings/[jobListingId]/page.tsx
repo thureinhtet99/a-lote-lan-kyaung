@@ -25,7 +25,7 @@ import StatusToggleButton from "../../components/status-toggle-button";
 import FeatureToggleButton from "../../components/feature-toggle-button";
 import Loading from "@/components/loading";
 import { getJobListingApplicationsDb } from "@/features/jobListingApplications/db/job-listing-application-db";
-import { hasOrgUserPermission } from "@/lib/permission";
+import { hasOrgUserPermission } from "@/lib/permissions";
 import { getCurrentOrg } from "@/lib/auth-helpers";
 
 export default function JobListingByIdPage(props: ParamsType) {

@@ -17,7 +17,7 @@ import {
 } from "@/drizzle/schema";
 import { unstable_cache } from "next/cache";
 import { jobListingIdTag, userResumeTag } from "@/lib/dataCache";
-import { hasOrgUserPermission } from "@/lib/permission";
+import { hasOrgUserPermission } from "@/lib/permissions";
 
 // Create
 export const createJobListingApplication = async (
