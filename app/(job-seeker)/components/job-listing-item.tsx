@@ -100,7 +100,10 @@ const getAllJobListings = async (
         },
       },
     },
-    orderBy: [desc(jobListingTable.isFeatured), desc(jobListingTable.postedAt)],
+    orderBy: [
+      desc(jobListingTable.isFeatured),
+      desc(jobListingTable.posted_at),
+    ],
   });
 };
 
@@ -189,7 +192,7 @@ const JobListingListItem = ({
     | "wageInterval"
     | "experienceLevel"
     | "type"
-    | "postedAt"
+    | "posted_at"
     | "locationRequirement"
     | "isFeatured"
   >;
@@ -239,31 +242,31 @@ const JobListingListItem = ({
             <CardDescription className="text-base font-medium">
               {org?.name ?? "Unknown Organization"}
             </CardDescription>
-            {jobListing.postedAt != null && (
+            {jobListing.posted_at != null && (
               <div className="text-sm font-medium text-muted-foreground @min-md:hidden">
                 <Suspense
                   fallback={
-                    jobListing.postedAt
-                      ? new Date(jobListing.postedAt).toLocaleDateString()
+                    jobListing.posted_at
+                      ? new Date(jobListing.posted_at).toLocaleDateString()
                       : ""
                   }
                 >
-                  <DaySincePosting postedAt={jobListing.postedAt} />
+                  <DaySincePosting postedAt={jobListing.posted_at} />
                 </Suspense>
               </div>
             )}
           </div>
 
-          {jobListing.postedAt != null && (
+          {jobListing.posted_at != null && (
             <div className="text-sm font-semibold text-muted-foreground @max-md:hidden bg-secondary/10 px-3 py-1 rounded-md">
               <Suspense
                 fallback={
-                  jobListing.postedAt
-                    ? new Date(jobListing.postedAt).toLocaleDateString()
+                  jobListing.posted_at
+                    ? new Date(jobListing.posted_at).toLocaleDateString()
                     : ""
                 }
               >
-                <DaySincePosting postedAt={jobListing.postedAt} />
+                <DaySincePosting postedAt={jobListing.posted_at} />
               </Suspense>
             </div>
           )}
