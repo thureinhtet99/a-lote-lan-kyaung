@@ -5,9 +5,11 @@ import {
   accountTable,
   memberTable,
   invitationTable,
+  employerRequestTable,
 } from "@/drizzle/schema";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth/auth";
+import { eq } from "drizzle-orm";
 
 function generateId() {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
@@ -67,6 +69,7 @@ async function seed() {
     await db.delete(jobListingTable);
     await db.delete(memberTable);
     await db.delete(invitationTable);
+    await db.delete(employerRequestTable);
     await db.delete(accountTable);
     await db.delete(organizationTable);
     await db.delete(userTable);
@@ -77,18 +80,49 @@ async function seed() {
     // ===== CREATE TEST USERS =====
     console.log("👤 Creating test users...");
 
+    // Create admin user
+    const adminUser = await createUser("admin@test.com", "System Admin");
+    await db
+      .update(userTable)
+      .set({ role: "admin" })
+      .where(eq(userTable.id, adminUser));
+    console.log("✅ Set admin role for admin@test.com");
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    // Create employer users
     const ownerUser1 = await createUser("owner@test.com", "John Owner");
+    await db
+      .update(userTable)
+      .set({ role: "employer" })
+      .where(eq(userTable.id, ownerUser1));
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     const ownerUser2 = await createUser("jane.owner@test.com", "Jane Owner");
+    await db
+      .update(userTable)
+      .set({ role: "employer" })
+      .where(eq(userTable.id, ownerUser2));
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    const adminUser1 = await createUser("admin@test.com", "Alice Admin");
+    const adminUser1 = await createUser("employer@test.com", "Alice Employer");
+    await db
+      .update(userTable)
+      .set({ role: "employer" })
+      .where(eq(userTable.id, adminUser1));
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    const adminUser2 = await createUser("bob.admin@test.com", "Bob Admin");
+    const adminUser2 = await createUser(
+      "bob.employer@test.com",
+      "Bob Employer",
+    );
+    await db
+      .update(userTable)
+      .set({ role: "employer" })
+      .where(eq(userTable.id, adminUser2));
+    console.log("✅ Set employer role for employer users");
     await new Promise((resolve) => setTimeout(resolve, 100));
 
+    // Create regular users
     const memberUser1 = await createUser("user@test.com", "Charlie User");
     await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -96,6 +130,60 @@ async function seed() {
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     const memberUser3 = await createUser("tom.member@test.com", "Tom Member");
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    // Create a user with pending employer request
+    const pendingUser = await createUser(
+      "pending@test.com",
+      "Pending Employer",
+    );
+    console.log("✅ Created regular users");
+
+    console.log("");
+    console.log("💼 Creating employer requests...");
+
+    const { nanoid } = await import("nanoid");
+
+    // Create a pending employer request
+    await db.insert(employerRequestTable).values({
+      id: nanoid(),
+      userId: pendingUser,
+      status: "pending",
+      requestMessage:
+        "I would like to become an employer to post job listings for my company.",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    console.log("✅ Created pending employer request for pending@test.com");
+
+    // Create an approved request (historical)
+    await db.insert(employerRequestTable).values({
+      id: nanoid(),
+      userId: ownerUser1,
+      status: "approved",
+      requestMessage: "I need employer access to hire developers.",
+      adminResponse: "Request approved. Welcome!",
+      reviewedBy: adminUser,
+      reviewedAt: new Date(Date.now() - 86400000), // 1 day ago
+      createdAt: new Date(Date.now() - 172800000), // 2 days ago
+      updatedAt: new Date(Date.now() - 86400000),
+    });
+    console.log("✅ Created approved employer request (historical)");
+
+    // Create a rejected request (historical)
+    const rejectedUser = await createUser("rejected@test.com", "Rejected User");
+    await db.insert(employerRequestTable).values({
+      id: nanoid(),
+      userId: rejectedUser,
+      status: "rejected",
+      requestMessage: "I want employer access.",
+      adminResponse: "Please provide more information about your company.",
+      reviewedBy: adminUser,
+      reviewedAt: new Date(Date.now() - 86400000),
+      createdAt: new Date(Date.now() - 259200000), // 3 days ago
+      updatedAt: new Date(Date.now() - 86400000),
+    });
+    console.log("✅ Created rejected employer request (historical)");
 
     console.log("");
     console.log("🏢 Creating organizations...");
@@ -381,18 +469,21 @@ This position was for developing cross-platform mobile applications using React 
     console.log("");
     console.log("🔑 All passwords: Test123!");
     console.log("");
-    console.log("👑 OWNER ACCOUNTS:");
-    console.log("  • owner@test.com");
-    console.log("  • jane.owner@test.com");
+    console.log("� ADMIN ACCOUNT (Full System Access):");
+    console.log("  • admin@test.com (System Admin)");
     console.log("");
-    console.log("⚙️  ADMIN ACCOUNTS:");
-    console.log("  • admin@test.com");
-    console.log("  • bob.admin@test.com");
+    console.log("👑 EMPLOYER ACCOUNTS (Can create organizations):");
+    console.log("  • owner@test.com (John Owner)");
+    console.log("  • jane.owner@test.com (Jane Owner)");
+    console.log("  • employer@test.com (Alice Employer)");
+    console.log("  • bob.employer@test.com (Bob Employer)");
     console.log("");
-    console.log("👤 MEMBER/USER ACCOUNTS:");
-    console.log("  • user@test.com");
-    console.log("  • member@test.com");
-    console.log("  • tom.member@test.com");
+    console.log("👤 REGULAR USER ACCOUNTS:");
+    console.log("  • user@test.com (Charlie User)");
+    console.log("  • member@test.com (Diana Member)");
+    console.log("  • tom.member@test.com (Tom Member)");
+    console.log("  • pending@test.com (Has pending employer request)");
+    console.log("  • rejected@test.com (Had rejected employer request)");
     console.log("");
     console.log("🏢 ORGANIZATIONS:");
     console.log(`  • Tech Corp (owner: owner@test.com)`);

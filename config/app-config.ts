@@ -17,6 +17,12 @@ export const APP_ROUTES = {
   // AI_SEARCH: "/ai-search",
   JOB_BOARD: "/job-board",
 
+  ADMIN: {
+    HOME: "/admin",
+    USERS: "/admin/users",
+    EMPLOYER_REQUESTS: "/admin/employer-requests",
+  },
+
   JOB_LISTINGS: {
     HOME: "/job-listings",
   },
@@ -26,6 +32,7 @@ export const APP_ROUTES = {
     PROFILE: "/settings/profile",
     RESUME: "/settings/resume",
     NOTIFICATIONS: "/settings/notifications",
+    EMPLOYER_REQUEST: "/settings/employer-request",
   },
 
   EMPLOYER: {

@@ -10,20 +10,28 @@ export const statement = {
 // Create access control instance
 export const ac = createAccessControl(statement);
 
-// User
+// User - basic user with limited permissions
 export const user = ac.newRole({
   job_listing: ["create", "update"],
   application: ["read", "update"],
 });
 
-// Member
+// Member - organization member with more permissions
 export const member = ac.newRole({
   organization: ["read"],
   job_listing: ["create", "update", "delete", "change_status"],
   application: ["read", "update", "change_rating", "change_status"],
 });
 
-// Owner
+// Admin - organization admin with extended permissions
+export const admin = ac.newRole({
+  organization: ["read", "update"],
+  job_listing: ["create", "update", "delete", "change_status"],
+  application: ["read", "update", "change_rating", "change_status"],
+  member: ["invite", "update_role"],
+});
+
+// Owner - organization owner with full permissions
 export const owner = ac.newRole({
   organization: ["create", "read", "update", "delete"],
   job_listing: ["create", "update", "delete", "change_status"],

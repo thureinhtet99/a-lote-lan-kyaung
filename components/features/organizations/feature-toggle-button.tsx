@@ -15,7 +15,7 @@ export default function FeatureToggleButton({
 }) {
   return (
     <CheckCondition
-      condition={() => hasOrgUserPermission("job_listing.change_status")}
+      condition={() => hasOrgUserPermission("job_listing", ["change_status"])}
     >
       {isFeatured ? (
         <ActionButton

@@ -60,3 +60,80 @@ const getOrgById = async (id: string) => {
     where: eq(organizationTable.id, id),
   });
 };
+
+/**
+ * Check if the current user is an admin
+ */
+export async function isAdmin(): Promise<boolean> {
+  try {
+    const session = await getSession();
+    return session?.user?.role === "admin";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Check if the current user is an employer
+ */
+export async function isEmployer(): Promise<boolean> {
+  try {
+    const session = await getSession();
+    return (
+      session?.user?.role === "employer" || session?.user?.role === "admin"
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Check if the current user is a regular user
+ */
+export async function isUser(): Promise<boolean> {
+  try {
+    const session = await getSession();
+    return session?.user?.role === "user";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Get the current user's role
+ */
+export async function getUserRole(): Promise<
+  "user" | "employer" | "admin" | null
+> {
+  try {
+    const session = await getSession();
+    return (session?.user?.role as "user" | "employer" | "admin") || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Check if the current user is banned
+ */
+export async function isBanned(): Promise<boolean> {
+  try {
+    const session = await getSession();
+
+    if (!session?.user) return false;
+
+    const banned = session.user.banned;
+    const banExpires = session.user.banExpires;
+
+    if (!banned) return false;
+
+    // Check if ban has expired
+    if (banExpires && new Date(banExpires) < new Date()) {
+      return false;
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
+}

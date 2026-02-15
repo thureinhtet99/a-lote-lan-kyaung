@@ -4,7 +4,8 @@ import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { invitationTable } from "@/drizzle/schema";
+import { invitationTable, userTable } from "@/drizzle/schema";
+import { eq } from "drizzle-orm";
 
 const inviteMemberSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -44,6 +45,19 @@ export async function inviteMember(data: InviteMemberInput) {
       return {
         success: false,
         error: "No active organization found",
+      };
+    }
+
+    // Check if user is registered
+    const existingUser = await db.query.userTable.findFirst({
+      where: eq(userTable.email, validated.email),
+    });
+
+    if (!existingUser) {
+      return {
+        success: false,
+        error: `User with email ${validated.email} is not registered yet. Please ask them to create an account first.`,
+        userNotRegistered: true,
       };
     }
 

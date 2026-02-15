@@ -42,6 +42,12 @@ export const userTable = pgTable("users", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
+  role: text("role", { enum: ["user", "employer", "admin"] })
+    .default("user")
+    .notNull(),
+  banned: boolean("banned"),
+  banReason: text("ban_reason"),
+  banExpires: timestamp("ban_expires"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
@@ -163,12 +169,40 @@ export const invitationTable = pgTable(
   ],
 );
 
+// Employer requests table
+export const employerRequestTable = pgTable(
+  "employer_requests",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => userTable.id, { onDelete: "cascade" }),
+    status: text("status", { enum: ["pending", "approved", "rejected"] })
+      .default("pending")
+      .notNull(),
+    requestMessage: text("request_message"),
+    adminResponse: text("admin_response"),
+    reviewedBy: text("reviewed_by").references(() => userTable.id),
+    reviewedAt: timestamp("reviewed_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("employer_request_userId_idx").on(table.userId),
+    index("employer_request_status_idx").on(table.status),
+  ],
+);
+
 export const userRelations = relations(userTable, ({ one, many }) => ({
   sessions: many(sessionTable),
   accounts: many(accountTable),
   members: many(memberTable),
   invitations: many(invitationTable),
   resume: one(resumeTable),
+  employerRequests: many(employerRequestTable),
 }));
 
 export const sessionRelations = relations(sessionTable, ({ one }) => ({
@@ -214,3 +248,17 @@ export const invitationRelations = relations(invitationTable, ({ one }) => ({
     references: [userTable.id],
   }),
 }));
+
+export const employerRequestRelations = relations(
+  employerRequestTable,
+  ({ one }) => ({
+    user: one(userTable, {
+      fields: [employerRequestTable.userId],
+      references: [userTable.id],
+    }),
+    reviewer: one(userTable, {
+      fields: [employerRequestTable.reviewedBy],
+      references: [userTable.id],
+    }),
+  }),
+);

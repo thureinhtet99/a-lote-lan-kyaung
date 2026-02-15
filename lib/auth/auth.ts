@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth/minimal";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/lib/db";
-import { organization } from "better-auth/plugins";
+import { organization, admin as adminPlugin } from "better-auth/plugins";
 import {
   accountTable,
   invitationTable,
@@ -11,7 +11,7 @@ import {
   userTable,
   verificationTable,
 } from "@/drizzle/schema";
-import { ac, owner, admin, user } from "@/lib/utils/access-control";
+import { ac, owner, admin, member } from "@/lib/utils/access-control";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -34,14 +34,18 @@ export const auth = betterAuth({
   },
   plugins: [
     organization({
-      allowUserToCreateOrganization: true,
+      allowUserToCreateOrganization: async (user) => {
+        // Only employers can create organizations
+        return user.role === "employer" || user.role === "admin";
+      },
       ac,
       roles: {
         owner,
         admin,
-        member: user, // map 'user' role to 'member' in the database
+        member,
       },
     }),
+    adminPlugin(),
   ],
   session: {
     cookieCache: {
