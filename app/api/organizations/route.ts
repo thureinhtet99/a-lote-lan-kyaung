@@ -24,6 +24,7 @@ export async function GET() {
         logo: organizationTable.logo,
         createdAt: organizationTable.createdAt,
         metadata: organizationTable.metadata,
+        role: memberTable.role, // Include the user's role in the organization
       })
       .from(organizationTable)
       .innerJoin(

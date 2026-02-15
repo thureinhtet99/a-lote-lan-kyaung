@@ -1,54 +1,168 @@
-import { jobListingTable, organizationTable } from "@/drizzle/schema";
+import {
+  jobListingTable,
+  organizationTable,
+  userTable,
+  accountTable,
+  memberTable,
+  invitationTable,
+} from "@/drizzle/schema";
 import { db } from "@/lib/db";
+import { auth } from "@/lib/auth/auth";
 
 function generateId() {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
 }
 
+// Helper function to create a user with email/password using Better-auth
+async function createUser(
+  email: string,
+  name: string,
+  password: string = "Test123!",
+) {
+  try {
+    // Use Better-auth's signUp method to create user
+    const result = await auth.api.signUpEmail({
+      body: {
+        email,
+        password,
+        name,
+      },
+    });
+
+    if (result?.user?.id) {
+      console.log(`✅ Created user: ${email} (${name})`);
+      return result.user.id;
+    } else {
+      throw new Error(`Failed to create user: ${email}`);
+    }
+  } catch (error) {
+    console.error(`❌ Error creating user ${email}:`, error);
+    throw error;
+  }
+}
+
+// Helper function to add member to organization
+async function addMemberToOrg(
+  userId: string,
+  organizationId: string,
+  role: "owner" | "admin" | "member",
+) {
+  const { nanoid } = await import("nanoid");
+
+  await db.insert(memberTable).values({
+    id: nanoid(),
+    userId,
+    organizationId,
+    role,
+    createdAt: new Date(),
+  });
+}
+
 async function seed() {
   try {
-    await db.delete(jobListingTable);
-    await db.delete(organizationTable);
-    console.log("Starting seed...");
+    // Clean up existing data (in correct order to avoid foreign key constraints)
+    console.log("🌱 Starting seed...");
+    console.log("🧹 Cleaning up existing data...");
 
-    const allOrganizations = [
+    await db.delete(jobListingTable);
+    await db.delete(memberTable);
+    await db.delete(invitationTable);
+    await db.delete(accountTable);
+    await db.delete(organizationTable);
+    await db.delete(userTable);
+
+    console.log("✅ Cleanup complete");
+    console.log("");
+
+    // ===== CREATE TEST USERS =====
+    console.log("👤 Creating test users...");
+
+    const ownerUser1 = await createUser("owner@test.com", "John Owner");
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    const ownerUser2 = await createUser("jane.owner@test.com", "Jane Owner");
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    const adminUser1 = await createUser("admin@test.com", "Alice Admin");
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    const adminUser2 = await createUser("bob.admin@test.com", "Bob Admin");
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    const memberUser1 = await createUser("user@test.com", "Charlie User");
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    const memberUser2 = await createUser("member@test.com", "Diana Member");
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    const memberUser3 = await createUser("tom.member@test.com", "Tom Member");
+
+    console.log("");
+    console.log("🏢 Creating organizations...");
+
+    // ===== CREATE ORGANIZATIONS =====
+    const organizations = [
       {
-        id: "1",
-        name: "first organization",
-        slug: `org-1-${generateId()}`,
+        id: `org-${generateId()}`,
+        name: "Tech Corp",
+        slug: `tech-corp-${generateId()}`,
         logo: null,
         metadata: null,
         createdAt: new Date(),
       },
       {
-        id: "2",
-        name: "second organization",
-        slug: `org-2-${generateId()}`,
+        id: `org-${generateId()}`,
+        name: "StartupCo",
+        slug: `startupco-${generateId()}`,
         logo: null,
         metadata: null,
         createdAt: new Date(),
       },
       {
-        id: "3",
-        name: "third organization",
-        slug: `org-3-${generateId()}`,
+        id: `org-${generateId()}`,
+        name: "Innovation Labs",
+        slug: `innovation-labs-${generateId()}`,
         logo: null,
         metadata: null,
         createdAt: new Date(),
       },
     ];
 
-    // Insert job listings
-    for (const organizations of allOrganizations) {
-      await db.insert(organizationTable).values(organizations);
-      console.log(`✅ Inserted: ${organizations.name} (${organizations.slug})`);
-    }
-
     const insertedOrganizations = await db
       .insert(organizationTable)
-      .values(allOrganizations)
+      .values(organizations)
       .returning();
 
+    for (const org of insertedOrganizations) {
+      console.log(`✅ Created organization: ${org.name} (${org.slug})`);
+    }
+
+    console.log("");
+    console.log("👥 Assigning members to organizations...");
+
+    // ===== ASSIGN MEMBERS TO ORGANIZATIONS =====
+    // Organization 1: Tech Corp
+    await addMemberToOrg(ownerUser1, insertedOrganizations[0].id, "owner");
+    await addMemberToOrg(adminUser1, insertedOrganizations[0].id, "admin");
+    await addMemberToOrg(memberUser1, insertedOrganizations[0].id, "member");
+    await addMemberToOrg(memberUser2, insertedOrganizations[0].id, "member");
+    console.log(`✅ Added members to ${insertedOrganizations[0].name}`);
+
+    // Organization 2: StartupCo
+    await addMemberToOrg(ownerUser2, insertedOrganizations[1].id, "owner");
+    await addMemberToOrg(adminUser2, insertedOrganizations[1].id, "admin");
+    await addMemberToOrg(memberUser3, insertedOrganizations[1].id, "member");
+    console.log(`✅ Added members to ${insertedOrganizations[1].name}`);
+
+    // Organization 3: Innovation Labs - Owner has multiple orgs
+    await addMemberToOrg(ownerUser1, insertedOrganizations[2].id, "owner");
+    await addMemberToOrg(adminUser1, insertedOrganizations[2].id, "admin");
+    console.log(`✅ Added members to ${insertedOrganizations[2].name}`);
+
+    console.log("");
+    console.log("📝 Creating job listings...");
+
+    // ===== CREATE JOB LISTINGS =====
     const allJobListings = insertedOrganizations.flatMap((org) => [
       {
         organizationId: org.id,
@@ -258,7 +372,34 @@ This position was for developing cross-platform mobile applications using React 
       console.log(`✅ Inserted: ${jobListing.title} (${jobListing.status})`);
     }
 
-    console.log("Seeding completed successfully!");
+    console.log("");
+    console.log("✨ Seeding completed successfully!");
+    console.log("");
+    console.log("=".repeat(60));
+    console.log("📋 TEST CREDENTIALS");
+    console.log("=".repeat(60));
+    console.log("");
+    console.log("🔑 All passwords: Test123!");
+    console.log("");
+    console.log("👑 OWNER ACCOUNTS:");
+    console.log("  • owner@test.com");
+    console.log("  • jane.owner@test.com");
+    console.log("");
+    console.log("⚙️  ADMIN ACCOUNTS:");
+    console.log("  • admin@test.com");
+    console.log("  • bob.admin@test.com");
+    console.log("");
+    console.log("👤 MEMBER/USER ACCOUNTS:");
+    console.log("  • user@test.com");
+    console.log("  • member@test.com");
+    console.log("  • tom.member@test.com");
+    console.log("");
+    console.log("🏢 ORGANIZATIONS:");
+    console.log(`  • Tech Corp (owner: owner@test.com)`);
+    console.log(`  • StartupCo (owner: jane.owner@test.com)`);
+    console.log(`  • Innovation Labs (owner: owner@test.com)`);
+    console.log("");
+    console.log("=".repeat(60));
   } catch (error) {
     console.error("❌ Error during seeding:", error);
     throw error;

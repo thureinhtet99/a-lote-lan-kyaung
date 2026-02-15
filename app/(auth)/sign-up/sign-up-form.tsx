@@ -18,8 +18,12 @@ import { authClient } from "@/lib/auth/auth-client";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES } from "@/config/app-config";
 import { SignUpFormType, signUpSchema } from "@/drizzle/schema";
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function SignUpForm() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
   const form = useForm<SignUpFormType>({
     resolver: zodResolver(signUpSchema),
@@ -100,12 +104,31 @@ export default function SignUpForm() {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input
-                  {...field}
-                  type="password"
-                  placeholder="Enter your password"
-                  disabled={form.formState.isSubmitting}
-                />
+                <div className="relative">
+                  <Input
+                    {...field}
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    disabled={form.formState.isSubmitting}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
+                    disabled={form.formState.isSubmitting}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    )}
+                    <span className="sr-only">
+                      {showPassword ? "Hide password" : "Show password"}
+                    </span>
+                  </Button>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -118,12 +141,31 @@ export default function SignUpForm() {
             <FormItem>
               <FormLabel>Confirm Password</FormLabel>
               <FormControl>
-                <Input
-                  {...field}
-                  type="password"
-                  placeholder="Confirm password"
-                  disabled={form.formState.isSubmitting}
-                />
+                <div className="relative">
+                  <Input
+                    {...field}
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirm password"
+                    disabled={form.formState.isSubmitting}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    disabled={form.formState.isSubmitting}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    )}
+                    <span className="sr-only">
+                      {showConfirmPassword ? "Hide password" : "Show password"}
+                    </span>
+                  </Button>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>

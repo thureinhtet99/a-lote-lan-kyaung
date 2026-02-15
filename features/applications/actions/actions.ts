@@ -2,7 +2,7 @@
 
 import z from "zod";
 import { newJobListingApplicationSchema } from "./schema";
-import { getCurrentOrg, getCurrentUser } from "@/lib/auth";
+import { getCurrentOrg, getCurrentUser } from "@/lib/auth/auth-helpers";
 import {
   insertJobListingApplicationDb,
   updateJobListingApplicationDb,
@@ -17,7 +17,7 @@ import {
 } from "@/drizzle/schema";
 import { unstable_cache } from "next/cache";
 import { jobListingIdTag, userResumeTag } from "@/lib/utils/dataCache";
-import { hasOrgUserPermission } from "@/lib/utils/permissions";
+import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/permissions";
 
 // Create
 export const createJobListingApplication = async (

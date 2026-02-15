@@ -4,15 +4,18 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
 } from "@/components/ui/sidebar";
-import { ClipboardListIcon, LogInIcon, PlusIcon } from "lucide-react";
+import {
+  ClipboardListIcon,
+  LogInIcon,
+  PlusIcon,
+  SettingsIcon,
+} from "lucide-react";
 import { ReactNode, Suspense } from "react";
 import Link from "next/link";
 import AppSidebar from "@/components/layout/sidebar/app-sidebar";
 import SidebarNavMenuGroup from "@/components/layout/sidebar/sidebar-nav-menu";
-
 import { APP_ROUTES } from "@/config/app-config";
 import { unstable_cache } from "next/cache";
-import { redirect } from "next/navigation";
 import { sortJobListingsByStatus } from "@/features/job-listings/lib/utils";
 import { JobListingStatusType } from "@/drizzle/schema";
 import JobListingMenuGroup from "@/components/features/organizations/_job-listing-menu-group";
@@ -21,7 +24,7 @@ import Loading from "@/components/shared/loading";
 import { getJobListingWithApplicationsDb } from "@/features/applications/db/job-listing-application-db";
 import { getCurrentOrg } from "@/lib/auth/auth-helpers";
 import SidebarOrgButton from "@/components/features/organizations/sidebar-org-button";
-import { hasOrgUserPermission } from "@/lib/utils/permissions";
+import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/permissions";
 
 export default function EmployerLayout({ children }: { children: ReactNode }) {
   return (
@@ -33,7 +36,11 @@ export default function EmployerLayout({ children }: { children: ReactNode }) {
 
 const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
   const { orgId } = await getCurrentOrg();
-  if (orgId == null) return redirect(APP_ROUTES.ORG.HOME);
+  
+  // If no organization, render children without sidebar (for organizations selection page)
+  if (orgId == null) {
+    return <main className="w-full">{children}</main>;
+  }
 
   // Get all job listings with applications(cached)
   const cachedData = unstable_cache(
@@ -79,6 +86,11 @@ const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
           <SidebarNavMenuGroup
             className="mt-auto"
             items={[
+              {
+                href: APP_ROUTES.EMPLOYER.SETTINGS.HOME,
+                icon: <SettingsIcon />,
+                label: "Organization Settings",
+              },
               {
                 href: APP_ROUTES.HOME,
                 icon: <ClipboardListIcon />,

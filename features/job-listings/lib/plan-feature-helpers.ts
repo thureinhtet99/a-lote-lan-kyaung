@@ -1,4 +1,4 @@
-import { getCurrentOrg } from "@/lib/auth";
+import { getCurrentOrg } from "@/lib/auth/auth-helpers";
 import { db } from "@/lib/db";
 import { and, count, eq } from "drizzle-orm";
 import { jobListingTable } from "@/drizzle/schema";

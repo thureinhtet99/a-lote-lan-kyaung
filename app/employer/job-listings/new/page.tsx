@@ -6,9 +6,9 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import EmployerLoading from "../../loading";
 import { getAllJobListingsDb } from "@/features/job-listings/db/job-listing-db";
-import { getCurrentOrg } from "@/lib/auth";
+import { getCurrentOrg } from "@/lib/auth/auth-helpers";
 import JobListingForm from "@/components/features/job-listings/job-listing-form";
-import { hasOrgUserPermission } from "@/lib/utils/permissions";
+import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/permissions";
 
 export default function NewJobListingPage() {
   return (
@@ -20,7 +20,7 @@ export default function NewJobListingPage() {
 
 const SuspendedComponent = async () => {
   const { orgId } = await getCurrentOrg();
-  if (orgId == null) return redirect(APP_ROUTES.ORG.HOME);
+  if (orgId == null) return redirect(APP_ROUTES.EMPLOYER.ORG);
 
   // Get all job listings (cached)
   const cachedData = unstable_cache(

@@ -17,7 +17,11 @@ export default function EmployerHomePage() {
 
 const SuspendedComponent = async () => {
   const { orgId } = await getCurrentOrg();
-  if (orgId == null) return null;
+
+  // Redirect to organizations page if no active organization
+  if (orgId == null) {
+    redirect(APP_ROUTES.EMPLOYER.ORG);
+  }
 
   const jobListing = await getMostRecentJobListingDb(orgId);
   if (!jobListing || !jobListing.id) {

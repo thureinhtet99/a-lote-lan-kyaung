@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,14 +20,29 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Building2, Plus, Settings, Trash2 } from "lucide-react";
+import {
+  Building2,
+  Plus,
+  Settings,
+  Trash2,
+  Crown,
+  Shield,
+  User,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
+import {
+  createOrganization,
+  deleteOrganization,
+  switchOrganization,
+} from "@/features/organizations/actions/manage-organizations";
+import { useRouter } from "next/navigation";
 
 interface Organization {
   id: string;
@@ -37,78 +51,41 @@ interface Organization {
   logo: string | null;
   createdAt: Date;
   metadata: string | null;
+  role: string;
 }
 
-// interface Member {
-//   id: string;
-//   role: string;
-//   userId: string;
-//   organizationId: string;
-//   createdAt: Date;
-// }
+interface OrganizationsClientProps {
+  organizations: Organization[];
+}
 
-export default function OrganizationsPage() {
+export default function OrganizationsClient({
+  organizations,
+}: OrganizationsClientProps) {
   const router = useRouter();
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newOrgName, setNewOrgName] = useState("");
-
-  useEffect(() => {
-    fetchOrganizations();
-  }, []);
-
-  const fetchOrganizations = async () => {
-    try {
-      const response = await fetch("/api/organizations");
-      if (response.ok) {
-        const data = await response.json();
-        setOrganizations(data);
-      }
-    } catch (error) {
-      toast.error("Failed to load organizations");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleCreateOrganization = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsCreating(true);
 
-    try {
-      // Use our API endpoint to create organization
-      const response = await fetch("/api/organizations/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: newOrgName,
-          slug: newOrgName.toLowerCase().replace(/\s+/g, "-"),
-        }),
-      });
+    const result = await createOrganization(
+      newOrgName,
+      newOrgName.toLowerCase().replace(/\s+/g, "-"),
+    );
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to create organization");
-      }
-
+    if (result.error) {
+      toast.error(result.error);
+    } else {
       toast.success("Organization created successfully!");
       setShowCreateDialog(false);
       setNewOrgName("");
-      await fetchOrganizations();
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Failed to create organization";
-      toast.error(errorMessage);
-    } finally {
-      setIsCreating(false);
+      router.refresh();
     }
+
+    setIsCreating(false);
   };
 
   const handleDeleteOrganization = async (orgId: string) => {
@@ -116,61 +93,24 @@ export default function OrganizationsPage() {
       return;
     }
 
-    try {
-      const response = await fetch(`/api/organizations/${orgId}`, {
-        method: "DELETE",
-      });
+    setDeletingId(orgId);
 
-      if (response.ok) {
-        toast.success("Organization deleted successfully!");
-        await fetchOrganizations();
-      } else {
-        toast.error("Failed to delete organization");
-      }
-    } catch (error) {
-      toast.error("Failed to delete organization");
-    }
-  };
+    const result = await deleteOrganization(orgId);
 
-  const switchOrganization = async (orgId: string) => {
-    try {
-      // Use our API endpoint to switch organization
-      const response = await fetch("/api/organizations/switch", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ organizationId: orgId }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to switch organization");
-      }
-
-      toast.success("Switched organization successfully!");
-      router.push("/employer");
+    if (result?.error) {
+      toast.error(result.error);
+    } else {
+      toast.success("Organization deleted successfully!");
       router.refresh();
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Failed to switch organization";
-      toast.error(errorMessage);
     }
+
+    setDeletingId(null);
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading organizations...</p>
-        </div>
-      </div>
-    );
-  }
+  const handleSwitchOrganization = async (orgId: string) => {
+    // switchOrganization redirects automatically
+    await switchOrganization(orgId);
+  };
 
   return (
     <div className="container mx-auto p-6 max-w-6xl">
@@ -245,7 +185,9 @@ export default function OrganizationsPage() {
                       <Image
                         src={org.logo}
                         alt={org.name}
-                        className="h-10 w-10 rounded-lg"
+                        width={40}
+                        height={40}
+                        className="h-10 w-10 rounded-lg object-cover"
                       />
                     ) : (
                       <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -268,21 +210,36 @@ export default function OrganizationsPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={() => handleDeleteOrganization(org.id)}
-                        className="text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
+                      {org.role === "owner" && (
+                        <DropdownMenuItem
+                          onClick={() => handleDeleteOrganization(org.id)}
+                          disabled={deletingId === org.id}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          {deletingId === org.id ? "Deleting..." : "Delete"}
+                        </DropdownMenuItem>
+                      )}
+                      {org.role !== "owner" && (
+                        <DropdownMenuItem disabled>
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete (Owner only)
+                        </DropdownMenuItem>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Badge variant={getRoleBadgeVariant(org.role)}>
+                      {getRoleIcon(org.role)}
+                      <span className="ml-1 capitalize">{org.role}</span>
+                    </Badge>
+                  </div>
                   <Button
-                    onClick={() => switchOrganization(org.id)}
+                    onClick={() => handleSwitchOrganization(org.id)}
                     className="w-full"
                     variant="outline"
                   >
@@ -296,4 +253,34 @@ export default function OrganizationsPage() {
       )}
     </div>
   );
+}
+
+// Helper function to get role icon
+function getRoleIcon(role: string) {
+  switch (role) {
+    case "owner":
+      return <Crown className="h-3 w-3" />;
+    case "admin":
+      return <Shield className="h-3 w-3" />;
+    case "member":
+      return <User className="h-3 w-3" />;
+    default:
+      return <User className="h-3 w-3" />;
+  }
+}
+
+// Helper function to get role badge variant
+function getRoleBadgeVariant(
+  role: string,
+): "default" | "secondary" | "outline" {
+  switch (role) {
+    case "owner":
+      return "default";
+    case "admin":
+      return "secondary";
+    case "member":
+      return "outline";
+    default:
+      return "outline";
+  }
 }

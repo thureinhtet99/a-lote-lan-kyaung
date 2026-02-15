@@ -7,13 +7,13 @@ import {
 import { nextJobListingStatus } from "@/features/job-listings/lib/utils";
 import z from "zod";
 import { jobListingSchema } from "./schemas";
-import { getCurrentOrg } from "@/lib/auth";
+import { getCurrentOrg } from "@/lib/auth/auth-helpers";
 import {
   deleteJobListingDb,
   insertJobListingDb,
   updateJobListingDb,
 } from "./db/job-listing-db";
-import { hasOrgUserPermission } from "@/lib/utils/permissions";
+import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/permissions";
 import { jobListingTable } from "@/drizzle/schema";
 import { db } from "@/lib/db";
 import { and, eq } from "drizzle-orm";

@@ -28,8 +28,8 @@ import StatusToggleButton from "@/components/features/organizations/status-toggl
 import FeatureToggleButton from "@/components/features/organizations/feature-toggle-button";
 import Loading from "@/components/shared/loading";
 import { getJobListingApplicationsDb } from "@/features/applications/db/job-listing-application-db";
-import { hasOrgUserPermission } from "@/lib/utils/permissions";
-import { getCurrentOrg } from "@/lib/auth";
+import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/permissions";
+import { getCurrentOrg } from "@/lib/auth/auth-helpers";
 
 export default function JobListingByIdPage(props: ParamsType) {
   return (

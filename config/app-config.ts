@@ -30,14 +30,18 @@ export const APP_ROUTES = {
 
   EMPLOYER: {
     HOME: "/employer",
+    ORG: "/employer/organizations",
+    // ORG_SELECT: "/employer/organizations/select",
     JOB_LISTINGS: "/employer/job-listings",
     JOB_LISTINGS_NEW: "/employer/job-listings/new",
     PRICING: "/employer/pricing",
-    SETTINGS: "/employer/settings",
-  },
-
-  ORG: {
-    HOME: "/organizations",
-    SELECT: "/organizations/select",
+    SETTINGS: {
+      HOME: "/employer/settings",
+      MEMBERS: "/employer/settings/members",
+      INVITATIONS: "/employer/settings/invitations",
+      ORGANIZATION: "/employer/settings/organization",
+      ACTIVITY: "/employer/settings/activity",
+      PERMISSIONS: "/employer/settings/permissions",
+    },
   },
 };

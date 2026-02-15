@@ -1,121 +1,108 @@
-import { db } from "@/lib/db";
-import { memberTable } from "@/drizzle/schema";
-import { eq, and } from "drizzle-orm";
+"use server";
+
 import { headers } from "next/headers";
 import { auth } from "../auth/auth";
+import type { StatementType, PermissionAction } from "./access-control";
 
-export type UserPermissionType =
-  | "owner.update"
-  | "organization.create"
-  | "organization.delete"
-  | "organization.update"
-  | "job_listing.create"
-  | "job_listing.update"
-  | "job_listing.delete"
-  | "job_listing.change_status"
-  | "application.read"
-  | "application.update"
-  | "application.change_rating"
-  | "application.change_status"
-  | "member.invite"
-  | "member.remove";
-
-// Role-based permissions mapping
-const rolePermissions: Record<string, UserPermissionType[]> = {
-  owner: [
-    "owner.update",
-    "organization.create",
-    "organization.delete",
-    "organization.update",
-    "job_listing.create",
-    "job_listing.update",
-    "job_listing.delete",
-    "job_listing.change_status",
-    "application.read",
-    "application.update",
-    "application.change_rating",
-    "application.change_status",
-    "member.invite",
-    "member.remove",
-  ],
-  admin: [
-    "job_listing.create",
-    "job_listing.update",
-    "job_listing.delete",
-    "job_listing.change_status",
-    "application.read",
-    "application.update",
-    "application.change_rating",
-    "application.change_status",
-    "member.invite",
-    "member.remove",
-  ],
-  member: [
-    "job_listing.create",
-    "job_listing.update",
-    "application.read",
-    "application.update",
-  ],
-};
-
-const getSession = async () => {
-  return await auth.api.getSession({
-    headers: await headers(), // you need to pass the headers object.
-  });
-};
-
-export async function hasOrgUserPermission(
-  permission: UserPermissionType,
+export async function hasOrgUserPermission<T extends StatementType>(
+  resource: T,
+  actions: PermissionAction<T>[],
 ): Promise<boolean> {
-  const session = await getSession();
+  try {
+    const result = await auth.api.hasPermission({
+      headers: await headers(),
+      body: {
+        permissions: {
+          [resource]: actions,
+        },
+      },
+    });
 
-  if (!session) {
+    return result.success;
+  } catch {
     return false;
   }
-
-  const activeOrgId = session.session.activeOrganizationId as
-    | string
-    | undefined;
-
-  if (!activeOrgId) {
-    return false;
-  }
-
-  // Get user's role in the organization from database
-  const membership = await db.query.memberTable.findFirst({
-    where: and(
-      eq(memberTable.userId, session.user.id),
-      eq(memberTable.organizationId, activeOrgId),
-    ),
-  });
-
-  if (!membership) {
-    return false;
-  }
-
-  // Check if the user's role has the required permission
-  const permissions = rolePermissions[membership.role] || [];
-  return permissions.includes(permission);
 }
 
-// import { createAccessControl } from "better-auth/plugins/access";
+export async function hasOrgUserPermissionLegacy(
+  permission: string,
+): Promise<boolean> {
+  // Parse old permission format "resource.action"
+  const [resource, action] = permission.split(".") as [StatementType, string];
 
-// /**
-//  * make sure to use `as const` so typescript can infer the type correctly
-//  */
-// const statement = {
-//   project: ["create", "share", "update", "delete"],
-// } as const;
+  if (!resource || !action) {
+    return false;
+  }
 
-// export const ac = createAccessControl(statement);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return hasOrgUserPermission(resource, [action as any]);
+}
 
-// export const member = ac.newRole({
-//   //   organization: ["create"],
-//   project: ["create"],
-// });
-// export const admin = ac.newRole({
-//   project: ["create", "update"],
-// });
-// export const owner = ac.newRole({
-//   project: ["create", "update", "delete"],
-// });
+/**
+ * Check if user is owner of the active organization
+ */
+export async function isOrgOwner(): Promise<boolean> {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.session?.activeOrganizationId) {
+      return false;
+    }
+
+    const member = await auth.api.getActiveMember({
+      headers: await headers(),
+    });
+
+    return member?.role === "owner";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Check if user is admin or owner of the active organization
+ */
+export async function isOrgAdminOrOwner(): Promise<boolean> {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.session?.activeOrganizationId) {
+      return false;
+    }
+
+    const member = await auth.api.getActiveMember({
+      headers: await headers(),
+    });
+
+    return member?.role === "owner" || member?.role === "admin";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Get current user's role in active organization
+ */
+export async function getCurrentOrgRole(): Promise<string | null> {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.session?.activeOrganizationId) {
+      return null;
+    }
+
+    const member = await auth.api.getActiveMember({
+      headers: await headers(),
+    });
+
+    return member?.role ?? null;
+  } catch {
+    return null;
+  }
+}

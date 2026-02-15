@@ -6,7 +6,7 @@ import UpgradePopOver from "./upgrade-popover";
 import ActionButton from "@/components/shared/ActionButton";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { toggleJobListingStatus } from "@/features/job-listings/actions";
-import { hasOrgUserPermission } from "@/lib/utils/permissions";
+import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/permissions";
 
 export default function StatusToggleButton({
   status,
