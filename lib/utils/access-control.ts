@@ -1,12 +1,7 @@
 import { createAccessControl } from "better-auth/plugins/access";
 
-/**
- * Access Control definitions for better-auth organization plugin
- * This file contains AC configuration and role definitions only (no server functions)
- */
-
 export const statement = {
-  organization: ["create", "update", "delete", "switch"],
+  organization: ["create", "update", "delete", "switch", "read"],
   job_listing: ["create", "update", "delete", "change_status"],
   application: ["read", "update", "change_rating", "change_status"],
   member: ["invite", "remove", "update_role"],
@@ -15,23 +10,22 @@ export const statement = {
 // Create access control instance
 export const ac = createAccessControl(statement);
 
-// User (basic member)
+// User
 export const user = ac.newRole({
   job_listing: ["create", "update"],
   application: ["read", "update"],
 });
 
-// Admin
-export const admin = ac.newRole({
-  organization: ["update"],
+// Member
+export const member = ac.newRole({
+  organization: ["read"],
   job_listing: ["create", "update", "delete", "change_status"],
   application: ["read", "update", "change_rating", "change_status"],
-  member: ["invite", "remove", "update_role"],
 });
 
 // Owner
 export const owner = ac.newRole({
-  organization: ["create", "update", "delete"],
+  organization: ["create", "read", "update", "delete"],
   job_listing: ["create", "update", "delete", "change_status"],
   application: ["read", "update", "change_rating", "change_status"],
   member: ["invite", "remove", "update_role"],
