@@ -6,21 +6,19 @@ import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { nanoid } from "nanoid";
 import { eq, and, or } from "drizzle-orm";
-import { z } from "zod";
-
-export const employerRequestSchema = z.object({
-  requestMessage: z
-    .string()
-    .min(10, "Please provide a reason (at least 10 characters)")
-    .max(500, "Message is too long (max 500 characters)"),
-});
-
-export type EmployerRequestFormType = z.infer<typeof employerRequestSchema>;
+import {
+  employerRequestSchema,
+  type EmployerRequestFormType,
+} from "../validations";
+import { revalidateAdminStatsCache } from "@/features/users/db/cache/users";
 
 export async function createEmployerRequest(
   data: EmployerRequestFormType,
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    // Validate input
+    const validated = employerRequestSchema.parse(data);
+
     const session = await auth.api.getSession({
       headers: await headers(),
     });
@@ -68,8 +66,10 @@ export async function createEmployerRequest(
       id: nanoid(),
       userId: user.id,
       status: "pending",
-      requestMessage: data.requestMessage,
+      requestMessage: validated.requestMessage,
     });
+
+    revalidateAdminStatsCache();
 
     return { success: true };
   } catch (error) {

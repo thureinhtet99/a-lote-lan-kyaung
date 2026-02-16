@@ -5,19 +5,19 @@ import { employerRequestTable, userTable } from "@/drizzle/schema";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { eq } from "drizzle-orm";
-import { z } from "zod";
-
-export const approveRequestSchema = z.object({
-  requestId: z.string(),
-  adminResponse: z.string().optional(),
-});
-
-export type ApproveRequestFormType = z.infer<typeof approveRequestSchema>;
+import {
+  approveRequestSchema,
+  type ApproveRequestFormType,
+} from "../validations";
+import { revalidateAdminStatsCache } from "@/features/users/db/cache/users";
 
 export async function approveEmployerRequest(
   data: ApproveRequestFormType,
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    // Validate input
+    const validated = approveRequestSchema.parse(data);
+
     const session = await auth.api.getSession({
       headers: await headers(),
     });
@@ -33,7 +33,7 @@ export async function approveEmployerRequest(
 
     // Get the request
     const request = await db.query.employerRequestTable.findFirst({
-      where: eq(employerRequestTable.id, data.requestId),
+      where: eq(employerRequestTable.id, validated.requestId),
       with: {
         user: true,
       },
@@ -52,11 +52,11 @@ export async function approveEmployerRequest(
       .update(employerRequestTable)
       .set({
         status: "approved",
-        adminResponse: data.adminResponse,
+        adminResponse: validated.adminResponse,
         reviewedBy: session.user.id,
         reviewedAt: new Date(),
       })
-      .where(eq(employerRequestTable.id, data.requestId));
+      .where(eq(employerRequestTable.id, validated.requestId));
 
     // Update the user role to employer
     await db
@@ -65,6 +65,8 @@ export async function approveEmployerRequest(
         role: "employer",
       })
       .where(eq(userTable.id, request.userId));
+
+    revalidateAdminStatsCache();
 
     return { success: true };
   } catch (error) {

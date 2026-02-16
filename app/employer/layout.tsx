@@ -18,12 +18,12 @@ import { APP_ROUTES } from "@/config/app-config";
 import { unstable_cache } from "next/cache";
 import { sortJobListingsByStatus } from "@/features/job-listings/lib/utils";
 import { JobListingStatusType } from "@/drizzle/schema";
-import JobListingMenuGroup from "@/components/features/organizations/_job-listing-menu-group";
-import { jobListingsTag } from "@/lib/utils/dataCache";
+import JobListingMenuGroup from "@/components/organizations/_job-listing-menu-group";
+import { jobListingsTag } from "@/lib/utils/data-cache";
 import Loading from "@/components/shared/loading";
 import { getJobListingWithApplicationsDb } from "@/features/applications/db/job-listing-application-db";
 import { getCurrentOrg } from "@/lib/auth/auth-helpers";
-import SidebarOrgButton from "@/components/features/organizations/sidebar-org-button";
+import SidebarOrgButton from "@/components/organizations/sidebar-org-button";
 import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/permissions";
 
 export default function EmployerLayout({ children }: { children: ReactNode }) {
@@ -36,7 +36,7 @@ export default function EmployerLayout({ children }: { children: ReactNode }) {
 
 const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
   const { orgId } = await getCurrentOrg();
-  
+
   // If no organization, render children without sidebar (for organizations selection page)
   if (orgId == null) {
     return <main className="w-full">{children}</main>;

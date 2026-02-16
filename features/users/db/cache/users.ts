@@ -1,4 +1,4 @@
-import { idTag } from "@/lib/utils/dataCache";
+import { adminStatsTag, idTag } from "@/lib/utils/data-cache";
 import { revalidateTag } from "next/cache";
 
 export function revalidateUserCache(userId: string) {
@@ -6,5 +6,13 @@ export function revalidateUserCache(userId: string) {
     if (userId) revalidateTag(idTag("users", userId));
   } catch (error) {
     console.error("Failed to revalidate user cache:", error);
+  }
+}
+
+export function revalidateAdminStatsCache() {
+  try {
+    revalidateTag(adminStatsTag("admin-stats"));
+  } catch (error) {
+    console.error("Failed to revalidate admin stats cache:", error);
   }
 }

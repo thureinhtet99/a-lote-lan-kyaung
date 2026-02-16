@@ -1,6 +1,6 @@
 import ActionButton from "@/components/shared/ActionButton";
 import CheckCondition from "@/components/shared/CheckCondition";
-import MarkdownRenderer from "@/components/features/markdown/MarkdownRenderer";
+import MarkdownRenderer from "@/components/markdown/MarkdownRenderer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { deleteJobListing } from "@/features/job-listings/actions";
@@ -10,7 +10,7 @@ import { APP_ROUTES } from "@/config/app-config";
 import {
   jobListingApplicationsTag,
   jobListingIdTag,
-} from "@/lib/utils/dataCache";
+} from "@/lib/utils/data-cache";
 import { EditIcon, Trash2Icon } from "lucide-react";
 import { unstable_cache } from "next/cache";
 import Link from "next/link";
@@ -18,14 +18,14 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Separator } from "@/components/ui/separator";
 import ApplicationTable from "@/features/applications/components/application-table";
-import { MarkdownPartial } from "@/components/features/markdown/MarkdownPartial";
-import JobListingBadges from "@/components/features/job-listings/job-listing-badges";
+import { MarkdownPartial } from "@/components/markdown/MarkdownPartial";
+import JobListingBadges from "@/components/job-listings/job-listing-badges";
 import { ParamsType } from "@/types/index.type";
 import SkeletonApplicationTable from "@/features/applications/components/skeleton-application-table";
 import EmployerLoading from "../../loading";
 import { getJobListingByIdByOrgIdDb } from "@/features/job-listings/db/job-listing-db";
-import StatusToggleButton from "@/components/features/organizations/status-toggle-button";
-import FeatureToggleButton from "@/components/features/organizations/feature-toggle-button";
+import StatusToggleButton from "@/components/organizations/status-toggle-button";
+import FeatureToggleButton from "@/components/organizations/feature-toggle-button";
 import Loading from "@/components/shared/loading";
 import { getJobListingApplicationsDb } from "@/features/applications/db/job-listing-application-db";
 import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/permissions";

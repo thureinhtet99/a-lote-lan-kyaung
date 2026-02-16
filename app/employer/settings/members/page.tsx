@@ -7,8 +7,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MemberTable } from "@/components/features/organizations/settings/member-table";
-import { MemberInviteDialog } from "@/components/features/organizations/settings/member-invite-dialog";
+import { MemberTable } from "@/components/organizations/settings/member-table";
+import { MemberInviteDialog } from "@/components/organizations/settings/member-invite-dialog";
 
 export default function MembersPage() {
   return (

@@ -16,7 +16,7 @@ import {
   resumeTable,
 } from "@/drizzle/schema";
 import { unstable_cache } from "next/cache";
-import { jobListingIdTag, userResumeTag } from "@/lib/utils/dataCache";
+import { jobListingIdTag, userResumeTag } from "@/lib/utils/data-cache";
 import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/permissions";
 
 // Create

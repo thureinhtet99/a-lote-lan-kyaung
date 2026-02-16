@@ -9,7 +9,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { MarkdownEditor } from "@/components/features/markdown/markdown-editor";
+import { MarkdownEditor } from "@/components/markdown/markdown-editor";
 import { Button } from "@/components/ui/button";
 import LoadingSwap from "@/components/shared/LoadingSwap";
 import z from "zod";

@@ -5,7 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ActivityLog } from "@/components/features/organizations/settings/activity-log";
+import { ActivityLog } from "@/components/organizations/settings/activity-log";
 
 export default function ActivityPage() {
   return (

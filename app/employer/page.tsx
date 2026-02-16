@@ -1,6 +1,6 @@
 import { getMostRecentJobListingDb } from "@/features/job-listings/db/job-listing-db";
 import { APP_ROUTES } from "@/config/app-config";
-import { jobListingIdTag } from "@/lib/utils/dataCache";
+import { jobListingIdTag } from "@/lib/utils/data-cache";
 import { unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";

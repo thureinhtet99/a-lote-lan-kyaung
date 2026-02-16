@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { unstable_cache } from "next/cache";
 import { getUserOrganizationsDb } from "@/features/organizations/actions/manage-organizations";
-import { idTag } from "@/lib/utils/dataCache";
+import { idTag } from "@/lib/utils/data-cache";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import Loading from "@/components/shared/loading";

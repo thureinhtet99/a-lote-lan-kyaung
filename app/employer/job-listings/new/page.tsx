@@ -1,13 +1,13 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { APP_ROUTES } from "@/config/app-config";
-import { jobListingsTag } from "@/lib/utils/dataCache";
+import { jobListingsTag } from "@/lib/utils/data-cache";
 import { unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import EmployerLoading from "../../loading";
 import { getAllJobListingsDb } from "@/features/job-listings/db/job-listing-db";
 import { getCurrentOrg } from "@/lib/auth/auth-helpers";
-import JobListingForm from "@/components/features/job-listings/job-listing-form";
+import JobListingForm from "@/components/job-listings/job-listing-form";
 import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/permissions";
 
 export default function NewJobListingPage() {

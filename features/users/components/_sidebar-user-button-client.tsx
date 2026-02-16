@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import { APP_ROUTES } from "@/config/app-config";
-import { SignOutButton } from "@/components/features/auth/auth-buttons";
+import { SignOutButton } from "@/components/auth/auth-buttons";
 import { UserType } from "@/types/index.type";
 import {
   ChevronsUpDown,

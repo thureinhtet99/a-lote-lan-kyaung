@@ -8,15 +8,6 @@ export type UserType = {
   image: string | null;
 };
 
-export type CacheType =
-  | "users"
-  | "organizations"
-  | "jobListings"
-  | "applications"
-  | "organizationUserSettings"
-  | "userNotificationSettings"
-  | "userResumes";
-
 export type UserPermissionType =
   | "org:job_listing:create"
   | "org:job_listing:update"

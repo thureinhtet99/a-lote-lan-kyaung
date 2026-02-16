@@ -5,7 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { PermissionsMatrix } from "@/components/features/organizations/settings/permissions-matrix";
+import { PermissionsMatrix } from "@/components/organizations/settings/permissions-matrix";
 
 export default function PermissionsPage() {
   return (

@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { OrganizationSettingsForm } from "@/components/features/organizations/settings/organization-settings-form";
+import { OrganizationSettingsForm } from "@/components/organizations/settings/organization-settings-form";
 
 export default function OrganizationPage() {
   return (

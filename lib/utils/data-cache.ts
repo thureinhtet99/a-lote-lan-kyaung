@@ -1,4 +1,12 @@
-import { CacheType } from "@/types/index.type";
+type CacheType =
+  | "users"
+  | "organizations"
+  | "job-listings"
+  | "applications"
+  | "organization-user-settings"
+  | "user-notification-settings"
+  | "user-resumes"
+  | "admin-stats";
 
 // JobListing
 export const jobListingsTag = (orgId: string, tag: CacheType) => {
@@ -35,4 +43,9 @@ export const userNotificationTag = (tag: CacheType, userId: string) => {
 // Id
 export const idTag = (tag: CacheType, id: string) => {
   return `${tag}-${id}` as const;
+};
+
+// Admin Dashboard Stats
+export const adminStatsTag = (tag: CacheType) => {
+  return `${tag}` as const;
 };

@@ -3,11 +3,11 @@
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { createEmployerRequest } from "@/features/employer-requests/actions/create-employer-request";
 import {
-  createEmployerRequest,
   employerRequestSchema,
   type EmployerRequestFormType,
-} from "@/features/employer-requests/actions/create-employer-request";
+} from "@/features/employer-requests/validations";
 import {
   Form,
   FormControl,

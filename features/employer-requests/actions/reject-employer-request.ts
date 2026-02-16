@@ -5,22 +5,19 @@ import { employerRequestTable } from "@/drizzle/schema";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { eq } from "drizzle-orm";
-import { z } from "zod";
-
-export const rejectRequestSchema = z.object({
-  requestId: z.string(),
-  adminResponse: z
-    .string()
-    .min(1, "Please provide a reason for rejection")
-    .max(500, "Response is too long (max 500 characters)"),
-});
-
-export type RejectRequestFormType = z.infer<typeof rejectRequestSchema>;
+import {
+  rejectRequestSchema,
+  type RejectRequestFormType,
+} from "../validations";
+import { revalidateAdminStatsCache } from "@/features/users/db/cache/users";
 
 export async function rejectEmployerRequest(
   data: RejectRequestFormType,
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    // Validate input
+    const validated = rejectRequestSchema.parse(data);
+
     const session = await auth.api.getSession({
       headers: await headers(),
     });
@@ -36,7 +33,7 @@ export async function rejectEmployerRequest(
 
     // Get the request
     const request = await db.query.employerRequestTable.findFirst({
-      where: eq(employerRequestTable.id, data.requestId),
+      where: eq(employerRequestTable.id, validated.requestId),
     });
 
     if (!request) {
@@ -52,11 +49,13 @@ export async function rejectEmployerRequest(
       .update(employerRequestTable)
       .set({
         status: "rejected",
-        adminResponse: data.adminResponse,
+        adminResponse: validated.adminResponse,
         reviewedBy: session.user.id,
         reviewedAt: new Date(),
       })
-      .where(eq(employerRequestTable.id, data.requestId));
+      .where(eq(employerRequestTable.id, validated.requestId));
+
+    revalidateAdminStatsCache();
 
     return { success: true };
   } catch (error) {

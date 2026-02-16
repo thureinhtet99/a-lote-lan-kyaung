@@ -35,7 +35,7 @@ import {
   formatWageInterval,
 } from "@/features/job-listings/lib/formatters";
 import { StateSelectItems } from "./StateSelectItems";
-import { MarkdownEditor } from "@/components/features/markdown/markdown-editor";
+import { MarkdownEditor } from "@/components/markdown/markdown-editor";
 import { Button } from "@/components/ui/button";
 import LoadingSwap from "@/components/shared/LoadingSwap";
 import {

@@ -3,96 +3,91 @@ import { headers } from "next/headers";
 import { db } from "@/lib/db";
 import { userTable, employerRequestTable } from "@/drizzle/schema";
 import { eq, count } from "drizzle-orm";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StatCard } from "@/components/shared/stat-card";
+import { Users, Briefcase, Shield, Clock } from "lucide-react";
+import { unstable_cache } from "next/cache";
+import { adminStatsTag } from "@/lib/utils/data-cache";
+
+const getAdminStats = unstable_cache(
+  async () => {
+    const [
+      totalUsersResult,
+      totalEmployersResult,
+      totalAdminsResult,
+      pendingRequestsResult,
+    ] = await Promise.all([
+      db.select({ count: count() }).from(userTable),
+      db
+        .select({ count: count() })
+        .from(userTable)
+        .where(eq(userTable.role, "employer")),
+      db
+        .select({ count: count() })
+        .from(userTable)
+        .where(eq(userTable.role, "admin")),
+      db
+        .select({ count: count() })
+        .from(employerRequestTable)
+        .where(eq(employerRequestTable.status, "pending")),
+    ]);
+
+    return {
+      totalUsers: Number(totalUsersResult[0]?.count ?? 0),
+      totalEmployers: Number(totalEmployersResult[0]?.count ?? 0),
+      totalAdmins: Number(totalAdminsResult[0]?.count ?? 0),
+      pendingRequests: Number(pendingRequestsResult[0]?.count ?? 0),
+    };
+  },
+  ["admin-stats"],
+  {
+    tags: [adminStatsTag("admin-stats")],
+    revalidate: 60,
+  },
+);
 
 export default async function AdminDashboard() {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
 
-  // Get statistics
-  const totalUsers = await db
-    .select({ count: count() })
-    .from(userTable)
-    .then((res) => res[0]?.count || 0);
-
-  const totalEmployers = await db
-    .select({ count: count() })
-    .from(userTable)
-    .where(eq(userTable.role, "employer"))
-    .then((res) => res[0]?.count || 0);
-
-  const totalAdmins = await db
-    .select({ count: count() })
-    .from(userTable)
-    .where(eq(userTable.role, "admin"))
-    .then((res) => res[0]?.count || 0);
-
-  const pendingRequests = await db
-    .select({ count: count() })
-    .from(employerRequestTable)
-    .where(eq(employerRequestTable.status, "pending"))
-    .then((res) => res[0]?.count || 0);
+  const { totalUsers, totalEmployers, totalAdmins, pendingRequests } =
+    await getAdminStats();
 
   return (
-    <div className="container py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Welcome back, {session?.user?.name}
+    <div className="p-8 space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground mt-2">
+          Welcome back, {session?.user?.name}. Here&apos;s what&apos;s happening
+          with your platform.
         </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalUsers}</div>
-            <p className="text-xs text-muted-foreground">
-              All registered users
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Employers</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalEmployers}</div>
-            <p className="text-xs text-muted-foreground">
-              Users with employer role
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Admins</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalAdmins}</div>
-            <p className="text-xs text-muted-foreground">
-              Users with admin role
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Pending Requests
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{pendingRequests}</div>
-            <p className="text-xs text-muted-foreground">
-              Employer requests awaiting review
-            </p>
-          </CardContent>
-        </Card>
+        <StatCard
+          title="Total Users"
+          value={totalUsers}
+          description="All registered users"
+          icon={Users}
+        />
+        <StatCard
+          title="Employers"
+          value={totalEmployers}
+          description="Users with employer role"
+          icon={Briefcase}
+        />
+        <StatCard
+          title="Admins"
+          value={totalAdmins}
+          description="Users with admin role"
+          icon={Shield}
+        />
+        <StatCard
+          title="Pending Requests"
+          value={pendingRequests}
+          description="Employer requests"
+          icon={Clock}
+        />
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import SidebarUserButtonClient from "./_sidebar-user-button-client";
 import { getCurrentUser } from "@/lib/auth/auth-helpers";
-import { SignOutButton } from "@/components/features/auth/auth-buttons";
+import { SignOutButton } from "@/components/auth/auth-buttons";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { LogOutIcon } from "lucide-react";
 import Loading from "@/components/shared/loading";

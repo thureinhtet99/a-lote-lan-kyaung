@@ -1,4 +1,4 @@
-import { idTag } from "@/lib/utils/dataCache";
+import { idTag } from "@/lib/utils/data-cache";
 import { revalidateTag } from "next/cache";
 
 export function revalidateOrgCache(orgId: string) {

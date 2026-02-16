@@ -4,8 +4,8 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { APP_CONFIG, APP_ROUTES } from "@/config/app-config";
-import BreakPoint from "@/components/shared/BreakPoint";
 import { Suspense } from "react";
+import ResponsiveBreakpoint from "@/components/shared/ResponsiveBreakpoint";
 import { SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import ClientSheet from "./_ClientSheet";
 import { db } from "@/lib/db";
@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { convertSearchParamsToString } from "@/lib/utils/convertSearchParamsToString";
 import { XIcon } from "lucide-react";
-import MarkdownRenderer from "@/components/features/markdown/MarkdownRenderer";
+import MarkdownRenderer from "@/components/markdown/MarkdownRenderer";
 import {
   Popover,
   PopoverContent,
@@ -32,7 +32,7 @@ import {
   idTag,
   jobListingApplicationsTag,
   userResumeTag,
-} from "@/lib/utils/dataCache";
+} from "@/lib/utils/data-cache";
 import { differenceInDays } from "date-fns";
 import { connection } from "next/server";
 import {
@@ -44,7 +44,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { NewJobListingApplicationForm } from "@/features/applications/components/NewJobListingApplicationForm";
-import JobListingBadges from "@/components/features/job-listings/job-listing-badges";
+import JobListingBadges from "@/components/job-listings/job-listing-badges";
 import { getCurrentUser } from "@/lib/auth/auth-helpers";
 import Loading from "@/components/shared/loading";
 
@@ -67,7 +67,7 @@ export default function JobListingPage({
             <JobListingDetails searchParams={searchParams} params={params} />
           </div>
         </ResizablePanel>
-        <BreakPoint
+        <ResponsiveBreakpoint
           breakpoint="min-width: 1024px"
           otherwise={
             <ClientSheet>
@@ -100,7 +100,7 @@ export default function JobListingPage({
               </Suspense>
             </div>
           </ResizablePanel>
-        </BreakPoint>
+        </ResponsiveBreakpoint>
       </ResizablePanelGroup>
     </>
   );
@@ -134,9 +134,9 @@ const JobListingDetails = async ({
   // Get job listing by id (cached)
   const cachedData = unstable_cache(
     async (id: string) => getJobListingById(id),
-    [idTag("jobListings", jobListingId)],
+    [idTag("job-listings", jobListingId)],
     {
-      tags: [idTag("jobListings", jobListingId)],
+      tags: [idTag("job-listings", jobListingId)],
     },
   );
   const jobListing = await cachedData(jobListingId);
@@ -270,8 +270,8 @@ const ApplyButton = async ({ jobListingId }: { jobListingId: string }) => {
   // Get user resume by userId (cached)
   const cachedUserResume = unstable_cache(
     async (userId: string) => getUserResume(userId),
-    [userResumeTag("userResumes", userId)],
-    { tags: [userResumeTag("userResumes", userId)] },
+    [userResumeTag("user-resumes", userId)],
+    { tags: [userResumeTag("user-resumes", userId)] },
   );
 
   const resume = await cachedUserResume(userId);

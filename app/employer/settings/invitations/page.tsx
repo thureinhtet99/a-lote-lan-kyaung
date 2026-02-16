@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { InvitationTable } from "@/components/features/organizations/settings/invitation-table";
+import { InvitationTable } from "@/components/organizations/settings/invitation-table";
 
 export default function InvitationsPage() {
   return (

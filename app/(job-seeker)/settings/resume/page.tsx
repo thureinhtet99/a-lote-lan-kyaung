@@ -13,10 +13,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
-import { userResumeTag } from "@/lib/utils/dataCache";
+import { userResumeTag } from "@/lib/utils/data-cache";
 import { resumeTable } from "@/drizzle/schema";
 import { unstable_cache } from "next/cache";
-import MarkdownRenderer from "@/components/features/markdown/MarkdownRenderer";
+import MarkdownRenderer from "@/components/markdown/MarkdownRenderer";
 import Loading from "@/components/shared/loading";
 import { getCurrentUser } from "@/lib/auth/auth-helpers";
 

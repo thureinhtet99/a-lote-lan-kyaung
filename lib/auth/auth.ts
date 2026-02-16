@@ -12,6 +12,7 @@ import {
   verificationTable,
 } from "@/drizzle/schema";
 import { ac, owner, admin, member } from "@/lib/utils/access-control";
+import { revalidateAdminStatsCache } from "@/features/users/db/cache/users";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -36,7 +37,7 @@ export const auth = betterAuth({
     organization({
       allowUserToCreateOrganization: async (user) => {
         // Only employers can create organizations
-        return user.role === "employer" || user.role === "admin";
+        return user.role === "employer";
       },
       ac,
       roles: {
@@ -47,6 +48,15 @@ export const auth = betterAuth({
     }),
     adminPlugin(),
   ],
+  databaseHooks: {
+    user: {
+      create: {
+        after: async () => {
+          revalidateAdminStatsCache();
+        },
+      },
+    },
+  },
   session: {
     cookieCache: {
       enabled: true,

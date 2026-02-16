@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { db } from "@/lib/db";
 import { userNotificationSettingsTable } from "@/drizzle/schema";
 import NotificationsForm from "@/features/users/components/NotificationsForm";
-import { userNotificationTag } from "@/lib/utils/dataCache";
+import { userNotificationTag } from "@/lib/utils/data-cache";
 import { eq } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 import { notFound } from "next/navigation";

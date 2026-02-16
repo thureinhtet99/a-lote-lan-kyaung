@@ -1,10 +1,10 @@
 import EmployerLoading from "@/app/employer/loading";
 import { Card, CardContent } from "@/components/ui/card";
-import JobListingForm from "@/components/features/job-listings/job-listing-form";
+import JobListingForm from "@/components/job-listings/job-listing-form";
 import { getJobListingByIdByOrgIdDb } from "@/features/job-listings/db/job-listing-db";
 import { isUUID } from "@/features/job-listings/lib/utils";
 import { getCurrentOrg } from "@/lib/auth/auth-helpers";
-import { jobListingIdTag } from "@/lib/utils/dataCache";
+import { jobListingIdTag } from "@/lib/utils/data-cache";
 import { ParamsType } from "@/types/index.type";
 import { unstable_cache } from "next/cache";
 import { notFound } from "next/navigation";

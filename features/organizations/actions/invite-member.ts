@@ -62,12 +62,12 @@ export async function inviteMember(data: InviteMemberInput) {
     }
 
     // Create invitation in database
-    const crypto = await import("crypto");
+    const { nanoid } = await import("nanoid");
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiration
 
     await db.insert(invitationTable).values({
-      id: crypto.randomUUID(),
+      id: nanoid(),
       email: validated.email,
       organizationId: session.session.activeOrganizationId,
       inviterId: session.user.id,

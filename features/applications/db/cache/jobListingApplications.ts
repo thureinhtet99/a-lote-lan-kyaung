@@ -1,4 +1,4 @@
-import { jobListingApplicationsTag } from "@/lib/utils/dataCache";
+import { jobListingApplicationsTag } from "@/lib/utils/data-cache";
 import { revalidateTag } from "next/cache";
 
 export function revalidateJobListingApplicationCache({

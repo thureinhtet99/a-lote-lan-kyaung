@@ -7,27 +7,31 @@ import { organizationTable } from "@/drizzle/schema";
 import { headers } from "next/headers";
 
 // Session
-const getSession = async () => {
-  return await auth.api.getSession({
-    headers: await headers(),
-  });
-};
+// export const getSession = async () => {
+//   return await auth.api.getSession({
+//     headers: await headers(),
+//   });
+// };
 
 // Get current session from better-auth session
 export const getCurrentSession = async ({ allData = false } = {}) => {
-  const session = await getSession();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
   if (!session) return { sessionId: null, session: undefined };
 
   return {
     sessionId: session.session.id,
-    session: allData ? session : undefined,
+    session: allData ? session.session : undefined,
   };
 };
 
 // Get current user from better-auth session
 export const getCurrentUser = async ({ allData = false } = {}) => {
-  const session = await getSession();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
   if (!session) return { userId: null, user: undefined };
 
@@ -39,7 +43,9 @@ export const getCurrentUser = async ({ allData = false } = {}) => {
 
 // Get current organization from better-auth session
 export const getCurrentOrg = async ({ allData = false } = {}) => {
-  const session = await getSession();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
   if (!session) return { orgId: null, organization: undefined };
 
@@ -66,7 +72,9 @@ const getOrgById = async (id: string) => {
  */
 export async function isAdmin(): Promise<boolean> {
   try {
-    const session = await getSession();
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
     return session?.user?.role === "admin";
   } catch {
     return false;
@@ -78,7 +86,10 @@ export async function isAdmin(): Promise<boolean> {
  */
 export async function isEmployer(): Promise<boolean> {
   try {
-    const session = await getSession();
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
     return (
       session?.user?.role === "employer" || session?.user?.role === "admin"
     );
@@ -92,7 +103,10 @@ export async function isEmployer(): Promise<boolean> {
  */
 export async function isUser(): Promise<boolean> {
   try {
-    const session = await getSession();
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
     return session?.user?.role === "user";
   } catch {
     return false;
@@ -106,7 +120,10 @@ export async function getUserRole(): Promise<
   "user" | "employer" | "admin" | null
 > {
   try {
-    const session = await getSession();
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
     return (session?.user?.role as "user" | "employer" | "admin") || null;
   } catch {
     return null;
@@ -118,7 +135,9 @@ export async function getUserRole(): Promise<
  */
 export async function isBanned(): Promise<boolean> {
   try {
-    const session = await getSession();
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
 
     if (!session?.user) return false;
 

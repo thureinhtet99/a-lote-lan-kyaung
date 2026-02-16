@@ -1,4 +1,4 @@
-import JobListingItem from "@/components/features/job-listings/job-listing-item";
+import JobListingItem from "@/components/job-listings/job-listing-item";
 import { Briefcase, Users, TrendingUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 

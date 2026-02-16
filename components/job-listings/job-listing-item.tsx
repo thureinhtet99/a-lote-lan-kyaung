@@ -24,10 +24,10 @@ import { connection } from "next/server";
 import { Badge } from "@/components/ui/badge";
 import z from "zod";
 import { unstable_cache } from "next/cache";
-import { jobListingsTag } from "@/lib/utils/dataCache";
+import { jobListingsTag } from "@/lib/utils/data-cache";
 import { convertSearchParamsToString } from "@/lib/utils/convertSearchParamsToString";
 import Loading from "@/components/shared/loading";
-import JobListingBadges from "@/components/features/job-listings/job-listing-badges";
+import JobListingBadges from "@/components/job-listings/job-listing-badges";
 import { getCurrentOrg } from "@/lib/auth/auth-helpers";
 import { JobSeekerSearchParamsType } from "@/types/index.type";
 

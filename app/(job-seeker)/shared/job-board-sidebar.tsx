@@ -1,4 +1,4 @@
-import JobListingFilterForm from "@/components/features/job-listings/JobListingFilterForm";
+import JobListingFilterForm from "@/components/job-listings/JobListingFilterForm";
 import { SidebarGroup, SidebarGroupContent } from "@/components/ui/sidebar";
 
 export default function JobBoardSidebar() {
