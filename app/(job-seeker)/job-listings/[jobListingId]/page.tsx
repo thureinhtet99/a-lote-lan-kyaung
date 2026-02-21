@@ -3,7 +3,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { APP_CONFIG, APP_ROUTES } from "@/config/app-config";
+import { APP_CONFIG, APP_ROUTES } from "@/constants/app-config";
 import { Suspense } from "react";
 import ResponsiveBreakpoint from "@/components/shared/ResponsiveBreakpoint";
 import { SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";

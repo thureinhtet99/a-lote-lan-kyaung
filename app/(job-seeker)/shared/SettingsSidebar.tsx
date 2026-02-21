@@ -1,5 +1,5 @@
 import SidebarNavMenuGroup from "@/components/layout/sidebar/sidebar-nav-menu";
-import { APP_ROUTES } from "@/config/app-config";
+import { APP_ROUTES } from "@/constants/app-config";
 import { BellIcon, FileUserIcon } from "lucide-react";
 
 export default function SettingsSidebar() {

@@ -3,7 +3,7 @@
 import { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { APP_ROUTES } from "@/config/app-config";
+import { APP_ROUTES } from "@/constants/app-config";
 import { Users, Mail, Building2, Activity, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { APP_ROUTES } from "@/config/app-config";
+import { APP_ROUTES } from "@/constants/app-config";
 
 export default function SettingsPage() {
   // Redirect to members page by default

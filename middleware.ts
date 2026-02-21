@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import type { Session, User } from "./lib/auth/auth";
-import { APP_ROUTES } from "./config/app-config";
+import { APP_ROUTES } from "./constants/app-config";
 
 const publicRoutes = ["/sign-in", "/sign-up", "/", "/job-listings"];
 const employerRoutes = ["/employer"];

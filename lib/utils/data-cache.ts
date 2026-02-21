@@ -26,8 +26,9 @@ export const jobListingIdTag = (
 export const jobListingApplicationsTag = (
   tag: CacheType,
   jobListingId: string,
+  userId: string,
 ) => {
-  return `${tag}-${jobListingId}` as const;
+  return `${tag}-${jobListingId}-${userId}` as const;
 };
 
 // Resume
@@ -46,6 +47,6 @@ export const idTag = (tag: CacheType, id: string) => {
 };
 
 // Admin Dashboard Stats
-export const adminStatsTag = (tag: CacheType) => {
+export const tag = (tag: CacheType) => {
   return `${tag}` as const;
 };

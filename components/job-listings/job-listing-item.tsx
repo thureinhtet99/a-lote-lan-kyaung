@@ -9,7 +9,7 @@ import {
 } from "@/drizzle/schema";
 import { Suspense } from "react";
 import Link from "next/link";
-import { APP_ROUTES } from "@/config/app-config";
+import { APP_ROUTES } from "@/constants/app-config";
 import { cn } from "@/lib/utils";
 import {
   Card,
@@ -145,9 +145,9 @@ const SuspendedComponent = async ({
       searchParams: z.infer<typeof searchParamsSchema>,
       jobListingId: string | undefined,
     ) => getAllJobListings(searchParams, jobListingId),
-    [jobListingsTag(orgId || "", "jobListings")],
+    [jobListingsTag(orgId || "", "job-listings")],
     {
-      tags: [jobListingsTag(orgId || "", "jobListings")],
+      tags: [jobListingsTag(orgId || "", "job-listings")],
     },
   );
 

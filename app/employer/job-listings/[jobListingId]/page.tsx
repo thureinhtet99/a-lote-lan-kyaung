@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { deleteJobListing } from "@/features/job-listings/actions";
 import { formatJobListingStatus } from "@/features/job-listings/lib/formatters";
 import { isUUID } from "@/features/job-listings/lib/utils";
-import { APP_ROUTES } from "@/config/app-config";
+import { APP_ROUTES } from "@/constants/app-config";
 import {
   jobListingApplicationsTag,
   jobListingIdTag,

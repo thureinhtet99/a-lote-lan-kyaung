@@ -1,4 +1,4 @@
-import { APP_CONFIG } from "@/config/app-config";
+import { APP_CONFIG } from "@/constants/app-config";
 import { cn } from "@/lib/utils";
 import { BriefcaseBusiness } from "lucide-react";
 
