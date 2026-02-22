@@ -1,11 +1,10 @@
 import { Suspense } from "react";
-import { unstable_cache } from "next/cache";
 import { getUserOrganizationsDb } from "@/features/organizations/actions/manage-organizations";
-import { idTag } from "@/lib/utils/data-cache";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import Loading from "@/components/shared/loading";
 import OrganizationsClient from "./organizations-client";
+import { cacheTag, cacheLife } from "next/cache";
 
 interface Organization {
   id: string;
@@ -25,6 +24,13 @@ export default function OrganizationsPage() {
   );
 }
 
+async function getCachedUserOrganizations(userId: string) {
+  "use cache";
+  cacheTag("user-organizations-" + userId);
+  cacheLife("hours");
+  return await getUserOrganizationsDb(userId);
+}
+
 const SuspendedComponent = async () => {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -35,15 +41,7 @@ const SuspendedComponent = async () => {
   }
 
   // Get user's organizations with caching
-  const cachedOrganizations = unstable_cache(
-    async (userId: string) => await getUserOrganizationsDb(userId),
-    [idTag("organizations", session.user.id)],
-    {
-      tags: [idTag("organizations", session.user.id)],
-    },
-  );
-
-  const organizations = (await cachedOrganizations(
+  const organizations = (await getCachedUserOrganizations(
     session.user.id,
   )) as Organization[];
 

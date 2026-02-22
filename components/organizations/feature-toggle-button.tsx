@@ -1,5 +1,5 @@
-import ActionButton from "@/components/shared/ActionButton";
-import CheckCondition from "@/components/shared/CheckCondition";
+import ActionButton from "@/components/shared/action-button";
+import CheckCondition from "@/components/shared/check-condition";
 import { toggleJobListingFeaturedStatus } from "@/features/job-listings/actions";
 import { hasReachedMaxFeaturedJobListings } from "@/features/job-listings/lib/plan-feature-helpers";
 import UpgradePopOver from "./upgrade-popover";

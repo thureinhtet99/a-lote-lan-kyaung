@@ -1,11 +1,10 @@
 import { getMostRecentJobListingDb } from "@/features/job-listings/db/job-listing-db";
 import { APP_ROUTES } from "@/constants/app-config";
-import { jobListingIdTag } from "@/lib/utils/data-cache";
-import { unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import EmployerLoading from "./loading";
 import { getCurrentOrg } from "@/lib/auth/auth-helpers";
+import { cacheTag, cacheLife } from "next/cache";
 
 export default function EmployerHomePage() {
   return (
@@ -13,6 +12,13 @@ export default function EmployerHomePage() {
       <SuspendedComponent />
     </Suspense>
   );
+}
+
+async function getCachedMostRecentJobListing(orgId: string) {
+  "use cache";
+  cacheTag("job-listing-recent-" + orgId);
+  cacheLife("hours");
+  return await getMostRecentJobListingDb(orgId);
 }
 
 const SuspendedComponent = async () => {
@@ -29,15 +35,7 @@ const SuspendedComponent = async () => {
   }
 
   // Get most recent job listings (cached)
-  const cachedData = unstable_cache(
-    async () => await getMostRecentJobListingDb(orgId),
-    [jobListingIdTag(orgId, "jobListings", jobListing.id)],
-    {
-      tags: [jobListingIdTag(orgId, "jobListings", jobListing.id)],
-    },
-  );
-
-  const recentJobListing = await cachedData();
+  const recentJobListing = await getCachedMostRecentJobListing(orgId);
   if (recentJobListing == null)
     redirect(`${APP_ROUTES.EMPLOYER.JOB_LISTINGS_NEW}`);
   else redirect(`${APP_ROUTES.EMPLOYER.JOB_LISTINGS}/${recentJobListing.id}`);

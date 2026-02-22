@@ -1,7 +1,7 @@
 "use client";
 
-import { DataTable } from "@/components/data-table/DataTable";
-import { DataTableSortableColumnHeader } from "@/components/data-table/DataTableSortableColumnHeader";
+import { DataTable } from "@/components/data-table/data-table";
+import { DataTableSortableColumnHeader } from "@/components/data-table/data-tableSortableColumnHeader";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ColumnDef } from "@tanstack/react-table";
 import sortApplicationByStatus from "../lib/utils";

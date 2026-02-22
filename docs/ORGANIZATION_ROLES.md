@@ -292,7 +292,7 @@ The organizations page shows role badges and restricts delete action to owners o
 Use the `CheckCondition` component for conditional rendering:
 
 ```tsx
-import CheckCondition from "@/components/shared/CheckCondition";
+import CheckCondition from "@/components/shared/check-condition";
 import { hasOrgUserPermissionLegacy } from "@/lib/utils/permissions";
 
 <CheckCondition

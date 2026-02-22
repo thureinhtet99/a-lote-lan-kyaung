@@ -2,8 +2,8 @@
 
 import { db } from "@/lib/db";
 import { resumeTable } from "@/drizzle/schema";
-import { revalidateUserResumeCache } from "./cache/userResumes";
 import { eq } from "drizzle-orm";
+import { revalidateUserResumeCache } from "./cache/user-resumes";
 
 export async function upsertUserResumeDb(
   userId: string,

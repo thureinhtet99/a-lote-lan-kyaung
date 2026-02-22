@@ -15,9 +15,22 @@ import {
   jobListingTable,
   resumeTable,
 } from "@/drizzle/schema";
-import { unstable_cache } from "next/cache";
-import { jobListingIdTag, userResumeTag } from "@/lib/utils/data-cache";
 import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/permissions";
+import { cacheTag, cacheLife } from "next/cache";
+
+async function getCachedUserResume(userId: string) {
+  "use cache";
+  cacheTag("user-resume-" + userId);
+  cacheLife("hours");
+  return await getUserResume(userId);
+}
+
+async function getCachedJobListing(orgId: string, jobListingId: string) {
+  "use cache";
+  cacheTag("job-listing-" + jobListingId);
+  cacheLife("hours");
+  return await getJobListingById(jobListingId);
+}
 
 // Create
 export const createJobListingApplication = async (
@@ -35,24 +48,8 @@ export const createJobListingApplication = async (
   const { userId } = await getCurrentUser();
   if (userId == null) return permissionError;
 
-  const userResumeCached = unstable_cache(
-    async (userId: string) => getUserResume(userId),
-    [userResumeTag("userResumes", userId)],
-    {
-      tags: [userResumeTag("userResumes", userId)],
-    },
-  );
-
-  const jobListingCached = unstable_cache(
-    async (jobListingId: string) => getJobListingById(jobListingId),
-    [jobListingIdTag(orgId, "jobListings", jobListingId)],
-    {
-      tags: [jobListingIdTag(orgId, "jobListings", jobListingId)],
-    },
-  );
-
-  const userResume = await userResumeCached(userId);
-  const jobListing = await jobListingCached(jobListingId);
+  const userResume = await getCachedUserResume(userId);
+  const jobListing = await getCachedJobListing(orgId, jobListingId);
   if (userResume == null || jobListing == null) return permissionError;
 
   const { success, data } =

@@ -3,7 +3,7 @@ import { revalidateTag } from "next/cache";
 
 export function revalidateUserCache(userId: string) {
   try {
-    if (userId) revalidateTag(idTag("users", userId));
+    if (userId) revalidateTag(idTag("users", userId), "max");
   } catch (error) {
     console.error("Failed to revalidate user cache:", error);
   }
@@ -11,7 +11,7 @@ export function revalidateUserCache(userId: string) {
 
 export function revalidateAdminStatsCache() {
   try {
-    revalidateTag(tag("admin-stats"));
+    revalidateTag(tag("admin-stats"), "max");
   } catch (error) {
     console.error("Failed to revalidate admin stats cache:", error);
   }

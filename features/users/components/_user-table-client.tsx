@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   updateUserRole,
@@ -18,6 +17,15 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,6 +64,43 @@ type PaginationProps = {
   totalPages: number;
 };
 
+const getVisiblePages = (currentPage: number, totalPages: number) => {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  const pages = new Set([
+    1,
+    totalPages,
+    currentPage - 1,
+    currentPage,
+    currentPage + 1,
+  ]);
+  const sortedPages = Array.from(pages)
+    .filter((page) => page >= 1 && page <= totalPages)
+    .sort((a, b) => a - b);
+
+  const visiblePages: Array<number | "ellipsis"> = [];
+
+  for (let index = 0; index < sortedPages.length; index += 1) {
+    const page = sortedPages[index];
+    const previousPage = sortedPages[index - 1];
+
+    if (index > 0) {
+      const gap = page - previousPage;
+      if (gap === 2) {
+        visiblePages.push(previousPage + 1);
+      } else if (gap > 2) {
+        visiblePages.push("ellipsis");
+      }
+    }
+
+    visiblePages.push(page);
+  }
+
+  return visiblePages;
+};
+
 export function UserTableClient({
   users,
   pagination,
@@ -71,6 +116,8 @@ export function UserTableClient({
   const [confirmBanDialogOpen, setConfirmBanDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProps | null>(null);
   const [banReason, setBanReason] = useState("");
+  const visiblePages = getVisiblePages(pagination.page, pagination.totalPages);
+  const emptyRowCount = Math.max(0, pagination.pageSize - users.length);
 
   const createPageUrl = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -224,6 +271,11 @@ export function UserTableClient({
               </TableCell>
             </TableRow>
           ))}
+          {Array.from({ length: emptyRowCount }, (_, index) => (
+            <TableRow key={`empty-row-${index}`} aria-hidden="true">
+              <TableCell colSpan={6} className="h-[49px]" />
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
 
@@ -232,30 +284,63 @@ export function UserTableClient({
           Showing page {pagination.page} of {pagination.totalPages} (
           {pagination.totalUsers} users)
         </p>
-        <div className="flex items-center gap-2">
-          <Button
-            asChild
-            variant="outline"
-            disabled={pagination.page <= 1 || isPending}
-          >
-            <Link href={createPageUrl(Math.max(1, pagination.page - 1))}>
-              Previous
-            </Link>
-          </Button>
-          <Button
-            asChild
-            variant="outline"
-            disabled={pagination.page >= pagination.totalPages || isPending}
-          >
-            <Link
-              href={createPageUrl(
-                Math.min(pagination.totalPages, pagination.page + 1),
-              )}
-            >
-              Next
-            </Link>
-          </Button>
-        </div>
+        <Pagination className="mx-0 w-auto justify-end">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href={createPageUrl(Math.max(1, pagination.page - 1))}
+                aria-disabled={pagination.page <= 1 || isPending}
+                tabIndex={pagination.page <= 1 || isPending ? -1 : undefined}
+                className={
+                  pagination.page <= 1 || isPending
+                    ? "pointer-events-none opacity-50"
+                    : undefined
+                }
+              />
+            </PaginationItem>
+
+            {visiblePages.map((page, index) => (
+              <PaginationItem key={`${page}-${index}`}>
+                {page === "ellipsis" ? (
+                  <PaginationEllipsis />
+                ) : (
+                  <PaginationLink
+                    href={createPageUrl(page)}
+                    isActive={page === pagination.page}
+                    aria-disabled={isPending}
+                    tabIndex={isPending ? -1 : undefined}
+                    className={
+                      isPending ? "pointer-events-none opacity-60" : undefined
+                    }
+                  >
+                    {page}
+                  </PaginationLink>
+                )}
+              </PaginationItem>
+            ))}
+
+            <PaginationItem>
+              <PaginationNext
+                href={createPageUrl(
+                  Math.min(pagination.totalPages, pagination.page + 1),
+                )}
+                aria-disabled={
+                  pagination.page >= pagination.totalPages || isPending
+                }
+                tabIndex={
+                  pagination.page >= pagination.totalPages || isPending
+                    ? -1
+                    : undefined
+                }
+                className={
+                  pagination.page >= pagination.totalPages || isPending
+                    ? "pointer-events-none opacity-50"
+                    : undefined
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
 
       <Dialog

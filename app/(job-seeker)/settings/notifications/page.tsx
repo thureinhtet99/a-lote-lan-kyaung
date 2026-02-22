@@ -2,13 +2,12 @@ import Loading from "@/components/shared/loading";
 import { Card, CardContent } from "@/components/ui/card";
 import { db } from "@/lib/db";
 import { userNotificationSettingsTable } from "@/drizzle/schema";
-import NotificationsForm from "@/features/users/components/NotificationsForm";
-import { userNotificationTag } from "@/lib/utils/data-cache";
+import NotificationsForm from "@/features/users/components/notifications-form";
 import { eq } from "drizzle-orm";
-import { unstable_cache } from "next/cache";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getCurrentUser } from "@/lib/auth/auth-helpers";
+import { cacheTag, cacheLife } from "next/cache";
 
 export default function NotificationPage() {
   return (
@@ -43,22 +42,18 @@ const SuspendedForm = async ({ userId }: { userId: string }) => {
 };
 
 // Fetch user noti from db (cached)
-const getNotiSettingsByUserId = async (userId: string) => {
-  const cachedData = unstable_cache(
-    async () => {
-      return await db.query.userNotificationSettingsTable.findFirst({
-        where: eq(userNotificationSettingsTable.userId, userId),
-        columns: {
-          // aiPrompt: true,
-          newJobEmailNotification: true,
-        },
-      });
+async function getNotiSettingsByUserId(userId: string) {
+  "use cache";
+  cacheTag("notification-settings-" + userId);
+  cacheLife("hours");
+  return await db.query.userNotificationSettingsTable.findFirst({
+    where: eq(userNotificationSettingsTable.userId, userId),
+    columns: {
+      // aiPrompt: true,
+      newJobEmailNotification: true,
     },
-    [userNotificationTag("userNotificationSettings", userId)],
-    { tags: [userNotificationTag("userNotificationSettings", userId)] },
-  );
-  return await cachedData();
-};
+  });
+}
 
 const getNotificationSettings = async (userId: string) => {
   const data = await getNotiSettingsByUserId(userId);

@@ -5,9 +5,9 @@ import {
 } from "@/components/ui/resizable";
 import { APP_CONFIG, APP_ROUTES } from "@/constants/app-config";
 import { Suspense } from "react";
-import ResponsiveBreakpoint from "@/components/shared/ResponsiveBreakpoint";
+import ResponsiveBreakpoint from "@/components/shared/responsive-breakpoint";
 import { SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import ClientSheet from "./_ClientSheet";
+import ClientSheet from "./_client-sheet";
 import { db } from "@/lib/db";
 import { and, eq } from "drizzle-orm";
 import {
@@ -19,20 +19,14 @@ import { notFound } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { convertSearchParamsToString } from "@/lib/utils/convertSearchParamsToString";
+import { convertSearchParamsToString } from "@/lib/utils/convert-search-params-to-string";
 import { XIcon } from "lucide-react";
-import MarkdownRenderer from "@/components/markdown/MarkdownRenderer";
+import MarkdownRenderer from "@/components/markdown/markdown-renderer";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { unstable_cache } from "next/cache";
-import {
-  idTag,
-  jobListingApplicationsTag,
-  userResumeTag,
-} from "@/lib/utils/data-cache";
 import { differenceInDays } from "date-fns";
 import { connection } from "next/server";
 import {
@@ -43,10 +37,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { NewJobListingApplicationForm } from "@/features/applications/components/NewJobListingApplicationForm";
+import { NewJobListingApplicationForm } from "@/features/applications/components/new-job-listing-application-form";
 import JobListingBadges from "@/components/job-listings/job-listing-badges";
 import { getCurrentUser } from "@/lib/auth/auth-helpers";
 import Loading from "@/components/shared/loading";
+import { cacheTag, cacheLife } from "next/cache";
 
 export default function JobListingPage({
   params,
@@ -122,6 +117,13 @@ const getJobListingApplication = async ({
   });
 };
 
+async function getCachedJobListing(id: string) {
+  "use cache";
+  cacheTag("job-listing-" + id);
+  cacheLife("hours");
+  return await getJobListingById(id);
+}
+
 const JobListingDetails = async ({
   params,
   searchParams,
@@ -132,14 +134,7 @@ const JobListingDetails = async ({
   const { jobListingId } = await params;
 
   // Get job listing by id (cached)
-  const cachedData = unstable_cache(
-    async (id: string) => getJobListingById(id),
-    [idTag("job-listings", jobListingId)],
-    {
-      tags: [idTag("job-listings", jobListingId)],
-    },
-  );
-  const jobListing = await cachedData(jobListingId);
+  const jobListing = await getCachedJobListing(jobListingId);
   if (jobListing == null) return notFound();
 
   const nameInitials = jobListing.organization.name
@@ -239,16 +234,10 @@ const ApplyButton = async ({ jobListingId }: { jobListingId: string }) => {
   }
 
   // Get job listing application by jobListingId & userId (cached)
-  const cachedJobApplication = unstable_cache(
-    async (jobListingId: string, userId: string) =>
-      getJobListingApplication({ jobListingId, userId }),
-    [jobListingApplicationsTag("applications", jobListingId)],
-    {
-      tags: [jobListingApplicationsTag("applications", jobListingId)],
-    },
+  const application = await getCachedJobListingApplication(
+    jobListingId,
+    userId,
   );
-
-  const application = await cachedJobApplication(jobListingId, userId);
   if (application != null) {
     const formatter = new Intl.RelativeTimeFormat(undefined, {
       style: "short",
@@ -268,13 +257,7 @@ const ApplyButton = async ({ jobListingId }: { jobListingId: string }) => {
   }
 
   // Get user resume by userId (cached)
-  const cachedUserResume = unstable_cache(
-    async (userId: string) => getUserResume(userId),
-    [userResumeTag("user-resumes", userId)],
-    { tags: [userResumeTag("user-resumes", userId)] },
-  );
-
-  const resume = await cachedUserResume(userId);
+  const resume = await getCachedUserResume(userId);
   if (resume == null) {
     return (
       <Popover>
@@ -318,3 +301,20 @@ const getUserResume = async (userId: string) => {
     where: eq(resumeTable.userId, userId),
   });
 };
+
+async function getCachedUserResume(userId: string) {
+  "use cache";
+  cacheTag("user-resume-" + userId);
+  cacheLife("hours");
+  return await getUserResume(userId);
+}
+
+async function getCachedJobListingApplication(
+  jobListingId: string,
+  userId: string,
+) {
+  "use cache";
+  cacheTag("application-" + jobListingId + "-" + userId);
+  cacheLife("minutes");
+  return await getJobListingApplication({ jobListingId, userId });
+}

@@ -1,4 +1,4 @@
-import PricingTable from "@/components/shared/PricingTable";
+import PricingTable from "@/components/shared/pricing-table";
 
 export default function PricingPage() {
   return (

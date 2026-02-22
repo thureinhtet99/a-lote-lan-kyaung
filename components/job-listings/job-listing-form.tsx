@@ -37,7 +37,7 @@ import {
 import { StateSelectItems } from "./StateSelectItems";
 import { MarkdownEditor } from "@/components/markdown/markdown-editor";
 import { Button } from "@/components/ui/button";
-import LoadingSwap from "@/components/shared/LoadingSwap";
+import LoadingSwap from "@/components/shared/loading-swap";
 import {
   createJobListing,
   updateJobListing,

@@ -13,7 +13,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import LoadingSwap from "@/components/shared/LoadingSwap";
+import LoadingSwap from "@/components/shared/loading-swap";
 import { authClient } from "@/lib/auth/auth-client";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES } from "@/constants/app-config";

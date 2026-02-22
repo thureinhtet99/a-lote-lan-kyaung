@@ -4,12 +4,22 @@ import { AdminUserMenu } from "@/features/admin/components/admin-user-menu";
 import { Logo } from "@/components/shared/logo";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth/auth";
+import { ReactNode, Suspense } from "react";
+import Loading from "@/components/shared/loading";
 
 export default async function AdminLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
+  return (
+    <Suspense fallback={<Loading />}>
+      <SuspendedComponent>{children}</SuspendedComponent>
+    </Suspense>
+  );
+}
+
+const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -33,4 +43,4 @@ export default async function AdminLayout({
       <main className="flex-1 bg-muted/30">{children}</main>
     </div>
   );
-}
+};

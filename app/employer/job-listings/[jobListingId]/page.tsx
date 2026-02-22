@@ -1,24 +1,20 @@
-import ActionButton from "@/components/shared/ActionButton";
-import CheckCondition from "@/components/shared/CheckCondition";
-import MarkdownRenderer from "@/components/markdown/MarkdownRenderer";
+import ActionButton from "@/components/shared/action-button";
+import CheckCondition from "@/components/shared/check-condition";
+import MarkdownRenderer from "@/components/markdown/markdown-renderer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { deleteJobListing } from "@/features/job-listings/actions";
 import { formatJobListingStatus } from "@/features/job-listings/lib/formatters";
 import { isUUID } from "@/features/job-listings/lib/utils";
 import { APP_ROUTES } from "@/constants/app-config";
-import {
-  jobListingApplicationsTag,
-  jobListingIdTag,
-} from "@/lib/utils/data-cache";
+
 import { EditIcon, Trash2Icon } from "lucide-react";
-import { unstable_cache } from "next/cache";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Separator } from "@/components/ui/separator";
 import ApplicationTable from "@/features/applications/components/application-table";
-import { MarkdownPartial } from "@/components/markdown/MarkdownPartial";
+import { MarkdownPartial } from "@/components/markdown/markdown-partial";
 import JobListingBadges from "@/components/job-listings/job-listing-badges";
 import { ParamsType } from "@/types/index.type";
 import SkeletonApplicationTable from "@/features/applications/components/skeleton-application-table";
@@ -30,6 +26,24 @@ import Loading from "@/components/shared/loading";
 import { getJobListingApplicationsDb } from "@/features/applications/db/job-listing-application-db";
 import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/permissions";
 import { getCurrentOrg } from "@/lib/auth/auth-helpers";
+import { cacheTag, cacheLife } from "next/cache";
+
+async function getCachedJobListingByOrg(
+  jobListingId: string,
+  orgId: string,
+) {
+  "use cache";
+  cacheTag("job-listing-" + jobListingId + "-org-" + orgId);
+  cacheLife("hours");
+  return await getJobListingByIdByOrgIdDb(jobListingId, orgId);
+}
+
+async function getCachedJobListingApplications(jobListingId: string) {
+  "use cache";
+  cacheTag("job-listing-applications-" + jobListingId);
+  cacheLife("minutes");
+  return await getJobListingApplicationsDb(jobListingId);
+}
 
 export default function JobListingByIdPage(props: ParamsType) {
   return (
@@ -47,15 +61,7 @@ const SuspendedComponent = async ({ params }: ParamsType) => {
   if (orgId == null) return notFound();
 
   // Get job listing by id by organization id (cached)
-  const cachedData = unstable_cache(
-    async () => await getJobListingByIdByOrgIdDb(jobListingId, orgId),
-    [jobListingIdTag(orgId, "jobListings", jobListingId)],
-    {
-      tags: [jobListingIdTag(orgId, "jobListings", jobListingId)],
-    },
-  );
-
-  const jobListing = await cachedData();
+  const jobListing = await getCachedJobListingByOrg(jobListingId, orgId);
   if (jobListing == null) return notFound();
 
   return (
@@ -144,15 +150,7 @@ const SuspendedComponent = async ({ params }: ParamsType) => {
 
 const Applications = async ({ jobListingId }: { jobListingId: string }) => {
   // Fetch applications by jobListingId from db (cached)
-  const cachedData = unstable_cache(
-    async () => await getJobListingApplicationsDb(jobListingId),
-    [jobListingApplicationsTag("applications", jobListingId)],
-    {
-      tags: [jobListingApplicationsTag("applications", jobListingId)],
-    },
-  );
-
-  const applications = await cachedData();
+  const applications = await getCachedJobListingApplications(jobListingId);
 
   return (
     <ApplicationTable

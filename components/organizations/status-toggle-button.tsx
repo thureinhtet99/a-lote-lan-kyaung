@@ -1,9 +1,9 @@
-import CheckCondition from "@/components/shared/CheckCondition";
+import CheckCondition from "@/components/shared/check-condition";
 import { JobListingStatusType } from "@/drizzle/schema";
 import { hasReachedMaxPublishedJobListings } from "@/features/job-listings/lib/plan-feature-helpers";
 import { nextJobListingStatus } from "@/features/job-listings/lib/utils";
 import UpgradePopOver from "./upgrade-popover";
-import ActionButton from "@/components/shared/ActionButton";
+import ActionButton from "@/components/shared/action-button";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { toggleJobListingStatus } from "@/features/job-listings/actions";
 import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/permissions";

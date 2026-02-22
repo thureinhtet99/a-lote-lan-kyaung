@@ -5,45 +5,40 @@ import { userTable, employerRequestTable } from "@/drizzle/schema";
 import { eq, count } from "drizzle-orm";
 import { StatCard } from "@/components/shared/stat-card";
 import { Users, Briefcase, Shield, Clock } from "lucide-react";
-import { unstable_cache } from "next/cache";
-import { tag } from "@/lib/utils";
+import { cacheTag, cacheLife } from "next/cache";
 
-const getAdminStats = unstable_cache(
-  async () => {
-    const [
-      totalUsersResult,
-      totalEmployersResult,
-      totalAdminsResult,
-      pendingRequestsResult,
-    ] = await Promise.all([
-      db.select({ count: count() }).from(userTable),
-      db
-        .select({ count: count() })
-        .from(userTable)
-        .where(eq(userTable.role, "employer")),
-      db
-        .select({ count: count() })
-        .from(userTable)
-        .where(eq(userTable.role, "admin")),
-      db
-        .select({ count: count() })
-        .from(employerRequestTable)
-        .where(eq(employerRequestTable.status, "pending")),
-    ]);
+async function getAdminStats() {
+  "use cache";
+  cacheTag("admin-stats");
+  cacheLife("minutes");
+  const [
+    totalUsersResult,
+    totalEmployersResult,
+    totalAdminsResult,
+    pendingRequestsResult,
+  ] = await Promise.all([
+    db.select({ count: count() }).from(userTable),
+    db
+      .select({ count: count() })
+      .from(userTable)
+      .where(eq(userTable.role, "employer")),
+    db
+      .select({ count: count() })
+      .from(userTable)
+      .where(eq(userTable.role, "admin")),
+    db
+      .select({ count: count() })
+      .from(employerRequestTable)
+      .where(eq(employerRequestTable.status, "pending")),
+  ]);
 
-    return {
-      totalUsers: Number(totalUsersResult[0]?.count ?? 0),
-      totalEmployers: Number(totalEmployersResult[0]?.count ?? 0),
-      totalAdmins: Number(totalAdminsResult[0]?.count ?? 0),
-      pendingRequests: Number(pendingRequestsResult[0]?.count ?? 0),
-    };
-  },
-  ["admin-stats"],
-  {
-    tags: [tag("admin-stats")],
-    revalidate: 60,
-  },
-);
+  return {
+    totalUsers: Number(totalUsersResult[0]?.count ?? 0),
+    totalEmployers: Number(totalEmployersResult[0]?.count ?? 0),
+    totalAdmins: Number(totalAdminsResult[0]?.count ?? 0),
+    pendingRequests: Number(pendingRequestsResult[0]?.count ?? 0),
+  };
+}
 
 export default async function AdminDashboard() {
   const session = await auth.api.getSession({

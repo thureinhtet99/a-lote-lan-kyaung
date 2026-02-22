@@ -7,10 +7,10 @@ import {
   revalidateAdminStatsCache,
   revalidateUserCache,
 } from "./cache/user-cache";
-import { tag } from "@/lib/utils/data-cache";
-import { revalidateTag } from "next/cache";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
+import { cacheTag } from "next/cache";
+import { tag } from "@/lib/utils/data-cache";
 
 export async function getAllUsers(page = 1, pageSize = 10) {
   try {
@@ -22,39 +22,7 @@ export async function getAllUsers(page = 1, pageSize = 10) {
       return { success: false, error: "Unauthorized", data: [] };
     }
 
-    const [total] = await db.select({ count: count() }).from(userTable);
-
-    const users = await db.query.userTable.findMany({
-      columns: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        image: true,
-        emailVerified: true,
-        banned: true,
-        banReason: true,
-        banExpires: true,
-        createdAt: true,
-      },
-      orderBy: (users, { desc }) => [desc(users.createdAt)],
-      limit: pageSize,
-      offset: (page - 1) * pageSize,
-    });
-
-    const totalUsers = total?.count ?? 0;
-    const totalPages = Math.max(1, Math.ceil(totalUsers / pageSize));
-
-    return {
-      success: true,
-      data: users,
-      pagination: {
-        page,
-        pageSize,
-        totalUsers,
-        totalPages,
-      },
-    };
+    return await getAllUsersCached(page, pageSize);
   } catch (error) {
     console.error("Error fetching users:", error);
     return {
@@ -71,6 +39,45 @@ export async function getAllUsers(page = 1, pageSize = 10) {
   }
 }
 
+async function getAllUsersCached(page: number, pageSize: number) {
+  "use cache";
+  cacheTag(tag("users"));
+
+  const [total] = await db.select({ count: count() }).from(userTable);
+  const totalUsers = total?.count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalUsers / pageSize));
+  const safePage = Math.min(Math.max(page, 1), totalPages);
+
+  const users = await db.query.userTable.findMany({
+    columns: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      image: true,
+      emailVerified: true,
+      banned: true,
+      banReason: true,
+      banExpires: true,
+      createdAt: true,
+    },
+    orderBy: (users, { desc }) => [desc(users.createdAt)],
+    limit: pageSize,
+    offset: (safePage - 1) * pageSize,
+  });
+
+  return {
+    success: true,
+    data: users,
+    pagination: {
+      page: safePage,
+      pageSize,
+      totalUsers,
+      totalPages,
+    },
+  };
+}
+
 export async function updateUserRole(
   userId: string,
   role: "user" | "employer" | "admin",
@@ -85,7 +92,6 @@ export async function updateUserRole(
     }
 
     await db.update(userTable).set({ role }).where(eq(userTable.id, userId));
-    revalidateTag(tag("users"));
     revalidateUserCache(userId);
     revalidateAdminStatsCache();
 
@@ -118,7 +124,6 @@ export async function banUser(
         banExpires: expiresAt,
       })
       .where(eq(userTable.id, userId));
-    revalidateTag(tag("users"));
     revalidateUserCache(userId);
     revalidateAdminStatsCache();
 
@@ -147,7 +152,6 @@ export async function unbanUser(userId: string) {
         banExpires: null,
       })
       .where(eq(userTable.id, userId));
-    revalidateTag(tag("users"));
     revalidateUserCache(userId);
     revalidateAdminStatsCache();
 
@@ -169,7 +173,6 @@ export async function updateUser(
 
 export async function deleteUser(id: string) {
   await db.delete(userTable).where(eq(userTable.id, id));
-  revalidateTag(tag("users"));
   revalidateUserCache(id);
   revalidateAdminStatsCache();
 }

@@ -15,16 +15,15 @@ import Link from "next/link";
 import AppSidebar from "@/components/layout/sidebar/app-sidebar";
 import SidebarNavMenuGroup from "@/components/layout/sidebar/sidebar-nav-menu";
 import { APP_ROUTES } from "@/constants/app-config";
-import { unstable_cache } from "next/cache";
 import { sortJobListingsByStatus } from "@/features/job-listings/lib/utils";
 import { JobListingStatusType } from "@/drizzle/schema";
 import JobListingMenuGroup from "@/components/organizations/_job-listing-menu-group";
-import { jobListingsTag } from "@/lib/utils/data-cache";
 import Loading from "@/components/shared/loading";
 import { getJobListingWithApplicationsDb } from "@/features/applications/db/job-listing-application-db";
 import { getCurrentOrg } from "@/lib/auth/auth-helpers";
 import SidebarOrgButton from "@/components/organizations/sidebar-org-button";
 import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/permissions";
+import { cacheTag, cacheLife } from "next/cache";
 
 export default function EmployerLayout({ children }: { children: ReactNode }) {
   return (
@@ -32,6 +31,13 @@ export default function EmployerLayout({ children }: { children: ReactNode }) {
       <SuspendedComponent>{children}</SuspendedComponent>
     </Suspense>
   );
+}
+
+async function getCachedJobListingsWithApplications(orgId: string) {
+  "use cache";
+  cacheTag("job-listings-applications-" + orgId);
+  cacheLife("minutes");
+  return await getJobListingWithApplicationsDb(orgId);
 }
 
 const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
@@ -43,15 +49,7 @@ const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
   }
 
   // Get all job listings with applications(cached)
-  const cachedData = unstable_cache(
-    async () => await getJobListingWithApplicationsDb(orgId),
-    [orgId],
-    {
-      tags: [jobListingsTag(orgId, "jobListings")],
-    },
-  );
-
-  const jobListings = await cachedData();
+  const jobListings = await getCachedJobListingsWithApplications(orgId);
   const canCreateJobListing = await hasOrgUserPermission("job_listing.create");
 
   return (

@@ -14,7 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "sonner";
-import LoadingSwap from "@/components/shared/LoadingSwap";
+import LoadingSwap from "@/components/shared/loading-swap";
 import { SignInFormType, signInSchema } from "@/drizzle/schema";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
