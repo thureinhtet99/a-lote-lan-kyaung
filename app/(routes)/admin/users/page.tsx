@@ -1,6 +1,10 @@
-import { UsersTable } from "@/features/users/components/users-table";
+import { UserTable } from "@/features/users/components/user-table";
 
-export default function UsersPage() {
+export default function UsersPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   return (
     <div className="p-8 space-y-8">
       <div>
@@ -9,7 +13,7 @@ export default function UsersPage() {
           Manage users, roles, and permissions
         </p>
       </div>
-      <UsersTable />
+      <UserTable searchParams={searchParams} />
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { userTable } from "@/drizzle/schema";
-import { eq } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 import {
   revalidateAdminStatsCache,
   revalidateUserCache,
@@ -12,7 +12,7 @@ import { revalidateTag } from "next/cache";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 
-export async function getAllUsers() {
+export async function getAllUsers(page = 1, pageSize = 10) {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -21,6 +21,8 @@ export async function getAllUsers() {
     if (!session?.user || session.user.role !== "admin") {
       return { success: false, error: "Unauthorized", data: [] };
     }
+
+    const [total] = await db.select({ count: count() }).from(userTable);
 
     const users = await db.query.userTable.findMany({
       columns: {
@@ -36,12 +38,36 @@ export async function getAllUsers() {
         createdAt: true,
       },
       orderBy: (users, { desc }) => [desc(users.createdAt)],
+      limit: pageSize,
+      offset: (page - 1) * pageSize,
     });
 
-    return { success: true, data: users };
+    const totalUsers = total?.count ?? 0;
+    const totalPages = Math.max(1, Math.ceil(totalUsers / pageSize));
+
+    return {
+      success: true,
+      data: users,
+      pagination: {
+        page,
+        pageSize,
+        totalUsers,
+        totalPages,
+      },
+    };
   } catch (error) {
     console.error("Error fetching users:", error);
-    return { success: false, error: "Failed to fetch users", data: [] };
+    return {
+      success: false,
+      error: "Failed to fetch users",
+      data: [],
+      pagination: {
+        page,
+        pageSize,
+        totalUsers: 0,
+        totalPages: 1,
+      },
+    };
   }
 }
 

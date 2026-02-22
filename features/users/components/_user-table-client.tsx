@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   updateUserRole,
   banUser,
@@ -46,15 +47,37 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type { UserProps } from "./users-table";
+import type { UserProps } from "./user-table";
 
-export function UsersTableClient({ users }: { users: UserProps[] }) {
+type PaginationProps = {
+  page: number;
+  pageSize: number;
+  totalUsers: number;
+  totalPages: number;
+};
+
+export function UserTableClient({
+  users,
+  pagination,
+}: {
+  users: UserProps[];
+  pagination: PaginationProps;
+}) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [banDialogOpen, setBanDialogOpen] = useState(false);
   const [confirmBanDialogOpen, setConfirmBanDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProps | null>(null);
   const [banReason, setBanReason] = useState("");
+
+  const createPageUrl = (page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", String(page));
+    params.set("pageSize", String(pagination.pageSize));
+    return `${pathname}?${params.toString()}`;
+  };
 
   const resetBanFlow = () => {
     setBanDialogOpen(false);
@@ -203,6 +226,37 @@ export function UsersTableClient({ users }: { users: UserProps[] }) {
           ))}
         </TableBody>
       </Table>
+
+      <div className="mt-4 flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          Showing page {pagination.page} of {pagination.totalPages} (
+          {pagination.totalUsers} users)
+        </p>
+        <div className="flex items-center gap-2">
+          <Button
+            asChild
+            variant="outline"
+            disabled={pagination.page <= 1 || isPending}
+          >
+            <Link href={createPageUrl(Math.max(1, pagination.page - 1))}>
+              Previous
+            </Link>
+          </Button>
+          <Button
+            asChild
+            variant="outline"
+            disabled={pagination.page >= pagination.totalPages || isPending}
+          >
+            <Link
+              href={createPageUrl(
+                Math.min(pagination.totalPages, pagination.page + 1),
+              )}
+            >
+              Next
+            </Link>
+          </Button>
+        </div>
+      </div>
 
       <Dialog
         open={banDialogOpen}
