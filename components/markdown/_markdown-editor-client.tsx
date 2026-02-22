@@ -19,9 +19,9 @@ import {
   toolbarPlugin,
 } from "@mdxeditor/editor";
 import { Ref } from "react";
-import { markdownClassNames } from "./MarkdownRenderer";
 import { useDarkMode } from "@/hooks/use-darkmode";
 import "@mdxeditor/editor/style.css";
+import { markdownClassNames } from "./markdown-renderer";
 
 export default function InternalMarkdownEditor({
   ref,

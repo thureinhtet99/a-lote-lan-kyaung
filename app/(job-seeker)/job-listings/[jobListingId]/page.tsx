@@ -7,7 +7,6 @@ import { APP_CONFIG, APP_ROUTES } from "@/constants/app-config";
 import { Suspense } from "react";
 import ResponsiveBreakpoint from "@/components/shared/responsive-breakpoint";
 import { SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import ClientSheet from "./_client-sheet";
 import { db } from "@/lib/db";
 import { and, eq } from "drizzle-orm";
 import {
@@ -42,6 +41,7 @@ import JobListingBadges from "@/components/job-listings/job-listing-badges";
 import { getCurrentUser } from "@/lib/auth/auth-helpers";
 import Loading from "@/components/shared/loading";
 import { cacheTag, cacheLife } from "next/cache";
+import ClientSheet from "./_ClientSheet";
 
 export default function JobListingPage({
   params,

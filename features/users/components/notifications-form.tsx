@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import LoadingSwap from "@/components/shared/loading-swap";
 import z from "zod";
 import { toast } from "sonner";
-import { updateNotificationSetting } from "../actions/notificationActions";
+import { updateNotificationSetting } from "../actions/notification-actions";
 
 export default function NotificationsForm({
   notificationSettings,

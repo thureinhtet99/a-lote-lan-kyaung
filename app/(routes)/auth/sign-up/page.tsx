@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import SignUpForm from "./sign-up-form";
-import { APP_CONFIG, APP_ROUTES } from "@/config/app-config";
+import { APP_CONFIG, APP_ROUTES } from "@/constants/app-config";
 import { Logo } from "@/components/shared/logo";
 
 export default function SignUpPage() {

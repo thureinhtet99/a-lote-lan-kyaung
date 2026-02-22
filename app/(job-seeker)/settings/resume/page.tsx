@@ -7,7 +7,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Suspense } from "react";
-import DropzoneClient from "./_dropzone-client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -18,6 +17,7 @@ import MarkdownRenderer from "@/components/markdown/markdown-renderer";
 import Loading from "@/components/shared/loading";
 import { getCurrentUser } from "@/lib/auth/auth-helpers";
 import { cacheTag, cacheLife } from "next/cache";
+import DropzoneClient from "./_DropzoneClient";
 
 export default function ResumePage() {
   return (

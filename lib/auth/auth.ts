@@ -12,7 +12,7 @@ import {
   verificationTable,
 } from "@/drizzle/schema";
 import { ac, owner, admin, member } from "@/lib/utils/access-control";
-import { revalidateAdminStatsCache } from "@/features/users/db/cache/user-cache";
+import { updateTag } from "next/cache";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -52,7 +52,7 @@ export const auth = betterAuth({
     user: {
       create: {
         after: async () => {
-          revalidateAdminStatsCache();
+          updateTag("admin-status");
         },
       },
     },

@@ -10,7 +10,7 @@ import {
   employerRequestSchema,
   type EmployerRequestFormType,
 } from "../validations";
-import { revalidateAdminStatsCache } from "@/features/users/db/cache/user-cache";
+import { updateTag } from "next/cache";
 
 export async function createEmployerRequest(
   data: EmployerRequestFormType,
@@ -69,7 +69,7 @@ export async function createEmployerRequest(
       requestMessage: validated.requestMessage,
     });
 
-    revalidateAdminStatsCache();
+    updateTag("admin-stats");
 
     return { success: true };
   } catch (error) {

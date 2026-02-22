@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useOptimistic, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   updateUserRole,
@@ -55,7 +55,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type { UserProps } from "./user-table";
+import { UserRoleType, UserType } from "@/types/index.type";
 
 type PaginationProps = {
   page: number;
@@ -105,19 +105,38 @@ export function UserTableClient({
   users,
   pagination,
 }: {
-  users: UserProps[];
+  users: UserType[];
   pagination: PaginationProps;
 }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  const [optimisticUsers, setOptimisticUsers] = useOptimistic(
+    users,
+    (
+      previousUsers,
+      update: { userId: string; role: UserRoleType; banned?: boolean },
+    ) =>
+      previousUsers.map((user) =>
+        user.id === update.userId
+          ? {
+              ...user,
+              role: update.role,
+              banned: update.banned ?? user.banned,
+            }
+          : user,
+      ),
+  );
   const [banDialogOpen, setBanDialogOpen] = useState(false);
   const [confirmBanDialogOpen, setConfirmBanDialogOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<UserProps | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [banReason, setBanReason] = useState("");
   const visiblePages = getVisiblePages(pagination.page, pagination.totalPages);
-  const emptyRowCount = Math.max(0, pagination.pageSize - users.length);
+  const emptyRowCount = Math.max(
+    0,
+    pagination.pageSize - optimisticUsers.length,
+  );
 
   const createPageUrl = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -133,17 +152,21 @@ export function UserTableClient({
     setSelectedUser(null);
   };
 
-  const handleRoleChange = (
-    userId: string,
-    newRole: "user" | "employer" | "admin",
-  ) => {
+  const handleRoleChange = (userId: string, newRole: UserRoleType) => {
+    const previousRole = optimisticUsers.find(
+      (user) => user.id === userId,
+    )?.role;
+    setOptimisticUsers({ userId, role: newRole });
+
     startTransition(async () => {
       const result = await updateUserRole(userId, newRole);
       if (result.success) {
-        toast.success("User role updated successfully");
-        router.refresh();
+        toast.success(result.message);
       } else {
-        toast.error(result.error || "Failed to update user role");
+        if (previousRole) {
+          setOptimisticUsers({ userId, role: previousRole });
+        }
+        toast.error(result.message);
       }
     });
   };
@@ -157,11 +180,10 @@ export function UserTableClient({
     startTransition(async () => {
       const result = await banUser(selectedUser.id, banReason);
       if (result.success) {
-        toast.success("User banned successfully");
+        toast.success(result.message);
         resetBanFlow();
-        router.refresh();
       } else {
-        toast.error(result.error || "Failed to ban user");
+        toast.error(result.message);
       }
     });
   };
@@ -170,10 +192,9 @@ export function UserTableClient({
     startTransition(async () => {
       const result = await unbanUser(userId);
       if (result.success) {
-        toast.success("User unbanned successfully");
-        router.refresh();
+        toast.success(result.message);
       } else {
-        toast.error(result.error || "Failed to unban user");
+        toast.error(result.message);
       }
     });
   };
@@ -192,7 +213,7 @@ export function UserTableClient({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {users.map((user) => (
+          {optimisticUsers.map((user) => (
             <TableRow key={user.id}>
               <TableCell className="font-medium">{user.name}</TableCell>
               <TableCell>{user.email}</TableCell>
@@ -223,25 +244,31 @@ export function UserTableClient({
               <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
+                    <Button
+                      variant="ghost"
+                      className="h-8 w-8 p-0 cursor-pointer hover:border"
+                    >
                       <span className="sr-only">Open menu</span>
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem
+                      className="cursor-pointer"
                       onClick={() => handleRoleChange(user.id, "user")}
                       disabled={isPending || user.role === "user"}
                     >
                       Set as User
                     </DropdownMenuItem>
                     <DropdownMenuItem
+                      className="cursor-pointer"
                       onClick={() => handleRoleChange(user.id, "employer")}
                       disabled={isPending || user.role === "employer"}
                     >
                       Set as Employer
                     </DropdownMenuItem>
                     <DropdownMenuItem
+                      className="cursor-pointer"
                       onClick={() => handleRoleChange(user.id, "admin")}
                       disabled={isPending || user.role === "admin"}
                     >
@@ -250,6 +277,7 @@ export function UserTableClient({
                     <DropdownMenuSeparator />
                     {user.banned ? (
                       <DropdownMenuItem
+                        className="cursor-pointer"
                         onClick={() => handleUnbanUser(user.id)}
                         disabled={isPending}
                       >
@@ -257,6 +285,7 @@ export function UserTableClient({
                       </DropdownMenuItem>
                     ) : (
                       <DropdownMenuItem
+                        className="cursor-pointer"
                         onClick={() => {
                           setSelectedUser(user);
                           setBanDialogOpen(true);
@@ -281,8 +310,10 @@ export function UserTableClient({
 
       <div className="mt-4 flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          Showing page {pagination.page} of {pagination.totalPages} (
-          {pagination.totalUsers} users)
+          Showing page {pagination.page} of {pagination.totalPages}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Total - {pagination.totalUsers} users
         </p>
         <Pagination className="mx-0 w-auto justify-end">
           <PaginationContent>
@@ -357,8 +388,9 @@ export function UserTableClient({
           <DialogHeader>
             <DialogTitle>Ban User</DialogTitle>
             <DialogDescription>
-              Are you sure you want to ban {selectedUser?.name}? Please provide
-              a reason.
+              Are you sure you want to ban{" "}
+              <span className="text-white">{selectedUser?.name}</span>? Please
+              provide a reason.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -368,7 +400,7 @@ export function UserTableClient({
                 id="reason"
                 value={banReason}
                 onChange={(e) => setBanReason(e.target.value)}
-                placeholder="Enter ban reason..."
+                placeholder="Enter ban reason"
               />
             </div>
           </div>

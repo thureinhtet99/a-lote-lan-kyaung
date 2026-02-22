@@ -5,9 +5,9 @@ import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { memberTable, organizationTable } from "@/drizzle/schema";
-import { revalidateOrgCache } from "../db/cache/organizations";
 import { redirect } from "next/navigation";
 import { APP_ROUTES } from "@/constants/app-config";
+import { updateTag } from "next/cache";
 
 export async function getUserOrganizationsDb(userId: string) {
   const userOrganizations = await db
@@ -51,8 +51,8 @@ export async function createOrganization(name: string, slug?: string) {
     if (!result) {
       return { error: "Failed to create organization" };
     }
+    updateTag("organizations");
 
-    revalidateOrgCache(result.id);
     return { success: true, organization: result };
   } catch (error) {
     console.error("Error creating organization:", error);
@@ -85,7 +85,7 @@ export async function deleteOrganization(orgId: string) {
     }
 
     await db.delete(organizationTable).where(eq(organizationTable.id, orgId));
-    revalidateOrgCache(orgId);
+    updateTag("organizations");
 
     return { success: true };
   } catch (error) {
@@ -115,7 +115,7 @@ export async function switchOrganization(organizationId: string) {
       return { error: "Failed to switch organization" };
     }
 
-    revalidateOrgCache(organizationId);
+    updateTag("organizations");
   } catch (error) {
     console.error("Error switching organization:", error);
     return { error: "Failed to switch organization" };

@@ -3,7 +3,7 @@
 import { db } from "@/lib/db";
 import { jobListingTable } from "@/drizzle/schema";
 import { and, count, desc, eq } from "drizzle-orm";
-import { revalidateJobListingCache } from "./cache/job-listing-cache";
+import { updateTag } from "next/cache";
 
 // Create
 export async function insertJobListingDb(
@@ -13,10 +13,7 @@ export async function insertJobListingDb(
     id: jobListingTable.id,
     organizationId: jobListingTable.organizationId,
   });
-  revalidateJobListingCache({
-    jobListingId: result.id,
-    organizationId: result.organizationId,
-  });
+  updateTag(`organizations-${result.organizationId}-job-listings`);
 
   return result;
 }
@@ -34,11 +31,7 @@ export async function updateJobListingDb(
       id: jobListingTable.id,
       organizationId: jobListingTable.organizationId,
     });
-
-  revalidateJobListingCache({
-    jobListingId: result.id,
-    organizationId: result.organizationId,
-  });
+  updateTag(`organizations-${result.organizationId}-job-listings`);
 
   return result;
 }
@@ -95,10 +88,7 @@ export async function deleteJobListingDb(id: string) {
       organizationId: jobListingTable.organizationId,
     });
 
-  revalidateJobListingCache({
-    jobListingId: result.id,
-    organizationId: result.organizationId,
-  });
+  updateTag(`organizations-${result.organizationId}-job-listings`);
 
   return result;
 }

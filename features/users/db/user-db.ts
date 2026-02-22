@@ -3,23 +3,25 @@
 import { db } from "@/lib/db";
 import { userTable } from "@/drizzle/schema";
 import { count, eq } from "drizzle-orm";
-import {
-  revalidateAdminStatsCache,
-  revalidateUserCache,
-} from "./cache/user-cache";
+// import {
+//   revalidateAdminStatsCache,
+//   revalidateAllUsersCache,
+//   revalidateUserCache,
+// } from "./cache/user-cache";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
-import { cacheTag } from "next/cache";
+import { cacheLife, cacheTag, updateTag } from "next/cache";
 import { tag } from "@/lib/utils/data-cache";
+import { UserRoleType } from "@/types/index.type";
 
-export async function getAllUsers(page = 1, pageSize = 10) {
+export const getAllUsers = async (page = 1, pageSize = 10) => {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
     if (!session?.user || session.user.role !== "admin") {
-      return { success: false, error: "Unauthorized", data: [] };
+      return { success: false, message: "Unauthorized", data: [] };
     }
 
     return await getAllUsersCached(page, pageSize);
@@ -27,7 +29,7 @@ export async function getAllUsers(page = 1, pageSize = 10) {
     console.error("Error fetching users:", error);
     return {
       success: false,
-      error: "Failed to fetch users",
+      message: "Failed to fetch users",
       data: [],
       pagination: {
         page,
@@ -37,11 +39,12 @@ export async function getAllUsers(page = 1, pageSize = 10) {
       },
     };
   }
-}
+};
 
-async function getAllUsersCached(page: number, pageSize: number) {
+const getAllUsersCached = async (page: number, pageSize: number) => {
   "use cache";
   cacheTag(tag("users"));
+  cacheLife("minutes");
 
   const [total] = await db.select({ count: count() }).from(userTable);
   const totalUsers = total?.count ?? 0;
@@ -58,7 +61,6 @@ async function getAllUsersCached(page: number, pageSize: number) {
       emailVerified: true,
       banned: true,
       banReason: true,
-      banExpires: true,
       createdAt: true,
     },
     orderBy: (users, { desc }) => [desc(users.createdAt)],
@@ -76,44 +78,37 @@ async function getAllUsersCached(page: number, pageSize: number) {
       totalPages,
     },
   };
-}
+};
 
-export async function updateUserRole(
-  userId: string,
-  role: "user" | "employer" | "admin",
-) {
+export const updateUserRole = async (userId: string, role: UserRoleType) => {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
     if (!session?.user || session.user.role !== "admin") {
-      return { success: false, error: "Unauthorized" };
+      return { success: false, message: "Unauthorized" };
     }
 
     await db.update(userTable).set({ role }).where(eq(userTable.id, userId));
-    revalidateUserCache(userId);
-    revalidateAdminStatsCache();
+    updateTag("users");
+    updateTag("admin-stats");
 
-    return { success: true };
+    return { success: true, message: "User role updated successfully" };
   } catch (error) {
     console.error("Error updating user role:", error);
-    return { success: false, error: "Failed to update user role" };
+    return { success: false, message: "Failed to update user role" };
   }
-}
+};
 
-export async function banUser(
-  userId: string,
-  reason: string,
-  expiresAt?: Date,
-) {
+export async function banUser(userId: string, reason: string) {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
     if (!session?.user || session.user.role !== "admin") {
-      return { success: false, error: "Unauthorized" };
+      return { success: false, message: "Unauthorized" };
     }
 
     await db
@@ -121,16 +116,15 @@ export async function banUser(
       .set({
         banned: true,
         banReason: reason,
-        banExpires: expiresAt,
       })
       .where(eq(userTable.id, userId));
-    revalidateUserCache(userId);
-    revalidateAdminStatsCache();
+    updateTag("users");
+    updateTag("admin-stats");
 
-    return { success: true };
+    return { success: true, message: "User banned successfully" };
   } catch (error) {
     console.error("Error banning user:", error);
-    return { success: false, error: "Failed to ban user" };
+    return { success: false, message: "Failed to ban user" };
   }
 }
 
@@ -141,7 +135,7 @@ export async function unbanUser(userId: string) {
     });
 
     if (!session?.user || session.user.role !== "admin") {
-      return { success: false, error: "Unauthorized" };
+      return { success: false, message: "Unauthorized" };
     }
 
     await db
@@ -149,16 +143,15 @@ export async function unbanUser(userId: string) {
       .set({
         banned: false,
         banReason: null,
-        banExpires: null,
       })
       .where(eq(userTable.id, userId));
-    revalidateUserCache(userId);
-    revalidateAdminStatsCache();
+    updateTag("users");
+    updateTag("admin-stats");
 
-    return { success: true };
+    return { success: true, message: "User unbanned successfully" };
   } catch (error) {
     console.error("Error unbanning user:", error);
-    return { success: false, error: "Failed to unban user" };
+    return { success: false, message: "Failed to unban user" };
   }
 }
 
@@ -167,12 +160,12 @@ export async function updateUser(
   user: typeof userTable.$inferInsert,
 ) {
   await db.update(userTable).set(user).where(eq(userTable.id, id));
-  revalidateUserCache(id);
-  revalidateAdminStatsCache();
+  updateTag(`users-${id}`);
+  updateTag("admin-stats");
 }
 
 export async function deleteUser(id: string) {
   await db.delete(userTable).where(eq(userTable.id, id));
-  revalidateUserCache(id);
-  revalidateAdminStatsCache();
+  updateTag("users");
+  updateTag("admin-stats");
 }

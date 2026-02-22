@@ -22,7 +22,11 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-export default function SidebarUserButtonClient({ user }: { user: UserType }) {
+export default function SidebarUserButtonClient({
+  user,
+}: {
+  user: Pick<UserType, "name" | "email" | "image">;
+}) {
   const { isMobile, setOpenMobile } = useSidebar();
   const router = useRouter();
 
@@ -80,7 +84,11 @@ export default function SidebarUserButtonClient({ user }: { user: UserType }) {
   );
 }
 
-const UserInfo = ({ name, email, image }: UserType) => {
+const UserInfo = ({
+  name,
+  email,
+  image,
+}: Pick<UserType, "name" | "email" | "image">) => {
   const nameInitials = name.slice(0, 1);
 
   return (

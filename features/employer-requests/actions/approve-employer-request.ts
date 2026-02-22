@@ -9,7 +9,7 @@ import {
   approveRequestSchema,
   type ApproveRequestFormType,
 } from "../validations";
-import { revalidateAdminStatsCache } from "@/features/users/db/cache/user-cache";
+import { updateTag } from "next/cache";
 
 export async function approveEmployerRequest(
   data: ApproveRequestFormType,
@@ -66,7 +66,7 @@ export async function approveEmployerRequest(
       })
       .where(eq(userTable.id, request.userId));
 
-    revalidateAdminStatsCache();
+    updateTag("admin-stats");
 
     return { success: true };
   } catch (error) {

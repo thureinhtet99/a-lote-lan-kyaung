@@ -2,10 +2,18 @@ import { applicationTable, resumeTable, userTable } from "@/drizzle/schema";
 import { Column } from "@tanstack/react-table";
 import { Key, ReactNode } from "react";
 
+export type UserRoleType = "user" | "admin" | "employer";
+
 export type UserType = {
+  id: string;
   name: string;
   email: string;
+  role: UserRoleType;
   image: string | null;
+  emailVerified: boolean;
+  banned: boolean | null;
+  banReason: string | null;
+  createdAt: Date;
 };
 
 export type UserPermissionType =

@@ -1,13 +1,12 @@
 "use client";
 
 import { DataTable } from "@/components/data-table/data-table";
-import { DataTableSortableColumnHeader } from "@/components/data-table/data-tableSortableColumnHeader";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ColumnDef } from "@tanstack/react-table";
 import sortApplicationByStatus from "../lib/utils";
 import { applicationStatus, ApplicationStatusType } from "@/drizzle/schema";
 import { ReactNode, useOptimistic, useState, useTransition } from "react";
-import StatusIcon from "./StatusIcon";
 import { formatApplicationStatus } from "../lib/formatters";
 import {
   DropdownMenu,
@@ -24,7 +23,6 @@ import {
   updateJobListingApplicationStatus,
 } from "../actions/actions";
 import { toast } from "sonner";
-import RatingIcon from "./RatingIcon";
 import { RATING_OPTIONS } from "../data/constants";
 import {
   Dialog,
@@ -37,6 +35,9 @@ import Link from "next/link";
 import { Table } from "@tanstack/react-table";
 import { ApplicationType } from "@/types/index.type";
 import DataTableFacetedFilter from "@/components/data-table/data-table-faceted-filter";
+import { DataTableSortableColumnHeader } from "@/components/data-table/data-table-sortable-column-header";
+import StatusIcon from "./status-icon";
+import RatingIcon from "./rating-icon";
 
 export default function ApplicationTable({
   applications,

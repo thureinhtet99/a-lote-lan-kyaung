@@ -1,22 +1,22 @@
 import { db } from "@/lib/db";
 import { userNotificationSettingsTable } from "@/drizzle/schema";
-import { revalidateUserNotiCache } from "./cache/userNotiSettings";
+import { updateTag } from "next/cache";
 
 export async function insertUserNotiSettingsDb(
-  settings: typeof userNotificationSettingsTable.$inferInsert
+  settings: typeof userNotificationSettingsTable.$inferInsert,
 ) {
   await db
     .insert(userNotificationSettingsTable)
     .values(settings)
     .onConflictDoNothing();
-  revalidateUserNotiCache(settings.userId);
+  updateTag(`users-${settings.userId}`);
 }
 
 export async function updateUserNotificationSettingDb(
   userId: string,
   settings: Partial<
     Omit<typeof userNotificationSettingsTable.$inferInsert, "userId">
-  >
+  >,
 ) {
   await db
     .insert(userNotificationSettingsTable)
@@ -25,5 +25,5 @@ export async function updateUserNotificationSettingDb(
       target: userNotificationSettingsTable.userId,
       set: settings,
     });
-  revalidateUserNotiCache(userId);
+  updateTag(`users-${userId}`);
 }

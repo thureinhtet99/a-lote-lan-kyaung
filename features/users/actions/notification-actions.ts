@@ -3,7 +3,7 @@
 import z from "zod";
 import { userNotificationSettingsSchema } from "./schema";
 import { getCurrentUser } from "@/lib/auth/auth-helpers";
-import { updateUserNotificationSettingDb } from "../db/userNotiSettings";
+import { updateUserNotificationSettingDb } from "../db/user-noti-settings";
 
 export const updateNotificationSetting = async (
   unsafeData: z.infer<typeof userNotificationSettingsSchema>,

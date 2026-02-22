@@ -3,7 +3,7 @@
 import { db } from "@/lib/db";
 import { organizationTable } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
-import { revalidateOrgCache } from "./cache/organizations";
+import { updateTag } from "next/cache";
 
 // Insert
 export async function insertOrg(org: typeof organizationTable.$inferInsert) {
@@ -14,7 +14,7 @@ export async function insertOrg(org: typeof organizationTable.$inferInsert) {
 
   if (existingOrg.length === 0) {
     await db.insert(organizationTable).values(org).onConflictDoNothing();
-    revalidateOrgCache(org.id);
+    updateTag("organizations");
   }
 }
 
@@ -27,11 +27,11 @@ export async function updateOrg(
     .update(organizationTable)
     .set(user)
     .where(eq(organizationTable.id, id));
-  revalidateOrgCache(id);
+  updateTag("organizations");
 }
 
 // Delete
 export async function deleteOrg(id: string) {
   await db.delete(organizationTable).where(eq(organizationTable.id, id));
-  revalidateOrgCache(id);
+  updateTag("organizations");
 }

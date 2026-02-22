@@ -2,8 +2,8 @@
 
 import { db } from "@/lib/db";
 import { applicationTable, jobListingTable } from "@/drizzle/schema";
-import { revalidateJobListingApplicationCache } from "./cache/jobListingApplications";
 import { and, count, desc, eq } from "drizzle-orm";
+import { updateTag } from "next/cache";
 
 // Create
 export async function insertJobListingApplicationDb(
@@ -13,10 +13,7 @@ export async function insertJobListingApplicationDb(
     jobListingId: applicationTable.jobListingId,
     userId: applicationTable.userId,
   });
-  revalidateJobListingApplicationCache({
-    jobListingId: result.jobListingId,
-    userId: result.userId,
-  });
+  updateTag(`job-listings-${result.jobListingId}-applications`);
 
   return result;
 }
@@ -46,10 +43,7 @@ export async function updateJobListingApplicationDb(
       userId: applicationTable.userId,
     });
 
-  revalidateJobListingApplicationCache({
-    jobListingId: result.jobListingId,
-    userId: result.userId,
-  });
+  updateTag(`job-listings-${result.jobListingId}-applications`);
 
   return result;
 }

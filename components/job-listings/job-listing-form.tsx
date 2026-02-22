@@ -34,7 +34,6 @@ import {
   formatLocationRequirement,
   formatWageInterval,
 } from "@/features/job-listings/lib/formatters";
-import { StateSelectItems } from "./StateSelectItems";
 import { MarkdownEditor } from "@/components/markdown/markdown-editor";
 import { Button } from "@/components/ui/button";
 import LoadingSwap from "@/components/shared/loading-swap";
@@ -45,6 +44,7 @@ import {
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES } from "@/constants/app-config";
+import { StateSelectItems } from "./state-select-items";
 
 const noneSelectedValue = "none";
 

@@ -9,7 +9,7 @@ import {
   rejectRequestSchema,
   type RejectRequestFormType,
 } from "../validations";
-import { revalidateAdminStatsCache } from "@/features/users/db/cache/user-cache";
+import { updateTag } from "next/cache";
 
 export async function rejectEmployerRequest(
   data: RejectRequestFormType,
@@ -55,7 +55,7 @@ export async function rejectEmployerRequest(
       })
       .where(eq(employerRequestTable.id, validated.requestId));
 
-    revalidateAdminStatsCache();
+    updateTag("admin-stats");
 
     return { success: true };
   } catch (error) {

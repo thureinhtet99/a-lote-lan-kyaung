@@ -35,8 +35,8 @@ import {
 import { Button } from "@/components/ui/button";
 import LoadingSwap from "@/components/shared/loading-swap";
 import { Form } from "@/components/ui/form";
-import { StateSelectItems } from "./StateSelectItems";
 import { useSidebar } from "@/components/ui/sidebar";
+import { StateSelectItems } from "./state-select-items";
 
 const ANY_VALUE = "any";
 
