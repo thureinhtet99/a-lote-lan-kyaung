@@ -1,6 +1,22 @@
 import { applicationTable, resumeTable, userTable } from "@/drizzle/schema";
+import {
+  approveRequestSchema,
+  employerRequestSchema,
+  rejectRequestSchema,
+} from "@/features/admin/admin-schema";
 import { Column } from "@tanstack/react-table";
 import { Key, ReactNode } from "react";
+import z from "zod";
+
+// User
+export type UserPermissionType =
+  | "org:job_listing:create"
+  | "org:job_listing:update"
+  | "org:job_listing:delete"
+  | "org:application:read"
+  | "org:application:update"
+  | "org:member:invite"
+  | "org:member:remove";
 
 export type UserRoleType = "user" | "admin" | "employer";
 
@@ -16,14 +32,24 @@ export type UserType = {
   createdAt: Date;
 };
 
-export type UserPermissionType =
-  | "org:job_listing:create"
-  | "org:job_listing:update"
-  | "org:job_listing:delete"
-  | "org:application:read"
-  | "org:application:update"
-  | "org:member:invite"
-  | "org:member:remove";
+// Employer
+export type EmployerRequestType = {
+  id: string;
+  userId: string;
+  status: string;
+  requestMessage: string;
+  adminResponse: string | null;
+  reviewedBy: string;
+  reviewedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  user: Pick<UserType, "id" | "name" | "email" | "image">;
+  reviewer: Pick<UserType, "id" | "name" | "email">;
+};
+
+export type EmployerRequestFormType = z.infer<typeof employerRequestSchema>;
+export type ApproveRequestFormType = z.infer<typeof approveRequestSchema>;
+export type RejectRequestFormType = z.infer<typeof rejectRequestSchema>;
 
 export type SidebarNavMenuType = {
   href: string;

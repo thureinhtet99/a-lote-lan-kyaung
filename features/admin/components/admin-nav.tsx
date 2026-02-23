@@ -15,14 +15,14 @@ export function AdminNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex items-center space-x-6 text-sm font-medium">
+    <nav className="flex min-w-0 max-w-full items-center gap-1 overflow-x-auto whitespace-nowrap py-0.5 text-xs font-medium sm:gap-2 sm:text-sm">
       {navItems.map((item) => (
         <Link
           key={item.href}
           href={item.href}
           className={cn(
-            "transition-colors hover:text-foreground/80",
-            pathname === item.href ? "text-foreground" : "text-foreground/60",
+            "shrink-0 rounded-md px-2.5 py-1.5 transition-colors hover:text-foreground/80 sm:px-3",
+            pathname === item.href ? "text-white" : "text-foreground/60",
           )}
         >
           {item.label}

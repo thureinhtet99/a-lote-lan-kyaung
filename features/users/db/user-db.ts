@@ -1,18 +1,14 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { userTable } from "@/drizzle/schema";
-import { count, eq } from "drizzle-orm";
-// import {
-//   revalidateAdminStatsCache,
-//   revalidateAllUsersCache,
-//   revalidateUserCache,
-// } from "./cache/user-cache";
+import { employerRequestTable, userTable } from "@/drizzle/schema";
+import { count, desc, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
 import { tag } from "@/lib/utils/data-cache";
-import { UserRoleType } from "@/types/index.type";
+import { ApproveRequestFormType, UserRoleType } from "@/types/index.type";
+import { approveRequestSchema } from "@/features/admin/admin-schema";
 
 export const getAllUsers = async (page = 1, pageSize = 10) => {
   try {
@@ -168,4 +164,131 @@ export async function deleteUser(id: string) {
   await db.delete(userTable).where(eq(userTable.id, id));
   updateTag("users");
   updateTag("admin-stats");
+}
+
+// Employer
+export async function getAllEmployerRequests() {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      return { success: false, message: "Unauthorized", data: [] };
+    }
+
+    // Only admins can view all requests
+    if (session.user.role !== "admin") {
+      return {
+        success: false,
+        message: "Only admins can view all requests",
+        data: [],
+      };
+    }
+
+    return await getAllEmployerRequestsCached();
+  } catch (error) {
+    console.error("Error fetching employer requests:", error);
+    return {
+      success: false,
+      message: "Failed to fetch employer requests",
+      data: [],
+    };
+  }
+}
+
+const getAllEmployerRequestsCached = async () => {
+  "use cache";
+  cacheTag(tag("employer-requests"));
+  cacheLife("hours");
+
+  const requests = await db.query.employerRequestTable.findMany({
+    with: {
+      user: {
+        columns: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        },
+      },
+      reviewer: {
+        columns: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
+    orderBy: [desc(employerRequestTable.createdAt)],
+  });
+
+  return { success: true, data: requests };
+};
+
+export async function approveEmployerRequest(
+  data: ApproveRequestFormType,
+): Promise<{ success: boolean; message?: string }> {
+  try {
+    const validated = approveRequestSchema.parse(data);
+
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      return { success: false, message: "Unauthorized" };
+    }
+
+    // Only admins can approve requests
+    if (session.user.role !== "admin") {
+      return { success: false, message: "Only admins can approve requests" };
+    }
+
+    // Get the request
+    const request = await db.query.employerRequestTable.findFirst({
+      where: eq(employerRequestTable.id, validated.requestId),
+      with: {
+        user: true,
+      },
+    });
+
+    if (!request) {
+      return { success: false, message: "Request not found" };
+    }
+
+    if (request.status !== "pending") {
+      return { success: false, message: "Request has already been reviewed" };
+    }
+
+    // Update the request
+    await db
+      .update(employerRequestTable)
+      .set({
+        status: "approved",
+        adminResponse: validated.adminResponse,
+        reviewedBy: session.user.id,
+        reviewedAt: new Date(),
+      })
+      .where(eq(employerRequestTable.id, validated.requestId));
+
+    // Update the user role to employer
+    await db
+      .update(userTable)
+      .set({
+        role: "employer",
+      })
+      .where(eq(userTable.id, request.userId));
+
+    updateTag("employer-requests");
+    updateTag("admin-stats");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error approving employer request:", error);
+    return {
+      success: false,
+      message: "Failed to approve employer request",
+    };
+  }
 }

@@ -179,10 +179,10 @@ export const employerRequestTable = pgTable(
     status: text("status", { enum: ["pending", "approved", "rejected"] })
       .default("pending")
       .notNull(),
-    requestMessage: text("request_message"),
+    requestMessage: text("request_message").notNull(),
     adminResponse: text("admin_response"),
     reviewedBy: text("reviewed_by").references(() => userTable.id),
-    reviewedAt: timestamp("reviewed_at"),
+    reviewedAt: timestamp("reviewed_at").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()

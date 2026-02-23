@@ -3,7 +3,7 @@ import { getAllUsers } from "@/features/users/db/user-db";
 import Loading from "@/components/shared/loading";
 import { UserTableClient } from "./_user-table-client";
 
-export function UserTable({
+export default function UserTable({
   searchParams,
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;

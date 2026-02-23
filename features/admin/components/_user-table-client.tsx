@@ -201,7 +201,7 @@ export function UserTableClient({
 
   return (
     <>
-      <Table>
+      <Table className="min-w-[760px]">
         <TableHeader>
           <TableRow>
             <TableHead>Name</TableHead>
@@ -215,8 +215,12 @@ export function UserTableClient({
         <TableBody>
           {optimisticUsers.map((user) => (
             <TableRow key={user.id}>
-              <TableCell className="font-medium">{user.name}</TableCell>
-              <TableCell>{user.email}</TableCell>
+              <TableCell className="max-w-[180px] truncate font-medium sm:max-w-none sm:whitespace-normal">
+                {user.name}
+              </TableCell>
+              <TableCell className="max-w-[220px] truncate sm:max-w-none sm:whitespace-normal">
+                {user.email}
+              </TableCell>
               <TableCell>
                 <Badge
                   className="capitalize"
@@ -308,14 +312,16 @@ export function UserTableClient({
         </TableBody>
       </Table>
 
-      <div className="mt-4 flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          Showing page {pagination.page} of {pagination.totalPages}
-        </p>
-        <p className="text-sm text-muted-foreground">
-          Total - {pagination.totalUsers} users
-        </p>
-        <Pagination className="mx-0 w-auto justify-end">
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center justify-between gap-20">
+          <p className="text-sm text-muted-foreground sm:order-1">
+            Showing page {pagination.page} of {pagination.totalPages}
+          </p>
+          <p className="text-sm text-muted-foreground sm:order-2">
+            Total - {pagination.totalUsers} users
+          </p>
+        </div>
+        <Pagination className="order-3 mx-0 w-full justify-start overflow-x-auto pb-1 sm:w-auto sm:justify-end sm:pb-0">
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious
@@ -400,7 +406,7 @@ export function UserTableClient({
                 id="reason"
                 value={banReason}
                 onChange={(e) => setBanReason(e.target.value)}
-                placeholder="Enter ban reason"
+                placeholder="Enter ban reason..."
               />
             </div>
           </div>

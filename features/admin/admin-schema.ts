@@ -19,7 +19,3 @@ export const rejectRequestSchema = z.object({
     .min(1, "Please provide a reason for rejection")
     .max(500, "Response is too long (max 500 characters)"),
 });
-
-export type EmployerRequestFormType = z.infer<typeof employerRequestSchema>;
-export type ApproveRequestFormType = z.infer<typeof approveRequestSchema>;
-export type RejectRequestFormType = z.infer<typeof rejectRequestSchema>;

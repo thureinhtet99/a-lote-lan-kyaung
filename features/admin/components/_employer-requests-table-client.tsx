@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
-import { getEmployerRequests } from "@/features/employer-requests/actions/get-employer-requests";
-import { approveEmployerRequest } from "@/features/employer-requests/actions/approve-employer-request";
+import { useState, useTransition } from "react";
+
 import { rejectEmployerRequest } from "@/features/employer-requests/actions/reject-employer-request";
 import {
   Table,
@@ -25,54 +24,65 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { EmployerRequestType } from "@/types/index.type";
+import {
+  approveEmployerRequest,
+  getAllEmployerRequests,
+} from "@/features/users/db/user-db";
 
-type EmployerRequest = {
-  id: string;
-  userId: string;
-  status: string;
-  requestMessage: string | null;
-  adminResponse: string | null;
-  reviewedBy: string | null;
-  reviewedAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    image: string | null;
-  };
-  reviewer: {
-    id: string;
-    name: string;
-    email: string;
-  } | null;
+type Props = {
+  pendingRequests: EmployerRequestType[];
+  reviewedRequests: EmployerRequestType[];
 };
 
-export function EmployerRequestsTable() {
-  const [requests, setRequests] = useState<EmployerRequest[]>([]);
-  const [loading, setLoading] = useState(true);
+export function EmployerRequestsTableClient({
+  pendingRequests,
+  reviewedRequests,
+}: Props) {
+  //   const [pendingRequests, setPendingRequests] = useState(
+  //     initialPendingRequests,
+  //   );
+  //   const [reviewedRequests, setReviewedRequests] = useState(
+  //     initialReviewedRequests,
+  //   );
   const [isPending, startTransition] = useTransition();
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] =
-    useState<EmployerRequest | null>(null);
+    useState<EmployerRequestType | null>(null);
   const [adminResponse, setAdminResponse] = useState("");
 
-  const fetchRequests = async () => {
-    setLoading(true);
-    const result = await getEmployerRequests();
-    if (result.success) {
-      setRequests(result.data);
-    } else {
-      toast.error(result.error || "Failed to fetch requests");
-    }
-    setLoading(false);
+  //   const refreshRequests = async () => {
+  //     const result = await getAllEmployerRequests();
+
+  //     if (!result.success) {
+  //       toast.error(result.message);
+  //       return;
+  //     }
+
+  //     const requests = result.data as EmployerRequestType[];
+  //     setPendingRequests(
+  //       requests.filter((request) => request.status === "pending"),
+  //     );
+  //     setReviewedRequests(
+  //       requests.filter((request) => request.status !== "pending"),
+  //     );
+  //   };
+
+  const resetDialogState = () => {
+    setAdminResponse("");
+    setSelectedRequest(null);
   };
 
-  useEffect(() => {
-    fetchRequests();
-  }, []);
+  const closeApproveDialog = () => {
+    setApproveDialogOpen(false);
+    resetDialogState();
+  };
+
+  const closeRejectDialog = () => {
+    setRejectDialogOpen(false);
+    resetDialogState();
+  };
 
   const handleApprove = () => {
     if (!selectedRequest) return;
@@ -82,14 +92,13 @@ export function EmployerRequestsTable() {
         requestId: selectedRequest.id,
         adminResponse: adminResponse || undefined,
       });
+
       if (result.success) {
-        toast.success("Employer request approved successfully");
-        setApproveDialogOpen(false);
-        setAdminResponse("");
-        setSelectedRequest(null);
-        fetchRequests();
+        toast.success(result.message);
+        closeApproveDialog();
+        // await refreshRequests();
       } else {
-        toast.error(result.error || "Failed to approve request");
+        toast.error(result.message || "Failed to approve request");
       }
     });
   };
@@ -105,32 +114,24 @@ export function EmployerRequestsTable() {
         requestId: selectedRequest.id,
         adminResponse,
       });
+
       if (result.success) {
         toast.success("Employer request rejected successfully");
-        setRejectDialogOpen(false);
-        setAdminResponse("");
-        setSelectedRequest(null);
-        fetchRequests();
+        closeRejectDialog();
+        // await refreshRequests();
       } else {
         toast.error(result.error || "Failed to reject request");
       }
     });
   };
 
-  if (loading) {
-    return <div className="flex justify-center p-8">Loading requests...</div>;
-  }
-
-  const pendingRequests = requests.filter((r) => r.status === "pending");
-  const reviewedRequests = requests.filter((r) => r.status !== "pending");
-
   return (
     <>
       <div className="space-y-8">
-        {pendingRequests.length > 0 && (
+        {pendingRequests.length > 0 ? (
           <div>
             <h2 className="mb-4 text-xl font-semibold">Pending Requests</h2>
-            <Table>
+            <Table className="min-w-[780px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>User</TableHead>
@@ -147,7 +148,7 @@ export function EmployerRequestsTable() {
                       {request.user.name}
                     </TableCell>
                     <TableCell>{request.user.email}</TableCell>
-                    <TableCell className="max-w-md">
+                    <TableCell className="max-w-[340px] whitespace-normal">
                       {request.requestMessage || "No message provided"}
                     </TableCell>
                     <TableCell>
@@ -183,12 +184,16 @@ export function EmployerRequestsTable() {
               </TableBody>
             </Table>
           </div>
+        ) : (
+          <div className="text-muted-foreground p-4 text-center animate-pulse">
+            No pending employer requests found
+          </div>
         )}
 
-        {reviewedRequests.length > 0 && (
+        {reviewedRequests.length > 0 ? (
           <div>
             <h2 className="mb-4 text-xl font-semibold">Reviewed Requests</h2>
-            <Table>
+            <Table className="min-w-[920px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>User</TableHead>
@@ -196,7 +201,7 @@ export function EmployerRequestsTable() {
                   <TableHead>Status</TableHead>
                   <TableHead>Admin Response</TableHead>
                   <TableHead>Reviewed By</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead>Reviewed At</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -208,6 +213,7 @@ export function EmployerRequestsTable() {
                     <TableCell>{request.user.email}</TableCell>
                     <TableCell>
                       <Badge
+                        className="capitalize"
                         variant={
                           request.status === "approved"
                             ? "default"
@@ -217,10 +223,10 @@ export function EmployerRequestsTable() {
                         {request.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="max-w-md">
+                    <TableCell className="max-w-[340px] whitespace-normal">
                       {request.adminResponse || "-"}
                     </TableCell>
-                    <TableCell>{request.reviewer?.name || "-"}</TableCell>
+                    <TableCell>{request.reviewer.name}</TableCell>
                     <TableCell>
                       {request.reviewedAt
                         ? new Date(request.reviewedAt).toLocaleDateString()
@@ -231,16 +237,19 @@ export function EmployerRequestsTable() {
               </TableBody>
             </Table>
           </div>
-        )}
-
-        {requests.length === 0 && (
-          <div className="flex justify-center p-8 text-muted-foreground">
-            No employer requests found
+        ) : (
+          <div className="text-muted-foreground p-4 text-center animate-pulse">
+            No reviewed employer requests found
           </div>
         )}
+
+        {/* {pendingRequests.length === 0 && reviewedRequests.length === 0 && (
+          <div className="text-muted-foreground p-4 text-center">
+            No employer requests found
+          </div>
+        )} */}
       </div>
 
-      {/* Approve Dialog */}
       <Dialog open={approveDialogOpen} onOpenChange={setApproveDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -258,21 +267,14 @@ export function EmployerRequestsTable() {
               <Textarea
                 id="approve-response"
                 value={adminResponse}
-                onChange={(e) => setAdminResponse(e.target.value)}
+                onChange={(event) => setAdminResponse(event.target.value)}
                 placeholder="Add a message for the user..."
                 rows={4}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setApproveDialogOpen(false);
-                setAdminResponse("");
-                setSelectedRequest(null);
-              }}
-            >
+            <Button variant="outline" onClick={closeApproveDialog}>
               Cancel
             </Button>
             <Button onClick={handleApprove} disabled={isPending}>
@@ -282,7 +284,6 @@ export function EmployerRequestsTable() {
         </DialogContent>
       </Dialog>
 
-      {/* Reject Dialog */}
       <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -294,25 +295,20 @@ export function EmployerRequestsTable() {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="reject-response">Rejection Reason *</Label>
+              <Label htmlFor="reject-response">
+                Rejection Reason<span className="text-destructive">*</span>
+              </Label>
               <Textarea
                 id="reject-response"
                 value={adminResponse}
-                onChange={(e) => setAdminResponse(e.target.value)}
+                onChange={(event) => setAdminResponse(event.target.value)}
                 placeholder="Enter reason for rejection..."
                 rows={4}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setRejectDialogOpen(false);
-                setAdminResponse("");
-                setSelectedRequest(null);
-              }}
-            >
+            <Button variant="outline" onClick={closeRejectDialog}>
               Cancel
             </Button>
             <Button

@@ -6,7 +6,8 @@ type CacheType =
   | "organization-user-settings"
   | "user-notification-settings"
   | "user-resumes"
-  | "admin-stats";
+  | "admin-stats"
+  | "employer-requests";
 
 // JobListing
 export const jobListingsTag = (orgId: string, tag: CacheType) => {

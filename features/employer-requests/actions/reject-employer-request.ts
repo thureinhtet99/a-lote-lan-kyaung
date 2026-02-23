@@ -5,11 +5,10 @@ import { employerRequestTable } from "@/drizzle/schema";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { eq } from "drizzle-orm";
-import {
-  rejectRequestSchema,
-  type RejectRequestFormType,
-} from "../validations";
+
 import { updateTag } from "next/cache";
+import { RejectRequestFormType } from "@/types/index.type";
+import { rejectRequestSchema } from "@/features/admin/admin-schema";
 
 export async function rejectEmployerRequest(
   data: RejectRequestFormType,
