@@ -17,7 +17,7 @@ export const wageIntervals = ["monthly", "yearly", "hourly"] as const;
 export type WageIntervalType = (typeof wageIntervals)[number];
 export const wageIntervalEnum = pgEnum("wage_interval", wageIntervals);
 
-export const locationRequirements = ["on-site", "hybrid", "remote"] as const;
+export const locationRequirements = ["on-site", "remote", "hybrid"] as const;
 export type LocationRequirementType = (typeof locationRequirements)[number];
 export const locationRequirementEnum = pgEnum(
   "location_requirement",

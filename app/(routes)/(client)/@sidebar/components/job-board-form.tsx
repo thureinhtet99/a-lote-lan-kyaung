@@ -38,6 +38,7 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { StateSelectItems } from "../../../../../components/job-listings/state-select-items";
 import { jobBoardFormSchema } from "../job-board-form-schema";
 import z from "zod";
+import { Loader2Icon } from "lucide-react";
 
 const ANY_VALUE = "any";
 
@@ -96,7 +97,7 @@ export default function JobBoardForm() {
             <FormItem>
               <FormLabel>Job Title</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} placeholder="Enter job title..." />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -109,7 +110,7 @@ export default function JobBoardForm() {
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Location</FormLabel>
+              <FormLabel>Work mode</FormLabel>
               <Select value={field.value} onValueChange={field.onChange}>
                 <FormControl>
                   <SelectTrigger className="w-full">
@@ -137,7 +138,7 @@ export default function JobBoardForm() {
             <FormItem>
               <FormLabel>City</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} placeholder="Enter city name..." />
               </FormControl>
             </FormItem>
           )}
@@ -222,9 +223,14 @@ export default function JobBoardForm() {
           className="w-full"
           disabled={form.formState.isSubmitting}
         >
-          <LoadingSwap isLoading={form.formState.isSubmitting}>
-            Filter
-          </LoadingSwap>
+          {form.formState.isSubmitting ? (
+            <>
+              <Loader2Icon className="animate-spin" />
+              Searching...
+            </>
+          ) : (
+            "Search"
+          )}
         </Button>
       </form>
     </Form>
