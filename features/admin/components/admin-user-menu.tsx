@@ -1,3 +1,5 @@
+"use client";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,8 +10,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User } from "lucide-react";
-import LogoutMenuItem from "../../../components/shared/logout-menu-item";
+import { LogOutIcon, User } from "lucide-react";
+import { useState } from "react";
+import { useSignOut } from "@/hooks/use-sign-out";
 
 type Props = {
   user: {
@@ -20,6 +23,9 @@ type Props = {
 };
 
 export function AdminUserMenu({ user }: Props) {
+  const [isOpen, setIsOpen] = useState(false);
+  const { signOut, isPending } = useSignOut();
+
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -30,7 +36,7 @@ export function AdminUserMenu({ user }: Props) {
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
@@ -52,12 +58,22 @@ export function AdminUserMenu({ user }: Props) {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem disabled>
-          <User className="mr-2 h-4 w-4" />
+        <DropdownMenuItem className="cursor-pointer" disabled>
+          <User className="mr-1 h-4 w-4" />
           <span>Profile</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <LogoutMenuItem />
+        <DropdownMenuItem
+          className="cursor-pointer"
+          disabled={isPending}
+          onSelect={(event) => {
+            event.preventDefault();
+          }}
+          onClick={() => signOut({ onSuccess: () => setIsOpen(false) })}
+        >
+          <LogOutIcon className="mr-1 h-4 w-4" />
+          {isPending ? "Logging out..." : "Log Out"}
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

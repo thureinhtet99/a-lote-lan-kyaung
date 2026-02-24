@@ -5,21 +5,20 @@ import { DropdownMenuItem } from "../ui/dropdown-menu";
 import { LogOut } from "lucide-react";
 
 export default function LogoutMenuItem() {
-  const { signOut, isLoading } = useSignOut();
+  const { signOut, isPending } = useSignOut();
 
-  const handleLogout = async (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleLogout = async () => {
     await signOut();
   };
 
   return (
     <DropdownMenuItem
-      className="text-red-600 focus:text-red-600"
+      className="text-red-600 focus:text-red-600 cursor-pointer"
       onClick={handleLogout}
-      disabled={false}
+      disabled={isPending}
     >
       <LogOut className="mr-2 h-4 w-4" />
-      <span>{isLoading ? "Logging out..." : "Log out"}</span>
+      <span>{isPending ? "Logging out..." : "Log out"}</span>
     </DropdownMenuItem>
   );
 }

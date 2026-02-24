@@ -3,24 +3,28 @@
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth/auth-client";
 import { APP_ROUTES } from "@/constants/app-config";
-import { useState } from "react";
+import { useTransition } from "react";
 
 export function useSignOut() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-  const signOut = async () => {
+  const signOut = async ({
+    onSuccess,
+  }: {
+    onSuccess?: () => void;
+  } = {}) => {
     await authClient.signOut({
       fetchOptions: {
-        onRequest: () => {
-          setIsLoading(true);
-        },
         onSuccess: () => {
-          router.push(APP_ROUTES.HOME);
+          startTransition(() => {
+            onSuccess?.();
+            router.push(APP_ROUTES.HOME);
+          });
         },
       },
     });
   };
 
-  return { signOut, isLoading };
+  return { signOut, isPending };
 }

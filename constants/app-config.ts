@@ -8,9 +8,9 @@ export const APP_CONFIG = {
 
 export const APP_ROUTES = {
   // Auth
-  SIGN_IN: "/sign-in",
-  SIGN_UP: "/sign-up",
-  SIGN_OUT: "/sign-out",
+  SIGN_IN: "/auth/sign-in",
+  SIGN_UP: "/auth/sign-up",
+  SIGN_OUT: "/auth/sign-out",
   FORGOT_PASSWORD: "/forgot-password",
 
   HOME: "/",

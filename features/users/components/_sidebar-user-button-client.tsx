@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import { APP_ROUTES } from "@/constants/app-config";
-import { SignOutButton } from "@/features/auth/components/auth-buttons";
+import { useSignOut } from "@/hooks/use-sign-out";
 import { UserType } from "@/types/index.type";
 import {
   ChevronsUpDown,
@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function SidebarUserButtonClient({
   user,
@@ -29,6 +30,8 @@ export default function SidebarUserButtonClient({
 }) {
   const { isMobile, setOpenMobile } = useSidebar();
   const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false);
+  const { signOut, isPending } = useSignOut();
 
   const openUserProfile = () => {
     router.push(APP_ROUTES.SETTINGS.PROFILE);
@@ -36,7 +39,7 @@ export default function SidebarUserButtonClient({
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
         <SidebarMenuButton
           size="lg"
@@ -73,12 +76,17 @@ export default function SidebarUserButtonClient({
         <DropdownMenuSeparator />
 
         {/* Sign out */}
-        <SignOutButton>
-          <DropdownMenuItem>
-            <LogOutIcon className="mr-1" />
-            Log Out
-          </DropdownMenuItem>
-        </SignOutButton>
+        <DropdownMenuItem
+          className="cursor-pointer"
+          disabled={isPending}
+          onSelect={(event) => {
+            event.preventDefault();
+          }}
+          onClick={() => signOut({ onSuccess: () => setIsOpen(false) })}
+        >
+          <LogOutIcon className="mr-1 h-4 w-4" />
+          Log Out
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
