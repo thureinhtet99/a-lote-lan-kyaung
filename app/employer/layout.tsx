@@ -13,7 +13,7 @@ import {
 import { ReactNode, Suspense } from "react";
 import Link from "next/link";
 import AppSidebar from "@/components/layout/sidebar/app-sidebar";
-import SidebarNavMenuGroup from "@/components/layout/sidebar/sidebar-nav-menu";
+import SidebarNavMenuGroup from "@/app/(routes)/(client)/@sidebar/components/sidebar-nav-menu";
 import { APP_ROUTES } from "@/constants/app-config";
 import { sortJobListingsByStatus } from "@/features/job-listings/lib/utils";
 import { JobListingStatusType } from "@/drizzle/schema";

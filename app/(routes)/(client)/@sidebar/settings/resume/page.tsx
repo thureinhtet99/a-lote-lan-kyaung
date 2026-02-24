@@ -1,4 +1,4 @@
-import SettingsSidebar from "@/app/(routes)/(client)/shared/settings-sidebar";
+import SettingsSidebar from "../../components/setting-sidebar";
 
 export default function ResumeSidebar() {
   return <SettingsSidebar />;

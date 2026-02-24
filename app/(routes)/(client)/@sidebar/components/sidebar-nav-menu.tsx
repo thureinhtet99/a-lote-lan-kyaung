@@ -26,7 +26,7 @@ export default function SidebarNavMenu({
       <SidebarMenu>
         {items.map((item) => {
           const html = (
-            <SidebarMenuItem key={item.href}>
+            <SidebarMenuItem className="cursor-pointer" key={item.href}>
               <Suspense>
                 <SidebarMenuButton asChild isActive={pathname === item.href}>
                   <Link href={item.href}>

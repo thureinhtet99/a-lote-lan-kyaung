@@ -13,13 +13,12 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import LoadingSwap from "@/components/shared/loading-swap";
 import { authClient } from "@/lib/auth/auth-client";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES } from "@/constants/app-config";
 import { SignUpFormType, signUpSchema } from "@/drizzle/schema";
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2Icon } from "lucide-react";
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -176,9 +175,14 @@ export default function SignUpForm() {
           className="w-full mt-4"
           disabled={form.formState.isSubmitting}
         >
-          <LoadingSwap isLoading={form.formState.isSubmitting}>
-            Create Account
-          </LoadingSwap>
+          {form.formState.isSubmitting ? (
+            <>
+              <Loader2Icon className="animate-spin" />
+              Creating...
+            </>
+          ) : (
+            "Create account"
+          )}
         </Button>
       </form>
     </Form>

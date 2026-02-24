@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import SidebarUserButtonClient from "./_sidebar-user-button-client";
+import SidebarUserButtonClient from ".//_sidebar-user-button-client";
 import { getCurrentUser } from "@/lib/auth/auth-helpers";
 import { SignOutButton } from "@/features/auth/components/auth-buttons";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
@@ -8,20 +8,20 @@ import Loading from "@/components/shared/loading";
 
 export default function SidebarUserButton() {
   return (
-    <Suspense fallback={<Loading className="my-4" />}>
+    <Suspense>
       <SuspendedComponent />
     </Suspense>
   );
 }
 
 const SuspendedComponent = async () => {
-  const { user } = await getCurrentUser({ allData: true });
+  const { user } = await getCurrentUser();
 
   // Check if there is a user to show user button
   if (!user) {
     return (
       <SignOutButton>
-        <SidebarMenuButton>
+        <SidebarMenuButton className="cursor-pointer">
           <LogOutIcon />
           <span>Log out</span>
         </SidebarMenuButton>
@@ -30,11 +30,11 @@ const SuspendedComponent = async () => {
   }
 
   // Map logged-in user's data
-  const mappedUser = {
+  const userData = {
     name: user.name,
     email: user.email,
     image: user.image ?? null,
   };
 
-  return <SidebarUserButtonClient user={mappedUser} />;
+  return <SidebarUserButtonClient user={userData} />;
 };

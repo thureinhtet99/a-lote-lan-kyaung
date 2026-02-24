@@ -4,10 +4,7 @@ import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createEmployerRequest } from "@/features/employer-requests/actions/create-employer-request";
-import {
-  employerRequestSchema,
-  type EmployerRequestFormType,
-} from "@/features/employer-requests/validations";
+
 import {
   Form,
   FormControl,
@@ -27,6 +24,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { toast } from "sonner";
+import { EmployerRequestFormType } from "@/types/index.type";
+import { employerRequestSchema } from "@/features/admin/admin-schema";
 
 export function EmployerRequestForm() {
   const [isPending, startTransition] = useTransition();

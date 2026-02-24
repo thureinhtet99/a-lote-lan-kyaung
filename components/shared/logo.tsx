@@ -1,10 +1,8 @@
-"use client";
-
 import { APP_CONFIG, APP_ROUTES } from "@/constants/app-config";
 import { cn } from "@/lib/utils";
 import { LogoType } from "@/types/index.type";
 import { BriefcaseBusiness } from "lucide-react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const textSizes = {
   sm: "text-lg",
@@ -14,11 +12,9 @@ const textSizes = {
 };
 
 export function Logo({ className, size = "md", showText = true }: LogoType) {
-  const router = useRouter();
-
   return (
-    <div
-      onClick={() => router.push(APP_ROUTES.HOME)}
+    <Link
+      href={APP_ROUTES.HOME}
       className={cn(
         "flex items-center justify-center gap-4 group-data-[state=collapsed]:gap-0 transition-all duration-300 ease-in-out cursor-pointer",
         className,
@@ -39,7 +35,7 @@ export function Logo({ className, size = "md", showText = true }: LogoType) {
           </span>
         </div>
       )}
-    </div>
+    </Link>
   );
 }
 

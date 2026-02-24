@@ -37,7 +37,7 @@ export default function AppSidebar({
           <SidebarContent>{content}</SidebarContent>
 
           <SignedIn>
-            <SidebarFooter className="border-t border-primary/10">
+            <SidebarFooter className="border-primary/10 border-t">
               <SidebarMenu>
                 <SidebarMenuItem>{footerButton}</SidebarMenuItem>
               </SidebarMenu>

@@ -6,39 +6,30 @@ import { eq } from "drizzle-orm";
 import { organizationTable } from "@/drizzle/schema";
 import { headers } from "next/headers";
 
-// Session
-// export const getSession = async () => {
-//   return await auth.api.getSession({
-//     headers: await headers(),
-//   });
-// };
-
 // Get current session from better-auth session
 export const getCurrentSession = async ({ allData = false } = {}) => {
-  const session = await auth.api.getSession({
+  const currentSession = await auth.api.getSession({
     headers: await headers(),
   });
+  if (!currentSession) return { sessionId: null, session: undefined };
 
-  if (!session) return { sessionId: null, session: undefined };
+  const sessionId = currentSession.session.id;
+  const session = currentSession.session;
 
-  return {
-    sessionId: session.session.id,
-    session: allData ? session.session : undefined,
-  };
+  return { sessionId, session };
 };
 
 // Get current user from better-auth session
-export const getCurrentUser = async ({ allData = false } = {}) => {
+export const getCurrentUser = async () => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
-
   if (!session) return { userId: null, user: undefined };
 
-  return {
-    userId: session.session.userId,
-    user: allData ? session.user : undefined,
-  };
+  const userId = session.session.userId;
+  const user = session.user;
+
+  return { userId, user };
 };
 
 // Get current organization from better-auth session

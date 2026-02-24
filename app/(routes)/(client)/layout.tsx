@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
-import SidebarUserButton from "@/features/users/components/sidebar-user-button";
+import SidebarUserButton from "@/app/(routes)/(client)/@sidebar/components/sidebar-user-button";
 import AppSidebar from "@/components/layout/sidebar/app-sidebar";
-import SidebarNavMenu from "@/components/layout/sidebar/sidebar-nav-menu";
+import SidebarNavMenu from "@/app/(routes)/(client)/@sidebar/components/sidebar-nav-menu";
 import { APP_ROUTES } from "@/constants/app-config";
 import {
   // BrainCircuitIcon,

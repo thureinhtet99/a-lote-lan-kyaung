@@ -1,5 +1,5 @@
 import SettingsSidebar from "../../components/setting-sidebar";
 
-export default function NotificationSidebar() {
+export default function EmployerRequestSidebar() {
   return <SettingsSidebar />;
 }

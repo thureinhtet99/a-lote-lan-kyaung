@@ -6,11 +6,9 @@ import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { nanoid } from "nanoid";
 import { eq, and, or } from "drizzle-orm";
-import {
-  employerRequestSchema,
-  type EmployerRequestFormType,
-} from "../validations";
 import { updateTag } from "next/cache";
+import { EmployerRequestFormType } from "@/types/index.type";
+import { employerRequestSchema } from "@/features/admin/admin-schema";
 
 export async function createEmployerRequest(
   data: EmployerRequestFormType,

@@ -14,10 +14,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "sonner";
-import LoadingSwap from "@/components/shared/loading-swap";
 import { SignInFormType, signInSchema } from "@/drizzle/schema";
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2Icon } from "lucide-react";
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -110,9 +109,14 @@ export default function SignInForm() {
             className="w-full mt-4"
             disabled={form.formState.isSubmitting}
           >
-            <LoadingSwap isLoading={form.formState.isSubmitting}>
-              Sign In
-            </LoadingSwap>
+            {form.formState.isSubmitting ? (
+              <>
+                <Loader2Icon className="animate-spin" />
+                Signing in...
+              </>
+            ) : (
+              "Sign in"
+            )}
           </Button>
         </form>
       </Form>

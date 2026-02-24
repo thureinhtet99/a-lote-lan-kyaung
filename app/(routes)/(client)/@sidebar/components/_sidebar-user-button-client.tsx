@@ -43,7 +43,7 @@ export default function SidebarUserButtonClient({
       <DropdownMenuTrigger asChild>
         <SidebarMenuButton
           size="lg"
-          className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+          className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
         >
           <UserInfo {...user} />
           <ChevronsUpDown className="ml-auto group-data-[state=collapsed]:hidden" />
@@ -85,7 +85,7 @@ export default function SidebarUserButtonClient({
           onClick={() => signOut({ onSuccess: () => setIsOpen(false) })}
         >
           <LogOutIcon className="mr-1 h-4 w-4" />
-          Log Out
+          {isPending ? "Logging out..." : "Log Out"}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -100,8 +100,8 @@ const UserInfo = ({
   const nameInitials = name.slice(0, 1);
 
   return (
-    <div className="flex items-center gap-2 overflow-hidden">
-      <Avatar className="rounded-lg size-8">
+    <div className="flex items-center gap-4 overflow-hidden">
+      <Avatar className="rounded-lg size-10">
         <AvatarImage src={image || undefined} alt={name} />
         <AvatarFallback className="uppercase bg-primary text-primary-foreground">
           {nameInitials}

@@ -32,7 +32,6 @@ import {
   formatLocationRequirement,
 } from "@/features/job-listings/lib/formatters";
 import { Button } from "@/components/ui/button";
-import LoadingSwap from "@/components/shared/loading-swap";
 import { Form } from "@/components/ui/form";
 import { useSidebar } from "@/components/ui/sidebar";
 import { StateSelectItems } from "../../../../../components/job-listings/state-select-items";
