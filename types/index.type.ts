@@ -8,6 +8,13 @@ import { Column } from "@tanstack/react-table";
 import { Key, ReactNode } from "react";
 import z from "zod";
 
+// Logo
+export type LogoType = {
+  className?: string;
+  size?: "sm" | "md" | "lg" | "xl";
+  showText?: boolean;
+};
+
 // User
 export type UserPermissionType =
   | "org:job_listing:create"

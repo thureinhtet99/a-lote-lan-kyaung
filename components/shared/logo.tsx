@@ -1,12 +1,7 @@
 import { APP_CONFIG } from "@/constants/app-config";
 import { cn } from "@/lib/utils";
+import { LogoType } from "@/types/index.type";
 import { BriefcaseBusiness } from "lucide-react";
-
-interface LogoProps {
-  className?: string;
-  size?: "sm" | "md" | "lg" | "xl";
-  showText?: boolean;
-}
 
 const textSizes = {
   sm: "text-lg",
@@ -15,7 +10,7 @@ const textSizes = {
   xl: "text-4xl",
 };
 
-export function Logo({ className, size = "md", showText = true }: LogoProps) {
+export function Logo({ className, size = "md", showText = true }: LogoType) {
   return (
     <div
       className={cn(
@@ -45,6 +40,6 @@ export function Logo({ className, size = "md", showText = true }: LogoProps) {
 export function LogoIcon({
   className,
   size = "md",
-}: Omit<LogoProps, "showText">) {
+}: Omit<LogoType, "showText">) {
   return <Logo className={className} size={size} showText={false} />;
 }

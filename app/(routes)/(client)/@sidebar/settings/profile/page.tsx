@@ -1,0 +1,5 @@
+import SettingsSidebar from "@/app/(routes)/(client)/shared/settings-sidebar";
+
+export default function ProfileSidebar() {
+  return <SettingsSidebar />;
+}

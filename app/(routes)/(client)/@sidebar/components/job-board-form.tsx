@@ -26,7 +26,6 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
-import z from "zod";
 import {
   formatExpLevel,
   formatJobType,
@@ -36,32 +35,20 @@ import { Button } from "@/components/ui/button";
 import LoadingSwap from "@/components/shared/loading-swap";
 import { Form } from "@/components/ui/form";
 import { useSidebar } from "@/components/ui/sidebar";
-import { StateSelectItems } from "./state-select-items";
+import { StateSelectItems } from "../../../../../components/job-listings/state-select-items";
+import { jobBoardFormSchema } from "../job-board-form-schema";
+import z from "zod";
 
 const ANY_VALUE = "any";
 
-// Schema
-const jobListingFilterSchema = z.object({
-  title: z.string().optional(),
-  locationRequirement: z
-    .enum(locationRequirements)
-    .or(z.literal(ANY_VALUE))
-    .optional(),
-  city: z.string().optional(),
-  state: z.string().or(z.literal(ANY_VALUE)).optional(),
-  type: z.enum(jobListingTypes).or(z.literal(ANY_VALUE)).optional(),
-  experienceLevel: z.enum(experienceLevels).or(z.literal(ANY_VALUE)).optional(),
-});
-
-export default function JobListingFilterForm() {
+export default function JobBoardForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
 
-  // Job listing filter schema form
   const form = useForm({
-    resolver: zodResolver(jobListingFilterSchema),
+    resolver: zodResolver(jobBoardFormSchema),
     defaultValues: {
       title: searchParams.get("title") ?? "",
       city: searchParams.get("city") ?? "",
@@ -74,7 +61,7 @@ export default function JobListingFilterForm() {
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof jobListingFilterSchema>) => {
+  const onSubmit = async (data: z.infer<typeof jobBoardFormSchema>) => {
     const newParams = new URLSearchParams();
 
     if (data.title) newParams.set("title", data.title);

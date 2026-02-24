@@ -10,7 +10,7 @@ import {
   LogInIcon,
 } from "lucide-react";
 
-export default function JobSeekerLayout({
+export default function ClientLayout({
   children,
   sidebar,
 }: {
