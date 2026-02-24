@@ -10,8 +10,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
-import { APP_ROUTES } from "@/config/appConfig";
-import { SignOutButton } from "@/components/auth/AuthButtons";
+import { APP_ROUTES } from "@/constants/app-config";
+import { SignOutButton } from "@/features/auth/components/auth-buttons";
 import { UserType } from "@/types/index.type";
 import {
   ChevronsUpDown,
@@ -22,12 +22,16 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-export default function SidebarUserButtonClient({ user }: { user: UserType }) {
+export default function SidebarUserButtonClient({
+  user,
+}: {
+  user: Pick<UserType, "name" | "email" | "image">;
+}) {
   const { isMobile, setOpenMobile } = useSidebar();
   const router = useRouter();
 
   const openUserProfile = () => {
-    router.push("/settings/profile");
+    router.push(APP_ROUTES.SETTINGS.PROFILE);
     setOpenMobile(false);
   };
 
@@ -80,7 +84,11 @@ export default function SidebarUserButtonClient({ user }: { user: UserType }) {
   );
 }
 
-const UserInfo = ({ name, email, image }: UserType) => {
+const UserInfo = ({
+  name,
+  email,
+  image,
+}: Pick<UserType, "name" | "email" | "image">) => {
   const nameInitials = name.slice(0, 1);
 
   return (

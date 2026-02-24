@@ -7,18 +7,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Suspense } from "react";
-import DropzoneClient from "./_DropzoneClient";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { getCurrentUser } from "@/services/clerk/lib/get-current-auth";
 import { notFound } from "next/navigation";
-import { db } from "@/drizzle/db";
+import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
-import { userResumeTag } from "@/lib/dataCache";
-import { userResumesTable } from "@/drizzle/schema";
-import { unstable_cache } from "next/cache";
-import MarkdownRenderer from "@/components/markdown/MarkdownRenderer";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import { resumeTable } from "@/drizzle/schema";
+import MarkdownRenderer from "@/components/markdown/markdown-renderer";
+import Loading from "@/components/shared/loading";
+import { getCurrentUser } from "@/lib/auth/auth-helpers";
+import { cacheTag, cacheLife } from "next/cache";
+import DropzoneClient from "./_DropzoneClient";
 
 export default function ResumePage() {
   return (
@@ -29,7 +28,7 @@ export default function ResumePage() {
         <CardContent className="pt-6">
           <DropzoneClient />
         </CardContent>
-        <Suspense fallback={<LoadingSpinner />}>
+        <Suspense fallback={<Loading />}>
           <SuspendedComponent />
         </Suspense>
       </Card>
@@ -65,18 +64,14 @@ const SuspendedComponent = async () => {
 };
 
 // Fetch user resume from db (cached)
-const getResumeByUserId = async (userId: string) => {
-  const cachedData = unstable_cache(
-    async () => {
-      return await db.query.userResumesTable.findFirst({
-        where: eq(userResumesTable.userId, userId),
-      });
-    },
-    [userResumeTag("userResumes", userId)],
-    { tags: [userResumeTag("userResumes", userId)] },
-  );
-  return await cachedData();
-};
+async function getResumeByUserId(userId: string) {
+  "use cache";
+  cacheTag("resume-" + userId);
+  cacheLife("hours");
+  return await db.query.resumeTable.findFirst({
+    where: eq(resumeTable.userId, userId),
+  });
+}
 
 const getCurrentResume = async (userId: string) => {
   const data = await getResumeByUserId(userId);
@@ -84,7 +79,8 @@ const getCurrentResume = async (userId: string) => {
 };
 
 const AISummaryCard = async () => {
-  const { userId } = await getCurrentUser();
+  // const { userId } = await getCurrentUser();
+  const userId = "5g4X3I2v2EVlFXUb0SrcBRBtQZPtOj80";
   if (userId == null) return notFound();
 
   const userResume = await getCurrentResume(userId);
@@ -100,7 +96,8 @@ const AISummaryCard = async () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <MarkdownRenderer source={userResume.aiSummary ?? "No summary"} />
+        {/* <MarkdownRenderer source={userResume.aiSummary ?? "No summary"} /> */}
+        <MarkdownRenderer source={"No summary"} />
       </CardContent>
     </Card>
   );

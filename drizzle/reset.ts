@@ -1,5 +1,5 @@
+import { db } from "@/lib/db";
 import "dotenv/config";
-import { db } from "./db";
 import { sql } from "drizzle-orm";
 
 async function resetDatabase() {

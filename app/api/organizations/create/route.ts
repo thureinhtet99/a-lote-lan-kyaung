@@ -1,13 +1,6 @@
-import { auth } from "@/lib/auth";
-import { db } from "@/drizzle/db";
-import { organization, member } from "@/drizzle/schema";
+import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-
-// Generate a unique ID without using crypto module
-function generateId() {
-  return `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
-}
 
 export async function POST(request: Request) {
   try {
@@ -29,31 +22,23 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create organization
-    const newOrg = await db
-      .insert(organization)
-      .values({
-        id: generateId(),
+    // Use better-auth's create organization method
+    const result = await auth.api.createOrganization({
+      body: {
         name,
         slug: slug || name.toLowerCase().replace(/\s+/g, "-"),
-        logo: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        metadata: null,
-      })
-      .returning();
-
-    // Add creator as admin member
-    await db.insert(member).values({
-      id: generateId(),
-      organizationId: newOrg[0].id,
-      userId: session.user.id,
-      role: "admin",
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      },
+      headers: await headers(),
     });
 
-    return NextResponse.json(newOrg[0], { status: 201 });
+    if (!result) {
+      return NextResponse.json(
+        { error: "Failed to create organization" },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json(result, { status: 201 });
   } catch (error) {
     console.error("Error creating organization:", error);
     return NextResponse.json(

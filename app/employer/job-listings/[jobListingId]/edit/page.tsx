@@ -1,14 +1,23 @@
 import EmployerLoading from "@/app/employer/loading";
 import { Card, CardContent } from "@/components/ui/card";
-import JobListingForm from "@/features/jobListings/components/job-listing-form";
-import { getJobListingByIdByOrgIdDb } from "@/features/jobListings/db/job-listing-db";
-import { isUUID } from "@/features/jobListings/lib/utils";
-import { jobListingIdTag } from "@/lib/dataCache";
-import { getCurrentOrg } from "@/services/clerk/lib/get-current-auth";
+import JobListingForm from "@/components/job-listings/job-listing-form";
+import { getJobListingByIdByOrgIdDb } from "@/features/job-listings/db/job-listing-db";
+import { isUUID } from "@/features/job-listings/lib/utils";
+import { getCurrentOrg } from "@/lib/auth/auth-helpers";
 import { ParamsType } from "@/types/index.type";
-import { unstable_cache } from "next/cache";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { cacheTag, cacheLife } from "next/cache";
+
+async function getCachedJobListingByOrg(
+  jobListingId: string,
+  orgId: string,
+) {
+  "use cache";
+  cacheTag("job-listing-" + jobListingId + "-org-" + orgId);
+  cacheLife("hours");
+  return await getJobListingByIdByOrgIdDb(jobListingId, orgId);
+}
 
 export default function EditJobListingPage(props: ParamsType) {
   return (
@@ -26,15 +35,7 @@ const SuspendedComponent = async ({ params }: ParamsType) => {
   if (!isUUID(jobListingId)) notFound();
 
   // Get job listing by id by organization id (cached)
-  const cachedData = unstable_cache(
-    async () => getJobListingByIdByOrgIdDb(jobListingId, orgId),
-    [jobListingIdTag(orgId, "jobListings", jobListingId)],
-    {
-      tags: [jobListingIdTag(orgId, "jobListings", jobListingId)],
-    },
-  );
-
-  const jobListing = await cachedData();
+  const jobListing = await getCachedJobListingByOrg(jobListingId, orgId);
   if (jobListing == null) return notFound();
 
   return (

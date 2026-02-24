@@ -3,39 +3,29 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { APP_CONFIG, APP_ROUTES } from "@/config/appConfig";
-import BreakPoint from "@/components/BreakPoint";
+import { APP_CONFIG, APP_ROUTES } from "@/constants/app-config";
 import { Suspense } from "react";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import ResponsiveBreakpoint from "@/components/shared/responsive-breakpoint";
 import { SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import ClientSheet from "./_ClientSheet";
-import { db } from "@/drizzle/db";
+import { db } from "@/lib/db";
 import { and, eq } from "drizzle-orm";
 import {
-  jobListingApplicationsTable,
-  jobListingsTable,
-  userResumesTable,
+  applicationTable,
+  jobListingTable,
+  resumeTable,
 } from "@/drizzle/schema";
 import { notFound } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { convertSearchParamsToString } from "@/lib/convertSearchParamsToString";
+import { convertSearchParamsToString } from "@/lib/utils/convert-search-params-to-string";
 import { XIcon } from "lucide-react";
-import MarkdownRenderer from "@/components/markdown/MarkdownRenderer";
+import MarkdownRenderer from "@/components/markdown/markdown-renderer";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { getCurrentUser } from "@/services/clerk/lib/get-current-auth";
-import { SignUpButton } from "@/services/clerk/component/AuthButtons";
-import { unstable_cache } from "next/cache";
-import {
-  idTag,
-  jobListingApplicationsTag,
-  userResumeTag,
-} from "@/lib/dataCache";
 import { differenceInDays } from "date-fns";
 import { connection } from "next/server";
 import {
@@ -46,8 +36,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { NewJobListingApplicationForm } from "@/features/jobListingApplications/components/NewJobListingApplicationForm";
-import JobListingBadges from "@/features/jobListings/components/job-listing-badges";
+import { NewJobListingApplicationForm } from "@/features/applications/components/new-job-listing-application-form";
+import JobListingBadges from "@/components/job-listings/job-listing-badges";
+import { getCurrentUser } from "@/lib/auth/auth-helpers";
+import Loading from "@/components/shared/loading";
+import { cacheTag, cacheLife } from "next/cache";
+import ClientSheet from "./_ClientSheet";
 
 export default function JobListingPage({
   params,
@@ -68,7 +62,7 @@ export default function JobListingPage({
             <JobListingDetails searchParams={searchParams} params={params} />
           </div>
         </ResizablePanel>
-        <BreakPoint
+        <ResponsiveBreakpoint
           breakpoint="min-width: 1024px"
           otherwise={
             <ClientSheet>
@@ -77,7 +71,7 @@ export default function JobListingPage({
                   <SheetTitle>Job Listing Details</SheetTitle>
                 </SheetHeader>
                 <div className="flex-1 overflow-y-auto p-4">
-                  <Suspense fallback={<LoadingSpinner />}>
+                  <Suspense fallback={<Loading />}>
                     <JobListingDetails
                       searchParams={searchParams}
                       params={params}
@@ -93,7 +87,7 @@ export default function JobListingPage({
           {/* Right  */}
           <ResizablePanel id="right" order={2} defaultSize={40} minSize={30}>
             <div className="p-4 h-screen overflow-y-auto">
-              <Suspense fallback={<LoadingSpinner />}>
+              <Suspense fallback={<Loading />}>
                 <JobListingDetails
                   searchParams={searchParams}
                   params={params}
@@ -101,7 +95,7 @@ export default function JobListingPage({
               </Suspense>
             </div>
           </ResizablePanel>
-        </BreakPoint>
+        </ResponsiveBreakpoint>
       </ResizablePanelGroup>
     </>
   );
@@ -115,13 +109,20 @@ const getJobListingApplication = async ({
   jobListingId: string;
   userId: string;
 }) => {
-  return await db.query.jobListingApplicationsTable.findFirst({
+  return await db.query.applicationTable.findFirst({
     where: and(
-      eq(jobListingApplicationsTable.jobListingId, jobListingId),
-      eq(jobListingApplicationsTable.userId, userId),
+      eq(applicationTable.jobListingId, jobListingId),
+      eq(applicationTable.userId, userId),
     ),
   });
 };
+
+async function getCachedJobListing(id: string) {
+  "use cache";
+  cacheTag("job-listing-" + id);
+  cacheLife("hours");
+  return await getJobListingById(id);
+}
 
 const JobListingDetails = async ({
   params,
@@ -133,14 +134,7 @@ const JobListingDetails = async ({
   const { jobListingId } = await params;
 
   // Get job listing by id (cached)
-  const cachedData = unstable_cache(
-    async (id: string) => getJobListingById(id),
-    [idTag("jobListings", jobListingId)],
-    {
-      tags: [idTag("jobListings", jobListingId)],
-    },
-  );
-  const jobListing = await cachedData(jobListingId);
+  const jobListing = await getCachedJobListing(jobListingId);
   if (jobListing == null) return notFound();
 
   const nameInitials = jobListing.organization.name
@@ -155,7 +149,7 @@ const JobListingDetails = async ({
         <div className="flex gap-4 items-start">
           <Avatar className="size-14 @max-md:hidden">
             <AvatarImage
-              src={jobListing.organization.image ?? undefined}
+              src={jobListing.organization.logo ?? undefined}
               alt={jobListing.organization.name}
             />
             <AvatarFallback className="uppercase bg-primary text-primary-foreground">
@@ -170,9 +164,9 @@ const JobListingDetails = async ({
             <div className="text-base text-muted-foreground">
               {jobListing.organization.name}
             </div>
-            {jobListing.postedAt != null && (
+            {jobListing.posted_at != null && (
               <div className="text-sm text-muted-foreground @max-lg:hidden">
-                {new Date(jobListing.postedAt).toLocaleDateString()}
+                {new Date(jobListing.posted_at).toLocaleDateString()}
               </div>
             )}
           </div>
@@ -206,17 +200,17 @@ const JobListingDetails = async ({
 
 // Get job listing by id
 const getJobListingById = async (id: string) => {
-  return await db.query.jobListingsTable.findFirst({
+  return await db.query.jobListingTable.findFirst({
     where: and(
-      eq(jobListingsTable.id, id),
-      eq(jobListingsTable.status, "published"),
+      eq(jobListingTable.id, id),
+      eq(jobListingTable.status, "published"),
     ),
     with: {
       organization: {
         columns: {
           id: true,
           name: true,
-          image: true,
+          logo: true,
         },
       },
     },
@@ -233,23 +227,17 @@ const ApplyButton = async ({ jobListingId }: { jobListingId: string }) => {
         </PopoverTrigger>
         <PopoverContent className="flex flex-col gap-2">
           You need to create an account before applying for a job
-          <SignUpButton />
+          {/* <SignUpButton /> */}
         </PopoverContent>
       </Popover>
     );
   }
 
   // Get job listing application by jobListingId & userId (cached)
-  const cachedJobApplication = unstable_cache(
-    async (jobListingId: string, userId: string) =>
-      getJobListingApplication({ jobListingId, userId }),
-    [jobListingApplicationsTag("jobListingApplications", jobListingId)],
-    {
-      tags: [jobListingApplicationsTag("jobListingApplications", jobListingId)],
-    },
+  const application = await getCachedJobListingApplication(
+    jobListingId,
+    userId,
   );
-
-  const application = await cachedJobApplication(jobListingId, userId);
   if (application != null) {
     const formatter = new Intl.RelativeTimeFormat(undefined, {
       style: "short",
@@ -258,7 +246,7 @@ const ApplyButton = async ({ jobListingId }: { jobListingId: string }) => {
     // undefined = user’s current system/browser locale.
 
     await connection();
-    const difference = differenceInDays(application.createdAt, new Date());
+    const difference = differenceInDays(application.created_at, new Date());
 
     return (
       <div className="text-muted-foreground text-sm">
@@ -269,13 +257,7 @@ const ApplyButton = async ({ jobListingId }: { jobListingId: string }) => {
   }
 
   // Get user resume by userId (cached)
-  const cachedUserResume = unstable_cache(
-    async (userId: string) => getUserResume(userId),
-    [userResumeTag("userResumes", userId)],
-    { tags: [userResumeTag("userResumes", userId)] },
-  );
-
-  const resume = await cachedUserResume(userId);
+  const resume = await getCachedUserResume(userId);
   if (resume == null) {
     return (
       <Popover>
@@ -315,7 +297,24 @@ const ApplyButton = async ({ jobListingId }: { jobListingId: string }) => {
 
 // Get user resume by userId
 const getUserResume = async (userId: string) => {
-  return await db.query.userResumesTable.findFirst({
-    where: eq(userResumesTable.userId, userId),
+  return await db.query.resumeTable.findFirst({
+    where: eq(resumeTable.userId, userId),
   });
 };
+
+async function getCachedUserResume(userId: string) {
+  "use cache";
+  cacheTag("user-resume-" + userId);
+  cacheLife("hours");
+  return await getUserResume(userId);
+}
+
+async function getCachedJobListingApplication(
+  jobListingId: string,
+  userId: string,
+) {
+  "use cache";
+  cacheTag("application-" + jobListingId + "-" + userId);
+  cacheLife("minutes");
+  return await getJobListingApplication({ jobListingId, userId });
+}

@@ -1,26 +1,14 @@
+import { applicationTable, resumeTable, userTable } from "@/drizzle/schema";
 import {
-  jobListingApplicationsTable,
-  userResumesTable,
-  user,
-} from "@/drizzle/schema";
+  approveRequestSchema,
+  employerRequestSchema,
+  rejectRequestSchema,
+} from "@/features/admin/admin-schema";
 import { Column } from "@tanstack/react-table";
 import { Key, ReactNode } from "react";
+import z from "zod";
 
-export type UserType = {
-  name: string;
-  email: string;
-  image: string | null;
-};
-
-export type CacheType =
-  | "users"
-  | "organizations"
-  | "jobListings"
-  | "jobListingApplications"
-  | "organizationUserSettings"
-  | "userNotificationSettings"
-  | "userResumes";
-
+// User
 export type UserPermissionType =
   | "org:job_listing:create"
   | "org:job_listing:update"
@@ -29,6 +17,39 @@ export type UserPermissionType =
   | "org:application:update"
   | "org:member:invite"
   | "org:member:remove";
+
+export type UserRoleType = "user" | "admin" | "employer";
+
+export type UserType = {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRoleType;
+  image: string | null;
+  emailVerified: boolean;
+  banned: boolean | null;
+  banReason: string | null;
+  createdAt: Date;
+};
+
+// Employer
+export type EmployerRequestType = {
+  id: string;
+  userId: string;
+  status: string;
+  requestMessage: string;
+  adminResponse: string | null;
+  reviewedBy: string;
+  reviewedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  user: Pick<UserType, "id" | "name" | "email" | "image">;
+  reviewer: Pick<UserType, "id" | "name" | "email">;
+};
+
+export type EmployerRequestFormType = z.infer<typeof employerRequestSchema>;
+export type ApproveRequestFormType = z.infer<typeof approveRequestSchema>;
+export type RejectRequestFormType = z.infer<typeof rejectRequestSchema>;
 
 export type SidebarNavMenuType = {
   href: string;
@@ -56,14 +77,14 @@ export type CheckConditionType = {
   otherwise?: ReactNode;
 };
 
-export type JobListingApplicationType = Pick<
-  typeof jobListingApplicationsTable.$inferSelect,
-  "jobListingId" | "rating" | "status" | "createdAt"
+export type ApplicationType = Pick<
+  typeof applicationTable.$inferSelect,
+  "jobListingId" | "rating" | "status" | "created_at"
 > & {
   coverLetterMarkDown: ReactNode | null;
-  user: Pick<typeof user.$inferSelect, "id" | "name" | "image"> & {
+  user: Pick<typeof userTable.$inferSelect, "id" | "name" | "image"> & {
     resume:
-      | (Pick<typeof userResumesTable.$inferSelect, "resumeFileUrl"> & {
+      | (Pick<typeof resumeTable.$inferSelect, "resumeFileUrl"> & {
           markdownSummary: ReactNode | null;
         })
       | null;

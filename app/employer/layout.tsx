@@ -4,50 +4,53 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
 } from "@/components/ui/sidebar";
-import { ClipboardListIcon, LogInIcon, PlusIcon } from "lucide-react";
+import {
+  ClipboardListIcon,
+  LogInIcon,
+  PlusIcon,
+  SettingsIcon,
+} from "lucide-react";
 import { ReactNode, Suspense } from "react";
 import Link from "next/link";
-import AppSidebar from "@/components/sidebar/app-sidebar";
-import SidebarNavMenuGroup from "@/components/sidebar/sidebar-nav-menu";
-import SidebarOrgButton from "@/features/organizations/components/sidebar-org-button";
-import { getCurrentOrg } from "@/services/clerk/lib/get-current-auth";
-import { APP_ROUTES } from "@/config/appConfig";
-import CheckCondition from "@/components/CheckCondition";
-import { hasOrgUserPermission } from "@/services/clerk/lib/org-user-permission";
-import OrganizationSyncWrapper from "@/services/clerk/component/OrganizationSyncWrapper";
-import { unstable_cache } from "next/cache";
-import { redirect } from "next/navigation";
-import { sortJobListingsByStatus } from "@/features/jobListings/lib/utils";
+import AppSidebar from "@/components/layout/sidebar/app-sidebar";
+import SidebarNavMenuGroup from "@/components/layout/sidebar/sidebar-nav-menu";
+import { APP_ROUTES } from "@/constants/app-config";
+import { sortJobListingsByStatus } from "@/features/job-listings/lib/utils";
 import { JobListingStatusType } from "@/drizzle/schema";
-import JobListingMenuGroup from "./components/_job-listing-menu-group";
-import { jobListingsTag } from "@/lib/dataCache";
-import Loading from "@/components/loading";
-import { getJobListingWithApplicationsDb } from "@/features/jobListingApplications/db/job-listing-application-db";
+import JobListingMenuGroup from "@/components/organizations/_job-listing-menu-group";
+import Loading from "@/components/shared/loading";
+import { getJobListingWithApplicationsDb } from "@/features/applications/db/job-listing-application-db";
+import { getCurrentOrg } from "@/lib/auth/auth-helpers";
+import SidebarOrgButton from "@/components/organizations/sidebar-org-button";
+import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/permissions";
+import { cacheTag, cacheLife } from "next/cache";
 
 export default function EmployerLayout({ children }: { children: ReactNode }) {
   return (
-    <OrganizationSyncWrapper>
-      <Suspense>
-        <SuspendedComponent>{children}</SuspendedComponent>
-      </Suspense>
-    </OrganizationSyncWrapper>
+    <Suspense fallback={<Loading />}>
+      <SuspendedComponent>{children}</SuspendedComponent>
+    </Suspense>
   );
+}
+
+async function getCachedJobListingsWithApplications(orgId: string) {
+  "use cache";
+  cacheTag("job-listings-applications-" + orgId);
+  cacheLife("minutes");
+  return await getJobListingWithApplicationsDb(orgId);
 }
 
 const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
   const { orgId } = await getCurrentOrg();
-  if (orgId == null) return redirect(APP_ROUTES.ORG.SELECT);
+
+  // If no organization, render children without sidebar (for organizations selection page)
+  if (orgId == null) {
+    return <main className="w-full">{children}</main>;
+  }
 
   // Get all job listings with applications(cached)
-  const cachedData = unstable_cache(
-    async () => await getJobListingWithApplicationsDb(orgId),
-    [orgId],
-    {
-      tags: [jobListingsTag(orgId, "jobListings")],
-    },
-  );
-
-  const jobListings = await cachedData();
+  const jobListings = await getCachedJobListingsWithApplications(orgId);
+  const canCreateJobListing = await hasOrgUserPermission("job_listing.create");
 
   return (
     <AppSidebar
@@ -55,22 +58,21 @@ const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
         <>
           <SidebarGroup>
             <SidebarGroupLabel className="mb-4">
-              <Link href={`${APP_ROUTES.EMPLOYER.JOB_LISTINGS_NEW}`}>
+              <Link
+                href={`${APP_ROUTES.EMPLOYER.JOB_LISTINGS_NEW}`}
+                className="w-full flex items-center justify-between"
+              >
                 Create job listings here
               </Link>
             </SidebarGroupLabel>
 
-            {jobListings.length > 0 && (
-              <CheckCondition
-                condition={() => hasOrgUserPermission("job_listing:create")}
-              >
-                <SidebarGroupAction title="Add job listing" asChild>
-                  <Link href={`${APP_ROUTES.EMPLOYER.JOB_LISTINGS_NEW}`}>
-                    <PlusIcon />
-                    <span className="sr-only">Add Job Listing</span>
-                  </Link>
-                </SidebarGroupAction>
-              </CheckCondition>
+            {jobListings.length > 0 && canCreateJobListing && (
+              <SidebarGroupAction title="Add job listing" asChild>
+                <Link href={`${APP_ROUTES.EMPLOYER.JOB_LISTINGS_NEW}`}>
+                  <PlusIcon />
+                  <span className="sr-only">Add Job Listing</span>
+                </Link>
+              </SidebarGroupAction>
             )}
             <SidebarGroupContent className="group-data-[state=collapsed]:hidden">
               <Suspense fallback={<Loading />}>
@@ -82,6 +84,11 @@ const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
           <SidebarNavMenuGroup
             className="mt-auto"
             items={[
+              {
+                href: APP_ROUTES.EMPLOYER.SETTINGS.HOME,
+                icon: <SettingsIcon />,
+                label: "Organization Settings",
+              },
               {
                 href: APP_ROUTES.HOME,
                 icon: <ClipboardListIcon />,

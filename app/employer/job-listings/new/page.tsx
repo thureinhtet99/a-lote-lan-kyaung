@@ -1,14 +1,13 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { APP_ROUTES } from "@/config/appConfig";
-import JobListingForm from "@/features/jobListings/components/job-listing-form";
-import { jobListingsTag } from "@/lib/dataCache";
-import { getCurrentOrg } from "@/services/clerk/lib/get-current-auth";
-import { hasOrgUserPermission } from "@/services/clerk/lib/org-user-permission";
-import { unstable_cache } from "next/cache";
+import { APP_ROUTES } from "@/constants/app-config";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import EmployerLoading from "../../loading";
-import { getAllJobListingsDb } from "@/features/jobListings/db/job-listing-db";
+import { getAllJobListingsDb } from "@/features/job-listings/db/job-listing-db";
+import { getCurrentOrg } from "@/lib/auth/auth-helpers";
+import JobListingForm from "@/components/job-listings/job-listing-form";
+import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/permissions";
+import { cacheTag, cacheLife } from "next/cache";
 
 export default function NewJobListingPage() {
   return (
@@ -18,26 +17,25 @@ export default function NewJobListingPage() {
   );
 }
 
+async function getCachedJobListings(orgId: string) {
+  "use cache";
+  cacheTag("job-listings-" + orgId);
+  cacheLife("hours");
+  return await getAllJobListingsDb(orgId);
+}
+
 const SuspendedComponent = async () => {
   const { orgId } = await getCurrentOrg();
-  if (orgId == null) return redirect(APP_ROUTES.ORG.SELECT);
+  if (orgId == null) return redirect(APP_ROUTES.EMPLOYER.ORG);
 
   // Get all job listings (cached)
-  const cachedData = unstable_cache(
-    async () => await getAllJobListingsDb(orgId),
-    [jobListingsTag(orgId, "jobListings")],
-    {
-      tags: [jobListingsTag(orgId, "jobListings")],
-    },
-  );
-
-  const jobListings = await cachedData();
+  const jobListings = await getCachedJobListings(orgId);
 
   return (
-    <div className="max-w-8xl mx-auto p-4">
+    <div className="max-w-7xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-2">
         {jobListings.length === 0 &&
-        (await hasOrgUserPermission("job_listing:create"))
+        (await hasOrgUserPermission("job_listing.create"))
           ? "Create your first job listing"
           : "New Job Listing"}
       </h1>

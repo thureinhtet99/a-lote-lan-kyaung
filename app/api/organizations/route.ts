@@ -1,9 +1,9 @@
-import { auth } from "@/lib/auth";
-import { db } from "@/drizzle/db";
-import { organization, member } from "@/drizzle/schema";
-import { eq, and } from "drizzle-orm";
+import { auth } from "@/lib/auth/auth";
+import { db } from "@/lib/db";
+import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import { memberTable, organizationTable } from "@/drizzle/schema";
 
 export async function GET() {
   try {
@@ -18,16 +18,20 @@ export async function GET() {
     // Get all organizations where user is a member
     const userOrganizations = await db
       .select({
-        id: organization.id,
-        name: organization.name,
-        slug: organization.slug,
-        logo: organization.logo,
-        createdAt: organization.createdAt,
-        metadata: organization.metadata,
+        id: organizationTable.id,
+        name: organizationTable.name,
+        slug: organizationTable.slug,
+        logo: organizationTable.logo,
+        createdAt: organizationTable.createdAt,
+        metadata: organizationTable.metadata,
+        role: memberTable.role, // Include the user's role in the organization
       })
-      .from(organization)
-      .innerJoin(member, eq(member.organizationId, organization.id))
-      .where(eq(member.userId, session.user.id));
+      .from(organizationTable)
+      .innerJoin(
+        memberTable,
+        eq(memberTable.organizationId, organizationTable.id),
+      )
+      .where(eq(memberTable.userId, session.user.id));
 
     return NextResponse.json(userOrganizations);
   } catch (error) {

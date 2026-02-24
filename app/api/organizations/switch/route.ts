@@ -1,9 +1,6 @@
-import { auth } from "@/lib/auth";
-import { db } from "@/drizzle/db";
-import { session as sessionTable } from "@/drizzle/schema";
+import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
 
 export async function POST(request: Request) {
   try {
@@ -25,11 +22,26 @@ export async function POST(request: Request) {
       );
     }
 
-    // Update session to set active organization
-    // Note: Better-auth doesn't natively support this, so we'll store it in session metadata
-    // For now, we'll just return success and the client should handle the state
+    // Use better-auth's built-in setActiveOrganization method
+    const result = await auth.api.setActiveOrganization({
+      body: {
+        organizationId,
+      },
+      headers: await headers(),
+    });
 
-    return NextResponse.json({ success: true, organizationId });
+    if (!result) {
+      return NextResponse.json(
+        { error: "Failed to set active organization" },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      organizationId,
+      session: result,
+    });
   } catch (error) {
     console.error("Error switching organization:", error);
     return NextResponse.json(
