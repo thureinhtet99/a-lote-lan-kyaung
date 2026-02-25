@@ -101,7 +101,7 @@ const UserInfo = ({
 
   return (
     <div className="flex items-center gap-4 overflow-hidden">
-      <Avatar className="rounded-lg size-10">
+      <Avatar className="rounded-lg size-8">
         <AvatarImage src={image || undefined} alt={name} />
         <AvatarFallback className="uppercase bg-primary text-primary-foreground">
           {nameInitials}

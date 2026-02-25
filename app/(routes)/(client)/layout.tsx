@@ -40,6 +40,7 @@ export default function ClientLayout({
                 icon: <LayoutDashboardIcon />,
                 label: "Employer dashboard",
                 authStatus: "signedIn",
+                roles: ["employer"],
               },
               {
                 href: APP_ROUTES.SIGN_IN,

@@ -6,15 +6,17 @@ import { and, count, desc, eq, or } from "drizzle-orm";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
-import { tag } from "@/lib/utils/data-cache";
+import { idTag, tag } from "@/lib/utils/data-cache";
 import {
   ApproveRequestFormType,
   EmployerRequestFormType,
+  RejectRequestFormType,
   UserRoleType,
 } from "@/types/index.type";
 import {
   approveRequestSchema,
   employerRequestSchema,
+  rejectRequestSchema,
 } from "@/features/admin/admin-schema";
 import { nanoid } from "nanoid";
 
@@ -235,6 +237,7 @@ const getAllEmployerRequestsCached = async () => {
 };
 
 export async function getEmployerRequest() {
+  "use cache";
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -246,17 +249,11 @@ export async function getEmployerRequest() {
 
     const request = await db.query.employerRequestTable.findFirst({
       where: eq(employerRequestTable.userId, session.user.id),
-      // with: {
-      //   reviewer: {
-      //     columns: {
-      //       id: true,
-      //       name: true,
-      //       email: true,
-      //     },
-      //   },
-      // },
       orderBy: [desc(employerRequestTable.createdAt)],
     });
+    if (request?.id) {
+      cacheTag(idTag("employer-requests", request.id));
+    }
 
     return { success: true, data: request || null };
   } catch (error) {
@@ -325,9 +322,10 @@ export async function createEmployerRequest(
       requestMessage: validated.requestMessage,
     });
 
+    updateTag("employer-requests");
     updateTag("admin-stats");
 
-    return { success: true };
+    return { success: true, message: "Submitted successfully" };
   } catch (error) {
     console.error("Error creating employer request:", error);
     return {
@@ -391,15 +389,73 @@ export async function approveEmployerRequest(
       })
       .where(eq(userTable.id, request.userId));
 
+    updateTag("users");
     updateTag("employer-requests");
     updateTag("admin-stats");
 
-    return { success: true };
+    return { success: true, message: "Employer request approved successfully" };
   } catch (error) {
     console.error("Error approving employer request:", error);
     return {
       success: false,
       message: "Failed to approve employer request",
+    };
+  }
+}
+
+export async function rejectEmployerRequest(
+  data: RejectRequestFormType,
+): Promise<{ success: boolean; message?: string }> {
+  try {
+    // Validate input
+    const validated = rejectRequestSchema.parse(data);
+
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      return { success: false, message: "Unauthorized" };
+    }
+
+    // Only admins can reject requests
+    if (session.user.role !== "admin") {
+      return { success: false, message: "Only admins can reject requests" };
+    }
+
+    // Get the request
+    const request = await db.query.employerRequestTable.findFirst({
+      where: eq(employerRequestTable.id, validated.requestId),
+    });
+
+    if (!request) {
+      return { success: false, message: "Request not found" };
+    }
+
+    if (request.status !== "pending") {
+      return { success: false, message: "Request has already been reviewed" };
+    }
+
+    // Update the request
+    await db
+      .update(employerRequestTable)
+      .set({
+        status: "rejected",
+        adminResponse: validated.adminResponse,
+        reviewedBy: session.user.id,
+        reviewedAt: new Date(),
+      })
+      .where(eq(employerRequestTable.id, validated.requestId));
+
+    updateTag("admin-stats");
+    updateTag("employer-requests");
+
+    return { success: true, message: "Employer request rejected successfully" };
+  } catch (error) {
+    console.error("Error rejecting employer request:", error);
+    return {
+      success: false,
+      message: "Failed to reject employer request",
     };
   }
 }

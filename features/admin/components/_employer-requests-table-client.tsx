@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-
-import { rejectEmployerRequest } from "@/features/employer-requests/actions/reject-employer-request";
 import {
   Table,
   TableBody,
@@ -27,47 +25,22 @@ import { toast } from "sonner";
 import { EmployerRequestType } from "@/types/index.type";
 import {
   approveEmployerRequest,
-  getAllEmployerRequests,
+  rejectEmployerRequest,
 } from "@/features/users/db/user-db";
-
-type Props = {
-  pendingRequests: EmployerRequestType[];
-  reviewedRequests: EmployerRequestType[];
-};
 
 export function EmployerRequestsTableClient({
   pendingRequests,
   reviewedRequests,
-}: Props) {
-  //   const [pendingRequests, setPendingRequests] = useState(
-  //     initialPendingRequests,
-  //   );
-  //   const [reviewedRequests, setReviewedRequests] = useState(
-  //     initialReviewedRequests,
-  //   );
+}: {
+  pendingRequests: EmployerRequestType[];
+  reviewedRequests: EmployerRequestType[];
+}) {
   const [isPending, startTransition] = useTransition();
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] =
     useState<EmployerRequestType | null>(null);
   const [adminResponse, setAdminResponse] = useState("");
-
-  //   const refreshRequests = async () => {
-  //     const result = await getAllEmployerRequests();
-
-  //     if (!result.success) {
-  //       toast.error(result.message);
-  //       return;
-  //     }
-
-  //     const requests = result.data as EmployerRequestType[];
-  //     setPendingRequests(
-  //       requests.filter((request) => request.status === "pending"),
-  //     );
-  //     setReviewedRequests(
-  //       requests.filter((request) => request.status !== "pending"),
-  //     );
-  //   };
 
   const resetDialogState = () => {
     setAdminResponse("");
@@ -96,9 +69,8 @@ export function EmployerRequestsTableClient({
       if (result.success) {
         toast.success(result.message);
         closeApproveDialog();
-        // await refreshRequests();
       } else {
-        toast.error(result.message || "Failed to approve request");
+        toast.error(result.message);
       }
     });
   };
@@ -116,11 +88,10 @@ export function EmployerRequestsTableClient({
       });
 
       if (result.success) {
-        toast.success("Employer request rejected successfully");
+        toast.success(result.message);
         closeRejectDialog();
-        // await refreshRequests();
       } else {
-        toast.error(result.error || "Failed to reject request");
+        toast.error(result.message);
       }
     });
   };
@@ -149,7 +120,7 @@ export function EmployerRequestsTableClient({
                     </TableCell>
                     <TableCell>{request.user.email}</TableCell>
                     <TableCell className="max-w-[340px] whitespace-normal">
-                      {request.requestMessage || "No message provided"}
+                      {request.requestMessage}
                     </TableCell>
                     <TableCell>
                       {new Date(request.createdAt).toLocaleDateString()}
@@ -242,12 +213,6 @@ export function EmployerRequestsTableClient({
             No reviewed employer requests found
           </div>
         )}
-
-        {/* {pendingRequests.length === 0 && reviewedRequests.length === 0 && (
-          <div className="text-muted-foreground p-4 text-center">
-            No employer requests found
-          </div>
-        )} */}
       </div>
 
       <Dialog open={approveDialogOpen} onOpenChange={setApproveDialogOpen}>
@@ -255,8 +220,10 @@ export function EmployerRequestsTableClient({
           <DialogHeader>
             <DialogTitle>Approve Employer Request</DialogTitle>
             <DialogDescription>
-              Approve {selectedRequest?.user.name}&apos;s request to become an
-              employer. You can optionally add a response message.
+              Approve{" "}
+              <span className="text-white">{selectedRequest?.user.name}</span>
+              &apos;s request to become an employer. You can optionally add a
+              response message.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -278,7 +245,7 @@ export function EmployerRequestsTableClient({
               Cancel
             </Button>
             <Button onClick={handleApprove} disabled={isPending}>
-              Approve Request
+              {isPending ? "Approving..." : "Approve Request"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -289,8 +256,10 @@ export function EmployerRequestsTableClient({
           <DialogHeader>
             <DialogTitle>Reject Employer Request</DialogTitle>
             <DialogDescription>
-              Reject {selectedRequest?.user.name}&apos;s request to become an
-              employer. Please provide a reason for rejection.
+              Reject{" "}
+              <span className="text-white">{selectedRequest?.user.name}</span>
+              &apos;s request to become an employer. Please provide a reason for
+              rejection.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -316,7 +285,7 @@ export function EmployerRequestsTableClient({
               onClick={handleReject}
               disabled={isPending || !adminResponse.trim()}
             >
-              Reject Request
+              {isPending ? "Rejecting...." : "Reject Request"}
             </Button>
           </DialogFooter>
         </DialogContent>

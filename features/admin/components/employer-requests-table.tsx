@@ -44,8 +44,6 @@ const SuspendedComponent = async () => {
     <EmployerRequestsTableClient
       pendingRequests={pendingRequests}
       reviewedRequests={reviewedRequests}
-      //   initialPendingRequests={pendingRequests}
-      //   initialReviewedRequests={reviewedRequests}
     />
   );
 };

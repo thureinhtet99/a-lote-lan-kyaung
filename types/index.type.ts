@@ -63,6 +63,7 @@ export type SidebarNavMenuType = {
   icon: ReactNode;
   label: string;
   authStatus?: "signedIn" | "signedOut";
+  roles?: UserRoleType[];
 }[];
 
 export type ParamsType = {

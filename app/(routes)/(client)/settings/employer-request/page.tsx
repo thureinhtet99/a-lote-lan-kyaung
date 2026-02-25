@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { EmployerRequestForm } from "@/app/(routes)/admin/employer-requests/components/employer-request-form";
+import { EmployerRequestForm } from "@/features/admin/components/employer-request-form";
 import {
   Card,
   CardContent,

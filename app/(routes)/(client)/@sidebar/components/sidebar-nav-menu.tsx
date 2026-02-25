@@ -11,6 +11,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SidebarNavMenuType } from "@/types/index.type";
 import { SignedIn, SignedOut } from "@/features/auth/components/auth-statuses";
+import { useSession } from "@/lib/auth/auth-client";
 
 export default function SidebarNavMenu({
   items,
@@ -20,11 +21,19 @@ export default function SidebarNavMenu({
   className?: string;
 }) {
   const pathname = usePathname();
+  const { data: session } = useSession();
 
   return (
     <SidebarGroup className={className}>
       <SidebarMenu>
         {items.map((item) => {
+          const userRole = session?.user.role;
+          const hasAllowedRole = item.roles?.some((role) => role === userRole);
+
+          if (item.roles && (!userRole || !hasAllowedRole)) {
+            return null;
+          }
+
           const html = (
             <SidebarMenuItem className="cursor-pointer" key={item.href}>
               <Suspense>
