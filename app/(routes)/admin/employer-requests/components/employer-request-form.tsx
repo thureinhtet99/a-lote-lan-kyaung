@@ -3,8 +3,6 @@
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createEmployerRequest } from "@/features/employer-requests/actions/create-employer-request";
-
 import {
   Form,
   FormControl,
@@ -26,6 +24,8 @@ import {
 import { toast } from "sonner";
 import { EmployerRequestFormType } from "@/types/index.type";
 import { employerRequestSchema } from "@/features/admin/admin-schema";
+import { createEmployerRequest } from "@/features/users/db/user-db";
+import { Loader2Icon } from "lucide-react";
 
 export function EmployerRequestForm() {
   const [isPending, startTransition] = useTransition();
@@ -42,11 +42,11 @@ export function EmployerRequestForm() {
     startTransition(async () => {
       const result = await createEmployerRequest(data);
       if (result.success) {
-        toast.success("Your employer request has been submitted successfully!");
+        toast.success(result.message);
         setSubmitted(true);
         form.reset();
       } else {
-        toast.error(result.error || "Failed to submit request");
+        toast.error(result.message);
       }
     });
   };
@@ -62,7 +62,7 @@ export function EmployerRequestForm() {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Your request to become an employer has been submitted and is pending
+            Your request to become an employer has been submitted and is under
             admin review. You will be notified once your request has been
             reviewed.
           </p>
@@ -105,7 +105,14 @@ export function EmployerRequestForm() {
             />
 
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Submitting..." : "Submit Request"}
+              {isPending ? (
+                <>
+                  <Loader2Icon className="animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                "Submit Request"
+              )}
             </Button>
           </form>
         </Form>

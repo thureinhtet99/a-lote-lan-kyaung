@@ -1,8 +1,7 @@
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { getUserEmployerRequest } from "@/features/employer-requests/actions/get-employer-requests";
-import { EmployerRequestForm } from "@/features/employer-requests/components/employer-request-form";
+import { EmployerRequestForm } from "@/app/(routes)/admin/employer-requests/components/employer-request-form";
 import {
   Card,
   CardContent,
@@ -13,15 +12,25 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, CheckCircle, Clock } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Suspense } from "react";
+import Loading from "@/components/shared/loading";
+import { APP_ROUTES } from "@/constants/app-config";
+import { getEmployerRequest } from "@/features/users/db/user-db";
 
 export default async function EmployerRequestPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <SuspendedComponent />
+    </Suspense>
+  );
+}
+
+const SuspendedComponent = async () => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
 
-  if (!session?.user) {
-    redirect("/sign-in");
-  }
+  if (!session?.user) redirect(APP_ROUTES.SIGN_IN);
 
   // Check if user is already an employer or admin
   if (session.user.role === "employer" || session.user.role === "admin") {
@@ -44,8 +53,8 @@ export default async function EmployerRequestPage() {
     );
   }
 
-  // Get user's employer request if it exists
-  const requestResult = await getUserEmployerRequest();
+  // Get employer request if it exists
+  const requestResult = await getEmployerRequest();
   const existingRequest = requestResult.data;
 
   return (
@@ -62,31 +71,18 @@ export default async function EmployerRequestPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Your Request Status</CardTitle>
-              <Badge
-                variant={
-                  existingRequest.status === "approved"
-                    ? "default"
-                    : existingRequest.status === "rejected"
-                      ? "destructive"
-                      : "secondary"
-                }
-              >
-                {existingRequest.status}
-              </Badge>
+              <CardDescription>
+                Submitted on{" "}
+                {new Date(existingRequest.createdAt).toLocaleDateString()}
+              </CardDescription>
             </div>
             <CardDescription>
-              Request submitted on{" "}
-              {new Date(existingRequest.createdAt).toLocaleDateString()}
+              <p className="text-sm text-muted-foreground">
+                {existingRequest.requestMessage}
+              </p>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <h4 className="mb-2 text-sm font-medium">Your Message</h4>
-              <p className="text-sm text-muted-foreground">
-                {existingRequest.requestMessage || "No message provided"}
-              </p>
-            </div>
-
             {existingRequest.status === "pending" && (
               <Alert>
                 <Clock className="h-4 w-4" />
@@ -107,45 +103,60 @@ export default async function EmployerRequestPage() {
                     Your request has been reviewed and rejected.
                   </AlertDescription>
                 </Alert>
-                {existingRequest.adminResponse && (
-                  <div>
-                    <h4 className="mb-2 text-sm font-medium">Admin Response</h4>
+
+                <CardHeader className="px-0">
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Admin Response</CardTitle>
+                    {existingRequest.reviewedAt && (
+                      <CardDescription>
+                        Reviewed on{" "}
+                        {existingRequest.reviewedAt
+                          ? new Date(
+                              existingRequest.reviewedAt,
+                            ).toLocaleDateString()
+                          : "N/A"}
+                      </CardDescription>
+                    )}
+                  </div>
+                  <CardDescription>
                     <p className="text-sm text-muted-foreground">
                       {existingRequest.adminResponse}
                     </p>
-                  </div>
-                )}
-                {existingRequest.reviewedBy && (
-                  <p className="text-xs text-muted-foreground">
-                    Reviewed by {existingRequest.reviewer?.name || "Admin"} on{" "}
-                    {existingRequest.reviewedAt
-                      ? new Date(
-                          existingRequest.reviewedAt,
-                        ).toLocaleDateString()
-                      : "N/A"}
-                  </p>
-                )}
+                  </CardDescription>
+                </CardHeader>
               </>
             )}
 
             {existingRequest.status === "approved" && (
               <>
-                <Alert>
+                <Alert className="text-green-400">
                   <CheckCircle className="h-4 w-4" />
                   <AlertTitle>Request Approved</AlertTitle>
-                  <AlertDescription>
+                  <AlertDescription className="text-green-400">
                     Congratulations! Your request has been approved. You now
                     have employer access.
                   </AlertDescription>
                 </Alert>
-                {existingRequest.adminResponse && (
-                  <div>
-                    <h4 className="mb-2 text-sm font-medium">Admin Response</h4>
+                <CardHeader className="px-0">
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Admin Response</CardTitle>
+                    {existingRequest.reviewedAt && (
+                      <CardDescription>
+                        Reviewed on{" "}
+                        {existingRequest.reviewedAt
+                          ? new Date(
+                              existingRequest.reviewedAt,
+                            ).toLocaleDateString()
+                          : "N/A"}
+                      </CardDescription>
+                    )}
+                  </div>
+                  <CardDescription>
                     <p className="text-sm text-muted-foreground">
                       {existingRequest.adminResponse}
                     </p>
-                  </div>
-                )}
+                  </CardDescription>
+                </CardHeader>
               </>
             )}
           </CardContent>
@@ -155,4 +166,4 @@ export default async function EmployerRequestPage() {
       )}
     </div>
   );
-}
+};

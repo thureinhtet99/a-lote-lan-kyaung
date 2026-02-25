@@ -53,7 +53,9 @@ export default function ClientLayout({
       }
       footerButton={<SidebarUserButton />}
     >
-      {children}
+      <div className="flex-1 items-center justify-center px-10 py-6 md:py-10">
+        {children}
+      </div>
     </AppSidebar>
   );
 }

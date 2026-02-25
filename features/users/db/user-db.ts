@@ -2,13 +2,21 @@
 
 import { db } from "@/lib/db";
 import { employerRequestTable, userTable } from "@/drizzle/schema";
-import { count, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq, or } from "drizzle-orm";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
 import { tag } from "@/lib/utils/data-cache";
-import { ApproveRequestFormType, UserRoleType } from "@/types/index.type";
-import { approveRequestSchema } from "@/features/admin/admin-schema";
+import {
+  ApproveRequestFormType,
+  EmployerRequestFormType,
+  UserRoleType,
+} from "@/types/index.type";
+import {
+  approveRequestSchema,
+  employerRequestSchema,
+} from "@/features/admin/admin-schema";
+import { nanoid } from "nanoid";
 
 export const getAllUsers = async (page = 1, pageSize = 10) => {
   try {
@@ -225,6 +233,109 @@ const getAllEmployerRequestsCached = async () => {
 
   return { success: true, data: requests };
 };
+
+export async function getEmployerRequest() {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      return { success: false, data: null };
+    }
+
+    const request = await db.query.employerRequestTable.findFirst({
+      where: eq(employerRequestTable.userId, session.user.id),
+      // with: {
+      //   reviewer: {
+      //     columns: {
+      //       id: true,
+      //       name: true,
+      //       email: true,
+      //     },
+      //   },
+      // },
+      orderBy: [desc(employerRequestTable.createdAt)],
+    });
+
+    return { success: true, data: request || null };
+  } catch (error) {
+    console.error("Error fetching user employer request:", error);
+    return {
+      success: false,
+      message: "Failed to fetch employer request",
+      data: null,
+    };
+  }
+}
+
+export async function createEmployerRequest(
+  data: EmployerRequestFormType,
+): Promise<{ success: boolean; message?: string }> {
+  try {
+    // Validate input
+    const validated = employerRequestSchema.parse(data);
+
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      return { success: false, message: "Unauthorized" };
+    }
+
+    const user = session.user;
+
+    // Check if user is already an employer or admin
+    if (user.role === "employer" || user.role === "admin") {
+      return {
+        success: false,
+        message: "You are already an employer",
+      };
+    }
+
+    // Check if user already has a pending or approved request
+    const existingRequest = await db.query.employerRequestTable.findFirst({
+      where: and(
+        eq(employerRequestTable.userId, user.id),
+        or(
+          eq(employerRequestTable.status, "pending"),
+          eq(employerRequestTable.status, "approved"),
+        ),
+      ),
+    });
+
+    if (existingRequest) {
+      if (existingRequest.status === "approved") {
+        return {
+          success: false,
+          message: "Your request has already been approved",
+        };
+      }
+      return {
+        success: false,
+        message: "You already have a pending request",
+      };
+    }
+
+    await db.insert(employerRequestTable).values({
+      id: nanoid(),
+      userId: user.id,
+      status: "pending",
+      requestMessage: validated.requestMessage,
+    });
+
+    updateTag("admin-stats");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error creating employer request:", error);
+    return {
+      success: false,
+      message: "Failed to create employer request",
+    };
+  }
+}
 
 export async function approveEmployerRequest(
   data: ApproveRequestFormType,
