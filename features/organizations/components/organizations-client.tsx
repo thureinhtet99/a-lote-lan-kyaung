@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,83 +37,82 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
-import {
-  createOrganization,
-  deleteOrganization,
-  switchOrganization,
-} from "@/features/organizations/actions/manage-organizations";
 import { useRouter } from "next/navigation";
-
-interface Organization {
-  id: string;
-  name: string;
-  slug: string | null;
-  logo: string | null;
-  createdAt: Date;
-  metadata: string | null;
-  role: string;
-}
-
-interface OrganizationsClientProps {
-  organizations: Organization[];
-}
+import { OrganizationType } from "@/types/index.type";
+import {
+  createOrg,
+  deleteOrg,
+  switchOrganization,
+} from "@/features/organizations/db/organization-db";
 
 export default function OrganizationsClient({
   organizations,
-}: OrganizationsClientProps) {
+  userId,
+  activeOrganizationId,
+}: {
+  organizations: OrganizationType[];
+  userId: string;
+  activeOrganizationId: string | null;
+}) {
   const router = useRouter();
-  const [isCreating, setIsCreating] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newOrgName, setNewOrgName] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [switchingId, setSwitchingId] = useState<string | null>(null);
 
-  const handleCreateOrganization = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsCreating(true);
+  const handleCreate = () => {
+    startTransition(async () => {
+      const result = await createOrg(
+        newOrgName,
+        userId,
+        newOrgName.toLowerCase().replace(/\s+/g, "-"),
+      );
 
-    const result = await createOrganization(
-      newOrgName,
-      newOrgName.toLowerCase().replace(/\s+/g, "-"),
-    );
-
-    if (result.error) {
-      toast.error(result.error);
-    } else {
-      toast.success("Organization created successfully!");
-      setShowCreateDialog(false);
-      setNewOrgName("");
-      router.refresh();
-    }
-
-    setIsCreating(false);
+      if (result.success) {
+        setShowCreateDialog(false);
+        setNewOrgName("");
+        toast.success(result.message);
+      } else {
+        toast.error(result.message);
+      }
+    });
   };
 
-  const handleDeleteOrganization = async (orgId: string) => {
-    if (!confirm("Are you sure you want to delete this organization?")) {
-      return;
-    }
-
+  const handleDelete = (orgId: string) => {
     setDeletingId(orgId);
-
-    const result = await deleteOrganization(orgId);
-
-    if (result?.error) {
-      toast.error(result.error);
-    } else {
-      toast.success("Organization deleted successfully!");
-      router.refresh();
-    }
-
-    setDeletingId(null);
+    startTransition(async () => {
+      const result = await deleteOrg(orgId, userId);
+      if (result.success) {
+        toast.success(result.message);
+        setDeletingId(null);
+      } else {
+        toast.error(result.message);
+        setDeletingId(null);
+      }
+    });
   };
 
   const handleSwitchOrganization = async (orgId: string) => {
-    // switchOrganization redirects automatically
-    await switchOrganization(orgId);
+    setSwitchingId(orgId);
+
+    startTransition(async () => {
+      const result = await switchOrganization(orgId, userId);
+      if (result.success) {
+        toast.success(result.message);
+        setSwitchingId(null);
+        if (result.redirectTo) {
+          router.push(result.redirectTo);
+        }
+      } else {
+        toast.error(result.message);
+        setSwitchingId(null);
+      }
+    });
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
+    <div className="@container mx-auto p-4 max-w-7xl">
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
@@ -123,14 +122,12 @@ export default function OrganizationsClient({
             </p>
           </div>
           <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-            {organizations.length > 0 && (
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Organization
-                </Button>
-              </DialogTrigger>
-            )}
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Organization
+              </Button>
+            </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Create New Organization</DialogTitle>
@@ -139,7 +136,7 @@ export default function OrganizationsClient({
                   members
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleCreateOrganization} className="space-y-4">
+              <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="orgName">Organization Name</Label>
                   <Input
@@ -147,14 +144,18 @@ export default function OrganizationsClient({
                     placeholder="Acme Inc."
                     value={newOrgName}
                     onChange={(e) => setNewOrgName(e.target.value)}
-                    required
-                    disabled={isCreating}
+                    disabled={isPending}
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={isCreating}>
-                  {isCreating ? "Creating..." : "Create Organization"}
+                <Button
+                  type="button"
+                  onClick={handleCreate}
+                  className="w-full"
+                  disabled={isPending || !newOrgName.trim()}
+                >
+                  {isPending ? "Creating..." : "Create"}
                 </Button>
-              </form>
+              </div>
             </DialogContent>
           </Dialog>
         </div>
@@ -205,15 +206,19 @@ export default function OrganizationsClient({
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="cursor-pointer"
+                        disabled={deletingId !== null}
+                      >
                         <Settings className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       {org.role === "owner" && (
                         <DropdownMenuItem
-                          onClick={() => handleDeleteOrganization(org.id)}
-                          disabled={deletingId === org.id}
+                          onClick={() => handleDelete(org.id)}
                           className="text-destructive"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
@@ -231,21 +236,22 @@ export default function OrganizationsClient({
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Badge variant={getRoleBadgeVariant(org.role)}>
-                      {getRoleIcon(org.role)}
-                      <span className="ml-1 capitalize">{org.role}</span>
-                    </Badge>
-                  </div>
+                {org.id === activeOrganizationId ? (
+                  <Button className="w-full" variant="secondary" disabled>
+                    Active
+                  </Button>
+                ) : (
                   <Button
                     onClick={() => handleSwitchOrganization(org.id)}
                     className="w-full"
                     variant="outline"
+                    disabled={switchingId !== null}
                   >
-                    Switch to this organization
+                    {switchingId === org.id
+                      ? "Switching..."
+                      : "Switch to this organization"}
                   </Button>
-                </div>
+                )}
               </CardContent>
             </Card>
           ))}

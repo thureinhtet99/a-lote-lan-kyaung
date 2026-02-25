@@ -29,6 +29,11 @@ export default function SidebarNavMenu({
         {items.map((item) => {
           const userRole = session?.user.role;
           const hasAllowedRole = item.roles?.some((role) => role === userRole);
+          const isActive =
+            pathname === item.href ||
+            item.activePathPrefixes?.some((prefix) =>
+              pathname.startsWith(prefix),
+            );
 
           if (item.roles && (!userRole || !hasAllowedRole)) {
             return null;
@@ -37,7 +42,7 @@ export default function SidebarNavMenu({
           const html = (
             <SidebarMenuItem className="cursor-pointer" key={item.href}>
               <Suspense>
-                <SidebarMenuButton asChild isActive={pathname === item.href}>
+                <SidebarMenuButton asChild isActive={isActive}>
                   <Link href={item.href}>
                     {item.icon}
                     <span>{item.label}</span>

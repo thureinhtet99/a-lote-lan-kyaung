@@ -12,6 +12,7 @@ import {
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import { APP_ROUTES } from "@/constants/app-config";
 import { SignOutButton } from "@/features/auth/components/auth-buttons";
+import { OrganizationType } from "@/types/index.type";
 import {
   ArrowLeftRightIcon,
   Building2Icon,
@@ -26,17 +27,17 @@ import { useRouter } from "next/navigation";
 type UserType = {
   email: string;
 };
-type OrganizationType = {
-  name: string;
-  logo: string | null;
-};
+// type OrganizationType = {
+//   name: string;
+//   logo: string | null;
+// };
 
 export default function SidebarOrgButtonClient({
   user,
   organization,
 }: {
   user: UserType;
-  organization: OrganizationType;
+  organization: Pick<OrganizationType, "name" | "logo">;
 }) {
   const { isMobile, setOpenMobile } = useSidebar();
   const router = useRouter();
@@ -77,7 +78,7 @@ export default function SidebarOrgButtonClient({
         <DropdownMenuItem asChild>
           <Link href={APP_ROUTES.EMPLOYER.SETTINGS.HOME}>
             <UserRoundCogIcon className="mr-1" />
-            User settings
+            Organization settings
           </Link>
         </DropdownMenuItem>
 
@@ -88,14 +89,6 @@ export default function SidebarOrgButtonClient({
           </Link>
         </DropdownMenuItem>
 
-        <DropdownMenuSeparator />
-
-        <DropdownMenuItem asChild>
-          <Link href={APP_ROUTES.EMPLOYER.ORG}>
-            <ArrowLeftRightIcon className="mr-1" />
-            Switch organization
-          </Link>
-        </DropdownMenuItem>
         <DropdownMenuSeparator />
 
         {/* Sign out */}
@@ -115,9 +108,9 @@ const OrgInfo = ({
   organization,
 }: {
   user: UserType;
-  organization: OrganizationType;
+  organization: Pick<OrganizationType, "name" | "logo">;
 }) => {
-  const nameInitials = organization.name
+  const nameInitials = organization?.name
     .split(" ")
     .slice(0, 2)
     .map((str) => str[0])

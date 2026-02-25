@@ -7,7 +7,6 @@ import { deleteJobListing } from "@/features/job-listings/actions";
 import { formatJobListingStatus } from "@/features/job-listings/lib/formatters";
 import { isUUID } from "@/features/job-listings/lib/utils";
 import { APP_ROUTES } from "@/constants/app-config";
-
 import { EditIcon, Trash2Icon } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -28,10 +27,7 @@ import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/
 import { getCurrentOrg } from "@/lib/auth/auth-helpers";
 import { cacheTag, cacheLife } from "next/cache";
 
-async function getCachedJobListingByOrg(
-  jobListingId: string,
-  orgId: string,
-) {
+async function getCachedJobListingByOrg(jobListingId: string, orgId: string) {
   "use cache";
   cacheTag("job-listing-" + jobListingId + "-org-" + orgId);
   cacheLife("hours");

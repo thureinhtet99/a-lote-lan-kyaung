@@ -4,6 +4,7 @@ import AppSidebar from "@/components/layout/sidebar/app-sidebar";
 import SidebarNavMenu from "@/app/(routes)/(client)/@sidebar/components/sidebar-nav-menu";
 import { APP_ROUTES } from "@/constants/app-config";
 import {
+  Building2Icon,
   // BrainCircuitIcon,
   ClipboardListIcon,
   LayoutDashboardIcon,
@@ -43,6 +44,13 @@ export default function ClientLayout({
                 roles: ["employer"],
               },
               {
+                href: APP_ROUTES.EMPLOYER.ORG,
+                icon: <Building2Icon />,
+                label: "Organizations",
+                authStatus: "signedIn",
+                roles: ["employer"],
+              },
+              {
                 href: APP_ROUTES.SIGN_IN,
                 icon: <LogInIcon />,
                 label: "Sign In",
@@ -54,9 +62,7 @@ export default function ClientLayout({
       }
       footerButton={<SidebarUserButton />}
     >
-      <div className="flex-1 items-center justify-center px-10 py-6 md:py-10">
-        {children}
-      </div>
+      <div className="flex-1 items-center justify-center ">{children}</div>
     </AppSidebar>
   );
 }

@@ -58,10 +58,22 @@ export type EmployerRequestFormType = z.infer<typeof employerRequestSchema>;
 export type ApproveRequestFormType = z.infer<typeof approveRequestSchema>;
 export type RejectRequestFormType = z.infer<typeof rejectRequestSchema>;
 
+// Organization
+export type OrganizationType = {
+  id: string;
+  name: string;
+  slug: string;
+  logo: string | null;
+  createdAt: Date;
+  metadata: string | null;
+  role: string;
+};
+
 export type SidebarNavMenuType = {
   href: string;
   icon: ReactNode;
   label: string;
+  activePathPrefixes?: string[];
   authStatus?: "signedIn" | "signedOut";
   roles?: UserRoleType[];
 }[];

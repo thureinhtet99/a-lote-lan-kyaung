@@ -5,10 +5,11 @@ import {
   SidebarGroupLabel,
 } from "@/components/ui/sidebar";
 import {
+  Building2Icon,
   ClipboardListIcon,
+  LayoutDashboardIcon,
   LogInIcon,
   PlusIcon,
-  SettingsIcon,
 } from "lucide-react";
 import { ReactNode, Suspense } from "react";
 import Link from "next/link";
@@ -37,15 +38,45 @@ async function getCachedJobListingsWithApplications(orgId: string) {
   "use cache";
   cacheTag("job-listings-applications-" + orgId);
   cacheLife("minutes");
+
   return await getJobListingWithApplicationsDb(orgId);
 }
 
 const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
   const { orgId } = await getCurrentOrg();
 
-  // If no organization, render children without sidebar (for organizations selection page)
+  // If no organization, keep employer navigation visible for organization selection flow.
   if (orgId == null) {
-    return <main className="w-full">{children}</main>;
+    return (
+      <AppSidebar
+        content={
+          <SidebarNavMenuGroup
+            className="mt-auto"
+            items={[
+              {
+                href: APP_ROUTES.HOME,
+                icon: <ClipboardListIcon />,
+                label: "Job board",
+              },
+              {
+                href: APP_ROUTES.EMPLOYER.ORG,
+                icon: <Building2Icon />,
+                label: "Organizations",
+              },
+              {
+                href: APP_ROUTES.SIGN_IN,
+                icon: <LogInIcon />,
+                label: "Sign In",
+                authStatus: "signedOut",
+              },
+            ]}
+          />
+        }
+        footerButton={<SidebarOrgButton />}
+      >
+        {children}
+      </AppSidebar>
+    );
   }
 
   // Get all job listings with applications(cached)
@@ -85,14 +116,24 @@ const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
             className="mt-auto"
             items={[
               {
-                href: APP_ROUTES.EMPLOYER.SETTINGS.HOME,
-                icon: <SettingsIcon />,
-                label: "Organization Settings",
-              },
-              {
                 href: APP_ROUTES.HOME,
                 icon: <ClipboardListIcon />,
                 label: "Job board",
+              },
+              {
+                href: APP_ROUTES.EMPLOYER.HOME,
+                icon: <LayoutDashboardIcon />,
+                label: "Employer dashboard",
+                activePathPrefixes: [APP_ROUTES.EMPLOYER.JOB_LISTINGS],
+                authStatus: "signedIn",
+                roles: ["employer"],
+              },
+              {
+                href: APP_ROUTES.EMPLOYER.ORG,
+                icon: <Building2Icon />,
+                label: "Organizations",
+                authStatus: "signedIn",
+                roles: ["employer"],
               },
               {
                 href: APP_ROUTES.SIGN_IN,

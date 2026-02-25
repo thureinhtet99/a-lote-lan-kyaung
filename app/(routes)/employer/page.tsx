@@ -18,6 +18,7 @@ async function getCachedMostRecentJobListing(orgId: string) {
   "use cache";
   cacheTag("job-listing-recent-" + orgId);
   cacheLife("hours");
+
   return await getMostRecentJobListingDb(orgId);
 }
 

@@ -20,6 +20,7 @@ import {
 } from "@/features/admin/admin-schema";
 import { nanoid } from "nanoid";
 
+// Users
 export const getAllUsers = async (page = 1, pageSize = 10) => {
   try {
     const session = await auth.api.getSession({
@@ -107,7 +108,7 @@ export const updateUserRole = async (userId: string, role: UserRoleType) => {
   }
 };
 
-export async function banUser(userId: string, reason: string) {
+export const banUser = async (userId: string, reason: string) => {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -132,9 +133,9 @@ export async function banUser(userId: string, reason: string) {
     console.error("Error banning user:", error);
     return { success: false, message: "Failed to ban user" };
   }
-}
+};
 
-export async function unbanUser(userId: string) {
+export const unbanUser = async (userId: string) => {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -159,25 +160,25 @@ export async function unbanUser(userId: string) {
     console.error("Error unbanning user:", error);
     return { success: false, message: "Failed to unban user" };
   }
-}
+};
 
-export async function updateUser(
+export const updateUser = async (
   id: string,
   user: typeof userTable.$inferInsert,
-) {
+) => {
   await db.update(userTable).set(user).where(eq(userTable.id, id));
   updateTag(`users-${id}`);
   updateTag("admin-stats");
-}
+};
 
-export async function deleteUser(id: string) {
+export const deleteUser = async (id: string) => {
   await db.delete(userTable).where(eq(userTable.id, id));
   updateTag("users");
   updateTag("admin-stats");
-}
+};
 
 // Employer
-export async function getAllEmployerRequests() {
+export const getAllEmployerRequests = async () => {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -205,7 +206,7 @@ export async function getAllEmployerRequests() {
       data: [],
     };
   }
-}
+};
 
 const getAllEmployerRequestsCached = async () => {
   "use cache";
@@ -236,7 +237,7 @@ const getAllEmployerRequestsCached = async () => {
   return { success: true, data: requests };
 };
 
-export async function getEmployerRequest() {
+export const getEmployerRequest = async () => {
   "use cache";
   try {
     const session = await auth.api.getSession({
@@ -264,11 +265,11 @@ export async function getEmployerRequest() {
       data: null,
     };
   }
-}
+};
 
-export async function createEmployerRequest(
+export const createEmployerRequest = async (
   data: EmployerRequestFormType,
-): Promise<{ success: boolean; message?: string }> {
+): Promise<{ success: boolean; message?: string }> => {
   try {
     // Validate input
     const validated = employerRequestSchema.parse(data);
@@ -333,11 +334,11 @@ export async function createEmployerRequest(
       message: "Failed to create employer request",
     };
   }
-}
+};
 
-export async function approveEmployerRequest(
+export const approveEmployerRequest = async (
   data: ApproveRequestFormType,
-): Promise<{ success: boolean; message?: string }> {
+): Promise<{ success: boolean; message?: string }> => {
   try {
     const validated = approveRequestSchema.parse(data);
 
@@ -401,11 +402,11 @@ export async function approveEmployerRequest(
       message: "Failed to approve employer request",
     };
   }
-}
+};
 
-export async function rejectEmployerRequest(
+export const rejectEmployerRequest = async (
   data: RejectRequestFormType,
-): Promise<{ success: boolean; message?: string }> {
+): Promise<{ success: boolean; message?: string }> => {
   try {
     // Validate input
     const validated = rejectRequestSchema.parse(data);
@@ -458,4 +459,4 @@ export async function rejectEmployerRequest(
       message: "Failed to reject employer request",
     };
   }
-}
+};

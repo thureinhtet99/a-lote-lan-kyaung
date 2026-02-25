@@ -16,9 +16,10 @@ export default function SidebarOrgButton() {
 
 const SuspendedComponent = async () => {
   const [{ user }, { organization }] = await Promise.all([
-    getCurrentUser({ allData: true }),
-    getCurrentOrg({ allData: true }),
+    getCurrentUser(),
+    getCurrentOrg(),
   ]);
+
   if (user == null || organization == null) {
     return (
       <SignOutButton>

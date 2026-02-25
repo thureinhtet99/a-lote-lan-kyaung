@@ -1,4 +1,4 @@
-import EmployerLoading from "@/app/employer/loading";
+import EmployerLoading from "@/app/(routes)/employer/loading";
 import { Card, CardContent } from "@/components/ui/card";
 import JobListingForm from "@/components/job-listings/job-listing-form";
 import { getJobListingByIdByOrgIdDb } from "@/features/job-listings/db/job-listing-db";
@@ -9,10 +9,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { cacheTag, cacheLife } from "next/cache";
 
-async function getCachedJobListingByOrg(
-  jobListingId: string,
-  orgId: string,
-) {
+async function getCachedJobListingByOrg(jobListingId: string, orgId: string) {
   "use cache";
   cacheTag("job-listing-" + jobListingId + "-org-" + orgId);
   cacheLife("hours");
