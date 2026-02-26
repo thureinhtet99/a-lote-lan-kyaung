@@ -216,7 +216,7 @@ export default function OrganizationsClient({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      {org.role === "owner" && (
+                      {org.role === "admin" && (
                         <DropdownMenuItem
                           onClick={() => handleDelete(org.id)}
                           className="text-destructive"
@@ -225,10 +225,10 @@ export default function OrganizationsClient({
                           {deletingId === org.id ? "Deleting..." : "Delete"}
                         </DropdownMenuItem>
                       )}
-                      {org.role !== "owner" && (
+                      {org.role !== "admin" && (
                         <DropdownMenuItem disabled>
                           <Trash2 className="h-4 w-4 mr-2" />
-                          Delete (Owner only)
+                          Delete (Admin only)
                         </DropdownMenuItem>
                       )}
                     </DropdownMenuContent>
@@ -264,11 +264,11 @@ export default function OrganizationsClient({
 // Helper function to get role icon
 function getRoleIcon(role: string) {
   switch (role) {
-    case "owner":
-      return <Crown className="h-3 w-3" />;
     case "admin":
+      return <Crown className="h-3 w-3" />;
+    case "employer":
       return <Shield className="h-3 w-3" />;
-    case "member":
+    case "user":
       return <User className="h-3 w-3" />;
     default:
       return <User className="h-3 w-3" />;
@@ -280,11 +280,11 @@ function getRoleBadgeVariant(
   role: string,
 ): "default" | "secondary" | "outline" {
   switch (role) {
-    case "owner":
-      return "default";
     case "admin":
+      return "default";
+    case "employer":
       return "secondary";
-    case "member":
+    case "user":
       return "outline";
     default:
       return "outline";

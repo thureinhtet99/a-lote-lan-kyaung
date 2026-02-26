@@ -13,7 +13,6 @@ export function MarkdownPartial({
 }) {
   const [isOverflowing, setIsOverflowing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-
   const markdownRef = useRef<HTMLDivElement>(null);
 
   function checkOverflow(node: HTMLDivElement) {

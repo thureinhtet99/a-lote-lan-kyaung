@@ -1,7 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { jobListingTable } from "@/drizzle/schema";
 import { ComponentProps } from "react";
-
 import { Banknote, BuildingIcon, MapPinIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {

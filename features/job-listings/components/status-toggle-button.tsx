@@ -1,12 +1,10 @@
 import CheckCondition from "@/components/shared/check-condition";
 import { JobListingStatusType } from "@/drizzle/schema";
-import { hasReachedMaxPublishedJobListings } from "@/features/job-listings/lib/plan-feature-helpers";
 import { nextJobListingStatus } from "@/features/job-listings/lib/utils";
-import UpgradePopOver from "./upgrade-popover";
 import ActionButton from "@/components/shared/action-button";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
-import { toggleJobListingStatus } from "@/features/job-listings/actions";
 import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/permissions";
+import { toggleJobListingStatus } from "../db/job-listing-db";
 
 export default function StatusToggleButton({
   status,
@@ -28,27 +26,35 @@ export default function StatusToggleButton({
       condition={() => hasOrgUserPermission("job_listing.change_status")}
     >
       {nextStatus === "published" ? (
-        <CheckCondition
-          condition={async () => {
-            const isMax = await hasReachedMaxPublishedJobListings();
-            return !isMax;
-          }}
-          otherwise={
-            <UpgradePopOver
-              buttonText={statusToggleButtonText(status)}
-              popOverText="You must upgrade your plan to publish more job listings"
-            />
-          }
+        // <CheckCondition
+        //   condition={async () => {
+        //     const isMax = await hasReachedMaxPublishedJobListings();
+        //     return !isMax;
+        //   }}
+        //   otherwise={
+        //     <UpgradePopOver
+        //       buttonText={statusToggleButtonText(status)}
+        //       popOverText="You must upgrade your plan to publish more job listings"
+        //     />
+        //   }
+        // >
+        //   <ActionButton
+        //     variant="outline"
+        //     action={toggleJobListingStatus.bind(null, id)}
+        //     areYouSure={shouldShowAlert}
+        //     sureDescription={alertDescription}
+        //   >
+        //     {statusToggleButtonText(status)}
+        //   </ActionButton>
+        // </CheckCondition>
+        <ActionButton
+          variant="outline"
+          action={toggleJobListingStatus.bind(null, id)}
+          areYouSure={shouldShowAlert}
+          sureDescription={alertDescription}
         >
-          <ActionButton
-            variant="outline"
-            action={toggleJobListingStatus.bind(null, id)}
-            areYouSure={shouldShowAlert}
-            sureDescription={alertDescription}
-          >
-            {statusToggleButtonText(status)}
-          </ActionButton>
-        </CheckCondition>
+          {statusToggleButtonText(status)}
+        </ActionButton>
       ) : (
         <ActionButton
           variant="outline"

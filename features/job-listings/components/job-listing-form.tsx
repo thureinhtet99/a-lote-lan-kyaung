@@ -1,8 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { jobListingSchema } from "@/features/job-listings/schemas";
 import z from "zod";
 import {
   Form,
@@ -36,17 +36,27 @@ import {
 } from "@/features/job-listings/lib/formatters";
 import { MarkdownEditor } from "@/components/markdown/markdown-editor";
 import { Button } from "@/components/ui/button";
-import LoadingSwap from "@/components/shared/loading-swap";
+import { toast } from "sonner";
+import { StateSelectItems } from "../../../components/job-listings/state-select-items";
 import {
   createJobListing,
   updateJobListing,
-} from "@/features/job-listings/actions";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { APP_ROUTES } from "@/constants/app-config";
-import { StateSelectItems } from "./state-select-items";
+} from "@/features/job-listings/db/job-listing-db";
+import { jobListingFormSchema } from "@/features/job-listings/job-listing-schema";
+import { Loader2Icon } from "lucide-react";
 
 const noneSelectedValue = "none";
+const createDefaultValues: z.infer<typeof jobListingFormSchema> = {
+  title: "",
+  description: "",
+  experienceLevel: "junior",
+  locationRequirement: "on-site",
+  type: "full-time",
+  wage: 0,
+  wageInterval: "monthly",
+  state: "",
+  city: "",
+};
 
 export default function JobListingForm({
   jobListing,
@@ -65,35 +75,31 @@ export default function JobListingForm({
     | "description"
   >;
 }) {
-  const router = useRouter();
+  const isEditing = jobListing != null;
+  const [markdownResetKey, setMarkdownResetKey] = useState(0);
   const form = useForm({
-    resolver: zodResolver(jobListingSchema),
-    defaultValues: jobListing ?? {
-      title: "",
-      description: "",
-      experienceLevel: "junior",
-      locationRequirement: "on-site",
-      type: "full-time",
-      wage: 0,
-      wageInterval: "monthly",
-      state: "",
-      city: "",
-    },
+    resolver: zodResolver(jobListingFormSchema),
+    defaultValues: jobListing ?? createDefaultValues,
   });
 
-  const onSubmit = async (data: z.infer<typeof jobListingSchema>) => {
+  const onSubmit = async (data: z.infer<typeof jobListingFormSchema>) => {
     const submitAction = jobListing
       ? updateJobListing.bind(null, jobListing.id)
       : createJobListing;
 
     const result = await submitAction(data);
-    if (result.error) toast.error(result.message);
-    else {
+    if (result.success) {
       toast.success(result.message);
-      if (result.data?.id)
-        router.push(`${APP_ROUTES.EMPLOYER.JOB_LISTINGS}/${result.data.id}`);
+      if (!isEditing) {
+        form.reset(createDefaultValues);
+        setMarkdownResetKey((prev) => prev + 1);
+      }
+    } else {
+      toast.error(result.message);
     }
   };
+
+  const isSubmitting = form.formState.isSubmitting;
 
   return (
     <Form {...form}>
@@ -115,6 +121,7 @@ export default function JobListingForm({
                     type="text"
                     value={field.value ?? ""}
                     placeholder="Enter job title"
+                    disabled={isSubmitting}
                   />
                 </FormControl>
                 <FormMessage />
@@ -155,6 +162,7 @@ export default function JobListingForm({
                         <Select
                           value={field.value ?? ""}
                           onValueChange={(val) => field.onChange(val)}
+                          disabled={isSubmitting}
                         >
                           <FormControl>
                             <SelectTrigger className="rounded-l-none">
@@ -195,9 +203,12 @@ export default function JobListingForm({
                       type="text"
                       value={field.value ?? ""}
                       placeholder="Enter city"
+                      disabled={isSubmitting}
                     />
                   </FormControl>
-                  <FormDescription>optional</FormDescription>
+                  <FormDescription className="text-xs">
+                    (optional)
+                  </FormDescription>
                 </FormItem>
               )}
             />
@@ -214,6 +225,7 @@ export default function JobListingForm({
                     onValueChange={(val) =>
                       field.onChange(val === noneSelectedValue ? null : val)
                     }
+                    disabled={isSubmitting}
                   >
                     <FormControl>
                       <SelectTrigger className="w-full">
@@ -232,7 +244,9 @@ export default function JobListingForm({
                       <StateSelectItems />
                     </SelectContent>
                   </Select>
-                  <FormDescription>optional</FormDescription>
+                  <FormDescription className="text-xs">
+                    (optional)
+                  </FormDescription>
                 </FormItem>
               )}
             />
@@ -244,10 +258,11 @@ export default function JobListingForm({
             control={form.control}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Location Requirement</FormLabel>
+                <FormLabel>Job type</FormLabel>
                 <Select
                   value={field.value ?? ""}
                   onValueChange={field.onChange}
+                  disabled={isSubmitting}
                 >
                   <FormControl>
                     <SelectTrigger className="w-full">
@@ -278,6 +293,7 @@ export default function JobListingForm({
                 <Select
                   value={field.value ?? ""}
                   onValueChange={field.onChange}
+                  disabled={isSubmitting}
                 >
                   <FormControl>
                     <SelectTrigger className="w-full">
@@ -306,6 +322,7 @@ export default function JobListingForm({
                 <Select
                   value={field.value ?? ""}
                   onValueChange={field.onChange}
+                  disabled={isSubmitting}
                 >
                   <FormControl>
                     <SelectTrigger className="w-full">
@@ -334,6 +351,7 @@ export default function JobListingForm({
               <FormLabel>Description</FormLabel>
               <FormControl>
                 <MarkdownEditor
+                  key={markdownResetKey}
                   {...field}
                   markdown={field.value ?? ""}
                   placeholder="Enter description"
@@ -343,14 +361,17 @@ export default function JobListingForm({
           )}
         />
 
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={form.formState.isSubmitting}
-        >
-          <LoadingSwap isLoading={form.formState.isSubmitting}>
-            {jobListing ? "Update Job Listing" : "Create Job Listing"}
-          </LoadingSwap>
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Loader2Icon className="animate-spin" />
+              {isEditing ? "Updating..." : "Creating..."}
+            </>
+          ) : isEditing ? (
+            "Update"
+          ) : (
+            "Create"
+          )}
         </Button>
       </form>
     </Form>

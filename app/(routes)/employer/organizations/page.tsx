@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import Loading from "@/components/shared/loading";
-import OrganizationsClient from "../../../../features/organizations/components/organizations-client";
+import OrganizationsClient from "../../../../features/organizations/components/_organizations-client";
 import { redirect } from "next/navigation";
 import { APP_ROUTES } from "@/constants/app-config";
 import { getOrganizationsByEmployerId } from "@/features/organizations/db/organization-db";

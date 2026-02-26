@@ -23,7 +23,7 @@ export async function DELETE(
       headers: await headers(),
     });
 
-    // Check if user has permission to delete organization (only owner)
+    // Check if user has permission to delete organization (only admin)
     const hasPermission = await auth.api.hasPermission({
       headers: await headers(),
       body: {
@@ -35,7 +35,7 @@ export async function DELETE(
 
     if (!hasPermission?.success) {
       return NextResponse.json(
-        { error: "Only organization owners can delete the organization" },
+        { error: "Only organization admins can delete the organization" },
         { status: 403 },
       );
     }

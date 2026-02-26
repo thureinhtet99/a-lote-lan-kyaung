@@ -37,7 +37,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { NewJobListingApplicationForm } from "@/features/applications/components/new-job-listing-application-form";
-import JobListingBadges from "@/components/job-listings/job-listing-badges";
+import JobListingBadges from "@/features/job-listings/components/job-listing-badges";
 import { getCurrentUser } from "@/lib/auth/auth-helpers";
 import Loading from "@/components/shared/loading";
 import { cacheTag, cacheLife } from "next/cache";

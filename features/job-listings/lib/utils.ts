@@ -24,10 +24,3 @@ const jobListingStatusSortOrder: Record<JobListingStatusType, number> = {
   draft: 1,
   delisted: 2,
 };
-
-export const isUUID = (id: string): boolean => {
-  const regex =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-  return regex.test(id);
-};

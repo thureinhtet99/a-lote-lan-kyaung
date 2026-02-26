@@ -7,38 +7,6 @@ import { cacheLife, cacheTag, updateTag } from "next/cache";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { APP_ROUTES } from "@/constants/app-config";
-import { OrganizationType } from "@/types/index.type";
-
-// Insert
-// export async function insertOrg(org: typeof organizationTable.$inferInsert) {
-//   const existingOrg = await db
-//     .select()
-//     .from(organizationTable)
-//     .where(eq(organizationTable.id, org.id));
-
-//   if (existingOrg.length === 0) {
-//     await db.insert(organizationTable).values(org).onConflictDoNothing();
-//     updateTag("organizations");
-//   }
-// }
-
-// Update
-// export async function updateOrg(
-//   id: string,
-//   user: typeof organizationTable.$inferInsert,
-// ) {
-//   await db
-//     .update(organizationTable)
-//     .set(user)
-//     .where(eq(organizationTable.id, id));
-//   updateTag("organizations");
-// }
-
-// // Delete
-// export async function deleteOrg(id: string) {
-//   await db.delete(organizationTable).where(eq(organizationTable.id, id));
-//   updateTag("organizations");
-// }
 
 export const getOrganizationsByEmployerId = async () => {
   try {
@@ -161,7 +129,7 @@ export const deleteOrg = async (
 
     if (!session) return { success: false, message: "Unauthorized" };
 
-    // Check if user is owner
+    // Check if user is organization admin
     const membership = await db
       .select()
       .from(memberTable)
@@ -171,10 +139,10 @@ export const deleteOrg = async (
       )
       .limit(1);
 
-    if (membership.length === 0 || membership[0].role !== "owner")
+    if (membership.length === 0 || membership[0].role !== "admin")
       return {
         success: false,
-        message: "Only employer can delete organizations",
+        message: "Only organization admins can delete organizations",
       };
 
     await db.delete(organizationTable).where(eq(organizationTable.id, orgId));

@@ -1,10 +1,10 @@
 import ActionButton from "@/components/shared/action-button";
 import CheckCondition from "@/components/shared/check-condition";
-import { toggleJobListingFeaturedStatus } from "@/features/job-listings/actions";
 import { hasReachedMaxFeaturedJobListings } from "@/features/job-listings/lib/plan-feature-helpers";
-import UpgradePopOver from "./upgrade-popover";
+import UpgradePopOver from "../../../components/shared/upgrade-popover";
 import { StarIcon, StarOffIcon } from "lucide-react";
 import { hasOrgUserPermission } from "@/lib/utils/permissions";
+import { toggleJobListingFeaturedStatus } from "../db/job-listing-db";
 
 export default function FeatureToggleButton({
   isFeatured,

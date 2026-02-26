@@ -27,7 +27,7 @@ import { unstable_cache } from "next/cache";
 import { jobListingsTag } from "@/lib/utils/data-cache";
 import { convertSearchParamsToString } from "@/lib/utils/convert-search-params-to-string";
 import Loading from "@/components/shared/loading";
-import JobListingBadges from "@/components/job-listings/job-listing-badges";
+import JobListingBadges from "@/features/job-listings/components/job-listing-badges";
 import { getCurrentOrg } from "@/lib/auth/auth-helpers";
 import { JobSeekerSearchParamsType } from "@/types/index.type";
 
@@ -135,7 +135,7 @@ const SuspendedComponent = async ({
   params,
 }: JobSeekerSearchParamsType) => {
   const { orgId } = await getCurrentOrg();
-  const jobListingId = params ? (await params.params).jobListingId : undefined;
+  const jobListingId = params ? (await params).jobListingId : undefined;
   const { success, data } = searchParamsSchema.safeParse(await searchParams);
   const search = success ? data : {};
 

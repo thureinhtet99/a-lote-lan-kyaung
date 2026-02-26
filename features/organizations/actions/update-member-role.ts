@@ -9,7 +9,7 @@ import { z } from "zod";
 
 const updateRoleSchema = z.object({
   memberId: z.string().min(1, "Member ID is required"),
-  newRole: z.enum(["admin", "member"]),
+  newRole: z.enum(["employer", "user"]),
 });
 
 export type UpdateMemberRoleInput = z.infer<typeof updateRoleSchema>;
@@ -60,11 +60,11 @@ export async function updateMemberRole(data: UpdateMemberRoleInput) {
       };
     }
 
-    // Only owners can change roles
-    if (currentMember.role !== "owner") {
+    // Only organization admins can change roles
+    if (currentMember.role !== "admin") {
       return {
         success: false,
-        error: "Only organization owners can change member roles",
+        error: "Only organization admins can change member roles",
       };
     }
 
@@ -83,11 +83,11 @@ export async function updateMemberRole(data: UpdateMemberRoleInput) {
       };
     }
 
-    // Prevent changing owner role
-    if (member.role === "owner") {
+    // Prevent changing organization admin role
+    if (member.role === "admin") {
       return {
         success: false,
-        error: "Cannot change the role of the organization owner",
+        error: "Cannot change the role of the organization admin",
       };
     }
 

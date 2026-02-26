@@ -4,7 +4,6 @@ import {
   pgTable,
   primaryKey,
   text,
-  uuid,
 } from "drizzle-orm/pg-core";
 import { jobListingTable } from "./job-listing-schema";
 import { userTable } from "./auth-schema";
@@ -26,7 +25,7 @@ export const applicationStatusEnum = pgEnum(
 export const applicationTable = pgTable(
   "applications",
   {
-    jobListingId: uuid("job_listing_id")
+    jobListingId: text("job_listing_id")
       .references(() => jobListingTable.id, {
         onDelete: "cascade",
       })

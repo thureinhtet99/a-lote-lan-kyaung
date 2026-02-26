@@ -16,15 +16,12 @@ import Link from "next/link";
 import AppSidebar from "@/components/layout/sidebar/app-sidebar";
 import SidebarNavMenuGroup from "@/app/(routes)/(client)/@sidebar/components/sidebar-nav-menu";
 import { APP_ROUTES } from "@/constants/app-config";
-import { sortJobListingsByStatus } from "@/features/job-listings/lib/utils";
-import { JobListingStatusType } from "@/drizzle/schema";
-import JobListingMenuGroup from "@/components/organizations/_job-listing-menu-group";
 import Loading from "@/components/shared/loading";
-import { getJobListingWithApplicationsDb } from "@/features/applications/db/job-listing-application-db";
 import { getCurrentOrg } from "@/lib/auth/auth-helpers";
-import SidebarOrgButton from "@/components/organizations/sidebar-org-button";
+import SidebarOrgButton from "@/features/organizations/components/sidebar-org-button";
 import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/permissions";
-import { cacheTag, cacheLife } from "next/cache";
+import EmployerSidebarJobListingMenu from "@/features/employer/components/employer-sidebar-job-listing-menu";
+import { getJobListingWithApplications } from "@/features/job-listings/db/job-listing-db";
 
 export default function EmployerLayout({ children }: { children: ReactNode }) {
   return (
@@ -32,14 +29,6 @@ export default function EmployerLayout({ children }: { children: ReactNode }) {
       <SuspendedComponent>{children}</SuspendedComponent>
     </Suspense>
   );
-}
-
-async function getCachedJobListingsWithApplications(orgId: string) {
-  "use cache";
-  cacheTag("job-listings-applications-" + orgId);
-  cacheLife("minutes");
-
-  return await getJobListingWithApplicationsDb(orgId);
 }
 
 const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
@@ -80,7 +69,8 @@ const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
   }
 
   // Get all job listings with applications(cached)
-  const jobListings = await getCachedJobListingsWithApplications(orgId);
+  const result = await getJobListingWithApplications(orgId);
+  const jobListings = result.data;
   const canCreateJobListing = await hasOrgUserPermission("job_listing.create");
 
   return (
@@ -107,7 +97,7 @@ const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
             )}
             <SidebarGroupContent className="group-data-[state=collapsed]:hidden">
               <Suspense fallback={<Loading />}>
-                <JobListingMenu jobListings={jobListings} />
+                <EmployerSidebarJobListingMenu jobListings={jobListings} />
               </Suspense>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -150,30 +140,4 @@ const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
       {children}
     </AppSidebar>
   );
-};
-
-const JobListingMenu = async ({
-  jobListings,
-}: {
-  jobListings: {
-    id: string;
-    title: string;
-    status: "draft" | "published" | "delisted";
-    applications: number;
-  }[];
-}) => {
-  return Object.entries(Object.groupBy(jobListings, (obj) => obj.status))
-    .sort(([a], [b]) => {
-      return sortJobListingsByStatus(
-        a as JobListingStatusType,
-        b as JobListingStatusType,
-      );
-    })
-    .map(([status, jobListings]) => (
-      <JobListingMenuGroup
-        key={status}
-        status={status as JobListingStatusType}
-        jobListings={jobListings}
-      />
-    ));
 };

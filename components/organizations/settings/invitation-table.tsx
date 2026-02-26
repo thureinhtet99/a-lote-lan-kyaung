@@ -135,7 +135,7 @@ export function InvitationTable() {
               </TableCell>
               <TableCell>
                 <Badge variant="outline" className="capitalize">
-                  {invitation.role || "member"}
+                  {invitation.role || "user"}
                 </Badge>
               </TableCell>
               <TableCell>

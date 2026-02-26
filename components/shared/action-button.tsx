@@ -25,7 +25,7 @@ export default function ActionButton({
   ...props
 }: Omit<ComponentPropsWithRef<typeof Button>, "onClick"> & {
   action: () => Promise<{
-    error: boolean;
+    success: boolean;
     message?: string;
     deleted?: boolean;
   }>;
@@ -34,16 +34,16 @@ export default function ActionButton({
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-
   const [isPending, startTransition] = useTransition();
 
   const performAction = () => {
     startTransition(async () => {
-      const { error, message, deleted } = await action();
-      if (error) toast.error(message);
-      else {
+      const { success, message } = await action();
+      if (success) {
         toast.success(message);
-        if (deleted) router.push(APP_ROUTES.EMPLOYER.HOME);
+        router.push(APP_ROUTES.EMPLOYER.HOME);
+      } else {
+        toast.error(message);
       }
     });
   };

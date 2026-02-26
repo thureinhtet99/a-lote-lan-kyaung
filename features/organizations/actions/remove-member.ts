@@ -44,7 +44,7 @@ export async function removeMember(memberId: string) {
       };
     }
 
-    // Get the member to check if they're an owner
+    // Get the member to check if they're an organization admin
     const member = await db.query.memberTable.findFirst({
       where: and(
         eq(memberTable.id, memberId),
@@ -59,11 +59,11 @@ export async function removeMember(memberId: string) {
       };
     }
 
-    // Prevent removing owner
-    if (member.role === "owner") {
+    // Prevent removing organization admin
+    if (member.role === "admin") {
       return {
         success: false,
-        error: "Cannot remove the organization owner",
+        error: "Cannot remove the organization admin",
       };
     }
 

@@ -1,7 +1,7 @@
 CREATE TYPE "public"."experience" AS ENUM('junior', 'mid-level', 'senior');--> statement-breakpoint
 CREATE TYPE "public"."status" AS ENUM('draft', 'published', 'delisted');--> statement-breakpoint
 CREATE TYPE "public"."type" AS ENUM('full-time', 'part-time', 'internship');--> statement-breakpoint
-CREATE TYPE "public"."location_requirement" AS ENUM('on-site', 'hybrid', 'remote');--> statement-breakpoint
+CREATE TYPE "public"."location_requirement" AS ENUM('on-site', 'remote', 'hybrid');--> statement-breakpoint
 CREATE TYPE "public"."wage_interval" AS ENUM('monthly', 'yearly', 'hourly');--> statement-breakpoint
 CREATE TYPE "public"."application_status" AS ENUM('denied', 'applied', 'interested', 'interviewed', 'hired');--> statement-breakpoint
 CREATE TABLE "accounts" (
@@ -24,7 +24,7 @@ CREATE TABLE "employer_requests" (
 	"id" text PRIMARY KEY NOT NULL,
 	"user_id" text NOT NULL,
 	"status" text DEFAULT 'pending' NOT NULL,
-	"request_message" text,
+	"request_message" text NOT NULL,
 	"admin_response" text,
 	"reviewed_by" text,
 	"reviewed_at" timestamp,
@@ -47,7 +47,7 @@ CREATE TABLE "members" (
 	"id" text PRIMARY KEY NOT NULL,
 	"organization_id" text NOT NULL,
 	"user_id" text NOT NULL,
-	"role" text DEFAULT 'member' NOT NULL,
+	"role" text DEFAULT 'user' NOT NULL,
 	"created_at" timestamp NOT NULL
 );
 --> statement-breakpoint
@@ -83,7 +83,6 @@ CREATE TABLE "users" (
 	"role" text DEFAULT 'user' NOT NULL,
 	"banned" boolean,
 	"ban_reason" text,
-	"ban_expires" timestamp,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "users_email_unique" UNIQUE("email")
@@ -99,7 +98,7 @@ CREATE TABLE "verifications" (
 );
 --> statement-breakpoint
 CREATE TABLE "job_listings" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
 	"organization_id" text NOT NULL,
 	"title" varchar(255) NOT NULL,
 	"description" text,
@@ -118,7 +117,7 @@ CREATE TABLE "job_listings" (
 );
 --> statement-breakpoint
 CREATE TABLE "applications" (
-	"job_listing_id" uuid NOT NULL,
+	"job_listing_id" text NOT NULL,
 	"user_id" text NOT NULL,
 	"cover_letter" text,
 	"rating" integer,

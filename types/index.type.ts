@@ -78,13 +78,9 @@ export type SidebarNavMenuType = {
   roles?: UserRoleType[];
 }[];
 
-export type ParamsType = {
-  params: Promise<{ jobListingId: string }>;
-};
-
 export type JobSeekerSearchParamsType = {
   searchParams: Promise<Record<string, string | string[]>>;
-  params?: ParamsType;
+  params?: Promise<{ jobListingId: string }>;
 };
 
 export type SearchParamsType = {

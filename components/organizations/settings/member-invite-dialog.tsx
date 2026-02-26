@@ -35,7 +35,7 @@ import { inviteMember } from "@/features/organizations/actions/invite-member";
 
 const inviteSchema = z.object({
   email: z.string().email("Invalid email address"),
-  role: z.enum(["admin", "member"]),
+  role: z.enum(["admin", "employer", "user"]),
 });
 
 type InviteFormData = z.infer<typeof inviteSchema>;
@@ -47,7 +47,7 @@ export function MemberInviteDialog() {
     resolver: zodResolver(inviteSchema),
     defaultValues: {
       email: "",
-      role: "member",
+      role: "user",
     },
   });
 
@@ -115,7 +115,8 @@ export function MemberInviteDialog() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="member">Member</SelectItem>
+                      <SelectItem value="user">User</SelectItem>
+                      <SelectItem value="employer">Employer</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>
                   </Select>

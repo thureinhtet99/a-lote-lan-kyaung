@@ -12,9 +12,8 @@ import {
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import { APP_ROUTES } from "@/constants/app-config";
 import { SignOutButton } from "@/features/auth/components/auth-buttons";
-import { OrganizationType } from "@/types/index.type";
+import { OrganizationType, UserType } from "@/types/index.type";
 import {
-  ArrowLeftRightIcon,
   Building2Icon,
   ChevronsUpDown,
   CreditCardIcon,
@@ -24,19 +23,11 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-type UserType = {
-  email: string;
-};
-// type OrganizationType = {
-//   name: string;
-//   logo: string | null;
-// };
-
 export default function SidebarOrgButtonClient({
   user,
   organization,
 }: {
-  user: UserType;
+  user: Pick<UserType, "email">;
   organization: Pick<OrganizationType, "name" | "logo">;
 }) {
   const { isMobile, setOpenMobile } = useSidebar();
@@ -107,7 +98,7 @@ const OrgInfo = ({
   user,
   organization,
 }: {
-  user: UserType;
+  user: Pick<UserType, "email">;
   organization: Pick<OrganizationType, "name" | "logo">;
 }) => {
   const nameInitials = organization?.name

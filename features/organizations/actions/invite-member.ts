@@ -9,7 +9,7 @@ import { eq } from "drizzle-orm";
 
 const inviteMemberSchema = z.object({
   email: z.string().email("Invalid email address"),
-  role: z.enum(["admin", "member"]),
+  role: z.enum(["admin", "employer", "user"]),
 });
 
 export type InviteMemberInput = z.infer<typeof inviteMemberSchema>;

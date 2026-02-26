@@ -1,14 +1,14 @@
-import { getMostRecentJobListingDb } from "@/features/job-listings/db/job-listing-db";
+import { getMostRecentJobListing } from "@/features/job-listings/db/job-listing-db";
 import { APP_ROUTES } from "@/constants/app-config";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import EmployerLoading from "./loading";
 import { getCurrentOrg } from "@/lib/auth/auth-helpers";
 import { cacheTag, cacheLife } from "next/cache";
+import PageLoading from "@/components/shared/page-loading";
 
 export default function EmployerHomePage() {
   return (
-    <Suspense fallback={<EmployerLoading />}>
+    <Suspense fallback={<PageLoading />}>
       <SuspendedComponent />
     </Suspense>
   );
@@ -19,7 +19,7 @@ async function getCachedMostRecentJobListing(orgId: string) {
   cacheTag("job-listing-recent-" + orgId);
   cacheLife("hours");
 
-  return await getMostRecentJobListingDb(orgId);
+  return await getMostRecentJobListing(orgId);
 }
 
 const SuspendedComponent = async () => {
@@ -30,7 +30,7 @@ const SuspendedComponent = async () => {
     redirect(APP_ROUTES.EMPLOYER.ORG);
   }
 
-  const jobListing = await getMostRecentJobListingDb(orgId);
+  const jobListing = await getMostRecentJobListing(orgId);
   if (!jobListing || !jobListing.id) {
     redirect(`${APP_ROUTES.EMPLOYER.JOB_LISTINGS_NEW}`);
   }

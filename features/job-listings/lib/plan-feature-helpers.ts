@@ -2,7 +2,7 @@ import { getCurrentOrg } from "@/lib/auth/auth-helpers";
 import { db } from "@/lib/db";
 import { and, count, eq } from "drizzle-orm";
 import { jobListingTable } from "@/drizzle/schema";
-import { getPublishedJobListingCountDb } from "../db/job-listing-db";
+import { getPublishedJobListingCount } from "../db/job-listing-db";
 
 // For now, we'll use simple limits. In the future, this can be integrated with a pricing/plan system
 const MAX_PUBLISHED_JOBS = 50;
@@ -12,8 +12,9 @@ export const hasReachedMaxPublishedJobListings = async () => {
   const { orgId } = await getCurrentOrg();
   if (orgId == null) return true;
 
-  const count = await getPublishedJobListingCountDb(orgId);
-  return count >= MAX_PUBLISHED_JOBS;
+  const { success, data } = await getPublishedJobListingCount(orgId);
+  if (!success || !data) return true;
+  return data >= MAX_PUBLISHED_JOBS;
 };
 
 export const hasReachedMaxFeaturedJobListings = async () => {

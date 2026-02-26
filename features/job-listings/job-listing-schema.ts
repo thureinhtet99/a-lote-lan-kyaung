@@ -6,7 +6,7 @@ import {
 } from "@/drizzle/schema";
 import { z } from "zod";
 
-export const jobListingSchema = z
+export const jobListingFormSchema = z
   .object({
     title: z.string().min(1, "Required"),
     description: z.string().nullable(),
@@ -42,6 +42,6 @@ export const jobListingSchema = z
   );
 
 // Ai
-export const jobListingAiSearchSchema = z.object({
-  query: z.string().min(1, "Required"),
-});
+// export const jobListingAiSearchSchema = z.object({
+//   query: z.string().min(1, "Required"),
+// });

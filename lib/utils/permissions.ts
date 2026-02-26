@@ -34,7 +34,6 @@ export async function hasOrgUserPermissionLegacy(
     return false;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return hasOrgUserPermission(resource, [action as any]);
 }
 
@@ -55,7 +54,7 @@ export async function isOrgOwner(): Promise<boolean> {
       headers: await headers(),
     });
 
-    return member?.role === "owner";
+    return member?.role === "admin";
   } catch {
     return false;
   }
@@ -64,45 +63,45 @@ export async function isOrgOwner(): Promise<boolean> {
 /**
  * Check if user is admin or owner of the active organization
  */
-export async function isOrgAdminOrOwner(): Promise<boolean> {
-  try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+// export async function isOrgAdminOrOwner(): Promise<boolean> {
+//   try {
+//     const session = await auth.api.getSession({
+//       headers: await headers(),
+//     });
 
-    if (!session?.session?.activeOrganizationId) {
-      return false;
-    }
+//     if (!session?.session?.activeOrganizationId) {
+//       return false;
+//     }
 
-    const member = await auth.api.getActiveMember({
-      headers: await headers(),
-    });
+//     const member = await auth.api.getActiveMember({
+//       headers: await headers(),
+//     });
 
-    return member?.role === "owner" || member?.role === "admin";
-  } catch {
-    return false;
-  }
-}
+//     return member?.role === "employer" || member?.role === "admin";
+//   } catch {
+//     return false;
+//   }
+// }
 
 /**
  * Get current user's role in active organization
  */
-export async function getCurrentOrgRole(): Promise<string | null> {
-  try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+// export async function getCurrentOrgRole(): Promise<string | null> {
+//   try {
+//     const session = await auth.api.getSession({
+//       headers: await headers(),
+//     });
 
-    if (!session?.session?.activeOrganizationId) {
-      return null;
-    }
+//     if (!session?.session?.activeOrganizationId) {
+//       return null;
+//     }
 
-    const member = await auth.api.getActiveMember({
-      headers: await headers(),
-    });
+//     const member = await auth.api.getActiveMember({
+//       headers: await headers(),
+//     });
 
-    return member?.role ?? null;
-  } catch {
-    return null;
-  }
-}
+//     return member?.role ?? null;
+//   } catch {
+//     return null;
+//   }
+// }

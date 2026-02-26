@@ -203,7 +203,7 @@ export function OrganizationSettingsForm() {
 
         {!isOwner && (
           <p className="text-sm text-muted-foreground">
-            Only organization owners can delete the organization
+            Only organization admins can delete the organization
           </p>
         )}
       </div>

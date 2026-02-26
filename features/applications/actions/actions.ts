@@ -6,7 +6,7 @@ import { getCurrentOrg, getCurrentUser } from "@/lib/auth/auth-helpers";
 import {
   insertJobListingApplicationDb,
   updateJobListingApplicationDb,
-} from "../db/job-listing-application-db";
+} from "../db/application-db";
 import { db } from "@/lib/db";
 import { and, eq } from "drizzle-orm";
 import {

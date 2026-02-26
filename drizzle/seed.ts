@@ -10,10 +10,7 @@ import {
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth/auth";
 import { eq } from "drizzle-orm";
-
-function generateId() {
-  return `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
-}
+import { nanoid } from "nanoid";
 
 // Helper function to create a user with email/password using Better-auth
 async function createUser(
@@ -47,10 +44,8 @@ async function createUser(
 async function addMemberToOrg(
   userId: string,
   organizationId: string,
-  role: "owner" | "admin" | "member",
+  role: "admin" | "employer" | "user",
 ) {
-  const { nanoid } = await import("nanoid");
-
   await db.insert(memberTable).values({
     id: nanoid(),
     userId,
@@ -142,8 +137,6 @@ async function seed() {
     console.log("");
     console.log("💼 Creating employer requests...");
 
-    const { nanoid } = await import("nanoid");
-
     // Create a pending employer request
     await db.insert(employerRequestTable).values({
       id: nanoid(),
@@ -191,25 +184,25 @@ async function seed() {
     // ===== CREATE ORGANIZATIONS =====
     const organizations = [
       {
-        id: `org-${generateId()}`,
+        id: nanoid(),
         name: "Tech Corp",
-        slug: `tech-corp-${generateId()}`,
+        slug: "tech-corp",
         logo: null,
         metadata: null,
         createdAt: new Date(),
       },
       {
-        id: `org-${generateId()}`,
+        id: nanoid(),
         name: "StartupCo",
-        slug: `startupco-${generateId()}`,
+        slug: "startupco",
         logo: null,
         metadata: null,
         createdAt: new Date(),
       },
       {
-        id: `org-${generateId()}`,
+        id: nanoid(),
         name: "Innovation Labs",
-        slug: `innovation-labs-${generateId()}`,
+        slug: "innovation-labs",
         logo: null,
         metadata: null,
         createdAt: new Date(),
@@ -230,30 +223,33 @@ async function seed() {
 
     // ===== ASSIGN MEMBERS TO ORGANIZATIONS =====
     // Organization 1: Tech Corp
-    await addMemberToOrg(ownerUser1, insertedOrganizations[0].id, "owner");
-    await addMemberToOrg(adminUser1, insertedOrganizations[0].id, "admin");
-    await addMemberToOrg(memberUser1, insertedOrganizations[0].id, "member");
-    await addMemberToOrg(memberUser2, insertedOrganizations[0].id, "member");
+    await addMemberToOrg(ownerUser1, insertedOrganizations[0].id, "admin");
+    await addMemberToOrg(adminUser1, insertedOrganizations[0].id, "employer");
+    await addMemberToOrg(memberUser1, insertedOrganizations[0].id, "user");
+    await addMemberToOrg(memberUser2, insertedOrganizations[0].id, "user");
     console.log(`✅ Added members to ${insertedOrganizations[0].name}`);
 
     // Organization 2: StartupCo
-    await addMemberToOrg(ownerUser2, insertedOrganizations[1].id, "owner");
-    await addMemberToOrg(adminUser2, insertedOrganizations[1].id, "admin");
-    await addMemberToOrg(memberUser3, insertedOrganizations[1].id, "member");
+    await addMemberToOrg(ownerUser2, insertedOrganizations[1].id, "admin");
+    await addMemberToOrg(adminUser2, insertedOrganizations[1].id, "employer");
+    await addMemberToOrg(memberUser3, insertedOrganizations[1].id, "user");
     console.log(`✅ Added members to ${insertedOrganizations[1].name}`);
 
     // Organization 3: Innovation Labs - Owner has multiple orgs
-    await addMemberToOrg(ownerUser1, insertedOrganizations[2].id, "owner");
-    await addMemberToOrg(adminUser1, insertedOrganizations[2].id, "admin");
+    await addMemberToOrg(ownerUser1, insertedOrganizations[2].id, "admin");
+    await addMemberToOrg(adminUser1, insertedOrganizations[2].id, "employer");
     console.log(`✅ Added members to ${insertedOrganizations[2].name}`);
 
     console.log("");
     console.log("📝 Creating job listings...");
 
     // ===== CREATE JOB LISTINGS =====
-    const allJobListings = insertedOrganizations.flatMap((org) => [
+    const [techCorp, startupCo, innovationLabs] = insertedOrganizations;
+
+    const allJobListings = [
+      // Tech Corp listings
       {
-        organizationId: org.id,
+        organizationId: techCorp.id,
         title: "Senior Full Stack Developer",
         description: `## About the Role
 We are looking for a Senior Full Stack Developer to join our growing engineering team. You will be responsible for developing and maintaining our web applications using modern technologies.
@@ -283,7 +279,7 @@ We are looking for a Senior Full Stack Developer to join our growing engineering
         posted_at: new Date(),
       },
       {
-        organizationId: org.id,
+        organizationId: techCorp.id,
         title: "Frontend Developer (React)",
         description: `## Frontend Developer Opportunity
 Join our team as a Frontend Developer and help build amazing user experiences with React and modern web technologies.
@@ -311,7 +307,36 @@ Join our team as a Frontend Developer and help build amazing user experiences wi
         posted_at: new Date(),
       },
       {
-        organizationId: org.id,
+        organizationId: techCorp.id,
+        title: "DevOps Engineer - Draft",
+        description: `## DevOps Engineer Position
+We are planning to hire a DevOps Engineer to help scale our infrastructure and improve our deployment processes.
+
+### Responsibilities
+- Manage cloud infrastructure (AWS/GCP)
+- Implement CI/CD pipelines
+- Monitor system performance
+- Ensure security best practices
+
+### Requirements
+- Experience with containerization (Docker, Kubernetes)
+- Knowledge of infrastructure as code (Terraform, CloudFormation)
+- Scripting skills (Bash, Python)
+- 3+ years of DevOps experience`,
+        wage: 110000,
+        wageInterval: "yearly" as const,
+        state: "Colorado",
+        city: "Denver",
+        is_featured: false,
+        locationRequirement: "remote" as const,
+        experienceLevel: "senior" as const,
+        status: "draft" as const,
+        type: "full-time" as const,
+      },
+
+      // StartupCo listings
+      {
+        organizationId: startupCo.id,
         title: "Junior Backend Developer",
         description: `## Start Your Backend Development Career
 We're seeking a motivated Junior Backend Developer to join our team and grow their skills in server-side development.
@@ -339,7 +364,7 @@ We're seeking a motivated Junior Backend Developer to join our team and grow the
         posted_at: new Date(),
       },
       {
-        organizationId: org.id,
+        organizationId: startupCo.id,
         title: "Part-time UI/UX Designer",
         description: `## Creative UI/UX Designer (Part-time)
 We're looking for a talented UI/UX Designer to work part-time on exciting projects and help shape our product experience.
@@ -367,7 +392,7 @@ We're looking for a talented UI/UX Designer to work part-time on exciting projec
         posted_at: new Date(),
       },
       {
-        organizationId: org.id,
+        organizationId: startupCo.id,
         title: "Software Engineering Intern",
         description: `## Summer Software Engineering Internship
 Join our engineering team for a hands-on internship experience where you'll work on real projects and learn from experienced developers.
@@ -394,35 +419,57 @@ Join our engineering team for a hands-on internship experience where you'll work
         type: "internship" as const,
         posted_at: new Date(),
       },
+
+      // Innovation Labs listings
       {
-        organizationId: org.id,
-        title: "DevOps Engineer - Draft",
-        description: `## DevOps Engineer Position
-We are planning to hire a DevOps Engineer to help scale our infrastructure and improve our deployment processes.
+        organizationId: innovationLabs.id,
+        title: "AI/ML Engineer",
+        description: `## AI/ML Engineer
+Help us build practical AI features for recruiting and applicant workflows.
 
 ### Responsibilities
-- Manage cloud infrastructure (AWS/GCP)
-- Implement CI/CD pipelines
-- Monitor system performance
-- Ensure security best practices
+- Build and deploy ML pipelines
+- Fine-tune models for ranking and matching
+- Collaborate with product and data teams
 
 ### Requirements
-- Experience with containerization (Docker, Kubernetes)
-- Knowledge of infrastructure as code (Terraform, CloudFormation)
-- Scripting skills (Bash, Python)
-- 3+ years of DevOps experience`,
-        wage: 110000,
+- 3+ years in machine learning engineering
+- Strong Python and MLOps experience
+- Familiar with vector search and embeddings`,
+        wage: 130000,
         wageInterval: "yearly" as const,
-        state: "Colorado",
-        city: "Denver",
-        is_featured: false,
-        locationRequirement: "remote" as const,
+        state: "Massachusetts",
+        city: "Boston",
+        is_featured: true,
+        locationRequirement: "hybrid" as const,
         experienceLevel: "senior" as const,
-        status: "draft" as const,
+        status: "published" as const,
         type: "full-time" as const,
+        posted_at: new Date(),
       },
       {
-        organizationId: org.id,
+        organizationId: innovationLabs.id,
+        title: "Data Analyst",
+        description: `## Data Analyst
+Support product and business decisions with clean reporting and insights.
+
+### Responsibilities
+- Build dashboards and reports
+- Analyze application funnels and hiring metrics
+- Partner with stakeholders for KPI tracking`,
+        wage: 80000,
+        wageInterval: "yearly" as const,
+        state: "Illinois",
+        city: "Chicago",
+        is_featured: false,
+        locationRequirement: "remote" as const,
+        experienceLevel: "mid-level" as const,
+        status: "published" as const,
+        type: "full-time" as const,
+        posted_at: new Date(),
+      },
+      {
+        organizationId: innovationLabs.id,
         title: "Mobile App Developer (Delisted)",
         description: `## Mobile App Developer
 This position was for developing cross-platform mobile applications using React Native.
@@ -443,12 +490,12 @@ This position was for developing cross-platform mobile applications using React 
         state: "Florida",
         city: "Miami",
         is_featured: false,
-        locationRequirement: "hybrid" as const,
+        locationRequirement: "remote" as const,
         experienceLevel: "mid-level" as const,
         status: "delisted" as const,
         type: "full-time" as const,
       },
-    ]);
+    ];
 
     console.log(
       `📝 Inserting ${allJobListings.length} job listings for ${insertedOrganizations.length} organization`,

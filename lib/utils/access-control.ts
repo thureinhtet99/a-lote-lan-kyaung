@@ -16,23 +16,23 @@ export const user = ac.newRole({
   application: ["read", "update"],
 });
 
-// Member - organization member with more permissions
-export const member = ac.newRole({
-  organization: ["read"],
+// Legacy member role example (deprecated)
+// export const member = ac.newRole({
+//   organization: ["read"],
+//   job_listing: ["create", "update", "delete", "change_status"],
+//   application: ["read", "update", "change_rating", "change_status"],
+// });
+
+// Employer - mid-level organization role
+export const employer = ac.newRole({
+  organization: ["create", "read", "update", "delete"],
   job_listing: ["create", "update", "delete", "change_status"],
   application: ["read", "update", "change_rating", "change_status"],
+  member: ["invite", "remove", "update_role"],
 });
 
-// Admin - organization admin with extended permissions
+// Admin - top-level organization role with full permissions
 export const admin = ac.newRole({
-  organization: ["read", "update"],
-  job_listing: ["create", "update", "delete", "change_status"],
-  application: ["read", "update", "change_rating", "change_status"],
-  member: ["invite", "update_role"],
-});
-
-// Owner - organization owner with full permissions
-export const owner = ac.newRole({
   organization: ["create", "read", "update", "delete"],
   job_listing: ["create", "update", "delete", "change_status"],
   application: ["read", "update", "change_rating", "change_status"],

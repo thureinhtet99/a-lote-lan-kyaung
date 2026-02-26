@@ -11,8 +11,8 @@ import {
   userTable,
   verificationTable,
 } from "@/drizzle/schema";
-import { ac, owner, admin, member } from "@/lib/utils/access-control";
-import { updateTag } from "next/cache";
+import { ac, user, employer, admin } from "@/lib/utils/access-control";
+import { revalidateTag } from "next/cache";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -41,9 +41,9 @@ export const auth = betterAuth({
       },
       ac,
       roles: {
-        owner,
+        user,
+        employer,
         admin,
-        member,
       },
     }),
     adminPlugin(),
@@ -52,7 +52,11 @@ export const auth = betterAuth({
     user: {
       create: {
         after: async () => {
-          updateTag("admin-status");
+          try {
+            revalidateTag("admin-status", "max");
+          } catch {
+            // ignore cache revalidation errors in non-request contexts (e.g. seed scripts)
+          }
         },
       },
     },
