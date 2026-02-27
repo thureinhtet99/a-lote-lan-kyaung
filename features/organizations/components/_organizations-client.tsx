@@ -20,43 +20,35 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import {
-  Building2,
-  Plus,
-  Settings,
-  Trash2,
-  Crown,
-  Shield,
-  User,
-} from "lucide-react";
+import { Building2, Plus, Settings, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { OrganizationType } from "@/types/index.type";
 import {
   createOrg,
   deleteOrg,
   switchOrganization,
 } from "@/features/organizations/db/organization-db";
+import { APP_ROUTES } from "@/constants/app-config";
 
 export default function OrganizationsClient({
   organizations,
-  userId,
   activeOrganizationId,
 }: {
   organizations: OrganizationType[];
-  userId: string;
   activeOrganizationId: string | null;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState<string | null>(null);
   const [newOrgName, setNewOrgName] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [switchingId, setSwitchingId] = useState<string | null>(null);
@@ -65,7 +57,6 @@ export default function OrganizationsClient({
     startTransition(async () => {
       const result = await createOrg(
         newOrgName,
-        userId,
         newOrgName.toLowerCase().replace(/\s+/g, "-"),
       );
 
@@ -73,6 +64,7 @@ export default function OrganizationsClient({
         setShowCreateDialog(false);
         setNewOrgName("");
         toast.success(result.message);
+        router.refresh();
       } else {
         toast.error(result.message);
       }
@@ -82,10 +74,12 @@ export default function OrganizationsClient({
   const handleDelete = (orgId: string) => {
     setDeletingId(orgId);
     startTransition(async () => {
-      const result = await deleteOrg(orgId, userId);
+      const result = await deleteOrg(orgId);
       if (result.success) {
-        toast.success(result.message);
+        setShowDeleteDialog(null);
         setDeletingId(null);
+        toast.success(result.message);
+        router.refresh();
       } else {
         toast.error(result.message);
         setDeletingId(null);
@@ -97,11 +91,13 @@ export default function OrganizationsClient({
     setSwitchingId(orgId);
 
     startTransition(async () => {
-      const result = await switchOrganization(orgId, userId);
+      const result = await switchOrganization(orgId);
       if (result.success) {
         toast.success(result.message);
+        // Force refresh to update server components (sidebar, job listings, etc.)
+        router.refresh();
         setSwitchingId(null);
-        if (result.redirectTo) {
+        if (result.redirectTo && pathname !== APP_ROUTES.EMPLOYER.ORG) {
           router.push(result.redirectTo);
         }
       } else {
@@ -112,9 +108,9 @@ export default function OrganizationsClient({
   };
 
   return (
-    <div className="@container mx-auto p-4 max-w-7xl">
+    <div className="@container mx-auto px-10 py-8 xl:p-4 max-w-7xl">
       <div className="mb-8">
-        <div className="flex items-center justify-between">
+        <div className="flex items-start justify-between">
           <div>
             <h1 className="text-3xl font-bold">Organizations</h1>
             <p className="text-muted-foreground mt-2">
@@ -124,8 +120,8 @@ export default function OrganizationsClient({
           <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
             <DialogTrigger asChild>
               <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Create Organization
+                <Plus className="h-4 w-4" />
+                <span className="hidden md:inline">Create Organization</span>
               </Button>
             </DialogTrigger>
             <DialogContent>
@@ -204,7 +200,12 @@ export default function OrganizationsClient({
                       )}
                     </div>
                   </div>
-                  <DropdownMenu>
+                  <DropdownMenu
+                    open={showDeleteDialog === org.id}
+                    onOpenChange={(open) =>
+                      setShowDeleteDialog(open ? org.id : null)
+                    }
+                  >
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="ghost"
@@ -216,7 +217,7 @@ export default function OrganizationsClient({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      {org.role === "admin" && (
+                      {org.role === "employer" ? (
                         <DropdownMenuItem
                           onClick={() => handleDelete(org.id)}
                           className="text-destructive"
@@ -224,11 +225,10 @@ export default function OrganizationsClient({
                           <Trash2 className="h-4 w-4 mr-2" />
                           {deletingId === org.id ? "Deleting..." : "Delete"}
                         </DropdownMenuItem>
-                      )}
-                      {org.role !== "admin" && (
+                      ) : (
                         <DropdownMenuItem disabled>
                           <Trash2 className="h-4 w-4 mr-2" />
-                          Delete (Admin only)
+                          Delete (Employer only)
                         </DropdownMenuItem>
                       )}
                     </DropdownMenuContent>
@@ -243,7 +243,7 @@ export default function OrganizationsClient({
                 ) : (
                   <Button
                     onClick={() => handleSwitchOrganization(org.id)}
-                    className="w-full"
+                    className="w-full cursor-pointer"
                     variant="outline"
                     disabled={switchingId !== null}
                   >
@@ -259,34 +259,4 @@ export default function OrganizationsClient({
       )}
     </div>
   );
-}
-
-// Helper function to get role icon
-function getRoleIcon(role: string) {
-  switch (role) {
-    case "admin":
-      return <Crown className="h-3 w-3" />;
-    case "employer":
-      return <Shield className="h-3 w-3" />;
-    case "user":
-      return <User className="h-3 w-3" />;
-    default:
-      return <User className="h-3 w-3" />;
-  }
-}
-
-// Helper function to get role badge variant
-function getRoleBadgeVariant(
-  role: string,
-): "default" | "secondary" | "outline" {
-  switch (role) {
-    case "admin":
-      return "default";
-    case "employer":
-      return "secondary";
-    case "user":
-      return "outline";
-    default:
-      return "outline";
-  }
 }

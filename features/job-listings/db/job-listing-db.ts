@@ -6,10 +6,17 @@ import { and, count, desc, eq } from "drizzle-orm";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
 import z from "zod";
 import { nanoid } from "nanoid";
-import { getCurrentOrg } from "@/lib/auth/auth-helpers";
+import { getCurrentOrg, safeGetSession } from "@/lib/auth/auth-helpers";
 import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/permissions";
+import {
+  jobListingIdTag,
+  jobListingsTag,
+  sideBarJobListingWithApplicationsTag,
+} from "@/lib/utils/data-cache";
 import { jobListingFormSchema } from "../job-listing-schema";
 import { nextJobListingStatus } from "../lib/utils";
+import { auth } from "@/lib/auth/auth";
+import { headers } from "next/headers";
 
 // Get job listings with applications count
 export const getJobListingWithApplications = async (
@@ -25,7 +32,14 @@ export const getJobListingWithApplications = async (
   }[];
 }> => {
   try {
-    return await getJobListingsWithApplicationsCached(orgId);
+    const session = await safeGetSession();
+
+    if (!session?.user)
+      return { success: false, message: "Unauthorized", data: [] };
+
+    const userId = session.user.id;
+
+    return await getJobListingsWithApplicationsCached(orgId, userId);
   } catch (error) {
     console.error("Error fetching job-listings with applications:", error);
     return {
@@ -38,6 +52,7 @@ export const getJobListingWithApplications = async (
 
 const getJobListingsWithApplicationsCached = async (
   orgId: string,
+  userId: string,
 ): Promise<{
   success: boolean;
   message?: string;
@@ -49,8 +64,6 @@ const getJobListingsWithApplicationsCached = async (
   }[];
 }> => {
   "use cache";
-  cacheTag(`organizations-${orgId}-job-listings-applications`);
-  cacheLife("days");
 
   const result = await db
     .select({
@@ -67,6 +80,9 @@ const getJobListingsWithApplicationsCached = async (
     )
     .groupBy(applicationTable.jobListingId, jobListingTable.id)
     .orderBy(desc(jobListingTable.created_at));
+
+  cacheTag(sideBarJobListingWithApplicationsTag(orgId, userId));
+  cacheLife("days");
 
   return {
     success: true,
@@ -102,7 +118,7 @@ const getJobListingsByOrgIdCached = async (
   data: (typeof jobListingTable.$inferSelect)[];
 }> => {
   "use cache";
-  cacheTag(`organizations-${orgId}-job-listings`);
+  cacheTag(jobListingsTag(orgId));
   cacheLife("days");
 
   const result = await db.query.jobListingTable.findMany({
@@ -149,14 +165,40 @@ export const getJobListingByIdByOrgId = async (
 };
 
 // Get most recent job listing
-export const getMostRecentJobListing = async (orgId: string) => {
-  const result = await db.query.jobListingTable.findFirst({
-    where: eq(jobListingTable.organizationId, orgId),
-    orderBy: desc(jobListingTable.created_at),
-    columns: { id: true },
-  });
+export const getMostRecentJobListing = async (
+  orgId: string,
+): Promise<{ success: boolean; message?: string; data?: { id: string } }> => {
+  try {
+    return await getMostRecentJobListingCached(orgId);
+  } catch (error) {
+    console.error("Failed to get most recent job-listings:", error);
+    return {
+      success: true,
+      message: "Most recent job-listings fetched successfully",
+    };
+  }
+};
 
-  return result;
+const getMostRecentJobListingCached = async (
+  orgId: string,
+): Promise<{ success: boolean; message?: string; data: { id: string } }> => {
+  "use cache";
+
+  const [result] = await db
+    .select({ id: jobListingTable.id })
+    .from(jobListingTable)
+    .where(eq(jobListingTable.organizationId, orgId))
+    .orderBy(desc(jobListingTable.created_at))
+    .limit(1);
+
+  cacheTag(jobListingIdTag(orgId, result.id));
+  cacheLife("hours");
+
+  return {
+    success: true,
+    message: "Most recent job-listings fetched successfully",
+    data: result,
+  };
 };
 
 // Get by id
@@ -174,6 +216,10 @@ export const createJobListing = async (
   unsafeData: z.infer<typeof jobListingFormSchema>,
 ): Promise<{ success: boolean; message?: string; data?: { id: string } }> => {
   try {
+    const session = await safeGetSession();
+
+    if (!session?.user) return { success: false, message: "Unauthorized" };
+
     const { orgId } = await getCurrentOrg();
     if (orgId == null || !(await hasOrgUserPermission("job_listing.create")))
       return {
@@ -200,8 +246,8 @@ export const createJobListing = async (
         id: jobListingTable.id,
       });
 
-    updateTag(`organizations-${orgId}-job-listings`);
-    updateTag(`organizations-${orgId}-job-listings-applications`);
+    updateTag(jobListingsTag(orgId));
+    updateTag(sideBarJobListingWithApplicationsTag(orgId, session.user.id));
 
     return {
       success: true,
@@ -223,6 +269,10 @@ export const updateJobListing = async (
   unsafeData: Partial<typeof jobListingTable.$inferInsert>,
 ): Promise<{ success: boolean; message?: string; data?: { id: string } }> => {
   try {
+    const session = await safeGetSession();
+
+    if (!session?.user) return { success: false, message: "Unauthorized" };
+
     const { orgId } = await getCurrentOrg();
     if (orgId == null || !(await hasOrgUserPermission("job_listing.update")))
       return {
@@ -249,8 +299,8 @@ export const updateJobListing = async (
       .set(data)
       .where(eq(jobListingTable.id, jobListingId));
 
-    updateTag(`organizations-${orgId}-job-listings`);
-    updateTag(`organizations-${orgId}-job-listings-applications`);
+    updateTag(jobListingsTag(orgId));
+    updateTag(sideBarJobListingWithApplicationsTag(orgId, session.user.id));
 
     return {
       success: true,
@@ -270,6 +320,10 @@ export const deleteJobListing = async (
   id: string,
 ): Promise<{ success: boolean; message?: string }> => {
   try {
+    const session = await safeGetSession();
+
+    if (!session?.user) return { success: false, message: "Unauthorized" };
+
     const { orgId } = await getCurrentOrg();
     if (orgId == null)
       return {
@@ -298,8 +352,8 @@ export const deleteJobListing = async (
         organizationId: jobListingTable.organizationId,
       });
 
-    updateTag(`organizations-${orgId}-job-listings`);
-    updateTag(`organizations-${orgId}-job-listings-applications`);
+    updateTag(jobListingsTag(orgId));
+    updateTag(sideBarJobListingWithApplicationsTag(orgId, session.user.id));
 
     return { success: true, message: "Job-listing deleted successfully" };
   } catch (error) {

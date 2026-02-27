@@ -145,9 +145,9 @@ const SuspendedComponent = async ({
       searchParams: z.infer<typeof searchParamsSchema>,
       jobListingId: string | undefined,
     ) => getAllJobListings(searchParams, jobListingId),
-    [jobListingsTag(orgId || "", "job-listings")],
+    [jobListingsTag(orgId || "")],
     {
-      tags: [jobListingsTag(orgId || "", "job-listings")],
+      tags: [jobListingsTag(orgId || "")],
     },
   );
 

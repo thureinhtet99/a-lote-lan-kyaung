@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth/auth";
+import { safeGetSession } from "@/lib/auth/auth-helpers";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -7,9 +8,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await safeGetSession();
 
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

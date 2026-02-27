@@ -1,15 +1,12 @@
-import { auth } from "@/lib/auth/auth";
 import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
-import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { memberTable, organizationTable } from "@/drizzle/schema";
+import { safeGetSession } from "@/lib/auth/auth-helpers";
 
 export async function GET() {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await safeGetSession();
 
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

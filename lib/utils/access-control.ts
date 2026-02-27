@@ -16,13 +16,6 @@ export const user = ac.newRole({
   application: ["read", "update"],
 });
 
-// Legacy member role example (deprecated)
-// export const member = ac.newRole({
-//   organization: ["read"],
-//   job_listing: ["create", "update", "delete", "change_status"],
-//   application: ["read", "update", "change_rating", "change_status"],
-// });
-
 // Employer - mid-level organization role
 export const employer = ac.newRole({
   organization: ["create", "read", "update", "delete"],

@@ -16,7 +16,8 @@ import { resumeTable } from "@/drizzle/schema";
 import MarkdownRenderer from "@/components/markdown/markdown-renderer";
 import Loading from "@/components/shared/loading";
 import { getCurrentUser } from "@/lib/auth/auth-helpers";
-import { cacheTag, cacheLife } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
+import { userResumeTag } from "@/lib/utils/data-cache";
 import DropzoneClient from "./_DropzoneClient";
 
 export default function ResumePage() {
@@ -66,7 +67,7 @@ const SuspendedComponent = async () => {
 // Fetch user resume from db (cached)
 async function getResumeByUserId(userId: string) {
   "use cache";
-  cacheTag("resume-" + userId);
+  cacheTag(userResumeTag(userId));
   cacheLife("hours");
   return await db.query.resumeTable.findFirst({
     where: eq(resumeTable.userId, userId),

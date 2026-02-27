@@ -3,8 +3,9 @@ import { APP_ROUTES } from "@/constants/app-config";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { getCurrentOrg } from "@/lib/auth/auth-helpers";
-import { cacheTag, cacheLife } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 import PageLoading from "@/components/shared/page-loading";
+import { jobListingsTag } from "@/lib/utils/data-cache";
 
 export default function EmployerHomePage() {
   return (
@@ -12,14 +13,6 @@ export default function EmployerHomePage() {
       <SuspendedComponent />
     </Suspense>
   );
-}
-
-async function getCachedMostRecentJobListing(orgId: string) {
-  "use cache";
-  cacheTag("job-listing-recent-" + orgId);
-  cacheLife("hours");
-
-  return await getMostRecentJobListing(orgId);
 }
 
 const SuspendedComponent = async () => {
@@ -31,13 +24,15 @@ const SuspendedComponent = async () => {
   }
 
   const jobListing = await getMostRecentJobListing(orgId);
-  if (!jobListing || !jobListing.id) {
+  if (!jobListing || !jobListing.data?.id) {
     redirect(`${APP_ROUTES.EMPLOYER.JOB_LISTINGS_NEW}`);
   }
 
   // Get most recent job listings (cached)
-  const recentJobListing = await getCachedMostRecentJobListing(orgId);
-  if (recentJobListing == null)
-    redirect(`${APP_ROUTES.EMPLOYER.JOB_LISTINGS_NEW}`);
-  else redirect(`${APP_ROUTES.EMPLOYER.JOB_LISTINGS}/${recentJobListing.id}`);
+  const recentJobListing = await getMostRecentJobListing(orgId);
+  if (!recentJobListing) redirect(`${APP_ROUTES.EMPLOYER.JOB_LISTINGS_NEW}`);
+  else
+    redirect(
+      `${APP_ROUTES.EMPLOYER.JOB_LISTINGS}/${recentJobListing.data?.id}`,
+    );
 };

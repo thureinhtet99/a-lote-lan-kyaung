@@ -6,7 +6,7 @@ import { and, count, desc, eq, or } from "drizzle-orm";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
-import { idTag, tag } from "@/lib/utils/data-cache";
+import { dashboardStatsTag } from "@/lib/utils/data-cache";
 import {
   ApproveRequestFormType,
   EmployerRequestFormType,
@@ -19,13 +19,18 @@ import {
   rejectRequestSchema,
 } from "@/features/admin/admin-schema";
 import { nanoid } from "nanoid";
+import { safeGetSession } from "@/lib/auth/auth-helpers";
+
+const usersTag = () => "users";
+const userIdTag = (userId: string) => `users-${userId}`;
+const employerRequestsTag = () => "employer-requests";
+const employerRequestIdTag = (requestId: string) =>
+  `employer-requests-${requestId}`;
 
 // Users
 export const getAllUsers = async (page = 1, pageSize = 10) => {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await safeGetSession();
 
     if (!session?.user || session.user.role !== "admin") {
       return { success: false, message: "Unauthorized", data: [] };
@@ -50,7 +55,7 @@ export const getAllUsers = async (page = 1, pageSize = 10) => {
 
 const getAllUsersCached = async (page: number, pageSize: number) => {
   "use cache";
-  cacheTag(tag("users"));
+  cacheTag(usersTag());
   cacheLife("minutes");
 
   const [total] = await db.select({ count: count() }).from(userTable);
@@ -89,17 +94,15 @@ const getAllUsersCached = async (page: number, pageSize: number) => {
 
 export const updateUserRole = async (userId: string, role: UserRoleType) => {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await safeGetSession();
 
     if (!session?.user || session.user.role !== "admin") {
       return { success: false, message: "Unauthorized" };
     }
 
     await db.update(userTable).set({ role }).where(eq(userTable.id, userId));
-    updateTag("users");
-    updateTag("admin-stats");
+    updateTag(usersTag());
+    updateTag(dashboardStatsTag());
 
     return { success: true, message: "User role updated successfully" };
   } catch (error) {
@@ -110,9 +113,7 @@ export const updateUserRole = async (userId: string, role: UserRoleType) => {
 
 export const banUser = async (userId: string, reason: string) => {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await safeGetSession();
 
     if (!session?.user || session.user.role !== "admin") {
       return { success: false, message: "Unauthorized" };
@@ -125,8 +126,8 @@ export const banUser = async (userId: string, reason: string) => {
         banReason: reason,
       })
       .where(eq(userTable.id, userId));
-    updateTag("users");
-    updateTag("admin-stats");
+    updateTag(usersTag());
+    updateTag(dashboardStatsTag());
 
     return { success: true, message: "User banned successfully" };
   } catch (error) {
@@ -137,9 +138,7 @@ export const banUser = async (userId: string, reason: string) => {
 
 export const unbanUser = async (userId: string) => {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await safeGetSession();
 
     if (!session?.user || session.user.role !== "admin") {
       return { success: false, message: "Unauthorized" };
@@ -152,8 +151,8 @@ export const unbanUser = async (userId: string) => {
         banReason: null,
       })
       .where(eq(userTable.id, userId));
-    updateTag("users");
-    updateTag("admin-stats");
+    updateTag(usersTag());
+    updateTag(dashboardStatsTag());
 
     return { success: true, message: "User unbanned successfully" };
   } catch (error) {
@@ -167,22 +166,20 @@ export const updateUser = async (
   user: typeof userTable.$inferInsert,
 ) => {
   await db.update(userTable).set(user).where(eq(userTable.id, id));
-  updateTag(`users-${id}`);
-  updateTag("admin-stats");
+  updateTag(userIdTag(id));
+  updateTag(dashboardStatsTag());
 };
 
 export const deleteUser = async (id: string) => {
   await db.delete(userTable).where(eq(userTable.id, id));
-  updateTag("users");
-  updateTag("admin-stats");
+  updateTag(usersTag());
+  updateTag(dashboardStatsTag());
 };
 
 // Employer
 export const getAllEmployerRequests = async () => {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await safeGetSession();
 
     if (!session?.user) {
       return { success: false, message: "Unauthorized", data: [] };
@@ -210,7 +207,7 @@ export const getAllEmployerRequests = async () => {
 
 const getAllEmployerRequestsCached = async () => {
   "use cache";
-  cacheTag(tag("employer-requests"));
+  cacheTag(employerRequestsTag());
   cacheLife("hours");
 
   const requests = await db.query.employerRequestTable.findMany({
@@ -240,9 +237,7 @@ const getAllEmployerRequestsCached = async () => {
 export const getEmployerRequest = async () => {
   "use cache";
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await safeGetSession();
 
     if (!session?.user) {
       return { success: false, data: null };
@@ -253,7 +248,7 @@ export const getEmployerRequest = async () => {
       orderBy: [desc(employerRequestTable.createdAt)],
     });
     if (request?.id) {
-      cacheTag(idTag("employer-requests", request.id));
+      cacheTag(employerRequestIdTag(request.id));
     }
 
     return { success: true, data: request || null };
@@ -274,9 +269,7 @@ export const createEmployerRequest = async (
     // Validate input
     const validated = employerRequestSchema.parse(data);
 
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await safeGetSession();
 
     if (!session?.user) {
       return { success: false, message: "Unauthorized" };
@@ -323,8 +316,8 @@ export const createEmployerRequest = async (
       requestMessage: validated.requestMessage,
     });
 
-    updateTag("employer-requests");
-    updateTag("admin-stats");
+    updateTag(employerRequestsTag());
+    updateTag(dashboardStatsTag());
 
     return { success: true, message: "Submitted successfully" };
   } catch (error) {
@@ -342,9 +335,7 @@ export const approveEmployerRequest = async (
   try {
     const validated = approveRequestSchema.parse(data);
 
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await safeGetSession();
 
     if (!session?.user) {
       return { success: false, message: "Unauthorized" };
@@ -390,9 +381,9 @@ export const approveEmployerRequest = async (
       })
       .where(eq(userTable.id, request.userId));
 
-    updateTag("users");
-    updateTag("employer-requests");
-    updateTag("admin-stats");
+    updateTag(usersTag());
+    updateTag(employerRequestsTag());
+    updateTag(dashboardStatsTag());
 
     return { success: true, message: "Employer request approved successfully" };
   } catch (error) {
@@ -411,9 +402,7 @@ export const rejectEmployerRequest = async (
     // Validate input
     const validated = rejectRequestSchema.parse(data);
 
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await safeGetSession();
 
     if (!session?.user) {
       return { success: false, message: "Unauthorized" };
@@ -448,8 +437,8 @@ export const rejectEmployerRequest = async (
       })
       .where(eq(employerRequestTable.id, validated.requestId));
 
-    updateTag("admin-stats");
-    updateTag("employer-requests");
+    updateTag(dashboardStatsTag());
+    updateTag(employerRequestsTag());
 
     return { success: true, message: "Employer request rejected successfully" };
   } catch (error) {

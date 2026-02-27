@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { db } from "@/lib/db";
 import { memberTable } from "@/drizzle/schema";
 import { and, eq } from "drizzle-orm";
+import { safeGetSession } from "@/lib/auth/auth-helpers";
 
 export async function removeMember(memberId: string) {
   try {
@@ -33,9 +34,7 @@ export async function removeMember(memberId: string) {
     }
 
     // Get current session
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await safeGetSession();
 
     if (!session?.session?.activeOrganizationId) {
       return {

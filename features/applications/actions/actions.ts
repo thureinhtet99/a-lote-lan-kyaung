@@ -10,24 +10,28 @@ import {
 import { db } from "@/lib/db";
 import { and, eq } from "drizzle-orm";
 import {
+  jobListingIdTag,
+  userResumeTag,
+} from "@/lib/utils/data-cache";
+import {
   applicationStatus,
   ApplicationStatusType,
   jobListingTable,
   resumeTable,
 } from "@/drizzle/schema";
 import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/permissions";
-import { cacheTag, cacheLife } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 
 async function getCachedUserResume(userId: string) {
   "use cache";
-  cacheTag("user-resume-" + userId);
+  cacheTag(userResumeTag(userId));
   cacheLife("hours");
   return await getUserResume(userId);
 }
 
 async function getCachedJobListing(orgId: string, jobListingId: string) {
   "use cache";
-  cacheTag("job-listing-" + jobListingId);
+  cacheTag(jobListingIdTag(orgId, jobListingId));
   cacheLife("hours");
   return await getJobListingById(jobListingId);
 }

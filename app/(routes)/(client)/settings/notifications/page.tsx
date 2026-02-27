@@ -7,7 +7,8 @@ import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getCurrentUser } from "@/lib/auth/auth-helpers";
-import { cacheTag, cacheLife } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
+import { userNotificationTag } from "@/lib/utils/data-cache";
 
 export default function NotificationPage() {
   return (
@@ -44,7 +45,7 @@ const SuspendedForm = async ({ userId }: { userId: string }) => {
 // Fetch user noti from db (cached)
 async function getNotiSettingsByUserId(userId: string) {
   "use cache";
-  cacheTag("notification-settings-" + userId);
+  cacheTag(userNotificationTag(userId));
   cacheLife("hours");
   return await db.query.userNotificationSettingsTable.findFirst({
     where: eq(userNotificationSettingsTable.userId, userId),

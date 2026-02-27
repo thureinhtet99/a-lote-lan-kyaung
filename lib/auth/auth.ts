@@ -13,6 +13,7 @@ import {
 } from "@/drizzle/schema";
 import { ac, user, employer, admin } from "@/lib/utils/access-control";
 import { revalidateTag } from "next/cache";
+import { dashboardStatsTag } from "@/lib/utils/data-cache";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -45,6 +46,17 @@ export const auth = betterAuth({
         employer,
         admin,
       },
+      organizationHooks: {
+        beforeAddMember: async ({ member, user: memberUser }) => {
+          // Use the user's application role instead of default "owner"
+          return {
+            data: {
+              ...member,
+              role: memberUser.role as "user" | "employer" | "admin",
+            },
+          };
+        },
+      },
     }),
     adminPlugin(),
   ],
@@ -53,7 +65,7 @@ export const auth = betterAuth({
       create: {
         after: async () => {
           try {
-            revalidateTag("admin-status", "max");
+            revalidateTag(dashboardStatsTag(), "max");
           } catch {
             // ignore cache revalidation errors in non-request contexts (e.g. seed scripts)
           }

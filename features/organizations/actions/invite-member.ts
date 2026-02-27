@@ -6,6 +6,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { invitationTable, userTable } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
+import { safeGetSession } from "@/lib/auth/auth-helpers";
 
 const inviteMemberSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -37,9 +38,7 @@ export async function inviteMember(data: InviteMemberInput) {
     }
 
     // Get current session to get organization ID
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await safeGetSession();
 
     if (!session?.session?.activeOrganizationId) {
       return {

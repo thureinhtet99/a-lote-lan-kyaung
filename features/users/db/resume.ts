@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { resumeTable } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
+import { userResumeTag } from "@/lib/utils/data-cache";
 
 export async function upsertUserResumeDb(
   userId: string,
@@ -16,7 +17,7 @@ export async function upsertUserResumeDb(
       target: resumeTable.userId,
       set: data,
     });
-  updateTag(`users-${userId}-resumes`);
+  updateTag(userResumeTag(userId));
 }
 
 export async function updateUserResumeDb(
@@ -24,5 +25,5 @@ export async function updateUserResumeDb(
   data: Partial<Omit<typeof resumeTable.$inferInsert, "userId">>,
 ) {
   await db.update(resumeTable).set(data).where(eq(resumeTable.userId, userId));
-  updateTag(`users-${userId}-resumes`);
+  updateTag(userResumeTag(userId));
 }

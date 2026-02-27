@@ -1,7 +1,7 @@
 "use client";
 
 import { useOptimistic, useState, useTransition } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   updateUserRole,
   banUser,
@@ -108,6 +108,7 @@ export function UserTableClient({
   users: UserType[];
   pagination: PaginationProps;
 }) {
+  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -161,6 +162,7 @@ export function UserTableClient({
       const result = await updateUserRole(userId, newRole);
       if (result.success) {
         toast.success(result.message);
+        router.refresh();
       } else {
         if (previousRole) {
           setOptimisticUsers({ userId, role: previousRole });
@@ -180,6 +182,7 @@ export function UserTableClient({
       const result = await banUser(selectedUser.id, banReason);
       if (result.success) {
         toast.success(result.message);
+        router.refresh();
         resetBanFlow();
       } else {
         toast.error(result.message);
@@ -192,6 +195,7 @@ export function UserTableClient({
       const result = await unbanUser(userId);
       if (result.success) {
         toast.success(result.message);
+        router.refresh();
       } else {
         toast.error(result.message);
       }

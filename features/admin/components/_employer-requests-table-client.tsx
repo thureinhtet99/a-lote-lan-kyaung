@@ -27,6 +27,7 @@ import {
   approveEmployerRequest,
   rejectEmployerRequest,
 } from "@/features/users/db/user-db";
+import { useRouter } from "next/navigation";
 
 export function EmployerRequestsTableClient({
   pendingRequests,
@@ -35,6 +36,7 @@ export function EmployerRequestsTableClient({
   pendingRequests: EmployerRequestType[];
   reviewedRequests: EmployerRequestType[];
 }) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
@@ -68,6 +70,7 @@ export function EmployerRequestsTableClient({
 
       if (result.success) {
         toast.success(result.message);
+        router.refresh();
         closeApproveDialog();
       } else {
         toast.error(result.message);
@@ -89,6 +92,7 @@ export function EmployerRequestsTableClient({
 
       if (result.success) {
         toast.success(result.message);
+        router.refresh();
         closeRejectDialog();
       } else {
         toast.error(result.message);

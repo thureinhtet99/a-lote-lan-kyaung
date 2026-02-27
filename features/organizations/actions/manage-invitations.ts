@@ -5,13 +5,12 @@ import { headers } from "next/headers";
 import { db } from "@/lib/db";
 import { invitationTable } from "@/drizzle/schema";
 import { and, eq } from "drizzle-orm";
+import { safeGetSession } from "@/lib/auth/auth-helpers";
 
 export async function getInvitations() {
   try {
     // Get current session
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await safeGetSession();
 
     if (!session?.session?.activeOrganizationId) {
       return {
@@ -71,9 +70,7 @@ export async function revokeInvitation(invitationId: string) {
     }
 
     // Get current session
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await safeGetSession();
 
     if (!session?.session?.activeOrganizationId) {
       return {
@@ -135,9 +132,7 @@ export async function resendInvitation(invitationId: string) {
     }
 
     // Get current session
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await safeGetSession();
 
     if (!session?.session?.activeOrganizationId) {
       return {

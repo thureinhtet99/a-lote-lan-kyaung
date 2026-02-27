@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { auth } from "../auth/auth";
 import type { StatementType, PermissionAction } from "./access-control";
+import { safeGetSession } from "../auth/auth-helpers";
 
 export async function hasOrgUserPermission<T extends StatementType>(
   resource: T,
@@ -42,9 +43,7 @@ export async function hasOrgUserPermissionLegacy(
  */
 export async function isOrgOwner(): Promise<boolean> {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await safeGetSession();
 
     if (!session?.session?.activeOrganizationId) {
       return false;

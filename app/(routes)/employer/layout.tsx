@@ -68,9 +68,8 @@ const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
     );
   }
 
-  // Get all job listings with applications(cached)
-  const result = await getJobListingWithApplications(orgId);
-  const jobListings = result.data;
+  const jobListings = await getJobListingWithApplications(orgId);
+
   const canCreateJobListing = await hasOrgUserPermission("job_listing.create");
 
   return (
@@ -87,7 +86,7 @@ const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
               </Link>
             </SidebarGroupLabel>
 
-            {jobListings.length > 0 && canCreateJobListing && (
+            {jobListings.data.length > 0 && canCreateJobListing && (
               <SidebarGroupAction title="Add job listing" asChild>
                 <Link href={`${APP_ROUTES.EMPLOYER.JOB_LISTINGS_NEW}`}>
                   <PlusIcon />
@@ -97,7 +96,7 @@ const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
             )}
             <SidebarGroupContent className="group-data-[state=collapsed]:hidden">
               <Suspense fallback={<Loading />}>
-                <EmployerSidebarJobListingMenu jobListings={jobListings} />
+                <EmployerSidebarJobListingMenu jobListings={jobListings.data} />
               </Suspense>
             </SidebarGroupContent>
           </SidebarGroup>

@@ -4,6 +4,9 @@ import { db } from "@/lib/db";
 import { applicationTable, jobListingTable } from "@/drizzle/schema";
 import { and, count, desc, eq } from "drizzle-orm";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
+import {
+  jobListingApplicationsTag,
+} from "@/lib/utils/data-cache";
 
 export const getApplicationsByJobListingId = async (jobListingId: string) => {
   try {
@@ -19,7 +22,7 @@ export const getApplicationsByJobListingId = async (jobListingId: string) => {
 
 const getApplicationsByJobListingIdCached = async (jobListingId: string) => {
   "use cache";
-  cacheTag(`applications-${jobListingId}`);
+  cacheTag(jobListingApplicationsTag(jobListingId, "all"));
   cacheLife("minutes");
 
   const result = await db.query.applicationTable.findMany({
@@ -65,7 +68,8 @@ export async function insertJobListingApplicationDb(
     jobListingId: applicationTable.jobListingId,
     userId: applicationTable.userId,
   });
-  updateTag(`job-listings-${result.jobListingId}-applications`);
+  updateTag(jobListingApplicationsTag(result.jobListingId, "all"));
+  updateTag(jobListingApplicationsTag(result.jobListingId, result.userId));
 
   return result;
 }
@@ -95,7 +99,8 @@ export async function updateJobListingApplicationDb(
       userId: applicationTable.userId,
     });
 
-  updateTag(`job-listings-${result.jobListingId}-applications`);
+  updateTag(jobListingApplicationsTag(result.jobListingId, "all"));
+  updateTag(jobListingApplicationsTag(result.jobListingId, result.userId));
 
   return result;
 }

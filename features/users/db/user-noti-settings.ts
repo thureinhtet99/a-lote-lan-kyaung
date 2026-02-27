@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { userNotificationSettingsTable } from "@/drizzle/schema";
 import { updateTag } from "next/cache";
+import { userNotificationTag } from "@/lib/utils/data-cache";
 
 export async function insertUserNotiSettingsDb(
   settings: typeof userNotificationSettingsTable.$inferInsert,
@@ -9,7 +10,7 @@ export async function insertUserNotiSettingsDb(
     .insert(userNotificationSettingsTable)
     .values(settings)
     .onConflictDoNothing();
-  updateTag(`users-${settings.userId}`);
+  updateTag(userNotificationTag(settings.userId));
 }
 
 export async function updateUserNotificationSettingDb(
@@ -25,5 +26,5 @@ export async function updateUserNotificationSettingDb(
       target: userNotificationSettingsTable.userId,
       set: settings,
     });
-  updateTag(`users-${userId}`);
+  updateTag(userNotificationTag(userId));
 }

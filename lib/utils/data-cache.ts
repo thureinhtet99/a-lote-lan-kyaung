@@ -1,53 +1,55 @@
-type CacheType =
-  | "users"
-  | "organizations"
-  | "job-listings"
-  | "applications"
-  | "organization-user-settings"
-  | "user-notification-settings"
-  | "user-resumes"
-  | "admin-stats"
-  | "employer-requests";
+// Organizations
+export const organizationsTag = (userId: string) => {
+  return `organizations-${userId}` as const;
+};
+
+// Organization
+export const organizationTag = (orgId: string, userId: string) => {
+  return `organization-${orgId}-user-${userId}` as const;
+};
+
+// Organizations id
+export const organizationIdTag = (orgId: string) => {
+  return `organization-${orgId}` as const;
+};
 
 // JobListing
-export const jobListingsTag = (orgId: string, tag: CacheType) => {
-  return `${orgId}-${tag}` as const;
+export const jobListingsTag = (orgId: string) => {
+  return `organization-${orgId}-job-listings` as const;
 };
 
 // JobListing Id
-export const jobListingIdTag = (
-  orgId: string,
-  tag: CacheType,
-  jobListingId: string,
-) => {
-  return `${orgId}-${tag}-${jobListingId}` as const;
+export const jobListingIdTag = (orgId: string, jobListingId: string) => {
+  return `organization-${orgId}-job-listing-${jobListingId}` as const;
 };
 
 // JobListing Application
 export const jobListingApplicationsTag = (
-  tag: CacheType,
   jobListingId: string,
   userId: string,
 ) => {
-  return `${tag}-${jobListingId}-${userId}` as const;
+  return `job-listing-${jobListingId}-user-${userId}-applications` as const;
+};
+
+// Sidebar
+export const sideBarJobListingWithApplicationsTag = (
+  orgId: string,
+  userId: string,
+) => {
+  return `organization-${orgId}-user-${userId}-job-listings-applications` as const;
 };
 
 // Resume
-export const userResumeTag = (tag: CacheType, userId: string) => {
-  return `${tag}-${userId}`;
+export const userResumeTag = (userId: string) => {
+  return `user-${userId}-resumes` as const;
 };
 
 // Notification
-export const userNotificationTag = (tag: CacheType, userId: string) => {
-  return `${tag}-${userId}`;
-};
-
-// Id
-export const idTag = (tag: CacheType, id: string) => {
-  return `${tag}-${id}` as const;
+export const userNotificationTag = (userId: string) => {
+  return `user-${userId}-notifications` as const;
 };
 
 // Admin Dashboard Stats
-export const tag = (tag: CacheType) => {
-  return `${tag}` as const;
+export const dashboardStatsTag = () => {
+  return `admin-stats` as const;
 };

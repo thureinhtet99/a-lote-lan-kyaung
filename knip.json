@@ -1,0 +1,42 @@
+{
+  "entry": [
+    "app/**/page.{ts,tsx}",
+    "app/**/layout.{ts,tsx}",
+    "app/**/route.{ts,tsx}",
+    "app/**/template.{ts,tsx}",
+    "app/**/default.{ts,tsx}",
+    "app/**/loading.{ts,tsx}",
+    "app/**/error.{ts,tsx}",
+    "app/**/not-found.{ts,tsx}",
+    "app/**/global-error.{ts,tsx}",
+    "app/**/sitemap.{ts,tsx}",
+    "app/**/robots.{ts,tsx}",
+    "proxy.{ts,js}",
+    "middleware.{ts,js,mts,mjs}",
+    "next.config.{js,ts,mjs}",
+    "drizzle.config.{js,ts,mjs}",
+    "drizzle/seed.ts",
+    "drizzle/reset.ts",
+    "postcss.config.{js,mjs,cjs,ts}",
+    "tailwind.config.{js,mjs,cjs,ts}",
+    "src/app/**/page.{ts,tsx}",
+    "src/app/**/layout.{ts,tsx}",
+    "src/app/**/route.{ts,tsx}"
+  ],
+  "project": [
+    "app/**/*.{ts,tsx}",
+    "components/**/*.{ts,tsx}",
+    "constants/**/*.{ts,tsx}",
+    "drizzle/**/*.{ts,tsx}",
+    "features/**/*.{ts,tsx}",
+    "hooks/**/*.{ts,tsx}",
+    "lib/**/*.{ts,tsx}",
+    "services/**/*.{ts,tsx}",
+    "types/**/*.{ts,tsx}",
+    "*.ts",
+    "*.tsx",
+    "src/**/*.{ts,tsx}"
+  ],
+  "ignore": [".next/**", "node_modules/**", "public/**", "dist/**", "docs/**"],
+  "eslint": false
+}

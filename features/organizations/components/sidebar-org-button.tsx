@@ -1,9 +1,8 @@
 import { Suspense } from "react";
 import SidebarOrgButtonClient from "./_sidebar-org-button-client";
 import { getCurrentOrg, getCurrentUser } from "@/lib/auth/auth-helpers";
-import { SignOutButton } from "@/features/auth/components/auth-buttons";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
-import { LogOutIcon } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Loading from "@/components/shared/loading";
 
 export default function SidebarOrgButton() {
@@ -22,12 +21,12 @@ const SuspendedComponent = async () => {
 
   if (user == null || organization == null) {
     return (
-      <SignOutButton>
-        <SidebarMenuButton>
-          <LogOutIcon />
-          <span>Log out</span>
-        </SidebarMenuButton>
-      </SignOutButton>
+      <SidebarMenuButton className="flex items-center justify-between">
+        <span className="flex flex-col flex-1 min-w-0 leading-tight group-data-[state=collapsed]:hidden">
+          Select organization first
+        </span>
+        <ArrowRight className="animate-caret-blink" />
+      </SidebarMenuButton>
     );
   }
 

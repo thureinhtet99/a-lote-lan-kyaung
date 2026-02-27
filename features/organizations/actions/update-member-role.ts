@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { memberTable } from "@/drizzle/schema";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
+import { safeGetSession } from "@/lib/auth/auth-helpers";
 
 const updateRoleSchema = z.object({
   memberId: z.string().min(1, "Member ID is required"),
@@ -37,9 +38,7 @@ export async function updateMemberRole(data: UpdateMemberRoleInput) {
     }
 
     // Get current session
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await safeGetSession();
 
     if (!session?.session?.activeOrganizationId) {
       return {

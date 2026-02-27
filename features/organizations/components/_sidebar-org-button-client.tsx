@@ -109,10 +109,7 @@ const OrgInfo = ({
   return (
     <div className="flex items-center gap-2 overflow-hidden">
       <Avatar className="rounded-lg size-8">
-        <AvatarImage
-          src={organization.logo ?? undefined}
-          alt={organization.name}
-        />
+        <AvatarImage src={organization.logo || undefined} alt={nameInitials} />
         <AvatarFallback className="uppercase bg-primary text-primary-foreground">
           {nameInitials}
         </AvatarFallback>

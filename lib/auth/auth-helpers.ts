@@ -4,8 +4,19 @@ import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { getOrgById } from "@/features/organizations/db/organization-db";
 
+export async function safeGetSession() {
+  try {
+    return await auth.api.getSession({
+      headers: await headers(),
+    });
+  } catch (error) {
+    console.error("Auth session error:", error);
+    return null;
+  }
+}
+
 // Get current session from better-auth session
-export const getCurrentSession = async ({ allData = false } = {}) => {
+export const getCurrentSession = async () => {
   const currentSession = await auth.api.getSession({
     headers: await headers(),
   });
@@ -52,9 +63,7 @@ export const getCurrentOrg = async () => {
 // Check if the current user is an admin
 export async function isAdmin(): Promise<boolean> {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await safeGetSession();
     return session?.user?.role === "admin";
   } catch {
     return false;
@@ -64,9 +73,7 @@ export async function isAdmin(): Promise<boolean> {
 // Check if the current user is an employer
 export async function isEmployer(): Promise<boolean> {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await safeGetSession();
 
     return (
       session?.user?.role === "employer" || session?.user?.role === "admin"
@@ -79,9 +86,7 @@ export async function isEmployer(): Promise<boolean> {
 // Check if the current user is a regular user
 export async function isUser(): Promise<boolean> {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await safeGetSession();
 
     return session?.user?.role === "user";
   } catch {
@@ -94,9 +99,7 @@ export async function getUserRole(): Promise<
   "user" | "employer" | "admin" | null
 > {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await safeGetSession();
 
     return (session?.user?.role as "user" | "employer" | "admin") || null;
   } catch {
@@ -107,9 +110,7 @@ export async function getUserRole(): Promise<
 // Check if the current user is banned
 export async function isBanned(): Promise<boolean> {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await safeGetSession();
 
     if (!session?.user) return false;
 

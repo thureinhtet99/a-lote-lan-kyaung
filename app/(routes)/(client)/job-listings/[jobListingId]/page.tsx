@@ -40,7 +40,12 @@ import { NewJobListingApplicationForm } from "@/features/applications/components
 import JobListingBadges from "@/features/job-listings/components/job-listing-badges";
 import { getCurrentUser } from "@/lib/auth/auth-helpers";
 import Loading from "@/components/shared/loading";
-import { cacheTag, cacheLife } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
+import {
+  jobListingApplicationsTag,
+  jobListingIdTag,
+  userResumeTag,
+} from "@/lib/utils/data-cache";
 import ClientSheet from "./_ClientSheet";
 
 export default function JobListingPage({
@@ -119,7 +124,7 @@ const getJobListingApplication = async ({
 
 async function getCachedJobListing(id: string) {
   "use cache";
-  cacheTag("job-listing-" + id);
+  cacheTag(jobListingIdTag("", id));
   cacheLife("hours");
   return await getJobListingById(id);
 }
@@ -304,7 +309,7 @@ const getUserResume = async (userId: string) => {
 
 async function getCachedUserResume(userId: string) {
   "use cache";
-  cacheTag("user-resume-" + userId);
+  cacheTag(userResumeTag(userId));
   cacheLife("hours");
   return await getUserResume(userId);
 }
@@ -314,7 +319,7 @@ async function getCachedJobListingApplication(
   userId: string,
 ) {
   "use cache";
-  cacheTag("application-" + jobListingId + "-" + userId);
+  cacheTag(jobListingApplicationsTag(jobListingId, userId));
   cacheLife("minutes");
   return await getJobListingApplication({ jobListingId, userId });
 }

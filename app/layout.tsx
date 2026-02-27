@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-
 import { APP_CONFIG } from "@/constants/app-config";
 import { UploadThingSSR } from "@/services/uploadthing/components/UploadThingSSR";
 
-const geistSans = Geist({
+const geistSans = Inter({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });

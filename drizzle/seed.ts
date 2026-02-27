@@ -1,50 +1,74 @@
 import {
-  jobListingTable,
-  organizationTable,
-  userTable,
   accountTable,
-  memberTable,
-  invitationTable,
+  applicationTable,
   employerRequestTable,
+  invitationTable,
+  jobListingTable,
+  memberTable,
+  organizationTable,
+  organizationUserSettingsTable,
+  resumeTable,
+  sessionTable,
+  userNotificationSettingsTable,
+  userTable,
+  verificationTable,
 } from "@/drizzle/schema";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth/auth";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
-// Helper function to create a user with email/password using Better-auth
+type AppRole = "admin" | "employer" | "user";
+type OrgRole = "admin" | "employer" | "user";
+
+type SeedUser = {
+  email: string;
+  name: string;
+  role: AppRole;
+};
+
+type CreatedSeedUser = SeedUser & { id: string };
+
+// Helper: create user through Better Auth so auth/account rows stay valid.
 async function createUser(
   email: string,
   name: string,
   password: string = "Test123!",
 ) {
-  try {
-    // Use Better-auth's signUp method to create user
-    const result = await auth.api.signUpEmail({
-      body: {
-        email,
-        password,
-        name,
-      },
-    });
+  const result = await auth.api.signUpEmail({
+    body: {
+      email,
+      password,
+      name,
+    },
+  });
 
-    if (result?.user?.id) {
-      console.log(`✅ Created user: ${email} (${name})`);
-      return result.user.id;
-    } else {
-      throw new Error(`Failed to create user: ${email}`);
-    }
-  } catch (error) {
-    console.error(`❌ Error creating user ${email}:`, error);
-    throw error;
+  if (!result?.user?.id) {
+    throw new Error(`Failed to create user: ${email}`);
   }
+
+  console.log(`✅ Created user: ${email} (${name})`);
+  return result.user.id;
 }
 
-// Helper function to add member to organization
+async function createUserWithRole(user: SeedUser): Promise<CreatedSeedUser> {
+  const userId = await createUser(user.email, user.name);
+
+  await db
+    .update(userTable)
+    .set({ role: user.role })
+    .where(eq(userTable.id, userId));
+
+  console.log(`✅ Set role=${user.role} for ${user.email}`);
+  await new Promise((resolve) => setTimeout(resolve, 50));
+
+  return { ...user, id: userId };
+}
+
 async function addMemberToOrg(
   userId: string,
   organizationId: string,
-  role: "admin" | "employer" | "user",
+  role: OrgRole,
 ) {
   await db.insert(memberTable).values({
     id: nanoid(),
@@ -57,486 +81,353 @@ async function addMemberToOrg(
 
 async function seed() {
   try {
-    // Clean up existing data (in correct order to avoid foreign key constraints)
     console.log("🌱 Starting seed...");
     console.log("🧹 Cleaning up existing data...");
 
+    await db.delete(applicationTable);
     await db.delete(jobListingTable);
+    await db.delete(organizationUserSettingsTable);
+    await db.delete(userNotificationSettingsTable);
+    await db.delete(resumeTable);
     await db.delete(memberTable);
     await db.delete(invitationTable);
     await db.delete(employerRequestTable);
     await db.delete(accountTable);
+    await db.delete(sessionTable);
+    await db.delete(verificationTable);
     await db.delete(organizationTable);
     await db.delete(userTable);
 
     console.log("✅ Cleanup complete");
     console.log("");
 
-    // ===== CREATE TEST USERS =====
-    console.log("👤 Creating test users...");
+    console.log("👤 Creating users (2 admins, 3 employers, 4 users)...");
 
-    // Create admin user
-    const adminUser = await createUser("admin@test.com", "System Admin");
-    await db
-      .update(userTable)
-      .set({ role: "admin" })
-      .where(eq(userTable.id, adminUser));
-    console.log("✅ Set admin role for admin@test.com");
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    const userPlan: SeedUser[] = [
+      { email: "admin.one@test.com", name: "Admin One", role: "admin" },
+      { email: "admin.two@test.com", name: "Admin Two", role: "admin" },
+      { email: "employer.one@test.com", name: "Employer One", role: "employer" },
+      { email: "employer.two@test.com", name: "Employer Two", role: "employer" },
+      {
+        email: "employer.three@test.com",
+        name: "Employer Three",
+        role: "employer",
+      },
+      { email: "user.one@test.com", name: "User One", role: "user" },
+      { email: "user.two@test.com", name: "User Two", role: "user" },
+      { email: "user.three@test.com", name: "User Three", role: "user" },
+      { email: "user.four@test.com", name: "User Four", role: "user" },
+    ];
 
-    // Create employer users
-    const ownerUser1 = await createUser("owner@test.com", "John Owner");
-    await db
-      .update(userTable)
-      .set({ role: "employer" })
-      .where(eq(userTable.id, ownerUser1));
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    const createdUsers: CreatedSeedUser[] = [];
+    for (const user of userPlan) {
+      createdUsers.push(await createUserWithRole(user));
+    }
 
-    const ownerUser2 = await createUser("jane.owner@test.com", "Jane Owner");
-    await db
-      .update(userTable)
-      .set({ role: "employer" })
-      .where(eq(userTable.id, ownerUser2));
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    const admins = createdUsers.filter((u) => u.role === "admin");
+    const employers = createdUsers.filter((u) => u.role === "employer");
+    const users = createdUsers.filter((u) => u.role === "user");
 
-    const adminUser1 = await createUser("employer@test.com", "Alice Employer");
-    await db
-      .update(userTable)
-      .set({ role: "employer" })
-      .where(eq(userTable.id, adminUser1));
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    console.log("✅ Users created with requested distribution");
+    console.log("");
 
-    const adminUser2 = await createUser(
-      "bob.employer@test.com",
-      "Bob Employer",
+    console.log("🏢 Creating organizations (2 per employer)...");
+
+    const orgSeeds = [
+      {
+        id: nanoid(),
+        name: "Atlas Tech",
+        slug: "atlas-tech",
+        ownerId: employers[0].id,
+        collaboratorId: employers[1].id,
+      },
+      {
+        id: nanoid(),
+        name: "Vertex Labs",
+        slug: "vertex-labs",
+        ownerId: employers[0].id,
+        collaboratorId: employers[2].id,
+      },
+      {
+        id: nanoid(),
+        name: "Blue Orbit",
+        slug: "blue-orbit",
+        ownerId: employers[1].id,
+        collaboratorId: employers[0].id,
+      },
+      {
+        id: nanoid(),
+        name: "North Ridge",
+        slug: "north-ridge",
+        ownerId: employers[1].id,
+        collaboratorId: employers[2].id,
+      },
+      {
+        id: nanoid(),
+        name: "Signal Foundry",
+        slug: "signal-foundry",
+        ownerId: employers[2].id,
+        collaboratorId: employers[0].id,
+      },
+      {
+        id: nanoid(),
+        name: "Nimbus Point",
+        slug: "nimbus-point",
+        ownerId: employers[2].id,
+        collaboratorId: employers[1].id,
+      },
+    ];
+
+    await db.insert(organizationTable).values(
+      orgSeeds.map((org) => ({
+        id: org.id,
+        name: org.name,
+        slug: org.slug,
+        logo: null,
+        metadata: null,
+        createdAt: new Date(),
+      })),
     );
-    await db
-      .update(userTable)
-      .set({ role: "employer" })
-      .where(eq(userTable.id, adminUser2));
-    console.log("✅ Set employer role for employer users");
-    await new Promise((resolve) => setTimeout(resolve, 100));
 
-    // Create regular users
-    const memberUser1 = await createUser("user@test.com", "Charlie User");
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    const memberUser2 = await createUser("member@test.com", "Diana Member");
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    const memberUser3 = await createUser("tom.member@test.com", "Tom Member");
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    // Create a user with pending employer request
-    const pendingUser = await createUser(
-      "pending@test.com",
-      "Pending Employer",
-    );
-    console.log("✅ Created regular users");
+    for (const org of orgSeeds) {
+      console.log(`✅ Created organization: ${org.name}`);
+    }
 
     console.log("");
+    console.log("👥 Creating organization memberships...");
+
+    for (let i = 0; i < orgSeeds.length; i++) {
+      const org = orgSeeds[i];
+      const userMember = users[i % users.length];
+
+      await addMemberToOrg(org.ownerId, org.id, "admin");
+      await addMemberToOrg(org.collaboratorId, org.id, "employer");
+      await addMemberToOrg(userMember.id, org.id, "user");
+
+      console.log(`✅ Added 3 members to ${org.name}`);
+    }
+
+    console.log("");
+    console.log("⚙️ Creating organization user settings...");
+
+    for (let i = 0; i < orgSeeds.length; i++) {
+      const org = orgSeeds[i];
+      const minimumRating = (i % 5) + 1;
+
+      await db.insert(organizationUserSettingsTable).values([
+        {
+          userId: org.ownerId,
+          organizationId: org.id,
+          newApplicationEmailNotification: true,
+          minimumRating,
+        },
+        {
+          userId: org.collaboratorId,
+          organizationId: org.id,
+          newApplicationEmailNotification: i % 2 === 0,
+          minimumRating: minimumRating >= 3 ? minimumRating - 1 : null,
+        },
+      ]);
+    }
+
+    console.log("✅ Organization user settings inserted");
+    console.log("");
+
+    console.log("🔔 Creating user notification settings...");
+    await db.insert(userNotificationSettingsTable).values(
+      createdUsers.map((u, index) => ({
+        userId: u.id,
+        newJobEmailNotification: index % 2 === 0,
+        aiPrompt:
+          u.role === "user"
+            ? "Notify me for remote software roles."
+            : "Notify me for relevant marketplace updates.",
+      })),
+    );
+    console.log("✅ Notification settings inserted");
+    console.log("");
+
+    console.log("📄 Creating resumes for all regular users...");
+    await db.insert(resumeTable).values(
+      users.map((u, index) => ({
+        userId: u.id,
+        resumeFileUrl: `https://example.com/resumes/${u.email.replace("@", "-at-")}.pdf`,
+        resumeFileKey: `resume-${index + 1}`,
+      })),
+    );
+    console.log("✅ Resumes inserted");
+    console.log("");
+
+    console.log("✉️ Creating invitations...");
+    const invitationTargets = [users[0], users[1], users[2], users[3]];
+    await db.insert(invitationTable).values(
+      orgSeeds.slice(0, 4).map((org, index) => ({
+        id: nanoid(),
+        organizationId: org.id,
+        email: invitationTargets[index].email,
+        role: index % 2 === 0 ? "user" : "employer",
+        status: index === 3 ? "accepted" : "pending",
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+        inviterId: org.ownerId,
+      })),
+    );
+    console.log("✅ Invitations inserted");
+    console.log("");
+
     console.log("💼 Creating employer requests...");
-
-    // Create a pending employer request
-    await db.insert(employerRequestTable).values({
-      id: nanoid(),
-      userId: pendingUser,
-      status: "pending",
-      requestMessage:
-        "I would like to become an employer to post job listings for my company.",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
-    console.log("✅ Created pending employer request for pending@test.com");
-
-    // Create an approved request (historical)
-    await db.insert(employerRequestTable).values({
-      id: nanoid(),
-      userId: ownerUser1,
-      status: "approved",
-      requestMessage: "I need employer access to hire developers.",
-      adminResponse: "Request approved. Welcome!",
-      reviewedBy: adminUser,
-      reviewedAt: new Date(Date.now() - 86400000), // 1 day ago
-      createdAt: new Date(Date.now() - 172800000), // 2 days ago
-      updatedAt: new Date(Date.now() - 86400000),
-    });
-    console.log("✅ Created approved employer request (historical)");
-
-    // Create a rejected request (historical)
-    const rejectedUser = await createUser("rejected@test.com", "Rejected User");
-    await db.insert(employerRequestTable).values({
-      id: nanoid(),
-      userId: rejectedUser,
-      status: "rejected",
-      requestMessage: "I want employer access.",
-      adminResponse: "Please provide more information about your company.",
-      reviewedBy: adminUser,
-      reviewedAt: new Date(Date.now() - 86400000),
-      createdAt: new Date(Date.now() - 259200000), // 3 days ago
-      updatedAt: new Date(Date.now() - 86400000),
-    });
-    console.log("✅ Created rejected employer request (historical)");
-
-    console.log("");
-    console.log("🏢 Creating organizations...");
-
-    // ===== CREATE ORGANIZATIONS =====
-    const organizations = [
+    await db.insert(employerRequestTable).values([
       {
         id: nanoid(),
-        name: "Tech Corp",
-        slug: "tech-corp",
-        logo: null,
-        metadata: null,
-        createdAt: new Date(),
+        userId: users[0].id,
+        status: "pending",
+        requestMessage: "I want to post jobs for my startup.",
       },
       {
         id: nanoid(),
-        name: "StartupCo",
-        slug: "startupco",
-        logo: null,
-        metadata: null,
-        createdAt: new Date(),
+        userId: users[1].id,
+        status: "rejected",
+        requestMessage: "Please upgrade me to employer.",
+        adminResponse: "Need more business information.",
+        reviewedBy: admins[0].id,
+        reviewedAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
       },
       {
         id: nanoid(),
-        name: "Innovation Labs",
-        slug: "innovation-labs",
-        logo: null,
-        metadata: null,
-        createdAt: new Date(),
+        userId: employers[0].id,
+        status: "approved",
+        requestMessage: "Historical request for employer access.",
+        adminResponse: "Approved.",
+        reviewedBy: admins[1].id,
+        reviewedAt: new Date(Date.now() - 1000 * 60 * 60 * 48),
       },
-    ];
-
-    const insertedOrganizations = await db
-      .insert(organizationTable)
-      .values(organizations)
-      .returning();
-
-    for (const org of insertedOrganizations) {
-      console.log(`✅ Created organization: ${org.name} (${org.slug})`);
-    }
-
+    ]);
+    console.log("✅ Employer requests inserted");
     console.log("");
-    console.log("👥 Assigning members to organizations...");
 
-    // ===== ASSIGN MEMBERS TO ORGANIZATIONS =====
-    // Organization 1: Tech Corp
-    await addMemberToOrg(ownerUser1, insertedOrganizations[0].id, "admin");
-    await addMemberToOrg(adminUser1, insertedOrganizations[0].id, "employer");
-    await addMemberToOrg(memberUser1, insertedOrganizations[0].id, "user");
-    await addMemberToOrg(memberUser2, insertedOrganizations[0].id, "user");
-    console.log(`✅ Added members to ${insertedOrganizations[0].name}`);
+    console.log("📝 Creating job listings (different set for each org)...");
 
-    // Organization 2: StartupCo
-    await addMemberToOrg(ownerUser2, insertedOrganizations[1].id, "admin");
-    await addMemberToOrg(adminUser2, insertedOrganizations[1].id, "employer");
-    await addMemberToOrg(memberUser3, insertedOrganizations[1].id, "user");
-    console.log(`✅ Added members to ${insertedOrganizations[1].name}`);
+    const jobListings = orgSeeds.flatMap((org, index) => {
+      const stateCity = [
+        ["California", "San Francisco"],
+        ["New York", "New York"],
+        ["Texas", "Austin"],
+        ["Washington", "Seattle"],
+        ["Massachusetts", "Boston"],
+        ["Illinois", "Chicago"],
+      ] as const;
+      const [state, city] = stateCity[index];
 
-    // Organization 3: Innovation Labs - Owner has multiple orgs
-    await addMemberToOrg(ownerUser1, insertedOrganizations[2].id, "admin");
-    await addMemberToOrg(adminUser1, insertedOrganizations[2].id, "employer");
-    console.log(`✅ Added members to ${insertedOrganizations[2].name}`);
+      return [
+        {
+          id: nanoid(),
+          organizationId: org.id,
+          title: `${org.name} Senior Engineer`,
+          description: `Build and scale products at ${org.name}.`,
+          wage: 130000 + index * 2000,
+          wageInterval: "yearly" as const,
+          state,
+          city,
+          isFeatured: true,
+          locationRequirement: "hybrid" as const,
+          experienceLevel: "senior" as const,
+          status: "published" as const,
+          type: "full-time" as const,
+          posted_at: new Date(),
+        },
+        {
+          id: nanoid(),
+          organizationId: org.id,
+          title: `${org.name} Product Designer`,
+          description: `Design polished product experiences for ${org.name}.`,
+          wage: 90000 + index * 1000,
+          wageInterval: "yearly" as const,
+          state,
+          city,
+          isFeatured: false,
+          locationRequirement: "remote" as const,
+          experienceLevel: "mid-level" as const,
+          status: "published" as const,
+          type: "full-time" as const,
+          posted_at: new Date(),
+        },
+        {
+          id: nanoid(),
+          organizationId: org.id,
+          title: `${org.name} Intern`,
+          description: `Internship role at ${org.name}.`,
+          wage: 24 + index,
+          wageInterval: "hourly" as const,
+          state,
+          city,
+          isFeatured: false,
+          locationRequirement: "on-site" as const,
+          experienceLevel: "junior" as const,
+          status: index % 2 === 0 ? ("draft" as const) : ("delisted" as const),
+          type: "internship" as const,
+          posted_at: null,
+        },
+      ];
+    });
 
+    await db.insert(jobListingTable).values(jobListings);
+    console.log(`✅ Inserted ${jobListings.length} job listings`);
     console.log("");
-    console.log("📝 Creating job listings...");
 
-    // ===== CREATE JOB LISTINGS =====
-    const [techCorp, startupCo, innovationLabs] = insertedOrganizations;
+    console.log("📬 Creating applications from regular users...");
 
-    const allJobListings = [
-      // Tech Corp listings
-      {
-        organizationId: techCorp.id,
-        title: "Senior Full Stack Developer",
-        description: `## About the Role
-We are looking for a Senior Full Stack Developer to join our growing engineering team. You will be responsible for developing and maintaining our web applications using modern technologies.
+    const publishedListings = jobListings.filter((j) => j.status === "published");
+    const applicationRows = users.flatMap((u, userIndex) => {
+      const first = publishedListings[userIndex * 2];
+      const second = publishedListings[userIndex * 2 + 1];
 
-### Responsibilities
-- Design and develop scalable web applications
-- Collaborate with cross-functional teams
-- Write clean, maintainable code
-- Participate in code reviews
-- Mentor junior developers
+      return [
+        {
+          jobListingId: first.id,
+          userId: u.id,
+          coverLetter: `Hello, I am ${u.name} and I am interested in this role.`,
+          status: "applied" as const,
+          rating: null,
+        },
+        {
+          jobListingId: second.id,
+          userId: u.id,
+          coverLetter: `I believe I am a strong fit for this opportunity.`,
+          status: userIndex % 2 === 0 ? ("interviewed" as const) : ("applied" as const),
+          rating: userIndex % 2 === 0 ? 4 : null,
+        },
+      ];
+    });
 
-### Requirements
-- 5+ years of experience in full-stack development
-- Proficiency in React, Node.js, and TypeScript
-- Experience with databases (PostgreSQL, MongoDB)
-- Strong problem-solving skills
-- Excellent communication skills`,
-        wage: 120000,
-        wageInterval: "yearly" as const,
-        state: "California",
-        city: "San Francisco",
-        is_featured: true,
-        locationRequirement: "hybrid" as const,
-        experienceLevel: "senior" as const,
-        status: "published" as const,
-        type: "full-time" as const,
-        posted_at: new Date(),
-      },
-      {
-        organizationId: techCorp.id,
-        title: "Frontend Developer (React)",
-        description: `## Frontend Developer Opportunity
-Join our team as a Frontend Developer and help build amazing user experiences with React and modern web technologies.
-
-### What You'll Do
-- Build responsive and interactive user interfaces
-- Work closely with designers and backend developers
-- Optimize applications for performance
-- Implement automated testing strategies
-
-### What We're Looking For
-- 3+ years of React development experience
-- Strong knowledge of HTML, CSS, and JavaScript
-- Experience with state management (Redux, Zustand)
-- Familiarity with testing frameworks (Jest, React Testing Library)`,
-        wage: 85000,
-        wageInterval: "yearly" as const,
-        state: "New York",
-        city: "New York",
-        is_featured: false,
-        locationRequirement: "remote" as const,
-        experienceLevel: "mid-level" as const,
-        status: "published" as const,
-        type: "full-time" as const,
-        posted_at: new Date(),
-      },
-      {
-        organizationId: techCorp.id,
-        title: "DevOps Engineer - Draft",
-        description: `## DevOps Engineer Position
-We are planning to hire a DevOps Engineer to help scale our infrastructure and improve our deployment processes.
-
-### Responsibilities
-- Manage cloud infrastructure (AWS/GCP)
-- Implement CI/CD pipelines
-- Monitor system performance
-- Ensure security best practices
-
-### Requirements
-- Experience with containerization (Docker, Kubernetes)
-- Knowledge of infrastructure as code (Terraform, CloudFormation)
-- Scripting skills (Bash, Python)
-- 3+ years of DevOps experience`,
-        wage: 110000,
-        wageInterval: "yearly" as const,
-        state: "Colorado",
-        city: "Denver",
-        is_featured: false,
-        locationRequirement: "remote" as const,
-        experienceLevel: "senior" as const,
-        status: "draft" as const,
-        type: "full-time" as const,
-      },
-
-      // StartupCo listings
-      {
-        organizationId: startupCo.id,
-        title: "Junior Backend Developer",
-        description: `## Start Your Backend Development Career
-We're seeking a motivated Junior Backend Developer to join our team and grow their skills in server-side development.
-
-### You'll Learn
-- API development and design
-- Database optimization
-- Cloud deployment
-- Testing and debugging
-
-### Requirements
-- Bachelor's degree in Computer Science or related field
-- Basic knowledge of Node.js or Python
-- Understanding of SQL databases
-- Eagerness to learn and grow`,
-        wage: 65000,
-        wageInterval: "yearly" as const,
-        state: "Texas",
-        city: "Austin",
-        is_featured: false,
-        locationRequirement: "on-site" as const,
-        experienceLevel: "junior" as const,
-        status: "published" as const,
-        type: "full-time" as const,
-        posted_at: new Date(),
-      },
-      {
-        organizationId: startupCo.id,
-        title: "Part-time UI/UX Designer",
-        description: `## Creative UI/UX Designer (Part-time)
-We're looking for a talented UI/UX Designer to work part-time on exciting projects and help shape our product experience.
-
-### Responsibilities
-- Create wireframes and prototypes
-- Design user interfaces for web and mobile
-- Conduct user research
-- Collaborate with development team
-
-### Requirements
-- Portfolio showcasing UI/UX work
-- Proficiency in Figma or Adobe Creative Suite
-- Understanding of user-centered design principles
-- 2+ years of design experience`,
-        wage: 40,
-        wageInterval: "hourly" as const,
-        state: "Washington",
-        city: "Seattle",
-        is_featured: false,
-        locationRequirement: "hybrid" as const,
-        experienceLevel: "mid-level" as const,
-        status: "published" as const,
-        type: "part-time" as const,
-        posted_at: new Date(),
-      },
-      {
-        organizationId: startupCo.id,
-        title: "Software Engineering Intern",
-        description: `## Summer Software Engineering Internship
-Join our engineering team for a hands-on internship experience where you'll work on real projects and learn from experienced developers.
-
-### What You'll Do
-- Work on feature development
-- Participate in code reviews
-- Learn about software architecture
-- Contribute to open source projects
-
-### Requirements
-- Currently pursuing Computer Science degree
-- Basic programming knowledge (any language)
-- Strong analytical and problem-solving skills
-- Enthusiasm for learning new technologies`,
-        wage: 25,
-        wageInterval: "hourly" as const,
-        state: "California",
-        city: "Palo Alto",
-        is_featured: false,
-        locationRequirement: "on-site" as const,
-        experienceLevel: "junior" as const,
-        status: "published" as const,
-        type: "internship" as const,
-        posted_at: new Date(),
-      },
-
-      // Innovation Labs listings
-      {
-        organizationId: innovationLabs.id,
-        title: "AI/ML Engineer",
-        description: `## AI/ML Engineer
-Help us build practical AI features for recruiting and applicant workflows.
-
-### Responsibilities
-- Build and deploy ML pipelines
-- Fine-tune models for ranking and matching
-- Collaborate with product and data teams
-
-### Requirements
-- 3+ years in machine learning engineering
-- Strong Python and MLOps experience
-- Familiar with vector search and embeddings`,
-        wage: 130000,
-        wageInterval: "yearly" as const,
-        state: "Massachusetts",
-        city: "Boston",
-        is_featured: true,
-        locationRequirement: "hybrid" as const,
-        experienceLevel: "senior" as const,
-        status: "published" as const,
-        type: "full-time" as const,
-        posted_at: new Date(),
-      },
-      {
-        organizationId: innovationLabs.id,
-        title: "Data Analyst",
-        description: `## Data Analyst
-Support product and business decisions with clean reporting and insights.
-
-### Responsibilities
-- Build dashboards and reports
-- Analyze application funnels and hiring metrics
-- Partner with stakeholders for KPI tracking`,
-        wage: 80000,
-        wageInterval: "yearly" as const,
-        state: "Illinois",
-        city: "Chicago",
-        is_featured: false,
-        locationRequirement: "remote" as const,
-        experienceLevel: "mid-level" as const,
-        status: "published" as const,
-        type: "full-time" as const,
-        posted_at: new Date(),
-      },
-      {
-        organizationId: innovationLabs.id,
-        title: "Mobile App Developer (Delisted)",
-        description: `## Mobile App Developer
-This position was for developing cross-platform mobile applications using React Native.
-
-### Responsibilities
-- Develop mobile applications for iOS and Android
-- Optimize app performance
-- Integrate with backend APIs
-- Publish apps to app stores
-
-### Requirements
-- Experience with React Native or Flutter
-- Knowledge of mobile UI/UX principles
-- Understanding of app store guidelines
-- 2+ years of mobile development experience`,
-        wage: 95000,
-        wageInterval: "yearly" as const,
-        state: "Florida",
-        city: "Miami",
-        is_featured: false,
-        locationRequirement: "remote" as const,
-        experienceLevel: "mid-level" as const,
-        status: "delisted" as const,
-        type: "full-time" as const,
-      },
-    ];
-
-    console.log(
-      `📝 Inserting ${allJobListings.length} job listings for ${insertedOrganizations.length} organization`,
-    );
-
-    // Insert job listings
-    for (const jobListing of allJobListings) {
-      await db.insert(jobListingTable).values(jobListing);
-      console.log(`✅ Inserted: ${jobListing.title} (${jobListing.status})`);
-    }
-
+    await db.insert(applicationTable).values(applicationRows);
+    console.log(`✅ Inserted ${applicationRows.length} applications`);
     console.log("");
+
     console.log("✨ Seeding completed successfully!");
     console.log("");
     console.log("=".repeat(60));
     console.log("📋 TEST CREDENTIALS");
     console.log("=".repeat(60));
-    console.log("");
     console.log("🔑 All passwords: Test123!");
     console.log("");
-    console.log("� ADMIN ACCOUNT (Full System Access):");
-    console.log("  • admin@test.com (System Admin)");
+    console.log("👨‍💼 ADMINS:");
+    console.log("  • admin.one@test.com");
+    console.log("  • admin.two@test.com");
     console.log("");
-    console.log("👑 EMPLOYER ACCOUNTS (Can create organizations):");
-    console.log("  • owner@test.com (John Owner)");
-    console.log("  • jane.owner@test.com (Jane Owner)");
-    console.log("  • employer@test.com (Alice Employer)");
-    console.log("  • bob.employer@test.com (Bob Employer)");
+    console.log("👑 EMPLOYERS:");
+    console.log("  • employer.one@test.com");
+    console.log("  • employer.two@test.com");
+    console.log("  • employer.three@test.com");
     console.log("");
-    console.log("👤 REGULAR USER ACCOUNTS:");
-    console.log("  • user@test.com (Charlie User)");
-    console.log("  • member@test.com (Diana Member)");
-    console.log("  • tom.member@test.com (Tom Member)");
-    console.log("  • pending@test.com (Has pending employer request)");
-    console.log("  • rejected@test.com (Had rejected employer request)");
+    console.log("👤 USERS:");
+    console.log("  • user.one@test.com");
+    console.log("  • user.two@test.com");
+    console.log("  • user.three@test.com");
+    console.log("  • user.four@test.com");
     console.log("");
     console.log("🏢 ORGANIZATIONS:");
-    console.log(`  • Tech Corp (owner: owner@test.com)`);
-    console.log(`  • StartupCo (owner: jane.owner@test.com)`);
-    console.log(`  • Innovation Labs (owner: owner@test.com)`);
-    console.log("");
+    for (const org of orgSeeds) {
+      console.log(`  • ${org.name}`);
+    }
     console.log("=".repeat(60));
   } catch (error) {
     console.error("❌ Error during seeding:", error);
@@ -544,7 +435,6 @@ This position was for developing cross-platform mobile applications using React 
   }
 }
 
-// Run the seed function
 if (require.main === module) {
   seed()
     .then(() => {

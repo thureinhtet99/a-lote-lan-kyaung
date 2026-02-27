@@ -5,11 +5,12 @@ import { userTable, employerRequestTable } from "@/drizzle/schema";
 import { eq, count } from "drizzle-orm";
 import { StatCard } from "@/components/shared/stat-card";
 import { Users, Briefcase, Shield, Clock } from "lucide-react";
-import { cacheTag, cacheLife } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
+import { dashboardStatsTag } from "@/lib/utils/data-cache";
 
 async function getAdminStats() {
   "use cache";
-  cacheTag("admin-stats");
+  cacheTag(dashboardStatsTag());
   cacheLife("minutes");
   const [
     totalUsersResult,

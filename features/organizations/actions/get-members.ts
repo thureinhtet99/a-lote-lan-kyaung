@@ -5,13 +5,12 @@ import { headers } from "next/headers";
 import { db } from "@/lib/db";
 import { memberTable, userTable } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
+import { safeGetSession } from "@/lib/auth/auth-helpers";
 
 export async function getOrganizationMembers() {
   try {
     // Get current session
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await safeGetSession();
 
     if (!session?.session?.activeOrganizationId) {
       return {
