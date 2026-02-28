@@ -217,7 +217,6 @@ export const createJobListing = async (
 ): Promise<{ success: boolean; message?: string; data?: { id: string } }> => {
   try {
     const session = await safeGetSession();
-
     if (!session?.user) return { success: false, message: "Unauthorized" };
 
     const { orgId } = await getCurrentOrg();

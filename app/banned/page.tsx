@@ -1,5 +1,3 @@
-import { auth } from "@/lib/auth/auth";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import {
   Card,
@@ -11,20 +9,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 import { signOut } from "@/lib/auth/auth-client";
+import { safeGetSession } from "@/lib/auth/auth-helpers";
+import { APP_ROUTES } from "@/constants/app-config";
 
 export default async function BannedPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session?.user) {
-    redirect("/sign-in");
-  }
+  const session = await safeGetSession();
+  if (!session?.user) redirect(APP_ROUTES.SIGN_IN);
 
   // Check if user is actually banned
-  if (!session.user.banned) {
-    redirect("/");
-  }
+  if (!session.user.banned) redirect("/");
 
   const banExpires = session.user.banExpires;
   const banReason = session.user.banReason;

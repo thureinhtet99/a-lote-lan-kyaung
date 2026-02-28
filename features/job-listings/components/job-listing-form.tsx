@@ -44,8 +44,17 @@ import {
 } from "@/features/job-listings/db/job-listing-db";
 import { jobListingFormSchema } from "@/features/job-listings/job-listing-schema";
 import { Loader2Icon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox";
+import states from "@/constants/states.json";
 
-const noneSelectedValue = "none";
 const createDefaultValues: z.infer<typeof jobListingFormSchema> = {
   title: "",
   description: "",
@@ -75,12 +84,16 @@ export default function JobListingForm({
     | "description"
   >;
 }) {
+  const router = useRouter();
   const isEditing = jobListing != null;
   const [markdownResetKey, setMarkdownResetKey] = useState(0);
   const form = useForm({
     resolver: zodResolver(jobListingFormSchema),
     defaultValues: jobListing ?? createDefaultValues,
   });
+  const countries = Object.values(states).sort((nameA, nameB) =>
+    nameA.localeCompare(nameB),
+  );
 
   const onSubmit = async (data: z.infer<typeof jobListingFormSchema>) => {
     const submitAction = jobListing
@@ -94,9 +107,8 @@ export default function JobListingForm({
         form.reset(createDefaultValues);
         setMarkdownResetKey((prev) => prev + 1);
       }
-    } else {
-      toast.error(result.message);
-    }
+      router.refresh();
+    } else toast.error(result.message);
   };
 
   const isSubmitting = form.formState.isSubmitting;
@@ -219,31 +231,25 @@ export default function JobListingForm({
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>State</FormLabel>
-                  <Select
+                  <FormLabel>Country</FormLabel>
+                  <Combobox
+                    items={countries}
+                    autoHighlight
                     value={field.value ?? ""}
-                    onValueChange={(val) =>
-                      field.onChange(val === noneSelectedValue ? null : val)
-                    }
-                    disabled={isSubmitting}
+                    onValueChange={field.onChange}
                   >
-                    <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select state" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {field.value != null && (
-                        <SelectItem
-                          value={noneSelectedValue}
-                          className="text-red-500"
-                        >
-                          Clear
-                        </SelectItem>
-                      )}
-                      <StateSelectItems />
-                    </SelectContent>
-                  </Select>
+                    <ComboboxInput placeholder="Select a country" />
+                    <ComboboxContent>
+                      <ComboboxEmpty>No items found.</ComboboxEmpty>
+                      <ComboboxList>
+                        {(item) => (
+                          <ComboboxItem key={item} value={item}>
+                            {item}
+                          </ComboboxItem>
+                        )}
+                      </ComboboxList>
+                    </ComboboxContent>
+                  </Combobox>
                   <FormDescription className="text-xs">
                     (optional)
                   </FormDescription>
@@ -258,7 +264,7 @@ export default function JobListingForm({
             control={form.control}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Job type</FormLabel>
+                <FormLabel>Work mode</FormLabel>
                 <Select
                   value={field.value ?? ""}
                   onValueChange={field.onChange}

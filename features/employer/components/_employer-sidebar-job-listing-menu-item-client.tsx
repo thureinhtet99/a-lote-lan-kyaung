@@ -6,6 +6,7 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { APP_ROUTES } from "@/constants/app-config";
+import { FileUser } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
@@ -22,17 +23,21 @@ export default function EmployerSidebarJobListingMenuItemClient({
 
   return (
     <SidebarMenuSubItem className="flex items-center justify-between">
-      <Link href={`${APP_ROUTES.EMPLOYER.JOB_LISTINGS}/${id}`}>
+      <Link
+        className="w-full"
+        href={`${APP_ROUTES.EMPLOYER.JOB_LISTINGS}/${id}`}
+      >
         <SidebarMenuSubButton
           isActive={jobListingId === id}
           asChild
-          className="truncate"
+          className="truncate w-auto"
         >
           <span className="truncate">{title}</span>
         </SidebarMenuSubButton>
       </Link>
       {applications > 0 && (
         <Badge variant="outline" className="text-xs text-muted-foreground">
+          <FileUser />
           {applications}
         </Badge>
       )}

@@ -15,6 +15,7 @@
     "detect": "npx knip --config knip.json"
   },
   "dependencies": {
+    "@base-ui/react": "^1.2.0",
     "@hookform/resolvers": "^5.2.1",
     "@mdxeditor/editor": "^3.42.0",
     "@radix-ui/react-alert-dialog": "^1.1.15",
