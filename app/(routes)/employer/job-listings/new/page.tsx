@@ -24,7 +24,7 @@ const SuspendedComponent = async () => {
   if (!jobListings.success) return redirect(APP_ROUTES.EMPLOYER.ORG);
 
   return (
-    <div className="max-w-7xl mx-auto p-4 @container">
+    <div className="max-w-7xl mx-auto px-10 py-8 xl:p-4 @container">
       <h1 className="text-2xl font-bold mb-2">
         {jobListings.data.length === 0 &&
         (await hasOrgUserPermission("job_listing.create"))

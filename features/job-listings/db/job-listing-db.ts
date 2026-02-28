@@ -317,10 +317,9 @@ export const updateJobListing = async (
 // Delete
 export const deleteJobListing = async (
   id: string,
-): Promise<{ success: boolean; message?: string }> => {
+): Promise<{ success: boolean; message?: string; deleted?: boolean }> => {
   try {
     const session = await safeGetSession();
-
     if (!session?.user) return { success: false, message: "Unauthorized" };
 
     const { orgId } = await getCurrentOrg();
@@ -330,11 +329,11 @@ export const deleteJobListing = async (
         message: "You don't have permission to delete this job listing",
       };
 
-    const { data } = await getJobListingByIdByOrgId(id, orgId);
-    if (data)
+    const jobListing = await getJobListingByIdByOrgId(id, orgId);
+    if (!jobListing.data)
       return {
         success: false,
-        message: "You don't have permission to delete this job listing",
+        message: "Job-listing is not found",
       };
 
     if (!(await hasOrgUserPermission("job_listing.delete")))
@@ -343,19 +342,18 @@ export const deleteJobListing = async (
         message: "You don't have permission to delete this job listing",
       };
 
-    const [result] = await db
-      .delete(jobListingTable)
-      .where(eq(jobListingTable.id, id))
-      .returning({
-        id: jobListingTable.id,
-        organizationId: jobListingTable.organizationId,
-      });
+    await db.delete(jobListingTable).where(eq(jobListingTable.id, id));
 
     updateTag(jobListingsTag(orgId));
     updateTag(sideBarJobListingWithApplicationsTag(orgId, session.user.id));
 
-    return { success: true, message: "Job-listing deleted successfully" };
+    return {
+      success: true,
+      message: "Job-listing deleted successfully",
+      deleted: true,
+    };
   } catch (error) {
+    console.error("Error deleting job-listing:", error);
     return {
       success: false,
       message: "Failed to delete job-listing",
@@ -368,6 +366,9 @@ export const toggleJobListingStatus = async (
   id: string,
 ): Promise<{ success: boolean; message?: string }> => {
   try {
+    const session = await safeGetSession();
+    if (!session?.user) return { success: false, message: "Unauthorized" };
+
     const { orgId } = await getCurrentOrg();
     if (orgId == null)
       return {
@@ -396,14 +397,20 @@ export const toggleJobListingStatus = async (
       };
     }
 
-    await updateJobListing(id, {
-      status: newStatus,
-      isFeatured: newStatus === "published" ? undefined : false,
-      posted_at:
-        newStatus === "published" && data.posted_at == null
-          ? new Date()
-          : undefined,
-    });
+    await db
+      .update(jobListingTable)
+      .set({
+        status: newStatus,
+        isFeatured: newStatus === "published" ? data.isFeatured : false,
+        posted_at:
+          newStatus === "published" && data.posted_at == null
+            ? new Date()
+            : data.posted_at,
+      })
+      .where(eq(jobListingTable.id, id));
+
+    updateTag(jobListingsTag(orgId));
+    updateTag(sideBarJobListingWithApplicationsTag(orgId, session.user.id));
 
     const statusMessage =
       newStatus === "published"
@@ -413,7 +420,7 @@ export const toggleJobListingStatus = async (
     return { success: true, message: statusMessage };
   } catch (error) {
     console.error("Error changing job-listing status:", error);
-    return { success: true, message: "Failed to change job-listing status" };
+    return { success: false, message: "Failed to change job-listing status" };
   }
 };
 
@@ -422,6 +429,9 @@ export const toggleJobListingFeaturedStatus = async (
   id: string,
 ): Promise<{ success: boolean; message?: string }> => {
   try {
+    const session = await safeGetSession();
+    if (!session?.user) return { success: false, message: "Unauthorized" };
+
     const { orgId } = await getCurrentOrg();
     if (orgId == null)
       return {
@@ -450,9 +460,15 @@ export const toggleJobListingFeaturedStatus = async (
       };
     }
 
-    await updateJobListing(id, {
-      isFeatured: newFeaturedStatus,
-    });
+    await db
+      .update(jobListingTable)
+      .set({
+        isFeatured: newFeaturedStatus,
+      })
+      .where(eq(jobListingTable.id, id));
+
+    updateTag(jobListingsTag(orgId));
+    updateTag(sideBarJobListingWithApplicationsTag(orgId, session.user.id));
 
     const featuredMessage = newFeaturedStatus
       ? "Featured successfully"
@@ -462,7 +478,7 @@ export const toggleJobListingFeaturedStatus = async (
   } catch (error) {
     console.error("Error changing job-listing featured status:", error);
     return {
-      success: true,
+      success: false,
       message: "Failed to change job-listing featured status",
     };
   }
@@ -490,7 +506,7 @@ export const getPublishedJobListingCount = async (
   } catch (error) {
     console.error("Error getting published job listing count:", error);
     return {
-      success: true,
+      success: false,
       message: "Failed to fetch published job listing count",
     };
   }

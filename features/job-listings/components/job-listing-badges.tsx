@@ -45,11 +45,10 @@ export default function JobListingBadges({
   return (
     <>
       {isFeatured && (
-        // Custom edit Badge in globals.css
         <Badge
           className={cn(
             className,
-            "border-featured bg-featured/50 text-featured-foreground",
+            "border-primary/30 bg-primary/10 text-primary font-semibold",
           )}
         >
           Featured

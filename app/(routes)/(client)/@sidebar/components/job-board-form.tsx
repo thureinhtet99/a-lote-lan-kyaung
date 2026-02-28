@@ -34,10 +34,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useSidebar } from "@/components/ui/sidebar";
-import { StateSelectItems } from "../../../../../components/job-listings/state-select-items";
 import { jobBoardFormSchema } from "../job-board-form-schema";
 import z from "zod";
 import { Loader2Icon } from "lucide-react";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox";
+import states from "@/constants/states.json";
 
 const ANY_VALUE = "any";
 
@@ -46,6 +54,9 @@ export default function JobBoardForm() {
   const router = useRouter();
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
+  const countries = Object.values(states).sort((nameA, nameB) =>
+    nameA.localeCompare(nameB),
+  );
 
   const form = useForm({
     resolver: zodResolver(jobBoardFormSchema),
@@ -54,7 +65,7 @@ export default function JobBoardForm() {
       city: searchParams.get("city") ?? "",
       locationRequirement:
         (searchParams.get("location") as LocationRequirementType) ?? ANY_VALUE,
-      state: searchParams.get("state") ?? ANY_VALUE,
+      state: searchParams.get("state") ?? "Myanmar",
       experienceLevel:
         (searchParams.get("experience") as ExperienceLevelType) ?? ANY_VALUE,
       type: (searchParams.get("type") as JobListingTypeType) ?? ANY_VALUE,
@@ -149,18 +160,26 @@ export default function JobBoardForm() {
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>State</FormLabel>
-              <Select value={field.value} onValueChange={field.onChange}>
-                <FormControl>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select state" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value={ANY_VALUE}>Any</SelectItem>
-                  <StateSelectItems />
-                </SelectContent>
-              </Select>
+              <FormLabel>Country</FormLabel>
+              <Combobox
+                items={countries}
+                autoHighlight
+                value={field.value ?? ""}
+                defaultValue="Myanmar"
+                onValueChange={field.onChange}
+              >
+                <ComboboxInput showClear placeholder="Select a country" />
+                <ComboboxContent>
+                  <ComboboxEmpty>No items found.</ComboboxEmpty>
+                  <ComboboxList>
+                    {(item) => (
+                      <ComboboxItem key={item} value={item}>
+                        {item}
+                      </ComboboxItem>
+                    )}
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
             </FormItem>
           )}
         />

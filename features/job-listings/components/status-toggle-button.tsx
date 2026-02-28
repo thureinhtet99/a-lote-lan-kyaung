@@ -53,7 +53,8 @@ export default function StatusToggleButton({
           areYouSure={shouldShowAlert}
           sureDescription={alertDescription}
         >
-          {statusToggleButtonText(status)}
+          <EyeIcon className="size-4" />
+          Publish
         </ActionButton>
       ) : (
         <ActionButton
@@ -62,31 +63,10 @@ export default function StatusToggleButton({
           areYouSure={shouldShowAlert}
           sureDescription={alertDescription}
         >
-          {statusToggleButtonText(status)}
+          <EyeOffIcon className="size-4" />
+          Delist
         </ActionButton>
       )}
     </CheckCondition>
   );
 }
-
-const statusToggleButtonText = (status: JobListingStatusType) => {
-  switch (status) {
-    case "delisted":
-    case "draft":
-      return (
-        <>
-          <EyeIcon className="size-4" />
-          Publish
-        </>
-      );
-    case "published":
-      return (
-        <>
-          <EyeOffIcon className="size-4" />
-          Delist
-        </>
-      );
-    default:
-      throw new Error(`Invalid status: ${status satisfies never}`);
-  }
-};

@@ -38,10 +38,14 @@ export default function ActionButton({
 
   const performAction = () => {
     startTransition(async () => {
-      const { success, message } = await action();
+      const { success, message, deleted } = await action();
       if (success) {
         toast.success(message);
-        router.push(APP_ROUTES.EMPLOYER.HOME);
+        if (deleted) {
+          router.push(APP_ROUTES.EMPLOYER.HOME);
+        } else {
+          router.refresh();
+        }
       } else {
         toast.error(message);
       }

@@ -37,7 +37,6 @@ import {
 import { MarkdownEditor } from "@/components/markdown/markdown-editor";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { StateSelectItems } from "../../../components/job-listings/state-select-items";
 import {
   createJobListing,
   updateJobListing,
@@ -63,7 +62,7 @@ const createDefaultValues: z.infer<typeof jobListingFormSchema> = {
   type: "full-time",
   wage: 0,
   wageInterval: "monthly",
-  state: "",
+  state: "Myanmar",
   city: "",
 };
 
@@ -234,11 +233,12 @@ export default function JobListingForm({
                   <FormLabel>Country</FormLabel>
                   <Combobox
                     items={countries}
+                    defaultValue="Myanmar"
                     autoHighlight
                     value={field.value ?? ""}
                     onValueChange={field.onChange}
                   >
-                    <ComboboxInput placeholder="Select a country" />
+                    <ComboboxInput showClear placeholder="Select a country" />
                     <ComboboxContent>
                       <ComboboxEmpty>No items found.</ComboboxEmpty>
                       <ComboboxList>

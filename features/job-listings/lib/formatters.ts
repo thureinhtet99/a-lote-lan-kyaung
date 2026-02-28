@@ -96,14 +96,14 @@ export const formatWage = (wage: number, wageInterval: WageIntervalType) => {
 };
 
 export const formatJobListingLocation = (
-  stateAbbreviation: string | null,
+  state: string | null,
   city: string | null,
 ) => {
-  if (stateAbbreviation == null && city == null) return "none";
+  if (!state && !city) return "";
 
   const locationParts = [];
   if (city != null) locationParts.push(city);
-  if (stateAbbreviation != null) locationParts.push(stateAbbreviation);
+  if (state != null) locationParts.push(state);
 
   return locationParts.join(", ");
 };

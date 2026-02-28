@@ -1,4 +1,5 @@
 import { JobListingStatusType } from "@/drizzle/schema";
+import { EyeIcon } from "lucide-react";
 
 export const nextJobListingStatus = (status: JobListingStatusType) => {
   switch (status) {

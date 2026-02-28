@@ -33,7 +33,7 @@ const SuspendedComponent = async ({
   if (!jobListing.data) return notFound();
 
   return (
-    <div className="max-w-7xl mx-auto p-4 @container">
+    <div className="max-w-7xl mx-auto px-10 py-8 xl:p-4 @container">
       <h1 className="text-2xl font-bold mb-2">Edit Job Listing</h1>
       <p className="text-muted-foreground mb-6">
         This does not post the listing yet. It just saves a draft.

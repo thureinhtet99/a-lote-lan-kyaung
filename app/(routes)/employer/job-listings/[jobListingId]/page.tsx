@@ -53,7 +53,7 @@ const SuspendedComponent = async ({
   if (!jobListing.data) return notFound();
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto p-4 @container">
+    <div className="space-y-8 max-w-7xl mx-auto px-10 py-8 xl:p-4 @container">
       <div className="flex items-center justify-between gap-4 @max-4xl:flex-col @max-4xl:items-start">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
@@ -109,7 +109,7 @@ const SuspendedComponent = async ({
             condition={() => hasOrgUserPermission("job_listing.delete")}
           >
             <ActionButton
-              action={deleteJobListing.bind(null, jobListing.data.id)}
+              action={deleteJobListing.bind(null, jobListing.data?.id)}
               variant="destructive"
               areYouSure
             >
