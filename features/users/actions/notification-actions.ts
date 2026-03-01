@@ -1,7 +1,7 @@
 "use server";
 
 import z from "zod";
-import { userNotificationSettingsSchema } from "./schema";
+import { userNotificationSettingsSchema } from "../user-schema";
 import { getCurrentUser } from "@/lib/auth/auth-helpers";
 import { updateUserNotificationSettingDb } from "../db/user-noti-settings";
 

@@ -15,7 +15,6 @@ export default function JobListingBadges({
   jobListing: {
     wage,
     wageInterval,
-    state,
     city,
     type,
     experienceLevel,
@@ -28,7 +27,6 @@ export default function JobListingBadges({
     typeof jobListingTable.$inferSelect,
     | "wage"
     | "wageInterval"
-    | "state"
     | "city"
     | "type"
     | "experienceLevel"
@@ -45,12 +43,7 @@ export default function JobListingBadges({
   return (
     <>
       {isFeatured && (
-        <Badge
-          className={cn(
-            className,
-            "border-primary/30 bg-primary/10 text-primary font-semibold",
-          )}
-        >
+        <Badge className={cn(className, "bg-primary font-semibold")}>
           Featured
         </Badge>
       )}
@@ -62,10 +55,10 @@ export default function JobListingBadges({
         </Badge>
       )}
 
-      {(state != null || city != null) && (
+      {city != null && (
         <Badge {...badgeType}>
           <MapPinIcon className="size-10" />
-          {formatJobListingLocation(state, city)}
+          {formatJobListingLocation(city)}
         </Badge>
       )}
 

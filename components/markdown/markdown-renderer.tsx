@@ -7,7 +7,7 @@ type MarkdownRendererType = {
 };
 
 export const markdownClassNames =
-  "max-w-none prose prose-neutral dark:prose-invert font-sans";
+  "max-w-none prose prose-neutral font-inter text-black";
 
 export default function MarkdownRenderer({
   className,

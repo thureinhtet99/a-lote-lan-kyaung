@@ -8,6 +8,14 @@ import { Column } from "@tanstack/react-table";
 import { Key, ReactNode } from "react";
 import z from "zod";
 
+// Cities
+export type CityType = {
+  city: string;
+  lat: string;
+  lng: string;
+  country: string;
+};
+
 // Logo
 export type LogoType = {
   className?: string;

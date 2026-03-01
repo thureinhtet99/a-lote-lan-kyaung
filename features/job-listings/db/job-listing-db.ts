@@ -11,29 +11,26 @@ import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/
 import {
   jobListingIdTag,
   jobListingsTag,
+  mostRecentJobListingIdTag,
   sideBarJobListingWithApplicationsTag,
 } from "@/lib/utils/data-cache";
 import { jobListingFormSchema } from "../job-listing-schema";
 import { nextJobListingStatus } from "../lib/utils";
-import { auth } from "@/lib/auth/auth";
-import { headers } from "next/headers";
+
+// export const getJobListingById = async (id: string) => {
+//   return await db.query.jobListingTable.findFirst({
+//     where: and(
+//       eq(jobListingTable.id, id),
+//       eq(jobListingTable.status, "published"),
+//     ),
+//     columns: { id: true },
+//   });
+// };
 
 // Get job listings with applications count
-export const getJobListingWithApplications = async (
-  orgId: string,
-): Promise<{
-  success: boolean;
-  message?: string;
-  data: {
-    id: string;
-    title: string;
-    status: "draft" | "published" | "delisted";
-    applications: number;
-  }[];
-}> => {
+export const getJobListingWithApplications = async (orgId: string) => {
   try {
     const session = await safeGetSession();
-
     if (!session?.user)
       return { success: false, message: "Unauthorized", data: [] };
 
@@ -41,7 +38,7 @@ export const getJobListingWithApplications = async (
 
     return await getJobListingsWithApplicationsCached(orgId, userId);
   } catch (error) {
-    console.error("Error fetching job-listings with applications:", error);
+    console.error("Error fetching job-listings with applications: ", error);
     return {
       success: false,
       message: "Failed to fetch job-listings with applications",
@@ -53,16 +50,7 @@ export const getJobListingWithApplications = async (
 const getJobListingsWithApplicationsCached = async (
   orgId: string,
   userId: string,
-): Promise<{
-  success: boolean;
-  message?: string;
-  data: {
-    id: string;
-    title: string;
-    status: "draft" | "published" | "delisted";
-    applications: number;
-  }[];
-}> => {
+) => {
   "use cache";
 
   const result = await db
@@ -91,39 +79,28 @@ const getJobListingsWithApplicationsCached = async (
   };
 };
 
-export const getJobListingsByOrgId = async (
-  orgId: string,
-): Promise<{
-  success: boolean;
-  message?: string;
-  data: (typeof jobListingTable.$inferSelect)[];
-}> => {
+export const getJobListingsByOrgId = async (orgId: string) => {
   try {
     return await getJobListingsByOrgIdCached(orgId);
   } catch (error) {
-    console.error("Error fetching job-listings by organization id :", error);
+    console.error("Error fetching job-listings by organization: ", error);
     return {
       success: false,
-      message: "Failed to fetch job-listings by organization id",
+      message: "Failed to fetch job-listings by organization",
       data: [],
     };
   }
 };
 
-const getJobListingsByOrgIdCached = async (
-  orgId: string,
-): Promise<{
-  success: boolean;
-  message?: string;
-  data: (typeof jobListingTable.$inferSelect)[];
-}> => {
+const getJobListingsByOrgIdCached = async (orgId: string) => {
   "use cache";
-  cacheTag(jobListingsTag(orgId));
-  cacheLife("days");
 
   const result = await db.query.jobListingTable.findMany({
     where: eq(jobListingTable.organizationId, orgId),
   });
+
+  cacheTag(jobListingsTag(orgId));
+  cacheLife("days");
 
   return {
     success: true,
@@ -132,46 +109,48 @@ const getJobListingsByOrgIdCached = async (
   };
 };
 
-export const getJobListingByIdByOrgId = async (
-  id: string,
-  orgId: string,
-): Promise<{
-  success: boolean;
-  message?: string;
-  data?: typeof jobListingTable.$inferSelect;
-}> => {
+export const getJobListingByIdByOrgId = async (id: string, orgId: string) => {
   try {
-    const result = await db.query.jobListingTable.findFirst({
-      where: and(
-        eq(jobListingTable.id, id),
-        eq(jobListingTable.organizationId, orgId),
-      ),
-    });
-    return {
-      success: true,
-      message: "Job-listings by id by organization id fetched successfully",
-      data: result,
-    };
+    return await getJobListingByIdByOrgIdCached(id, orgId);
   } catch (error) {
-    console.error(
-      "Error fetching job-listings by id by organization id :",
-      error,
-    );
+    console.error("Error fetching job-listing by organization: ", error);
     return {
       success: false,
-      message: "Failed to fetch job-listings by id by organization id",
+      message: "Failed to fetch job-listings by organization",
     };
   }
 };
 
+const getJobListingByIdByOrgIdCached = async (id: string, orgId: string) => {
+  "use cache";
+  const result = await db.query.jobListingTable.findFirst({
+    where: and(
+      eq(jobListingTable.id, id),
+      eq(jobListingTable.organizationId, orgId),
+    ),
+  });
+  if (!result)
+    return {
+      success: true,
+      message: "Job-listings by organization fetched successfully",
+    };
+
+  cacheTag(jobListingIdTag(orgId, id));
+  cacheLife("days");
+
+  return {
+    success: true,
+    message: "Job-listing by organization fetched successfully",
+    data: result,
+  };
+};
+
 // Get most recent job listing
-export const getMostRecentJobListing = async (
-  orgId: string,
-): Promise<{ success: boolean; message?: string; data?: { id: string } }> => {
+export const getMostRecentJobListing = async (orgId: string) => {
   try {
     return await getMostRecentJobListingCached(orgId);
   } catch (error) {
-    console.error("Failed to get most recent job-listings:", error);
+    console.error("Failed to get most recent job-listings: ", error);
     return {
       success: true,
       message: "Most recent job-listings fetched successfully",
@@ -179,9 +158,7 @@ export const getMostRecentJobListing = async (
   }
 };
 
-const getMostRecentJobListingCached = async (
-  orgId: string,
-): Promise<{ success: boolean; message?: string; data: { id: string } }> => {
+const getMostRecentJobListingCached = async (orgId: string) => {
   "use cache";
 
   const [result] = await db
@@ -191,7 +168,7 @@ const getMostRecentJobListingCached = async (
     .orderBy(desc(jobListingTable.created_at))
     .limit(1);
 
-  cacheTag(jobListingIdTag(orgId, result.id));
+  cacheTag(mostRecentJobListingIdTag(orgId, result.id));
   cacheLife("hours");
 
   return {
@@ -202,19 +179,64 @@ const getMostRecentJobListingCached = async (
 };
 
 // Get by id
-export const getJobListingById = async (jobListingId: string) => {
-  const [result] = await db
-    .select()
-    .from(jobListingTable)
-    .where(eq(jobListingTable.id, jobListingId));
+export const getPublishedJobListingByIdWithOrganization = async (
+  jobListingId: string,
+) => {
+  try {
+    return await getPublishedJobListingByIdWithOrganizationCached(jobListingId);
+  } catch (error) {
+    console.error(
+      "Error fetching  published job-listing by organization: ",
+      error,
+    );
+    return {
+      success: false,
+      message: "Failed to fetch published job-listing by organization",
+    };
+  }
+};
 
-  return result;
+const getPublishedJobListingByIdWithOrganizationCached = async (
+  jobListingId: string,
+) => {
+  "use cache";
+  const result = await db.query.jobListingTable.findFirst({
+    where: and(
+      eq(jobListingTable.id, jobListingId),
+      eq(jobListingTable.status, "published"),
+    ),
+    with: {
+      organization: {
+        columns: {
+          id: true,
+          name: true,
+          logo: true,
+        },
+      },
+    },
+  });
+
+  if (!result) return { success: false, message: "Job-listing not found" };
+  if (!result.organization)
+    return {
+      success: false,
+      message: "Organization not found for this job-listing",
+    };
+
+  cacheTag(jobListingIdTag(result.organization.id, result.id));
+  cacheLife("max");
+
+  return {
+    success: true,
+    message: "Job-listing by id fetched successfully",
+    data: result,
+  };
 };
 
 // Create
 export const createJobListing = async (
   unsafeData: z.infer<typeof jobListingFormSchema>,
-): Promise<{ success: boolean; message?: string; data?: { id: string } }> => {
+) => {
   try {
     const session = await safeGetSession();
     if (!session?.user) return { success: false, message: "Unauthorized" };
@@ -254,7 +276,7 @@ export const createJobListing = async (
       data: result,
     };
   } catch (error) {
-    console.error("Error creating job-listing:", error);
+    console.error("Error creating job-listing: ", error);
     return {
       success: false,
       message: "Failed to create job-listing",
@@ -306,7 +328,7 @@ export const updateJobListing = async (
       message: "Job listing updated successfully",
     };
   } catch (error) {
-    console.error("Error updating job-listing:", error);
+    console.error("Error updating job-listing: ", error);
     return {
       success: false,
       message: "Failed to update job-listing",
@@ -315,9 +337,7 @@ export const updateJobListing = async (
 };
 
 // Delete
-export const deleteJobListing = async (
-  id: string,
-): Promise<{ success: boolean; message?: string; deleted?: boolean }> => {
+export const deleteJobListing = async (id: string) => {
   try {
     const session = await safeGetSession();
     if (!session?.user) return { success: false, message: "Unauthorized" };
@@ -362,9 +382,7 @@ export const deleteJobListing = async (
 };
 
 // Toggle status
-export const toggleJobListingStatus = async (
-  id: string,
-): Promise<{ success: boolean; message?: string }> => {
+export const toggleJobListingStatus = async (id: string) => {
   try {
     const session = await safeGetSession();
     if (!session?.user) return { success: false, message: "Unauthorized" };
@@ -425,9 +443,7 @@ export const toggleJobListingStatus = async (
 };
 
 // Toggle featured status
-export const toggleJobListingFeaturedStatus = async (
-  id: string,
-): Promise<{ success: boolean; message?: string }> => {
+export const toggleJobListingFeaturedStatus = async (id: string) => {
   try {
     const session = await safeGetSession();
     if (!session?.user) return { success: false, message: "Unauthorized" };
@@ -485,9 +501,7 @@ export const toggleJobListingFeaturedStatus = async (
 };
 
 // Get published job listings count
-export const getPublishedJobListingCount = async (
-  orgId: string,
-): Promise<{ success: boolean; message?: string; data?: number }> => {
+export const getPublishedJobListingCount = async (orgId: string) => {
   try {
     const [result] = await db
       .select({ count: count() })
@@ -501,10 +515,10 @@ export const getPublishedJobListingCount = async (
     return {
       success: true,
       message: "Published job listing count fetched successfully",
-      data: result?.count ?? 0,
+      data: result.count,
     };
   } catch (error) {
-    console.error("Error getting published job listing count:", error);
+    console.error("Error getting published job listing count: ", error);
     return {
       success: false,
       message: "Failed to fetch published job listing count",

@@ -16,7 +16,7 @@ export function Logo({ className, size = "md", showText = true }: LogoType) {
     <Link
       href={APP_ROUTES.HOME}
       className={cn(
-        "flex items-center justify-center gap-4 group-data-[state=collapsed]:gap-0 transition-all duration-300 ease-in-out cursor-pointer",
+        "flex items-center justify-center gap-4 group-data-[state=collapsed]:gap-0 transition-all duration-300 ease-in-out cursor-pointer text-white",
         className,
       )}
     >
@@ -25,12 +25,7 @@ export function Logo({ className, size = "md", showText = true }: LogoType) {
       {/* Logo Text */}
       {showText && (
         <div className="flex flex-col leading-tight overflow-hidden transition-all duration-300 ease-in-out group-data-[state=collapsed]:w-0 group-data-[state=collapsed]:opacity-0">
-          <span
-            className={cn(
-              "font-bold text-primary whitespace-nowrap",
-              textSizes[size],
-            )}
-          >
+          <span className={cn("font-bold whitespace-nowrap", textSizes[size])}>
             {APP_CONFIG.APP_NAME}
           </span>
         </div>

@@ -45,8 +45,9 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/combobox";
-import states from "@/constants/states.json";
+import cities from "@/constants/cities.json";
 import { Suspense } from "react";
+import { CityType } from "@/types/index.type";
 
 const ANY_VALUE = "any";
 
@@ -63,18 +64,17 @@ const SuspendedComponent = () => {
   const router = useRouter();
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
-  const countries = Object.values(states).sort((nameA, nameB) =>
-    nameA.localeCompare(nameB),
-  );
+  const cityNames = (Object.values(cities) as CityType[])
+    .map((item) => item.city)
+    .sort((nameA, nameB) => nameA.localeCompare(nameB));
 
   const form = useForm({
     resolver: zodResolver(jobBoardFormSchema),
     defaultValues: {
       title: searchParams.get("title") ?? "",
-      city: searchParams.get("city") ?? "",
+      city: searchParams.get("city") ?? ANY_VALUE,
       locationRequirement:
         (searchParams.get("location") as LocationRequirementType) ?? ANY_VALUE,
-      state: searchParams.get("state") ?? "Myanmar",
       experienceLevel:
         (searchParams.get("experience") as ExperienceLevelType) ?? ANY_VALUE,
       type: (searchParams.get("type") as JobListingTypeType) ?? ANY_VALUE,
@@ -85,13 +85,11 @@ const SuspendedComponent = () => {
     const newParams = new URLSearchParams();
 
     if (data.title) newParams.set("title", data.title);
-    if (data.city) newParams.set("city", data.city);
 
     if (data.locationRequirement && data.locationRequirement !== ANY_VALUE)
       newParams.set("location", data.locationRequirement);
 
-    if (data.state && data.state !== ANY_VALUE)
-      newParams.set("state", data.state);
+    if (data.city && data.city !== ANY_VALUE) newParams.set("city", data.city);
 
     if (data.experienceLevel && data.experienceLevel !== ANY_VALUE)
       newParams.set("experience", data.experienceLevel);
@@ -137,7 +135,7 @@ const SuspendedComponent = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value={ANY_VALUE}>Any</SelectItem>
+                  <SelectItem value={ANY_VALUE}>any</SelectItem>
                   {locationRequirements.map((require, index) => (
                     <SelectItem key={index} value={require}>
                       {formatLocationRequirement(require)}
@@ -156,30 +154,15 @@ const SuspendedComponent = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>City</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Enter city name..." />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        {/* State */}
-        <FormField
-          name="state"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Country</FormLabel>
               <Combobox
-                items={countries}
+                items={cityNames}
                 autoHighlight
-                value={field.value ?? ""}
-                defaultValue="Myanmar"
+                value={field.value}
                 onValueChange={field.onChange}
               >
-                <ComboboxInput showClear placeholder="Select a country" />
+                <ComboboxInput showClear placeholder="Select a city" />
                 <ComboboxContent>
-                  <ComboboxEmpty>No items found.</ComboboxEmpty>
+                  <ComboboxEmpty>No city found.</ComboboxEmpty>
                   <ComboboxList>
                     {(item) => (
                       <ComboboxItem key={item} value={item}>
@@ -207,7 +190,7 @@ const SuspendedComponent = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value={ANY_VALUE}>Any</SelectItem>
+                  <SelectItem value={ANY_VALUE}>any</SelectItem>
                   {jobListingTypes.map((type, index) => (
                     <SelectItem key={index} value={type}>
                       {formatJobType(type)}
@@ -233,7 +216,7 @@ const SuspendedComponent = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value={ANY_VALUE}>Any</SelectItem>
+                  <SelectItem value={ANY_VALUE}>any</SelectItem>
                   {experienceLevels.map((level, index) => (
                     <SelectItem key={index} value={level}>
                       {formatExpLevel(level)}

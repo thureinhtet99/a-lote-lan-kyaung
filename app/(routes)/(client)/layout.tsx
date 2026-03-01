@@ -9,6 +9,7 @@ import {
   LayoutDashboardIcon,
   LogInIcon,
 } from "lucide-react";
+import Loading from "@/components/shared/loading";
 
 export default function ClientLayout({
   children,
@@ -22,7 +23,7 @@ export default function ClientLayout({
       content={
         <>
           {sidebar}
-          <Suspense>
+          <Suspense fallback={<Loading className="mt-auto" />}>
             <SidebarNavMenu
               className="mt-auto"
               items={[
@@ -31,7 +32,6 @@ export default function ClientLayout({
                   icon: <ClipboardListIcon />,
                   label: "Job board",
                 },
-
                 {
                   href: APP_ROUTES.EMPLOYER.HOME,
                   icon: <LayoutDashboardIcon />,
@@ -59,7 +59,7 @@ export default function ClientLayout({
       }
       footerButton={<SidebarUserButton />}
     >
-      <div className="flex-1 items-center justify-center ">{children}</div>
+      <div className="flex-1">{children}</div>
     </AppSidebar>
   );
 }

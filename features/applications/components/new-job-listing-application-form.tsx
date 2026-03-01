@@ -13,11 +13,11 @@ import { MarkdownEditor } from "@/components/markdown/markdown-editor";
 import { Button } from "@/components/ui/button";
 import LoadingSwap from "@/components/shared/loading-swap";
 import z from "zod";
-import { newJobListingApplicationSchema } from "../actions/schema";
+import { newJobListingApplicationSchema } from "../application-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { createJobListingApplication } from "../actions/actions";
 import { toast } from "sonner";
+import { createApplication } from "../db/application-db";
 
 export function NewJobListingApplicationForm({
   jobListingId,
@@ -32,13 +32,9 @@ export function NewJobListingApplicationForm({
   const onSubmit = async (
     data: z.infer<typeof newJobListingApplicationSchema>,
   ) => {
-    const result = await createJobListingApplication(jobListingId, data);
-    if (result.error) {
-      toast.error(result.message);
-      return;
-    }
-
-    toast.success(result.message);
+    const result = await createApplication(jobListingId, data);
+    if (result.success) toast.success(result.message);
+    else toast.error(result.message);
   };
 
   return (

@@ -28,16 +28,21 @@ export default function AppSidebar({
         {/* Left */}
         <Sidebar
           collapsible="icon"
-          className="overflow-hidden border-r border-primary/10"
+          className="overflow-hidden border-r border-primary"
         >
-          <SidebarHeader className="flex-row items-center justify-center gap-2 py-4">
+          <SidebarHeader className="px-4 h-[72px] flex items-center justify-center border-b border-sidebar-border bg-gradient-to-r from-accent to-primary">
             <Logo size="sm" showText={true} />
           </SidebarHeader>
 
-          <SidebarContent>{content}</SidebarContent>
+          <SidebarContent className="relative pt-8 overflow-y-auto">
+            <div className="hidden md:flex items-center absolute top-1 right-1 z-20">
+              <SidebarTrigger className="size-8 bg-background text-foreground shadow-sm hover:bg-muted mr-0.5" />
+            </div>
+            {content}
+          </SidebarContent>
 
           <SignedIn>
-            <SidebarFooter className="border-primary/10 border-t">
+            <SidebarFooter className="border-t border-sidebar-border bg-sidebar px-2 py-2">
               <SidebarMenu>
                 <SidebarMenuItem>{footerButton}</SidebarMenuItem>
               </SidebarMenu>
@@ -46,8 +51,7 @@ export default function AppSidebar({
         </Sidebar>
 
         {/* Right */}
-        <main className="flex-1 bg-gradient-to-br from-background via-primary/[0.02] to-secondary/[0.02] relative">
-          <SidebarTrigger className="absolute hidden md:inline-flex" />
+        <main className="flex-1 bg-background overflow-y-auto flex flex-col min-w-0">
           {children}
         </main>
       </AppSidebarClient>

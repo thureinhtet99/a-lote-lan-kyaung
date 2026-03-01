@@ -95,15 +95,11 @@ export const formatWage = (wage: number, wageInterval: WageIntervalType) => {
   }
 };
 
-export const formatJobListingLocation = (
-  state: string | null,
-  city: string | null,
-) => {
-  if (!state && !city) return "";
+export const formatJobListingLocation = (city: string | null) => {
+  if (!city) return "";
 
   const locationParts = [];
   if (city != null) locationParts.push(city);
-  if (state != null) locationParts.push(state);
 
   return locationParts.join(", ");
 };

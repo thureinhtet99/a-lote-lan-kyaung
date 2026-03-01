@@ -106,8 +106,16 @@ async function seed() {
     const userPlan: SeedUser[] = [
       { email: "admin.one@test.com", name: "Admin One", role: "admin" },
       { email: "admin.two@test.com", name: "Admin Two", role: "admin" },
-      { email: "employer.one@test.com", name: "Employer One", role: "employer" },
-      { email: "employer.two@test.com", name: "Employer Two", role: "employer" },
+      {
+        email: "employer.one@test.com",
+        name: "Employer One",
+        role: "employer",
+      },
+      {
+        email: "employer.two@test.com",
+        name: "Employer Two",
+        role: "employer",
+      },
       {
         email: "employer.three@test.com",
         name: "Employer Three",
@@ -308,14 +316,13 @@ async function seed() {
 
     const jobListings = orgSeeds.flatMap((org, index) => {
       const stateCity = [
-        ["California", "San Francisco"],
-        ["New York", "New York"],
-        ["Texas", "Austin"],
-        ["Washington", "Seattle"],
-        ["Massachusetts", "Boston"],
-        ["Illinois", "Chicago"],
+        ["Yangon", "Mandalay"],
+        ["Bago", "Pakokku"],
+        ["An", "Nay Pyi Taw"],
+        ["Kyaukse", "Sagaing"],
+        ["Magway"],
       ] as const;
-      const [state, city] = stateCity[index];
+      const [city] = stateCity[index];
 
       return [
         {
@@ -325,7 +332,6 @@ async function seed() {
           description: `Build and scale products at ${org.name}.`,
           wage: 130000 + index * 2000,
           wageInterval: "yearly" as const,
-          state,
           city,
           isFeatured: true,
           locationRequirement: "hybrid" as const,
@@ -341,7 +347,7 @@ async function seed() {
           description: `Design polished product experiences for ${org.name}.`,
           wage: 90000 + index * 1000,
           wageInterval: "yearly" as const,
-          state,
+
           city,
           isFeatured: false,
           locationRequirement: "remote" as const,
@@ -357,7 +363,7 @@ async function seed() {
           description: `Internship role at ${org.name}.`,
           wage: 24 + index,
           wageInterval: "hourly" as const,
-          state,
+
           city,
           isFeatured: false,
           locationRequirement: "on-site" as const,
@@ -375,7 +381,9 @@ async function seed() {
 
     console.log("📬 Creating applications from regular users...");
 
-    const publishedListings = jobListings.filter((j) => j.status === "published");
+    const publishedListings = jobListings.filter(
+      (j) => j.status === "published",
+    );
     const applicationRows = users.flatMap((u, userIndex) => {
       const first = publishedListings[userIndex * 2];
       const second = publishedListings[userIndex * 2 + 1];
@@ -392,7 +400,10 @@ async function seed() {
           jobListingId: second.id,
           userId: u.id,
           coverLetter: `I believe I am a strong fit for this opportunity.`,
-          status: userIndex % 2 === 0 ? ("interviewed" as const) : ("applied" as const),
+          status:
+            userIndex % 2 === 0
+              ? ("interviewed" as const)
+              : ("applied" as const),
           rating: userIndex % 2 === 0 ? 4 : null,
         },
       ];

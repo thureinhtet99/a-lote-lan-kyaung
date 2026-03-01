@@ -23,12 +23,22 @@ export const jobListingIdTag = (orgId: string, jobListingId: string) => {
   return `organization-${orgId}-job-listing-${jobListingId}` as const;
 };
 
-// JobListing Application
-export const jobListingApplicationsTag = (
+// Most recent jobListing Id
+export const mostRecentJobListingIdTag = (
+  orgId: string,
   jobListingId: string,
-  userId: string,
 ) => {
-  return `job-listing-${jobListingId}-user-${userId}-applications` as const;
+  return `organization-${orgId}-most-recent-job-listing-${jobListingId}` as const;
+};
+
+// Application
+export const applicationTag = (jobListingId: string, userId: string) => {
+  return `job-listing-${jobListingId}-user-${userId}-application` as const;
+};
+
+// Application by job-listing id
+export const jobListingApplicationsTag = (jobListingId: string) => {
+  return `job-listing-${jobListingId}-applications` as const;
 };
 
 // Sidebar
@@ -36,17 +46,17 @@ export const sideBarJobListingWithApplicationsTag = (
   orgId: string,
   userId: string,
 ) => {
-  return `organization-${orgId}-user-${userId}-job-listings-applications` as const;
+  return `organization-${orgId}-user-${userId}-job-listings-application` as const;
 };
 
 // Resume
-export const userResumeTag = (userId: string) => {
-  return `user-${userId}-resumes` as const;
+export const resumeTag = (userId: string) => {
+  return `user-${userId}-resume` as const;
 };
 
 // Notification
 export const userNotificationTag = (userId: string) => {
-  return `user-${userId}-notifications` as const;
+  return `user-${userId}-notification` as const;
 };
 
 // Admin Dashboard Stats
