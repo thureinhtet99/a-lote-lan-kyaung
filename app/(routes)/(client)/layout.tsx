@@ -1,11 +1,10 @@
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
 import SidebarUserButton from "@/app/(routes)/(client)/@sidebar/components/sidebar-user-button";
 import AppSidebar from "@/components/layout/sidebar/app-sidebar";
 import SidebarNavMenu from "@/app/(routes)/(client)/@sidebar/components/sidebar-nav-menu";
 import { APP_ROUTES } from "@/constants/app-config";
 import {
   Building2Icon,
-  // BrainCircuitIcon,
   ClipboardListIcon,
   LayoutDashboardIcon,
   LogInIcon,
@@ -23,41 +22,39 @@ export default function ClientLayout({
       content={
         <>
           {sidebar}
-          <SidebarNavMenu
-            className="mt-auto"
-            items={[
-              {
-                href: APP_ROUTES.HOME,
-                icon: <ClipboardListIcon />,
-                label: "Job board",
-              },
-              // {
-              //   href: APP_ROUTES.AI_SEARCH,
-              //   icon: <BrainCircuitIcon />,
-              //   label: "AI search",
-              // },
-              {
-                href: APP_ROUTES.EMPLOYER.HOME,
-                icon: <LayoutDashboardIcon />,
-                label: "Employer dashboard",
-                authStatus: "signedIn",
-                roles: ["employer"],
-              },
-              {
-                href: APP_ROUTES.EMPLOYER.ORG,
-                icon: <Building2Icon />,
-                label: "Organizations",
-                authStatus: "signedIn",
-                roles: ["employer"],
-              },
-              {
-                href: APP_ROUTES.SIGN_IN,
-                icon: <LogInIcon />,
-                label: "Sign In",
-                authStatus: "signedOut",
-              },
-            ]}
-          />
+          <Suspense>
+            <SidebarNavMenu
+              className="mt-auto"
+              items={[
+                {
+                  href: APP_ROUTES.HOME,
+                  icon: <ClipboardListIcon />,
+                  label: "Job board",
+                },
+
+                {
+                  href: APP_ROUTES.EMPLOYER.HOME,
+                  icon: <LayoutDashboardIcon />,
+                  label: "Employer dashboard",
+                  authStatus: "signedIn",
+                  roles: ["employer"],
+                },
+                {
+                  href: APP_ROUTES.EMPLOYER.ORG,
+                  icon: <Building2Icon />,
+                  label: "Organizations",
+                  authStatus: "signedIn",
+                  roles: ["employer"],
+                },
+                {
+                  href: APP_ROUTES.SIGN_IN,
+                  icon: <LogInIcon />,
+                  label: "Sign In",
+                  authStatus: "signedOut",
+                },
+              ]}
+            />
+          </Suspense>
         </>
       }
       footerButton={<SidebarUserButton />}

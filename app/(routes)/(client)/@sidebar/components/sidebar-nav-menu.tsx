@@ -20,6 +20,20 @@ export default function SidebarNavMenu({
   items: SidebarNavMenuType;
   className?: string;
 }) {
+  return (
+    <Suspense>
+      <SuspendedComponent items={items} className={className} />
+    </Suspense>
+  );
+}
+
+function SuspendedComponent({
+  items,
+  className,
+}: {
+  items: SidebarNavMenuType;
+  className?: string;
+}) {
   const pathname = usePathname();
   const { data: session } = useSession();
 

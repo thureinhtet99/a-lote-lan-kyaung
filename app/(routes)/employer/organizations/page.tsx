@@ -15,7 +15,6 @@ export default function OrganizationsPage() {
 const SuspendedComponent = async () => {
   const session = await safeGetSession();
   const activeOrganizationId = session?.session.activeOrganizationId ?? null;
-
   const organizations = await getOrganizationsByEmployerId();
 
   return (

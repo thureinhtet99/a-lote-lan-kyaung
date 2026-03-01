@@ -43,21 +43,26 @@ export const getCurrentUser = async () => {
 
 // Get current organization from better-auth session
 export const getCurrentOrg = async () => {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-  if (!session) return { orgId: null, organization: undefined };
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+    if (!session) return { orgId: null, organization: undefined };
 
-  const orgId = session.session.activeOrganizationId ?? null;
-  if (!orgId) return { orgId: null, organization: undefined };
+    const orgId = session.session.activeOrganizationId ?? null;
+    if (!orgId) return { orgId: null, organization: undefined };
 
-  const org = await getOrgById(orgId);
-  const organization = org.data;
+    const org = await getOrgById(orgId);
+    const organization = org.data;
 
-  return {
-    orgId,
-    organization,
-  };
+    return {
+      orgId,
+      organization,
+    };
+  } catch (error) {
+    console.error("Get current organization error:", error);
+    return { orgId: null, organization: undefined };
+  }
 };
 
 // Check if the current user is an admin

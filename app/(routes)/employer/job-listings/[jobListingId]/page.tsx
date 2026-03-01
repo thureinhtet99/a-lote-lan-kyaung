@@ -61,7 +61,6 @@ const SuspendedComponent = async ({
           </h1>
 
           <div className="flex flex-wrap gap-2 mt-2">
-            {/* Custom Badge */}
             <Badge>{formatJobListingStatus(jobListing.data.status)}</Badge>
             <JobListingBadges jobListing={jobListing.data} />
           </div>

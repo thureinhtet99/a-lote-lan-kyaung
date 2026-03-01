@@ -22,10 +22,11 @@ import SidebarOrgButton from "@/features/organizations/components/sidebar-org-bu
 import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/permissions";
 import EmployerSidebarJobListingMenu from "@/features/employer/components/employer-sidebar-job-listing-menu";
 import { getJobListingWithApplications } from "@/features/job-listings/db/job-listing-db";
+import PageLoading from "@/components/shared/page-loading";
 
 export default function EmployerLayout({ children }: { children: ReactNode }) {
   return (
-    <Suspense fallback={<Loading />}>
+    <Suspense fallback={<PageLoading />}>
       <SuspendedComponent>{children}</SuspendedComponent>
     </Suspense>
   );
@@ -39,27 +40,31 @@ const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
     return (
       <AppSidebar
         content={
-          <SidebarNavMenuGroup
-            className="mt-auto"
-            items={[
-              {
-                href: APP_ROUTES.HOME,
-                icon: <ClipboardListIcon />,
-                label: "Job board",
-              },
-              {
-                href: APP_ROUTES.EMPLOYER.ORG,
-                icon: <Building2Icon />,
-                label: "Organizations",
-              },
-              {
-                href: APP_ROUTES.SIGN_IN,
-                icon: <LogInIcon />,
-                label: "Sign In",
-                authStatus: "signedOut",
-              },
-            ]}
-          />
+          <Suspense fallback={<Loading />}>
+            <SidebarNavMenuGroup
+              className="mt-auto"
+              items={[
+                {
+                  href: APP_ROUTES.HOME,
+                  icon: <ClipboardListIcon />,
+                  label: "Job board",
+                },
+                {
+                  href: APP_ROUTES.EMPLOYER.ORG,
+                  icon: <Building2Icon />,
+                  label: "Organizations",
+                  authStatus: "signedIn",
+                  roles: ["employer"],
+                },
+                {
+                  href: APP_ROUTES.SIGN_IN,
+                  icon: <LogInIcon />,
+                  label: "Sign In",
+                  authStatus: "signedOut",
+                },
+              ]}
+            />
+          </Suspense>
         }
         footerButton={<SidebarOrgButton />}
       >
@@ -101,37 +106,39 @@ const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          <SidebarNavMenuGroup
-            className="mt-auto"
-            items={[
-              {
-                href: APP_ROUTES.HOME,
-                icon: <ClipboardListIcon />,
-                label: "Job board",
-              },
-              {
-                href: APP_ROUTES.EMPLOYER.HOME,
-                icon: <LayoutDashboardIcon />,
-                label: "Employer dashboard",
-                activePathPrefixes: [APP_ROUTES.EMPLOYER.JOB_LISTINGS],
-                authStatus: "signedIn",
-                roles: ["employer"],
-              },
-              {
-                href: APP_ROUTES.EMPLOYER.ORG,
-                icon: <Building2Icon />,
-                label: "Organizations",
-                authStatus: "signedIn",
-                roles: ["employer"],
-              },
-              {
-                href: APP_ROUTES.SIGN_IN,
-                icon: <LogInIcon />,
-                label: "Sign In",
-                authStatus: "signedOut",
-              },
-            ]}
-          />
+          <Suspense fallback={<Loading />}>
+            <SidebarNavMenuGroup
+              className="mt-auto"
+              items={[
+                {
+                  href: APP_ROUTES.HOME,
+                  icon: <ClipboardListIcon />,
+                  label: "Job board",
+                },
+                {
+                  href: APP_ROUTES.EMPLOYER.HOME,
+                  icon: <LayoutDashboardIcon />,
+                  label: "Employer dashboard",
+                  activePathPrefixes: [APP_ROUTES.EMPLOYER.JOB_LISTINGS],
+                  authStatus: "signedIn",
+                  roles: ["employer"],
+                },
+                {
+                  href: APP_ROUTES.EMPLOYER.ORG,
+                  icon: <Building2Icon />,
+                  label: "Organizations",
+                  authStatus: "signedIn",
+                  roles: ["employer"],
+                },
+                {
+                  href: APP_ROUTES.SIGN_IN,
+                  icon: <LogInIcon />,
+                  label: "Sign In",
+                  authStatus: "signedOut",
+                },
+              ]}
+            />
+          </Suspense>
         </>
       }
       footerButton={<SidebarOrgButton />}

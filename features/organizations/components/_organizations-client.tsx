@@ -61,9 +61,9 @@ export default function OrganizationsClient({
       );
 
       if (result.success) {
+        toast.success(result.message);
         setShowCreateDialog(false);
         setNewOrgName("");
-        toast.success(result.message);
         router.refresh();
       } else {
         toast.error(result.message);
@@ -89,17 +89,14 @@ export default function OrganizationsClient({
 
   const handleSwitchOrganization = async (orgId: string) => {
     setSwitchingId(orgId);
-
     startTransition(async () => {
       const result = await switchOrganization(orgId);
       if (result.success) {
         toast.success(result.message);
-        // Force refresh to update server components (sidebar, job listings, etc.)
         router.refresh();
         setSwitchingId(null);
-        if (result.redirectTo && pathname !== APP_ROUTES.EMPLOYER.ORG) {
+        if (result.redirectTo && pathname !== APP_ROUTES.EMPLOYER.ORG)
           router.push(result.redirectTo);
-        }
       } else {
         toast.error(result.message);
         setSwitchingId(null);

@@ -46,10 +46,19 @@ import {
   ComboboxList,
 } from "@/components/ui/combobox";
 import states from "@/constants/states.json";
+import { Suspense } from "react";
 
 const ANY_VALUE = "any";
 
 export default function JobBoardForm() {
+  return (
+    <Suspense>
+      <SuspendedComponent />
+    </Suspense>
+  );
+}
+
+const SuspendedComponent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -253,4 +262,4 @@ export default function JobBoardForm() {
       </form>
     </Form>
   );
-}
+};
