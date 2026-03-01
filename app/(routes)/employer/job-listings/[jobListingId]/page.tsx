@@ -53,7 +53,7 @@ const SuspendedComponent = async ({
   if (!jobListing.data) return notFound();
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto px-10 py-8 xl:p-4 @container">
+    <div className="space-y-6 p-4 sm:p-6 lg:p-8 @container">
       <div className="flex items-center justify-between gap-4 @max-4xl:flex-col @max-4xl:items-start">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">

@@ -33,7 +33,7 @@ export async function inviteMember(data: InviteMemberInput) {
     if (!hasPermission.success) {
       return {
         success: false,
-        error: "You don't have permission to invite members",
+        message: "You don't have permission to invite members",
       };
     }
 
@@ -43,7 +43,7 @@ export async function inviteMember(data: InviteMemberInput) {
     if (!session?.session?.activeOrganizationId) {
       return {
         success: false,
-        error: "No active organization found",
+        message: "No active organization found",
       };
     }
 
@@ -55,8 +55,17 @@ export async function inviteMember(data: InviteMemberInput) {
     if (!existingUser) {
       return {
         success: false,
-        error: `User with email ${validated.email} is not registered yet. Please ask them to create an account first.`,
+        message: `User with email ${validated.email} is not registered yet. Please ask them to create an account first.`,
         userNotRegistered: true,
+      };
+    }
+
+    // Ensure the invitee has the employer role
+    if (existingUser.role !== "employer" && existingUser.role !== "admin") {
+      return {
+        success: false,
+        message: `${existingUser.name} (${validated.email}) does not have the employer role yet. They need to request employer access from an admin before they can be invited to an organization.`,
+        requiresEmployerRole: true,
       };
     }
 
@@ -86,13 +95,14 @@ export async function inviteMember(data: InviteMemberInput) {
     if (error instanceof z.ZodError) {
       return {
         success: false,
-        error: error.issues[0].message,
+        message: error.issues[0].message,
       };
     }
 
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Failed to invite member",
+      message:
+        error instanceof Error ? error.message : "Failed to invite member",
     };
   }
 }

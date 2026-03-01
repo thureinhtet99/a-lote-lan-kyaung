@@ -21,6 +21,8 @@ export const APP_ROUTES = {
     HOME: "/admin",
     USERS: "/admin/users",
     EMPLOYER_REQUESTS: "/admin/employer-requests",
+    ORG_REQUESTS: "/admin/organization-requests",
+    ORGANIZATIONS: "/admin/organizations",
   },
 
   JOB_LISTINGS: {
@@ -33,6 +35,12 @@ export const APP_ROUTES = {
     RESUME: "/settings/resume",
     NOTIFICATIONS: "/settings/notifications",
     EMPLOYER_REQUEST: "/settings/employer-request",
+    ORG_REQUEST: "/settings/organization-request",
+  },
+
+  ORGANIZATIONS: {
+    HOME: "/organizations",
+    DETAIL: (slug: string) => `/organizations/${slug}`,
   },
 
   EMPLOYER: {

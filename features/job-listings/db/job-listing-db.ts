@@ -268,6 +268,7 @@ export const createJobListing = async (
       });
 
     updateTag(jobListingIdTag(orgId, result.id));
+    updateTag(jobListingsTag(orgId));
     updateTag(sideBarJobListingWithApplicationsTag(orgId, session.user.id));
 
     return {
@@ -320,6 +321,7 @@ export const updateJobListing = async (
       .set(data)
       .where(eq(jobListingTable.id, jobListingId));
 
+    updateTag(jobListingIdTag(orgId, jobListingId));
     updateTag(jobListingsTag(orgId));
     updateTag(sideBarJobListingWithApplicationsTag(orgId, session.user.id));
 
@@ -364,6 +366,7 @@ export const deleteJobListing = async (id: string) => {
 
     await db.delete(jobListingTable).where(eq(jobListingTable.id, id));
 
+    updateTag(jobListingIdTag(orgId, id));
     updateTag(jobListingsTag(orgId));
     updateTag(sideBarJobListingWithApplicationsTag(orgId, session.user.id));
 
@@ -427,6 +430,7 @@ export const toggleJobListingStatus = async (id: string) => {
       })
       .where(eq(jobListingTable.id, id));
 
+    updateTag(jobListingIdTag(orgId, id));
     updateTag(jobListingsTag(orgId));
     updateTag(sideBarJobListingWithApplicationsTag(orgId, session.user.id));
 
@@ -483,6 +487,7 @@ export const toggleJobListingFeaturedStatus = async (id: string) => {
       })
       .where(eq(jobListingTable.id, id));
 
+    updateTag(jobListingIdTag(orgId, id));
     updateTag(jobListingsTag(orgId));
     updateTag(sideBarJobListingWithApplicationsTag(orgId, session.user.id));
 

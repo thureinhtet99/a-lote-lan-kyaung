@@ -13,6 +13,16 @@ export const organizationIdTag = (orgId: string) => {
   return `organization-${orgId}` as const;
 };
 
+// All organizations (admin / public)
+export const allOrganizationsTag = () => {
+  return `all-organizations` as const;
+};
+
+// Public organization by slug
+export const publicOrganizationSlugTag = (slug: string) => {
+  return `public-organization-${slug}` as const;
+};
+
 // JobListing
 export const jobListingsTag = (orgId: string) => {
   return `organization-${orgId}-job-listings` as const;
@@ -62,4 +72,35 @@ export const userNotificationTag = (userId: string) => {
 // Admin Dashboard Stats
 export const dashboardStatsTag = () => {
   return `admin-stats` as const;
+};
+
+// Users (admin)
+export const usersTag = () => {
+  return `users` as const;
+};
+
+export const userIdTag = (userId: string) => {
+  return `users-${userId}` as const;
+};
+
+// Employer requests
+export const employerRequestsTag = () => {
+  return `employer-requests` as const;
+};
+
+export const employerRequestIdTag = (requestId: string) => {
+  return `employer-requests-${requestId}` as const;
+};
+
+// Organization requests
+export const orgRequestsTag = () => {
+  return `organization-requests` as const;
+};
+
+export const orgRequestIdTag = (requestId: string) => {
+  return `organization-requests-${requestId}` as const;
+};
+
+export const userOrgRequestsTag = (userId: string) => {
+  return `user-${userId}-organization-requests` as const;
 };

@@ -115,41 +115,14 @@ const getOrgByIdCached = async (id: string) => {
 };
 
 export const createOrg = async (
-  name: string,
-  slug?: string,
+  _name: string,
+  _slug?: string,
 ): Promise<{ success: boolean; message?: string }> => {
-  try {
-    const session = await safeGetSession();
-
-    if (!session?.user) return { success: false, message: "Unauthorized" };
-    if (session.user.role !== "employer")
-      return {
-        success: false,
-        message: "Only employers can create organizations",
-      };
-
-    const result = await auth.api.createOrganization({
-      body: {
-        name,
-        slug: slug || name.toLowerCase().replace(/\s+/g, "-"),
-        keepCurrentActiveOrganization: true,
-      },
-      headers: await headers(),
-    });
-
-    if (!result)
-      return { success: false, message: "Failed to create organization" };
-
-    updateTag(organizationsTag(session.user.id));
-
-    return {
-      success: true,
-      message: "Organization created successfully",
-    };
-  } catch (error) {
-    console.error("Error creating organization:", error);
-    return { success: false, message: "Failed to create organization" };
-  }
+  return {
+    success: false,
+    message:
+      "Direct organization creation is disabled. Please submit an organization request via Settings → Create Organization.",
+  };
 };
 
 export const deleteOrg = async (

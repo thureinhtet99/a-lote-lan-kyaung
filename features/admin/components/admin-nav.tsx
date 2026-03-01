@@ -9,6 +9,8 @@ const navItems = [
   { href: APP_ROUTES.ADMIN.HOME, label: "Overview" },
   { href: APP_ROUTES.ADMIN.USERS, label: "Users" },
   { href: APP_ROUTES.ADMIN.EMPLOYER_REQUESTS, label: "Employer Requests" },
+  { href: APP_ROUTES.ADMIN.ORG_REQUESTS, label: "Org Requests" },
+  { href: APP_ROUTES.ADMIN.ORGANIZATIONS, label: "Organizations" },
 ];
 
 export function AdminNav() {
@@ -22,7 +24,7 @@ export function AdminNav() {
           href={item.href}
           className={cn(
             "shrink-0 rounded-md px-2.5 py-1.5 transition-colors hover:text-foreground/80 sm:px-3",
-            pathname === item.href ? "text-white" : "text-foreground/60",
+            pathname === item.href ? "text-white" : "text-foreground",
           )}
         >
           {item.label}

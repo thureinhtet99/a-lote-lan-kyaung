@@ -5,6 +5,7 @@ import SidebarNavMenu from "@/app/(routes)/(client)/@sidebar/components/sidebar-
 import { APP_ROUTES } from "@/constants/app-config";
 import {
   Building2Icon,
+  BuildingIcon,
   ClipboardListIcon,
   LayoutDashboardIcon,
   LogInIcon,
@@ -33,6 +34,11 @@ export default function ClientLayout({
                   label: "Job board",
                 },
                 {
+                  href: APP_ROUTES.ORGANIZATIONS.HOME,
+                  icon: <BuildingIcon />,
+                  label: "Organizations",
+                },
+                {
                   href: APP_ROUTES.EMPLOYER.HOME,
                   icon: <LayoutDashboardIcon />,
                   label: "Employer dashboard",
@@ -42,7 +48,7 @@ export default function ClientLayout({
                 {
                   href: APP_ROUTES.EMPLOYER.ORG,
                   icon: <Building2Icon />,
-                  label: "Organizations",
+                  label: "My organizations",
                   authStatus: "signedIn",
                   roles: ["employer"],
                 },

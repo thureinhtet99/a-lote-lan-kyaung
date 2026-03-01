@@ -60,9 +60,9 @@ export function MemberTable() {
     setLoading(true);
     const result = await getOrganizationMembers();
     if (result.success) {
-      setMembers(result.members);
+      setMembers(result.data);
     } else {
-      toast.error(result.error || "Failed to load members");
+      toast.error(result.message || "Failed to load members");
     }
     setLoading(false);
   }
@@ -78,7 +78,7 @@ export function MemberTable() {
       setMemberToDelete(null);
       loadMembers();
     } else {
-      toast.error(result.error || "Failed to remove member");
+      toast.error(result.message || "Failed to remove member");
     }
     setDeleting(false);
   }

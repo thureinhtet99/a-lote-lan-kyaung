@@ -62,9 +62,9 @@ export function InvitationTable() {
     setLoading(true);
     const result = await getInvitations();
     if (result.success) {
-      setInvitations(result.invitations);
+      setInvitations(result.data);
     } else {
-      toast.error(result.error || "Failed to load invitations");
+      toast.error(result.message || "Failed to load invitations");
     }
     setLoading(false);
   }
@@ -80,7 +80,7 @@ export function InvitationTable() {
       setInvitationToRevoke(null);
       loadInvitations();
     } else {
-      toast.error(result.error || "Failed to revoke invitation");
+      toast.error(result.message || "Failed to revoke invitation");
     }
     setRevoking(false);
   }
@@ -92,7 +92,7 @@ export function InvitationTable() {
     if (result.success) {
       toast.success(result.message || "Invitation resent");
     } else {
-      toast.error(result.error || "Failed to resend invitation");
+      toast.error(result.message || "Failed to resend invitation");
     }
     setResending(null);
   }

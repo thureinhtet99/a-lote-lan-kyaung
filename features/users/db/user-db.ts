@@ -6,7 +6,13 @@ import { and, count, desc, eq, or } from "drizzle-orm";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
-import { dashboardStatsTag } from "@/lib/utils/data-cache";
+import {
+  dashboardStatsTag,
+  employerRequestIdTag,
+  employerRequestsTag,
+  userIdTag,
+  usersTag,
+} from "@/lib/utils/data-cache";
 import {
   ApproveRequestFormType,
   EmployerRequestFormType,
@@ -20,12 +26,6 @@ import {
 } from "@/features/admin/admin-schema";
 import { nanoid } from "nanoid";
 import { safeGetSession } from "@/lib/auth/auth-helpers";
-
-const usersTag = () => "users";
-const userIdTag = (userId: string) => `users-${userId}`;
-const employerRequestsTag = () => "employer-requests";
-const employerRequestIdTag = (requestId: string) =>
-  `employer-requests-${requestId}`;
 
 // Users
 export const getAllUsers = async (page = 1, pageSize = 10) => {

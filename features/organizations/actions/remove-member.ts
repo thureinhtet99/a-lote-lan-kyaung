@@ -12,7 +12,7 @@ export async function removeMember(memberId: string) {
     if (!memberId) {
       return {
         success: false,
-        error: "Member ID is required",
+        message: "Member ID is required",
       };
     }
 
@@ -29,7 +29,7 @@ export async function removeMember(memberId: string) {
     if (!hasPermission.success) {
       return {
         success: false,
-        error: "You don't have permission to remove members",
+        message: "You don't have permission to remove members",
       };
     }
 
@@ -39,7 +39,7 @@ export async function removeMember(memberId: string) {
     if (!session?.session?.activeOrganizationId) {
       return {
         success: false,
-        error: "No active organization found",
+        message: "No active organization found",
       };
     }
 
@@ -54,7 +54,7 @@ export async function removeMember(memberId: string) {
     if (!member) {
       return {
         success: false,
-        error: "Member not found",
+        message: "Member not found",
       };
     }
 
@@ -62,7 +62,7 @@ export async function removeMember(memberId: string) {
     if (member.role === "admin") {
       return {
         success: false,
-        error: "Cannot remove the organization admin",
+        message: "Cannot remove the organization admin",
       };
     }
 
@@ -70,7 +70,7 @@ export async function removeMember(memberId: string) {
     if (member.userId === session.user.id) {
       return {
         success: false,
-        error: "You cannot remove yourself from the organization",
+        message: "You cannot remove yourself from the organization",
       };
     }
 
@@ -91,7 +91,8 @@ export async function removeMember(memberId: string) {
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Failed to remove member",
+      message:
+        error instanceof Error ? error.message : "Failed to remove member",
     };
   }
 }

@@ -15,8 +15,8 @@ export async function getInvitations() {
     if (!session?.session?.activeOrganizationId) {
       return {
         success: false,
-        error: "No active organization found",
-        invitations: [],
+        message: "No active organization found",
+        data: [],
       };
     }
 
@@ -31,14 +31,14 @@ export async function getInvitations() {
 
     return {
       success: true,
-      invitations,
+      data: invitations,
     };
   } catch (error) {
     return {
       success: false,
-      error:
+      message:
         error instanceof Error ? error.message : "Failed to fetch invitations",
-      invitations: [],
+      data: [],
     };
   }
 }
@@ -48,7 +48,7 @@ export async function revokeInvitation(invitationId: string) {
     if (!invitationId) {
       return {
         success: false,
-        error: "Invitation ID is required",
+        message: "Invitation ID is required",
       };
     }
 
@@ -65,7 +65,7 @@ export async function revokeInvitation(invitationId: string) {
     if (!hasPermission.success) {
       return {
         success: false,
-        error: "You don't have permission to manage invitations",
+        message: "You don't have permission to manage invitations",
       };
     }
 
@@ -75,7 +75,7 @@ export async function revokeInvitation(invitationId: string) {
     if (!session?.session?.activeOrganizationId) {
       return {
         success: false,
-        error: "No active organization found",
+        message: "No active organization found",
       };
     }
 
@@ -99,7 +99,7 @@ export async function revokeInvitation(invitationId: string) {
   } catch (error) {
     return {
       success: false,
-      error:
+      message:
         error instanceof Error ? error.message : "Failed to revoke invitation",
     };
   }
@@ -110,7 +110,7 @@ export async function resendInvitation(invitationId: string) {
     if (!invitationId) {
       return {
         success: false,
-        error: "Invitation ID is required",
+        message: "Invitation ID is required",
       };
     }
 
@@ -127,7 +127,7 @@ export async function resendInvitation(invitationId: string) {
     if (!hasPermission.success) {
       return {
         success: false,
-        error: "You don't have permission to manage invitations",
+        message: "You don't have permission to manage invitations",
       };
     }
 
@@ -137,7 +137,7 @@ export async function resendInvitation(invitationId: string) {
     if (!session?.session?.activeOrganizationId) {
       return {
         success: false,
-        error: "No active organization found",
+        message: "No active organization found",
       };
     }
 
@@ -155,7 +155,7 @@ export async function resendInvitation(invitationId: string) {
     if (!invitation) {
       return {
         success: false,
-        error: "Invitation not found",
+        message: "Invitation not found",
       };
     }
 
@@ -170,7 +170,7 @@ export async function resendInvitation(invitationId: string) {
   } catch (error) {
     return {
       success: false,
-      error:
+      message:
         error instanceof Error ? error.message : "Failed to resend invitation",
     };
   }

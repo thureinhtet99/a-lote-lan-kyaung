@@ -11,7 +11,7 @@ export const updateNotificationSetting = async (
   const { userId } = await getCurrentUser();
   if (userId == null) {
     return {
-      error: true,
+      success: false,
       message: "You must be signed in to update notification settings",
     };
   }
@@ -20,7 +20,7 @@ export const updateNotificationSetting = async (
     userNotificationSettingsSchema.safeParse(unsafeData);
   if (!success) {
     return {
-      error: true,
+      success: false,
       message: "There was an error updating your notification settings",
     };
   }
@@ -28,7 +28,7 @@ export const updateNotificationSetting = async (
   await updateUserNotificationSettingDb(userId, data);
 
   return {
-    error: false,
-    message: "Successfully update your notification settings",
+    success: true,
+    message: "Notification settings updated successfully",
   };
 };

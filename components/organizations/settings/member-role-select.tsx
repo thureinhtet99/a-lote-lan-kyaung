@@ -38,7 +38,7 @@ export function MemberRoleSelect({
       toast.success(result.message);
       onRoleChange();
     } else {
-      toast.error(result.error || "Failed to update role");
+      toast.error(result.message || "Failed to update role");
     }
     setUpdating(false);
   }

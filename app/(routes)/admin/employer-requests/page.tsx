@@ -1,14 +1,13 @@
-import EmployerRequestsTable from "../../../../features/admin/components/employer-requests-table";
+import EmployerRequestsTable from "@/features/admin/components/employer-requests-table";
+import { PageHeader } from "@/components/shared/page-header";
 
 export default function EmployerRequestsPage() {
   return (
-    <div className="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-      <div className="mb-6 lg:mb-8">
-        <h1 className="text-3xl font-bold">Employer Requests</h1>
-        <p className="text-muted-foreground">
-          Review and manage employer role requests
-        </p>
-      </div>
+    <div className="space-y-6 p-4 sm:p-6 lg:space-y-8 lg:p-8">
+      <PageHeader
+        title="Employer Requests"
+        description="Review and manage employer role requests"
+      />
       <EmployerRequestsTable />
     </div>
   );

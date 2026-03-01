@@ -59,7 +59,7 @@ export function MemberInviteDialog() {
       setOpen(false);
       form.reset();
     } else {
-      toast.error(result.error || "Failed to send invitation");
+      toast.error(result.message || "Failed to send invitation");
     }
   }
 
@@ -75,7 +75,9 @@ export function MemberInviteDialog() {
         <DialogHeader>
           <DialogTitle>Invite Team Member</DialogTitle>
           <DialogDescription>
-            Send an invitation to join your organization
+            Send an invitation to join your organization. The invited user must
+            already have the <strong>employer role</strong> to accept the
+            invitation.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>

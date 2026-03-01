@@ -36,9 +36,10 @@ export const auth = betterAuth({
   },
   plugins: [
     organization({
-      allowUserToCreateOrganization: async (user) => {
-        // Only employers can create organizations
-        return user.role === "employer";
+      allowUserToCreateOrganization: async () => {
+        // Direct creation via better-auth API is disabled.
+        // Organizations must be created through the org-request approval flow.
+        return false;
       },
       ac,
       roles: {

@@ -227,20 +227,20 @@ export async function updateApplication(
       .safeParse(unsafeStatus);
     if (!success)
       return {
-        error: true,
+        success: false,
         message: "Invalid status",
       };
 
     if (!(await hasOrgUserPermission("application", ["update"])))
       return {
-        error: true,
+        success: false,
         message: "You don't have permission to update the status",
       };
 
     const { orgId } = await getCurrentOrg();
     if (orgId == null)
       return {
-        error: true,
+        success: false,
         message: "You don't have permission to update the status",
       };
 
@@ -258,7 +258,7 @@ export async function updateApplication(
         userId: applicationTable.userId,
       });
 
-    // updateTag(jobListingApplicationsTag(result.jobListingId));
+    updateTag(jobListingApplicationsTag(result.jobListingId));
 
     return {
       success: true,
@@ -268,7 +268,7 @@ export async function updateApplication(
     console.error("Error updating application: ", error);
     return {
       success: false,
-      message: "Failed to create successfully",
+      message: "Failed to update application",
     };
   }
 }
@@ -289,20 +289,20 @@ export const updateApplicationStatus = async (
       .safeParse(unsafeStatus);
     if (!success)
       return {
-        error: true,
+        success: false,
         message: "Invalid status",
       };
 
     if (!(await hasOrgUserPermission("application", ["update"])))
       return {
-        error: true,
+        success: false,
         message: "You don't have permission to update the status",
       };
 
     const { orgId } = await getCurrentOrg();
     if (orgId == null)
       return {
-        error: true,
+        success: false,
         message: "You don't have permission to update the status",
       };
 
@@ -319,7 +319,7 @@ export const updateApplicationStatus = async (
         jobListingId: applicationTable.jobListingId,
       });
 
-    // updateTag(jobListingApplicationsTag(result.jobListingId));
+    updateTag(jobListingApplicationsTag(result.jobListingId));
 
     return { success: true, message: "Status updated successfully" };
   } catch (error) {
@@ -345,18 +345,18 @@ export async function updateApplicationRating(
       .max(5)
       .nullish()
       .safeParse(rating);
-    if (!success) return { error: true, message: "Invalid rating" };
+    if (!success) return { success: false, message: "Invalid rating" };
 
     if (!(await hasOrgUserPermission("application", ["update"])))
       return {
-        error: true,
+        success: false,
         message: "You don't have permission to update the rating",
       };
 
     const { orgId } = await getCurrentOrg();
     if (orgId == null)
       return {
-        error: true,
+        success: false,
         message: "You don't have permission to update the rating",
       };
 
@@ -373,7 +373,7 @@ export async function updateApplicationRating(
         jobListingId: applicationTable.jobListingId,
       });
 
-    // updateTag(jobListingApplicationsTag(result.jobListingId));
+    updateTag(jobListingApplicationsTag(result.jobListingId));
 
     return { success: true, message: "Rating updated successfully" };
   } catch (error) {

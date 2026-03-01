@@ -1,7 +1,10 @@
 import { applicationTable, resumeTable, userTable } from "@/drizzle/schema";
 import {
+  approveOrgRequestSchema,
   approveRequestSchema,
   employerRequestSchema,
+  organizationRequestSchema,
+  rejectOrgRequestSchema,
   rejectRequestSchema,
 } from "@/features/admin/admin-schema";
 import { Column } from "@tanstack/react-table";
@@ -65,6 +68,29 @@ export type EmployerRequestType = {
 export type EmployerRequestFormType = z.infer<typeof employerRequestSchema>;
 export type ApproveRequestFormType = z.infer<typeof approveRequestSchema>;
 export type RejectRequestFormType = z.infer<typeof rejectRequestSchema>;
+
+// Organization request
+export type OrganizationRequestType = {
+  id: string;
+  userId: string;
+  orgName: string;
+  orgSlug: string;
+  orgLogo: string | null;
+  requestMessage: string;
+  status: "pending" | "approved" | "rejected";
+  adminResponse: string | null;
+  reviewedBy: string | null;
+  reviewedAt: Date | null;
+  createdOrganizationId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  user: Pick<UserType, "id" | "name" | "email" | "image">;
+  reviewer: Pick<UserType, "id" | "name" | "email"> | null;
+};
+
+export type OrgRequestFormType = z.infer<typeof organizationRequestSchema>;
+export type ApproveOrgRequestFormType = z.infer<typeof approveOrgRequestSchema>;
+export type RejectOrgRequestFormType = z.infer<typeof rejectOrgRequestSchema>;
 
 // Organization
 export type OrganizationType = {

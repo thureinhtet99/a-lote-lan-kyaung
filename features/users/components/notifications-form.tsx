@@ -42,7 +42,7 @@ export default function NotificationsForm({
   ) => {
     const result = await updateNotificationSetting(data);
 
-    if (result.error) {
+    if (!result.success) {
       toast.error(result.message);
     } else {
       toast.success(result.message);

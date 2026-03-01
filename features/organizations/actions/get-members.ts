@@ -15,8 +15,8 @@ export async function getOrganizationMembers() {
     if (!session?.session?.activeOrganizationId) {
       return {
         success: false,
-        error: "No active organization found",
-        members: [],
+        message: "No active organization found",
+        data: [],
       };
     }
 
@@ -41,13 +41,14 @@ export async function getOrganizationMembers() {
 
     return {
       success: true,
-      members,
+      data: members,
     };
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Failed to fetch members",
-      members: [],
+      message:
+        error instanceof Error ? error.message : "Failed to fetch members",
+      data: [],
     };
   }
 }

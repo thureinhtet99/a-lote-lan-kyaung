@@ -17,13 +17,18 @@ import MarkdownRenderer from "@/components/markdown/markdown-renderer";
 import Loading from "@/components/shared/loading";
 import { getCurrentUser } from "@/lib/auth/auth-helpers";
 import { cacheLife, cacheTag } from "next/cache";
-import { userResumeTag } from "@/lib/utils/data-cache";
+import { resumeTag } from "@/lib/utils/data-cache";
 import DropzoneClient from "./_DropzoneClient";
 
 export default function ResumePage() {
   return (
-    <div className="max-w-3xl mx-auto py-8 space-y-6 px-4">
-      <h1 className="text-2xl font-bold">Upload your resume</h1>
+    <div className="space-y-6 px-6 py-6 md:px-8 md:py-8">
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight">Resume</h2>
+        <p className="text-sm text-muted-foreground mt-1">
+          Upload and manage your resume
+        </p>
+      </div>
 
       <Card>
         <CardContent className="pt-6">
@@ -67,7 +72,7 @@ const SuspendedComponent = async () => {
 // Fetch user resume from db (cached)
 async function getResumeByUserId(userId: string) {
   "use cache";
-  cacheTag(userResumeTag(userId));
+  cacheTag(resumeTag(userId));
   cacheLife("hours");
   return await db.query.resumeTable.findFirst({
     where: eq(resumeTable.userId, userId),

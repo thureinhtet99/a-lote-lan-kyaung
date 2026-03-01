@@ -33,7 +33,7 @@ export async function updateMemberRole(data: UpdateMemberRoleInput) {
     if (!hasPermission.success) {
       return {
         success: false,
-        error: "You don't have permission to update member roles",
+        message: "You don't have permission to update member roles",
       };
     }
 
@@ -43,7 +43,7 @@ export async function updateMemberRole(data: UpdateMemberRoleInput) {
     if (!session?.session?.activeOrganizationId) {
       return {
         success: false,
-        error: "No active organization found",
+        message: "No active organization found",
       };
     }
 
@@ -55,7 +55,7 @@ export async function updateMemberRole(data: UpdateMemberRoleInput) {
     if (!currentMember) {
       return {
         success: false,
-        error: "You are not a member of this organization",
+        message: "You are not a member of this organization",
       };
     }
 
@@ -63,7 +63,7 @@ export async function updateMemberRole(data: UpdateMemberRoleInput) {
     if (currentMember.role !== "admin") {
       return {
         success: false,
-        error: "Only organization admins can change member roles",
+        message: "Only organization admins can change member roles",
       };
     }
 
@@ -78,7 +78,7 @@ export async function updateMemberRole(data: UpdateMemberRoleInput) {
     if (!member) {
       return {
         success: false,
-        error: "Member not found",
+        message: "Member not found",
       };
     }
 
@@ -86,7 +86,7 @@ export async function updateMemberRole(data: UpdateMemberRoleInput) {
     if (member.role === "admin") {
       return {
         success: false,
-        error: "Cannot change the role of the organization admin",
+        message: "Cannot change the role of the organization admin",
       };
     }
 
@@ -94,7 +94,7 @@ export async function updateMemberRole(data: UpdateMemberRoleInput) {
     if (member.userId === session.user.id) {
       return {
         success: false,
-        error: "You cannot change your own role",
+        message: "You cannot change your own role",
       };
     }
 
@@ -117,13 +117,13 @@ export async function updateMemberRole(data: UpdateMemberRoleInput) {
     if (error instanceof z.ZodError) {
       return {
         success: false,
-        error: error.issues[0].message,
+        message: error.issues[0].message,
       };
     }
 
     return {
       success: false,
-      error:
+      message:
         error instanceof Error ? error.message : "Failed to update member role",
     };
   }

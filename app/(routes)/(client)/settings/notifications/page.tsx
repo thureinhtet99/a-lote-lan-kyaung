@@ -23,8 +23,15 @@ const SuspendedComponent = async () => {
   if (userId == null) return notFound();
 
   return (
-    <div className="max-w-3xl mx-auto py-8 px-4">
-      <h1 className="text-2xl font-bold mb-6">Notification Settings</h1>
+    <div className="space-y-6 px-6 py-6 md:px-8 md:py-8">
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight">
+          Notification Settings
+        </h2>
+        <p className="text-sm text-muted-foreground mt-1">
+          Manage how you receive notifications
+        </p>
+      </div>
       <Card>
         <CardContent>
           <Suspense fallback={<Loading />}>

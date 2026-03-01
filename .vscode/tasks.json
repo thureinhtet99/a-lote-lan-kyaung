@@ -1,0 +1,17 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Drizzle: Generate migration",
+			"type": "shell",
+			"command": "cd /home/thurein-htet/Projects/job-portal && npx drizzle-kit generate --name add_organization_requests",
+			"group": "build"
+		},
+		{
+			"label": "Drizzle: Run migration",
+			"type": "shell",
+			"command": "cd /home/thurein-htet/Projects/job-portal && npx drizzle-kit migrate",
+			"group": "build"
+		}
+	]
+}

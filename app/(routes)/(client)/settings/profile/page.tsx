@@ -86,7 +86,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="container max-w-5xl mx-auto p-6 space-y-6">
+    <div className="space-y-6 px-6 py-6 md:px-8 md:py-8">
       <Card className="border-primary/20">
         <CardHeader className="">
           <div className="flex items-start justify-between">

@@ -1,10 +1,16 @@
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { db } from "@/lib/db";
-import { userTable, employerRequestTable } from "@/drizzle/schema";
+import {
+  employerRequestTable,
+  organizationRequestTable,
+  organizationTable,
+  userTable,
+} from "@/drizzle/schema";
 import { eq, count } from "drizzle-orm";
 import { StatCard } from "@/components/shared/stat-card";
-import { Users, Briefcase, Shield, Clock } from "lucide-react";
+import { PageHeader } from "@/components/shared/page-header";
+import { Users, Briefcase, Shield, Clock, Building2 } from "lucide-react";
 import { cacheLife, cacheTag } from "next/cache";
 import { dashboardStatsTag } from "@/lib/utils/data-cache";
 
@@ -16,7 +22,9 @@ async function getAdminStats() {
     totalUsersResult,
     totalEmployersResult,
     totalAdminsResult,
-    pendingRequestsResult,
+    pendingEmployerRequestsResult,
+    pendingOrgRequestsResult,
+    totalOrgsResult,
   ] = await Promise.all([
     db.select({ count: count() }).from(userTable),
     db
@@ -31,13 +39,22 @@ async function getAdminStats() {
       .select({ count: count() })
       .from(employerRequestTable)
       .where(eq(employerRequestTable.status, "pending")),
+    db
+      .select({ count: count() })
+      .from(organizationRequestTable)
+      .where(eq(organizationRequestTable.status, "pending")),
+    db.select({ count: count() }).from(organizationTable),
   ]);
 
   return {
     totalUsers: Number(totalUsersResult[0]?.count ?? 0),
     totalEmployers: Number(totalEmployersResult[0]?.count ?? 0),
     totalAdmins: Number(totalAdminsResult[0]?.count ?? 0),
-    pendingRequests: Number(pendingRequestsResult[0]?.count ?? 0),
+    pendingEmployerRequests: Number(
+      pendingEmployerRequestsResult[0]?.count ?? 0,
+    ),
+    pendingOrgRequests: Number(pendingOrgRequestsResult[0]?.count ?? 0),
+    totalOrgs: Number(totalOrgsResult[0]?.count ?? 0),
   };
 }
 
@@ -46,22 +63,25 @@ export default async function AdminDashboard() {
     headers: await headers(),
   });
 
-  const { totalUsers, totalEmployers, totalAdmins, pendingRequests } =
-    await getAdminStats();
+  const {
+    totalUsers,
+    totalEmployers,
+    totalAdmins,
+    pendingEmployerRequests,
+    pendingOrgRequests,
+    totalOrgs,
+  } = await getAdminStats();
 
   return (
     <div className="space-y-6 p-4 sm:p-6 lg:space-y-8 lg:p-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground mt-2">
-          Welcome back, {session?.user?.name}. Here&apos;s what&apos;s happening
-          with your platform.
-        </p>
-      </div>
+      <PageHeader
+        title="Dashboard"
+        description={`Welcome back, ${session?.user?.name ?? "Admin"}. Here's what's happening with your platform.`}
+      />
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <StatCard
-          title="Total Users"
+          title="Users"
           value={totalUsers}
           description="All registered users"
           icon={Users}
@@ -79,9 +99,21 @@ export default async function AdminDashboard() {
           icon={Shield}
         />
         <StatCard
-          title="Pending Requests"
-          value={pendingRequests}
-          description="Employer requests"
+          title="Organizations"
+          value={totalOrgs}
+          description="Approved organizations"
+          icon={Building2}
+        />
+        <StatCard
+          title="Pending Employer Requests"
+          value={pendingEmployerRequests}
+          description="Awaiting review"
+          icon={Clock}
+        />
+        <StatCard
+          title="Pending Org Requests"
+          value={pendingOrgRequests}
+          description="Awaiting review"
           icon={Clock}
         />
       </div>

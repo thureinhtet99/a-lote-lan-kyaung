@@ -1,6 +1,6 @@
 import SidebarNavMenuGroup from "@/app/(routes)/(client)/@sidebar/components/sidebar-nav-menu";
 import { APP_ROUTES } from "@/constants/app-config";
-import { BellIcon, FileUserIcon, Megaphone } from "lucide-react";
+import { BellIcon, Building2Icon, FileUserIcon, Megaphone } from "lucide-react";
 
 export default function SettingsSidebar() {
   return (
@@ -20,6 +20,13 @@ export default function SettingsSidebar() {
           href: APP_ROUTES.SETTINGS.EMPLOYER_REQUEST,
           icon: <Megaphone />,
           label: "Employer Request",
+        },
+        {
+          href: APP_ROUTES.SETTINGS.ORG_REQUEST,
+          icon: <Building2Icon />,
+          label: "Create Organization",
+          authStatus: "signedIn",
+          roles: ["employer"],
         },
       ]}
     />

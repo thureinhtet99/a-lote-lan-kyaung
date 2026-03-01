@@ -325,7 +325,7 @@ async function seed() {
         "Sagaing",
         "Magway",
       ];
-      const [city] = stateCity[index];
+      const city = stateCity[index];
 
       return [
         {

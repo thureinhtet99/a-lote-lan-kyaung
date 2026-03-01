@@ -52,7 +52,8 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/combobox";
-import states from "@/constants/states.json";
+import cities from "@/constants/cities.json";
+import { CityType } from "@/types/index.type";
 
 const createDefaultValues: z.infer<typeof jobListingFormSchema> = {
   title: "",
@@ -76,7 +77,6 @@ export default function JobListingForm({
     | "wage"
     | "wageInterval"
     | "city"
-    | "state"
     | "locationRequirement"
     | "type"
     | "experienceLevel"
@@ -90,9 +90,10 @@ export default function JobListingForm({
     resolver: zodResolver(jobListingFormSchema),
     defaultValues: jobListing ?? createDefaultValues,
   });
-  const countries = Object.values(states).sort((nameA, nameB) =>
-    nameA.localeCompare(nameB),
-  );
+
+  const cityNames = (Object.values(cities) as CityType[])
+    .map((item) => item.city)
+    .sort((nameA, nameB) => nameA.localeCompare(nameB));
 
   const onSubmit = async (data: z.infer<typeof jobListingFormSchema>) => {
     const submitAction = jobListing
@@ -208,39 +209,15 @@ export default function JobListingForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>City</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="text"
-                      value={field.value ?? ""}
-                      placeholder="Enter city"
-                      disabled={isSubmitting}
-                    />
-                  </FormControl>
-                  <FormDescription className="text-xs">
-                    (optional)
-                  </FormDescription>
-                </FormItem>
-              )}
-            />
-
-            {/* State */}
-            <FormField
-              name="state"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Country</FormLabel>
                   <Combobox
-                    items={countries}
-                    defaultValue="Myanmar"
+                    items={cityNames}
                     autoHighlight
-                    value={field.value ?? ""}
+                    value={field.value}
                     onValueChange={field.onChange}
                   >
-                    <ComboboxInput showClear placeholder="Select a country" />
+                    <ComboboxInput showClear placeholder="Select a city" />
                     <ComboboxContent>
-                      <ComboboxEmpty>No items found.</ComboboxEmpty>
+                      <ComboboxEmpty>No city found.</ComboboxEmpty>
                       <ComboboxList>
                         {(item) => (
                           <ComboboxItem key={item} value={item}>
@@ -250,9 +227,6 @@ export default function JobListingForm({
                       </ComboboxList>
                     </ComboboxContent>
                   </Combobox>
-                  <FormDescription className="text-xs">
-                    (optional)
-                  </FormDescription>
                 </FormItem>
               )}
             />

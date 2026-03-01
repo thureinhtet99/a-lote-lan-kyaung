@@ -51,6 +51,22 @@ CREATE TABLE "members" (
 	"created_at" timestamp NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "organization_requests" (
+	"id" text PRIMARY KEY NOT NULL,
+	"user_id" text NOT NULL,
+	"org_name" text NOT NULL,
+	"org_slug" text NOT NULL,
+	"org_logo" text,
+	"request_message" text NOT NULL,
+	"status" text DEFAULT 'pending' NOT NULL,
+	"admin_response" text,
+	"reviewed_by" text,
+	"reviewed_at" timestamp,
+	"created_organization_id" text,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "organizations" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
@@ -159,6 +175,9 @@ ALTER TABLE "invitations" ADD CONSTRAINT "invitations_organization_id_organizati
 ALTER TABLE "invitations" ADD CONSTRAINT "invitations_inviter_id_users_id_fk" FOREIGN KEY ("inviter_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "members" ADD CONSTRAINT "members_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "members" ADD CONSTRAINT "members_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "organization_requests" ADD CONSTRAINT "organization_requests_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "organization_requests" ADD CONSTRAINT "organization_requests_reviewed_by_users_id_fk" FOREIGN KEY ("reviewed_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "organization_requests" ADD CONSTRAINT "organization_requests_created_organization_id_organizations_id_fk" FOREIGN KEY ("created_organization_id") REFERENCES "public"."organizations"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "job_listings" ADD CONSTRAINT "job_listings_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "applications" ADD CONSTRAINT "applications_job_listing_id_job_listings_id_fk" FOREIGN KEY ("job_listing_id") REFERENCES "public"."job_listings"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -174,6 +193,8 @@ CREATE INDEX "invitation_organizationId_idx" ON "invitations" USING btree ("orga
 CREATE INDEX "invitation_email_idx" ON "invitations" USING btree ("email");--> statement-breakpoint
 CREATE INDEX "member_organizationId_idx" ON "members" USING btree ("organization_id");--> statement-breakpoint
 CREATE INDEX "member_userId_idx" ON "members" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "org_request_userId_idx" ON "organization_requests" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "org_request_status_idx" ON "organization_requests" USING btree ("status");--> statement-breakpoint
 CREATE UNIQUE INDEX "organization_slug_uidx" ON "organizations" USING btree ("slug");--> statement-breakpoint
 CREATE INDEX "session_userId_idx" ON "sessions" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "verification_identifier_idx" ON "verifications" USING btree ("identifier");--> statement-breakpoint

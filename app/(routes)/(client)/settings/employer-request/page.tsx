@@ -58,10 +58,10 @@ const SuspendedComponent = async () => {
   const existingRequest = requestResult.data;
 
   return (
-    <div className="space-y-6 px-6 md:px-9 py-6 md:py-9">
+    <div className="space-y-6 px-6 py-6 md:px-8 md:py-8">
       <div>
-        <h3 className="text-lg font-medium">Employer Access</h3>
-        <p className="text-sm text-muted-foreground">
+        <h2 className="text-2xl font-bold tracking-tight">Employer Access</h2>
+        <p className="text-sm text-muted-foreground mt-1">
           Request access to employer features
         </p>
       </div>
