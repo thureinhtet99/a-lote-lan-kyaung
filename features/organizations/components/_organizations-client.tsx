@@ -105,7 +105,7 @@ export default function OrganizationsClient({
   };
 
   return (
-    <div className="@container mx-auto px-10 py-8 xl:p-4 max-w-7xl">
+    <div className="@container flex-1 px-10 py-8 max-w-7xl xl:p-4 border">
       <div className="mb-8">
         <div className="flex items-start justify-between">
           <div>

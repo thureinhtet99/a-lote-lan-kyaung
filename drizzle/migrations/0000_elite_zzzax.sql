@@ -104,7 +104,6 @@ CREATE TABLE "job_listings" (
 	"description" text,
 	"wage" integer NOT NULL,
 	"wageInterval" "wage_interval" NOT NULL,
-	"state" varchar,
 	"city" varchar,
 	"is_featured" boolean DEFAULT false NOT NULL,
 	"locationRequirement" "location_requirement" NOT NULL,
@@ -178,4 +177,4 @@ CREATE INDEX "member_userId_idx" ON "members" USING btree ("user_id");--> statem
 CREATE UNIQUE INDEX "organization_slug_uidx" ON "organizations" USING btree ("slug");--> statement-breakpoint
 CREATE INDEX "session_userId_idx" ON "sessions" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "verification_identifier_idx" ON "verifications" USING btree ("identifier");--> statement-breakpoint
-CREATE INDEX "job_listings_state_index" ON "job_listings" USING btree ("state");
+CREATE INDEX "job_listings_city_index" ON "job_listings" USING btree ("city");

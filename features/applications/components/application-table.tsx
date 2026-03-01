@@ -1,7 +1,6 @@
 "use client";
 
 import { DataTable } from "@/components/data-table/data-table";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ColumnDef } from "@tanstack/react-table";
 import sortApplicationByStatus from "../lib/utils";
@@ -18,10 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ChevronDownIcon, MoreHorizontalIcon } from "lucide-react";
-import {
-  updateJobListingApplicationRating,
-  updateJobListingApplicationStatus,
-} from "../actions/actions";
+
 import { toast } from "sonner";
 import { RATING_OPTIONS } from "../data/constants";
 import {
@@ -256,12 +252,12 @@ const StatusCell = ({
               onClick={() => {
                 startTransition(async () => {
                   setOptimisticStatus(status);
-                  const response = await updateJobListingApplicationStatus(
-                    { jobListingId, userId },
-                    status,
-                  );
+                  // const response = await updateJobListingApplicationStatus(
+                  //   { jobListingId, userId },
+                  //   status,
+                  // );
 
-                  if (response?.error) toast.error(response.message);
+                  // if (response?.error) toast.error(response.message);
                 });
               }}
             >
@@ -309,12 +305,12 @@ const RatingCell = ({
               onClick={() => {
                 startTransition(async () => {
                   setOptimisticRating(rating);
-                  const response = await updateJobListingApplicationRating(
-                    { jobListingId, userId },
-                    rating,
-                  );
+                  // const response = await updateJobListingApplicationRating(
+                  //   { jobListingId, userId },
+                  //   rating,
+                  // );
 
-                  if (response?.error) toast.error(response.message);
+                  // if (response?.error) toast.error(response.message);
                 });
               }}
             >

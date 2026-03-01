@@ -29,7 +29,6 @@ type SeedUser = {
 
 type CreatedSeedUser = SeedUser & { id: string };
 
-// Helper: create user through Better Auth so auth/account rows stay valid.
 async function createUser(
   email: string,
   name: string,
@@ -101,7 +100,7 @@ async function seed() {
     console.log("✅ Cleanup complete");
     console.log("");
 
-    console.log("👤 Creating users (2 admins, 3 employers, 4 users)...");
+    console.log("👤 Creating users (2 admins, 3 employers, 4 users)");
 
     const userPlan: SeedUser[] = [
       { email: "admin.one@test.com", name: "Admin One", role: "admin" },
@@ -202,7 +201,7 @@ async function seed() {
     }
 
     console.log("");
-    console.log("👥 Creating organization memberships...");
+    console.log("👥 Creating organization members...");
 
     for (let i = 0; i < orgSeeds.length; i++) {
       const org = orgSeeds[i];
@@ -316,12 +315,16 @@ async function seed() {
 
     const jobListings = orgSeeds.flatMap((org, index) => {
       const stateCity = [
-        ["Yangon", "Mandalay"],
-        ["Bago", "Pakokku"],
-        ["An", "Nay Pyi Taw"],
-        ["Kyaukse", "Sagaing"],
-        ["Magway"],
-      ] as const;
+        "Yangon",
+        "Mandalay",
+        "Bago",
+        "Pakokku",
+        "An",
+        "Nay Pyi Taw",
+        "Kyaukse",
+        "Sagaing",
+        "Magway",
+      ];
       const [city] = stateCity[index];
 
       return [

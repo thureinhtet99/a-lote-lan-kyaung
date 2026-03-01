@@ -1,5 +1,5 @@
 {
-  "id": "63c9e48e-0b91-47ab-991c-8beba4002100",
+  "id": "b349be91-614e-4a11-aa87-5e9e74e461a1",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -849,12 +849,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "state": {
-          "name": "state",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
         "city": {
           "name": "city",
           "type": "varchar",
@@ -919,11 +913,11 @@
         }
       },
       "indexes": {
-        "job_listings_state_index": {
-          "name": "job_listings_state_index",
+        "job_listings_city_index": {
+          "name": "job_listings_city_index",
           "columns": [
             {
-              "expression": "state",
+              "expression": "city",
               "isExpression": false,
               "asc": true,
               "nulls": "last"

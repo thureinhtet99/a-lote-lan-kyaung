@@ -7,7 +7,6 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:drop": "npx drizzle-kit drop",
     "db:clean": "npx tsx drizzle/reset.ts",
     "db:restart": "npx drizzle-kit drop && npx drizzle-kit generate && npx drizzle-kit migrate && npx drizzle-kit push",
     "db:studio": "npx drizzle-kit studio",
