@@ -33,7 +33,7 @@ export default async function JobApplyButton({
     return (
       <Popover>
         <PopoverTrigger asChild>
-          <Button>Apply</Button>
+          <Button>Apply job here</Button>
         </PopoverTrigger>
         <PopoverContent className="flex flex-col gap-2">
           You need to create an account before applying for a job
@@ -69,7 +69,7 @@ export default async function JobApplyButton({
     return (
       <Popover>
         <PopoverTrigger asChild>
-          <Button>Apply</Button>
+          <Button>Apply job here</Button>
         </PopoverTrigger>
         <PopoverContent className="flex flex-col gap-2">
           You need to upload your resume before applying for a job
@@ -84,9 +84,9 @@ export default async function JobApplyButton({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Apply</Button>
+        <Button>Apply job here</Button>
       </DialogTrigger>
-      <DialogContent className="md:max-w-3xl max-h-[calc(100%-2rem)] overflow-hidden flex flex-col">
+      <DialogContent className="md:max-w-4xl max-h-[calc(100%-2rem)] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Application</DialogTitle>
           <DialogDescription>

@@ -65,7 +65,7 @@ const SuspendedComponent = async ({
               </div>
             )}
           </div>
-          <Suspense fallback={<Button disabled>Apply</Button>}>
+          <Suspense fallback={<Button disabled>Apply job here</Button>}>
             <JobApplyButton jobListingId={jobListing.data.id} />
           </Suspense>
         </div>

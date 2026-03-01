@@ -10,11 +10,14 @@ import {
 } from "@/drizzle/schema";
 import { and, count, desc, eq } from "drizzle-orm";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
-import { jobListingApplicationsTag, resumeTag } from "@/lib/utils/data-cache";
+import {
+  jobListingApplicationsTag,
+  jobListingIdTag,
+  resumeTag,
+} from "@/lib/utils/data-cache";
 import { newJobListingApplicationSchema } from "../application-schema";
 import z from "zod";
 import { getCurrentOrg, getCurrentUser } from "@/lib/auth/auth-helpers";
-import { getJobListingByIdByOrgId } from "@/features/job-listings/db/job-listing-db";
 import { hasOrgUserPermission } from "@/lib/utils/permissions";
 
 // Get application by userId
@@ -44,6 +47,8 @@ const getApplicationByUserIdCached = async ({
   userId: string;
 }) => {
   "use cache";
+  cacheTag(jobListingApplicationsTag(jobListingId));
+  cacheLife("days");
 
   const result = await db.query.applicationTable.findFirst({
     where: and(
@@ -57,9 +62,6 @@ const getApplicationByUserIdCached = async ({
       success: false,
       message: "Error fetching applications by user",
     };
-
-  cacheTag(jobListingApplicationsTag(jobListingId));
-  cacheLife("weeks");
 
   return {
     success: true,
@@ -131,34 +133,57 @@ export const createApplication = async (
   unsafeData: z.infer<typeof newJobListingApplicationSchema>,
 ) => {
   try {
-    const { orgId } = await getCurrentOrg();
-    if (orgId == null)
-      return {
-        success: true,
-        message: "You don't have permission to submit an application",
-      };
-
     const { userId } = await getCurrentUser();
     if (userId == null)
       return {
-        error: true,
+        success: false,
         message: "You don't have permission to submit an application",
+      };
+
+    const { success: hasValidData, data } =
+      newJobListingApplicationSchema.safeParse(unsafeData);
+    if (!hasValidData)
+      return {
+        success: false,
+        message: "There was an error submitting your application",
+      };
+
+    const existingApplication = await db.query.applicationTable.findFirst({
+      where: and(
+        eq(applicationTable.jobListingId, jobListingId),
+        eq(applicationTable.userId, userId),
+      ),
+      columns: {
+        jobListingId: true,
+      },
+    });
+    if (existingApplication)
+      return {
+        success: false,
+        message: "You have already applied for this job",
+      };
+
+    const jobListing = await db.query.jobListingTable.findFirst({
+      where: and(
+        eq(jobListingTable.id, jobListingId),
+        eq(jobListingTable.status, "published"),
+      ),
+      columns: {
+        id: true,
+        organizationId: true,
+      },
+    });
+    if (!jobListing)
+      return {
+        success: false,
+        message: "Job listing is not available",
       };
 
     const userResume = await getCachedUserResume(userId);
-    const jobListing = await getJobListingByIdByOrgId(jobListingId, orgId);
-    if (userResume == null || jobListing == null)
+    if (!userResume.success || !userResume.data)
       return {
-        success: true,
-        message: "You don't have permission to submit an application",
-      };
-
-    const { success, data } =
-      newJobListingApplicationSchema.safeParse(unsafeData);
-    if (!success)
-      return {
-        error: true,
-        message: "There was an error submitting your application",
+        success: false,
+        message: "You need to upload your resume before applying",
       };
 
     const [result] = await db
@@ -169,7 +194,8 @@ export const createApplication = async (
         userId: applicationTable.userId,
       });
 
-    // updateTag(jobListingApplicationsTag(result.jobListingId));
+    updateTag(jobListingIdTag(jobListing.organizationId, result.jobListingId));
+    updateTag(jobListingApplicationsTag(result.jobListingId));
 
     return {
       success: true,

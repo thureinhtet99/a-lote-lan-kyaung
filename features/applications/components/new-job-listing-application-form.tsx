@@ -18,12 +18,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { createApplication } from "../db/application-db";
+import { useRouter } from "next/navigation";
+import { useRef } from "react";
 
 export function NewJobListingApplicationForm({
   jobListingId,
 }: {
   jobListingId: string;
 }) {
+  const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null);
   const form = useForm({
     resolver: zodResolver(newJobListingApplicationSchema),
     defaultValues: { coverLetter: "" },
@@ -33,23 +37,37 @@ export function NewJobListingApplicationForm({
     data: z.infer<typeof newJobListingApplicationSchema>,
   ) => {
     const result = await createApplication(jobListingId, data);
-    if (result.success) toast.success(result.message);
-    else toast.error(result.message);
+    if (result.success) {
+      const dialogContent = formRef.current?.closest(
+        "[data-slot='dialog-content']",
+      );
+      const closeButton = dialogContent?.querySelector<HTMLButtonElement>(
+        "[data-slot='dialog-close']",
+      );
+      closeButton?.click();
+      toast.success(result.message);
+      form.reset();
+      router.refresh();
+    } else toast.error(result.message);
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form
+        ref={formRef}
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-6"
+      >
         <FormField
           control={form.control}
           name="coverLetter"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Cover Letter</FormLabel>
+              <FormLabel>Write cover letter</FormLabel>
               <FormControl>
                 <MarkdownEditor {...field} markdown={field.value ?? ""} />
               </FormControl>
-              <FormDescription>Optional</FormDescription>
+              <FormDescription className="text-xs">optional</FormDescription>
               <FormMessage />
             </FormItem>
           )}

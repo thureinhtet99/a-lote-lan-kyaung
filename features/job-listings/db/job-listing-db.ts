@@ -267,7 +267,7 @@ export const createJobListing = async (
         id: jobListingTable.id,
       });
 
-    updateTag(jobListingsTag(orgId));
+    updateTag(jobListingIdTag(orgId, result.id));
     updateTag(sideBarJobListingWithApplicationsTag(orgId, session.user.id));
 
     return {

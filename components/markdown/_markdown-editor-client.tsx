@@ -19,7 +19,6 @@ import {
   toolbarPlugin,
 } from "@mdxeditor/editor";
 import { Ref } from "react";
-import { useDarkMode } from "@/hooks/use-darkmode";
 import "@mdxeditor/editor/style.css";
 import { markdownClassNames } from "./markdown-renderer";
 
@@ -28,13 +27,11 @@ export default function InternalMarkdownEditor({
   className,
   ...props
 }: MDXEditorProps & { ref?: Ref<MDXEditorMethods> }) {
-  const isDarkMode = useDarkMode();
-
   return (
     <MDXEditor
       {...props}
       ref={ref}
-      className={cn(markdownClassNames, isDarkMode && "dark-theme", className)}
+      className={cn(markdownClassNames, className)}
       suppressHtmlProcessing
       plugins={[
         headingsPlugin(),
