@@ -7,7 +7,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Building2, Users } from "lucide-react";
 import Link from "next/link";
 import { APP_ROUTES } from "@/constants/app-config";
@@ -23,7 +22,7 @@ export default function OrganizationsPage() {
           Organizations
         </h1>
         <span className="inline-flex items-center gap-1.5 text-white text-xs font-medium shrink-0">
-          <Building2 className="size-3" />
+          <Building2 className="size-5" />
           Companies hiring now
         </span>
       </section>
@@ -37,7 +36,7 @@ export default function OrganizationsPage() {
   );
 }
 
-async function OrganizationsList() {
+const OrganizationsList = async () => {
   const result = await getAllApprovedOrganizations();
 
   if (!result.success || result.data.length === 0) {
@@ -61,7 +60,7 @@ async function OrganizationsList() {
           All Organizations
         </h2>
         <p className="text-xs text-muted-foreground mt-0.5">
-          {result.data.length} organization
+          <span className="text-black">{result.data.length}</span> organization
           {result.data.length !== 1 ? "s" : ""} on the platform
         </p>
       </div>
@@ -87,7 +86,7 @@ async function OrganizationsList() {
                       {org.name}
                     </CardTitle>
                     <CardDescription className="text-xs">
-                      /{org.slug}
+                      @{org.slug}
                     </CardDescription>
                   </div>
                 </div>
@@ -107,4 +106,4 @@ async function OrganizationsList() {
       </div>
     </div>
   );
-}
+};

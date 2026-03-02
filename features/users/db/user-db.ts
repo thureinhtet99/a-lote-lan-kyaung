@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { employerRequestTable, userTable } from "@/drizzle/schema";
-import { and, count, desc, eq, or } from "drizzle-orm";
+import { and, count, desc, eq, ilike, or } from "drizzle-orm";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
@@ -23,12 +23,12 @@ import {
   approveRequestSchema,
   employerRequestSchema,
   rejectRequestSchema,
-} from "@/features/admin/admin-schema";
+} from "@/features/admin/schema/admin-schema";
 import { nanoid } from "nanoid";
 import { safeGetSession } from "@/lib/auth/auth-helpers";
 
 // Users
-export const getAllUsers = async (page = 1, pageSize = 10) => {
+export const getAllUsers = async (page = 1, pageSize = 10, query = "") => {
   try {
     const session = await safeGetSession();
 
@@ -36,7 +36,7 @@ export const getAllUsers = async (page = 1, pageSize = 10) => {
       return { success: false, message: "Unauthorized", data: [] };
     }
 
-    return await getAllUsersCached(page, pageSize);
+    return await getAllUsersCached(page, pageSize, query);
   } catch (error) {
     console.error("Error fetching users:", error);
     return {
@@ -53,17 +53,33 @@ export const getAllUsers = async (page = 1, pageSize = 10) => {
   }
 };
 
-const getAllUsersCached = async (page: number, pageSize: number) => {
+const getAllUsersCached = async (
+  page: number,
+  pageSize: number,
+  query: string,
+) => {
   "use cache";
   cacheTag(usersTag());
   cacheLife("minutes");
 
-  const [total] = await db.select({ count: count() }).from(userTable);
+  const normalizedQuery = query.trim();
+  const whereCondition = normalizedQuery
+    ? or(
+        ilike(userTable.name, `%${normalizedQuery}%`),
+        ilike(userTable.email, `%${normalizedQuery}%`),
+      )
+    : undefined;
+
+  const [total] = await db
+    .select({ count: count() })
+    .from(userTable)
+    .where(whereCondition);
   const totalUsers = total?.count ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalUsers / pageSize));
   const safePage = Math.min(Math.max(page, 1), totalPages);
 
   const users = await db.query.userTable.findMany({
+    where: whereCondition,
     columns: {
       id: true,
       name: true,
@@ -180,23 +196,20 @@ export const deleteUser = async (id: string) => {
 export const getAllEmployerRequests = async () => {
   try {
     const session = await safeGetSession();
-
-    if (!session?.user) {
+    if (!session?.user)
       return { success: false, message: "Unauthorized", data: [] };
-    }
 
     // Only admins can view all requests
-    if (session.user.role !== "admin") {
+    if (session.user.role !== "admin")
       return {
         success: false,
-        message: "Only admins can view all requests",
+        message: "Only admins can view all employer requests",
         data: [],
       };
-    }
 
     return await getAllEmployerRequestsCached();
   } catch (error) {
-    console.error("Error fetching employer requests:", error);
+    console.error("Error fetching employer requests: ", error);
     return {
       success: false,
       message: "Failed to fetch employer requests",
@@ -235,31 +248,39 @@ const getAllEmployerRequestsCached = async () => {
 };
 
 export const getEmployerRequest = async () => {
-  "use cache";
   try {
     const session = await safeGetSession();
+    if (!session?.user) return { success: false, message: "Unauthorized" };
 
-    if (!session?.user) {
-      return { success: false, data: null };
-    }
-
-    const request = await db.query.employerRequestTable.findFirst({
-      where: eq(employerRequestTable.userId, session.user.id),
-      orderBy: [desc(employerRequestTable.createdAt)],
-    });
-    if (request?.id) {
-      cacheTag(employerRequestIdTag(request.id));
-    }
-
-    return { success: true, data: request || null };
+    return await getEmployerRequestCached(session.user.id);
   } catch (error) {
-    console.error("Error fetching user employer request:", error);
+    console.error("Error fetching employer request: ", error);
     return {
       success: false,
       message: "Failed to fetch employer request",
-      data: null,
     };
   }
+};
+
+const getEmployerRequestCached = async (userId: string) => {
+  "use cache";
+  cacheTag(employerRequestsTag());
+
+  const request = await db.query.employerRequestTable.findFirst({
+    where: eq(employerRequestTable.userId, userId),
+    orderBy: [desc(employerRequestTable.createdAt)],
+  });
+
+  if (!request)
+    return { success: false, message: "Failed to get employer request" };
+
+  cacheTag(employerRequestIdTag(request.id));
+
+  return {
+    success: true,
+    message: "Employer request fetched successfully",
+    data: request,
+  };
 };
 
 export const createEmployerRequest = async (
@@ -309,13 +330,19 @@ export const createEmployerRequest = async (
       };
     }
 
-    await db.insert(employerRequestTable).values({
-      id: nanoid(),
-      userId: user.id,
-      status: "pending",
-      requestMessage: validated.requestMessage,
-    });
+    const [result] = await db
+      .insert(employerRequestTable)
+      .values({
+        id: nanoid(),
+        userId: user.id,
+        status: "pending",
+        requestMessage: validated.requestMessage,
+      })
+      .returning({
+        employerRequestId: employerRequestTable.id,
+      });
 
+    updateTag(employerRequestIdTag(result.employerRequestId));
     updateTag(employerRequestsTag());
     updateTag(dashboardStatsTag());
 

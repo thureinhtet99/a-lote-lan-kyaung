@@ -16,11 +16,11 @@ export default function ClientPage({
 
         <div className="flex items-center gap-6 shrink-0">
           <span className="inline-flex items-center gap-1.5 text-white text-xs font-medium">
-            <Briefcase className="size-3" />
+            <Briefcase className="size-5" />
             1000+ <span className="hidden md:inline">Active Jobs</span>
           </span>
           <span className="inline-flex items-center gap-1.5 text-white text-xs font-medium">
-            <Users className="size-3" />
+            <Users className="size-5" />
             500+ <span className="hidden md:inline">Organizations</span>
           </span>
         </div>

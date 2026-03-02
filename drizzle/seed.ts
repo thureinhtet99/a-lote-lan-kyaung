@@ -19,7 +19,7 @@ import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
 type AppRole = "admin" | "employer" | "user";
-type OrgRole = "admin" | "employer" | "user";
+type OrgRole = "org-admin" | "hr";
 
 type SeedUser = {
   email: string;
@@ -207,11 +207,10 @@ async function seed() {
       const org = orgSeeds[i];
       const userMember = users[i % users.length];
 
-      await addMemberToOrg(org.ownerId, org.id, "admin");
-      await addMemberToOrg(org.collaboratorId, org.id, "employer");
-      await addMemberToOrg(userMember.id, org.id, "user");
+      await addMemberToOrg(org.collaboratorId, org.id, "org-admin");
+      await addMemberToOrg(userMember.id, org.id, "hr");
 
-      console.log(`✅ Added 3 members to ${org.name}`);
+      console.log(`✅ Added 2 members to ${org.name}`);
     }
 
     console.log("");
@@ -272,7 +271,7 @@ async function seed() {
         id: nanoid(),
         organizationId: org.id,
         email: invitationTargets[index].email,
-        role: index % 2 === 0 ? "user" : "employer",
+        role: (index % 2 === 0 ? "hr" : "org-admin") as "hr" | "org-admin",
         status: index === 3 ? "accepted" : "pending",
         expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
         inviterId: org.ownerId,

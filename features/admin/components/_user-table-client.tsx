@@ -33,7 +33,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -56,57 +56,25 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { UserRoleType, UserType } from "@/types/index.type";
-
-type PaginationProps = {
-  page: number;
-  pageSize: number;
-  totalUsers: number;
-  totalPages: number;
-};
-
-const getVisiblePages = (currentPage: number, totalPages: number) => {
-  if (totalPages <= 7) {
-    return Array.from({ length: totalPages }, (_, index) => index + 1);
-  }
-
-  const pages = new Set([
-    1,
-    totalPages,
-    currentPage - 1,
-    currentPage,
-    currentPage + 1,
-  ]);
-  const sortedPages = Array.from(pages)
-    .filter((page) => page >= 1 && page <= totalPages)
-    .sort((a, b) => a - b);
-
-  const visiblePages: Array<number | "ellipsis"> = [];
-
-  for (let index = 0; index < sortedPages.length; index += 1) {
-    const page = sortedPages[index];
-    const previousPage = sortedPages[index - 1];
-
-    if (index > 0) {
-      const gap = page - previousPage;
-      if (gap === 2) {
-        visiblePages.push(previousPage + 1);
-      } else if (gap > 2) {
-        visiblePages.push("ellipsis");
-      }
-    }
-
-    visiblePages.push(page);
-  }
-
-  return visiblePages;
-};
+import {
+  InputGroup,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 
 export function UserTableClient({
   users,
   pagination,
+  initialQuery,
 }: {
   users: UserType[];
-  pagination: PaginationProps;
+  pagination: {
+    page: number;
+    pageSize: number;
+    totalUsers: number;
+    totalPages: number;
+  };
+  initialQuery: string;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -132,6 +100,7 @@ export function UserTableClient({
   const [confirmBanDialogOpen, setConfirmBanDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [banReason, setBanReason] = useState("");
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
   const visiblePages = getVisiblePages(pagination.page, pagination.totalPages);
   const emptyRowCount = Math.max(
     0,
@@ -143,6 +112,30 @@ export function UserTableClient({
     params.set("page", String(page));
     params.set("pageSize", String(pagination.pageSize));
     return `${pathname}?${params.toString()}`;
+  };
+
+  const handleSearch = () => {
+    const trimmedQuery = searchQuery.trim();
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (trimmedQuery) {
+      params.set("q", trimmedQuery);
+    } else {
+      params.delete("q");
+    }
+
+    params.set("page", "1");
+    params.set("pageSize", String(pagination.pageSize));
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const clearSearch = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("q");
+    params.set("page", "1");
+    params.set("pageSize", String(pagination.pageSize));
+    setSearchQuery("");
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   const resetBanFlow = () => {
@@ -204,6 +197,37 @@ export function UserTableClient({
 
   return (
     <>
+      <form
+        className="flex w-full items-center justify-center"
+        onSubmit={(event) => {
+          event.preventDefault();
+          handleSearch();
+        }}
+      >
+        <InputGroup>
+          <InputGroupInput
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search by name or email"
+            aria-label="Search users"
+          />
+          {searchQuery && (
+            <InputGroupButton
+              type="button"
+              variant="ghost"
+              size="xs"
+              onClick={clearSearch}
+              className="cursor-pointer"
+            >
+              <X />
+            </InputGroupButton>
+          )}
+          <InputGroupButton type="submit" size="xs" className="cursor-pointer">
+            <Search />
+          </InputGroupButton>
+        </InputGroup>
+      </form>
+
       <Table className="min-w-[760px]">
         <TableHeader>
           <TableRow>
@@ -398,7 +422,7 @@ export function UserTableClient({
             <DialogTitle>Ban User</DialogTitle>
             <DialogDescription>
               Are you sure you want to ban{" "}
-              <span className="text-white">{selectedUser?.name}</span>? Please
+              <span className="text-black">{selectedUser?.name}</span>? Please
               provide a reason.
             </DialogDescription>
           </DialogHeader>
@@ -455,7 +479,7 @@ export function UserTableClient({
               disabled={isPending}
               className="bg-destructive hover:bg-destructive/90"
             >
-              {isPending ? "Banning..." : "Confirm Ban"}
+              {isPending ? "Confirming..." : "Confirm Ban"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -463,3 +487,40 @@ export function UserTableClient({
     </>
   );
 }
+
+const getVisiblePages = (currentPage: number, totalPages: number) => {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  const pages = new Set([
+    1,
+    totalPages,
+    currentPage - 1,
+    currentPage,
+    currentPage + 1,
+  ]);
+  const sortedPages = Array.from(pages)
+    .filter((page) => page >= 1 && page <= totalPages)
+    .sort((a, b) => a - b);
+
+  const visiblePages: Array<number | "ellipsis"> = [];
+
+  for (let index = 0; index < sortedPages.length; index += 1) {
+    const page = sortedPages[index];
+    const previousPage = sortedPages[index - 1];
+
+    if (index > 0) {
+      const gap = page - previousPage;
+      if (gap === 2) {
+        visiblePages.push(previousPage + 1);
+      } else if (gap > 2) {
+        visiblePages.push("ellipsis");
+      }
+    }
+
+    visiblePages.push(page);
+  }
+
+  return visiblePages;
+};

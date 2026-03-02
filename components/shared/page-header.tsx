@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 
 interface PageHeaderProps {
   title: string;
-  description?: string;
+  description?: ReactNode;
   className?: string;
   /** Optional action button(s) rendered to the right of the heading */
   actions?: ReactNode;

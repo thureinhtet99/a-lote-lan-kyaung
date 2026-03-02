@@ -80,9 +80,7 @@ export async function isEmployer(): Promise<boolean> {
   try {
     const session = await safeGetSession();
 
-    return (
-      session?.user?.role === "employer" || session?.user?.role === "admin"
-    );
+    return session?.user?.role === "employer";
   } catch {
     return false;
   }

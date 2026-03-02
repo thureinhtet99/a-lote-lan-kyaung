@@ -37,7 +37,9 @@ export default async function JobApplyButton({
         </PopoverTrigger>
         <PopoverContent className="flex flex-col gap-2">
           You need to create an account before applying for a job
-          <Button>Sign in</Button>
+          <Button asChild>
+            <Link href={APP_ROUTES.SIGN_IN}>Sign in</Link>
+          </Button>
         </PopoverContent>
       </Popover>
     );

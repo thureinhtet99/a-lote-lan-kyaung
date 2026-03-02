@@ -89,7 +89,7 @@ export const employerRequestsTag = () => {
 };
 
 export const employerRequestIdTag = (requestId: string) => {
-  return `employer-requests-${requestId}` as const;
+  return `employer-request-${requestId}` as const;
 };
 
 // Organization requests
@@ -98,7 +98,7 @@ export const orgRequestsTag = () => {
 };
 
 export const orgRequestIdTag = (requestId: string) => {
-  return `organization-requests-${requestId}` as const;
+  return `organization-request-${requestId}` as const;
 };
 
 export const userOrgRequestsTag = (userId: string) => {

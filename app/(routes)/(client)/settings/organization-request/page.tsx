@@ -16,6 +16,7 @@ import { Suspense } from "react";
 import Loading from "@/components/shared/loading";
 import { APP_ROUTES } from "@/constants/app-config";
 import { getMyOrganizationRequest } from "@/features/organizations/db/organization-request-db";
+import Link from "next/link";
 
 export default async function OrganizationRequestPage() {
   return (
@@ -45,9 +46,17 @@ const SuspendedComponent = async () => {
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Employer role required</AlertTitle>
-          <AlertDescription>
+          <AlertDescription className="flex items-center">
             You need to have the employer role before you can request to create
-            an organization. Please request employer access first.
+            an organization. Please{" "}
+            <Link
+              href={APP_ROUTES.SETTINGS.EMPLOYER_REQUEST}
+              className="text-primary hover:underline"
+            >
+              {" "}
+              request employer
+            </Link>
+            access first.
           </AlertDescription>
         </Alert>
       </div>
@@ -106,7 +115,7 @@ const SuspendedComponent = async () => {
             <div>
               <p className="text-sm font-medium">Slug</p>
               <p className="text-sm text-muted-foreground">
-                /{existingRequest.orgSlug}
+                @{existingRequest.orgSlug}
               </p>
             </div>
             <div>

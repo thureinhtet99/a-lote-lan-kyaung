@@ -15,8 +15,21 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Building2, Users } from "lucide-react";
 import Link from "next/link";
 import { APP_ROUTES } from "@/constants/app-config";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
-export default function AdminOrganizationsPage() {
+export default function AdminOrganizationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   return (
     <div className="space-y-6 p-4 sm:p-6 lg:space-y-8 lg:p-8">
       <PageHeader
@@ -24,13 +37,22 @@ export default function AdminOrganizationsPage() {
         description="All approved organizations on the platform"
       />
       <Suspense fallback={<Loading />}>
-        <AdminOrganizationsList />
+        <SuspendedComponent searchParams={searchParams} />
       </Suspense>
     </div>
   );
 }
 
-async function AdminOrganizationsList() {
+const PAGE_SIZE = 10;
+
+const SuspendedComponent = async ({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) => {
+  const resolvedSearchParams = await searchParams;
+  const page = getNumberParam(resolvedSearchParams.page, 1);
+
   const result = await getAllApprovedOrganizations();
 
   if (!result.success || result.data.length === 0) {
@@ -43,9 +65,24 @@ async function AdminOrganizationsList() {
     );
   }
 
+  const totalItems = result.data.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+  const safePage = Math.min(Math.max(page, 1), totalPages);
+  const paginatedOrganizations = result.data.slice(
+    (safePage - 1) * PAGE_SIZE,
+    safePage * PAGE_SIZE,
+  );
+  const visiblePages = getVisiblePages(safePage, totalPages);
+
+  const createPageUrl = (targetPage: number) => {
+    const params = new URLSearchParams();
+    params.set("page", String(targetPage));
+    return `?${params.toString()}`;
+  };
+
   return (
-    <div className="rounded-md border">
-      <Table>
+    <div className="space-y-4">
+      <Table className="min-w-[760px]">
         <TableHeader>
           <TableRow>
             <TableHead>Organization</TableHead>
@@ -56,7 +93,7 @@ async function AdminOrganizationsList() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {result.data.map((org) => (
+          {paginatedOrganizations.map((org) => (
             <TableRow key={org.id}>
               <TableCell>
                 <div className="flex items-center gap-3">
@@ -70,7 +107,7 @@ async function AdminOrganizationsList() {
                 </div>
               </TableCell>
               <TableCell className="text-muted-foreground text-sm">
-                /{org.slug}
+                @{org.slug}
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -83,16 +120,114 @@ async function AdminOrganizationsList() {
               </TableCell>
               <TableCell className="text-right">
                 <Link
-                  href={APP_ROUTES.ORGANIZATIONS.DETAIL(org.slug)}
-                  className="text-sm text-primary hover:underline"
+                  href={APP_ROUTES.HOME}
+                  className="text-sm hover:text-primary hover:underline"
                 >
-                  View
+                  View Details
                 </Link>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+
+      {totalPages > 1 && (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">
+            Showing page {safePage} of {totalPages} ({totalItems} total)
+          </p>
+          <Pagination className="mx-0 w-full justify-start overflow-x-auto pb-1 sm:w-auto sm:justify-end sm:pb-0">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href={createPageUrl(Math.max(1, safePage - 1))}
+                  aria-disabled={safePage <= 1}
+                  tabIndex={safePage <= 1 ? -1 : undefined}
+                  className={
+                    safePage <= 1 ? "pointer-events-none opacity-50" : undefined
+                  }
+                />
+              </PaginationItem>
+
+              {visiblePages.map((visiblePage, index) => (
+                <PaginationItem key={`${visiblePage}-${index}`}>
+                  {visiblePage === "ellipsis" ? (
+                    <PaginationEllipsis />
+                  ) : (
+                    <PaginationLink
+                      href={createPageUrl(visiblePage)}
+                      isActive={visiblePage === safePage}
+                    >
+                      {visiblePage}
+                    </PaginationLink>
+                  )}
+                </PaginationItem>
+              ))}
+
+              <PaginationItem>
+                <PaginationNext
+                  href={createPageUrl(Math.min(totalPages, safePage + 1))}
+                  aria-disabled={safePage >= totalPages}
+                  tabIndex={safePage >= totalPages ? -1 : undefined}
+                  className={
+                    safePage >= totalPages
+                      ? "pointer-events-none opacity-50"
+                      : undefined
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
     </div>
   );
-}
+};
+
+const getNumberParam = (
+  value: string | string[] | undefined,
+  fallback: number,
+) => {
+  const stringValue = Array.isArray(value) ? value[0] : value;
+  if (!stringValue) return fallback;
+
+  const parsed = Number.parseInt(stringValue, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+};
+
+const getVisiblePages = (currentPage: number, totalPages: number) => {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  const pages = new Set([
+    1,
+    totalPages,
+    currentPage - 1,
+    currentPage,
+    currentPage + 1,
+  ]);
+  const sortedPages = Array.from(pages)
+    .filter((page) => page >= 1 && page <= totalPages)
+    .sort((a, b) => a - b);
+
+  const visiblePages: Array<number | "ellipsis"> = [];
+
+  for (let index = 0; index < sortedPages.length; index += 1) {
+    const page = sortedPages[index];
+    const previousPage = sortedPages[index - 1];
+
+    if (index > 0) {
+      const gap = page - previousPage;
+      if (gap === 2) {
+        visiblePages.push(previousPage + 1);
+      } else if (gap > 2) {
+        visiblePages.push("ellipsis");
+      }
+    }
+
+    visiblePages.push(page);
+  }
+
+  return visiblePages;
+};

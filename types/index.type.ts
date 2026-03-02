@@ -6,7 +6,7 @@ import {
   organizationRequestSchema,
   rejectOrgRequestSchema,
   rejectRequestSchema,
-} from "@/features/admin/admin-schema";
+} from "@/features/admin/schema/admin-schema";
 import { Column } from "@tanstack/react-table";
 import { Key, ReactNode } from "react";
 import z from "zod";

@@ -10,23 +10,16 @@ export const statement = {
 // Create access control instance
 export const ac = createAccessControl(statement);
 
-// User - basic user with limited permissions
-export const user = ac.newRole({
-  job_listing: ["create", "update"],
-  application: ["read", "update"],
-});
-
-// Employer - mid-level organization role
-export const employer = ac.newRole({
-  organization: ["create", "read", "update", "delete"],
+// HR - basic organization role for managing job postings and applications
+export const hr = ac.newRole({
+  organization: ["read"],
   job_listing: ["create", "update", "delete", "change_status"],
   application: ["read", "update", "change_rating", "change_status"],
-  member: ["invite", "remove", "update_role"],
 });
 
-// Admin - top-level organization role with full permissions
-export const admin = ac.newRole({
-  organization: ["create", "read", "update", "delete"],
+// Org Admin - full organization management role
+export const orgAdmin = ac.newRole({
+  organization: ["create", "read", "update", "delete", "switch"],
   job_listing: ["create", "update", "delete", "change_status"],
   application: ["read", "update", "change_rating", "change_status"],
   member: ["invite", "remove", "update_role"],

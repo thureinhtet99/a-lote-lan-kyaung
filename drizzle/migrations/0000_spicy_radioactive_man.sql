@@ -47,7 +47,7 @@ CREATE TABLE "members" (
 	"id" text PRIMARY KEY NOT NULL,
 	"organization_id" text NOT NULL,
 	"user_id" text NOT NULL,
-	"role" text DEFAULT 'user' NOT NULL,
+	"role" text DEFAULT 'hr' NOT NULL,
 	"created_at" timestamp NOT NULL
 );
 --> statement-breakpoint

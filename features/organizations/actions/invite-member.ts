@@ -4,13 +4,13 @@ import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { invitationTable, userTable } from "@/drizzle/schema";
+import { userTable } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
 import { safeGetSession } from "@/lib/auth/auth-helpers";
 
 const inviteMemberSchema = z.object({
   email: z.string().email("Invalid email address"),
-  role: z.enum(["admin", "employer", "user"]),
+  role: z.enum(["org-admin", "hr"]),
 });
 
 export type InviteMemberInput = z.infer<typeof inviteMemberSchema>;
@@ -69,27 +69,36 @@ export async function inviteMember(data: InviteMemberInput) {
       };
     }
 
-    // Create invitation in database
-    const { nanoid } = await import("nanoid");
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiration
+    // Use better-auth's organization API route directly
+    const inviteResult = await fetch(
+      `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/organization/invite-member`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(await headers()),
+        },
+        body: JSON.stringify({
+          email: validated.email,
+          role: validated.role,
+          organizationId: session.session.activeOrganizationId,
+        }),
+      },
+    );
 
-    await db.insert(invitationTable).values({
-      id: nanoid(),
-      email: validated.email,
-      organizationId: session.session.activeOrganizationId,
-      inviterId: session.user.id,
-      role: validated.role,
-      status: "pending",
-      expiresAt,
-    });
+    const result = await inviteResult.json();
 
-    // TODO: Send email notification here
-    // In production, you'd use a service like Resend, SendGrid, etc.
+    if (!result) {
+      return {
+        success: false,
+        message: "Failed to create invitation",
+      };
+    }
 
     return {
       success: true,
       message: `Invitation sent to ${validated.email}`,
+      invitation: result,
     };
   } catch (error) {
     if (error instanceof z.ZodError) {

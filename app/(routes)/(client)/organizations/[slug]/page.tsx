@@ -43,7 +43,7 @@ export default async function OrganizationDetailPage({
           </Avatar>
           <div>
             <h1 className="text-2xl font-bold">{org.name}</h1>
-            <p className="text-sm text-muted-foreground">/{org.slug}</p>
+            <p className="text-sm text-muted-foreground">@{org.slug}</p>
           </div>
         </div>
       </section>

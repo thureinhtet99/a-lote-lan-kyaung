@@ -2,15 +2,13 @@
 
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
-import { db } from "@/lib/db";
-import { memberTable } from "@/drizzle/schema";
-import { and, eq } from "drizzle-orm";
 import { z } from "zod";
-import { safeGetSession } from "@/lib/auth/auth-helpers";
 
 const updateRoleSchema = z.object({
   memberId: z.string().min(1, "Member ID is required"),
-  newRole: z.enum(["employer", "user"]),
+  newRole: z.enum(["hr", "org-admin"], {
+    errorMap: () => ({ message: "Role must be either 'hr' or 'org-admin'" }),
+  }),
 });
 
 export type UpdateMemberRoleInput = z.infer<typeof updateRoleSchema>;
@@ -20,25 +18,9 @@ export async function updateMemberRole(data: UpdateMemberRoleInput) {
     // Validate input
     const validated = updateRoleSchema.parse(data);
 
-    // Check if user has permission to update member roles
-    const hasPermission = await auth.api.hasPermission({
+    const session = await auth.api.getSession({
       headers: await headers(),
-      body: {
-        permissions: {
-          member: ["update_role"],
-        },
-      },
     });
-
-    if (!hasPermission.success) {
-      return {
-        success: false,
-        message: "You don't have permission to update member roles",
-      };
-    }
-
-    // Get current session
-    const session = await safeGetSession();
 
     if (!session?.session?.activeOrganizationId) {
       return {
@@ -47,46 +29,20 @@ export async function updateMemberRole(data: UpdateMemberRoleInput) {
       };
     }
 
-    // Get current user's role
-    const currentMember = await auth.api.getActiveMember({
+    // Get member details
+    const members = await auth.api.listMembers({
       headers: await headers(),
+      query: {
+        organizationId: session.session.activeOrganizationId,
+      },
     });
 
-    if (!currentMember) {
-      return {
-        success: false,
-        message: "You are not a member of this organization",
-      };
-    }
-
-    // Only organization admins can change roles
-    if (currentMember.role !== "admin") {
-      return {
-        success: false,
-        message: "Only organization admins can change member roles",
-      };
-    }
-
-    // Get the member to update
-    const member = await db.query.memberTable.findFirst({
-      where: and(
-        eq(memberTable.id, validated.memberId),
-        eq(memberTable.organizationId, session.session.activeOrganizationId),
-      ),
-    });
+    const member = members?.data?.find((m) => m.id === validated.memberId);
 
     if (!member) {
       return {
         success: false,
         message: "Member not found",
-      };
-    }
-
-    // Prevent changing organization admin role
-    if (member.role === "admin") {
-      return {
-        success: false,
-        message: "Cannot change the role of the organization admin",
       };
     }
 
@@ -98,20 +54,35 @@ export async function updateMemberRole(data: UpdateMemberRoleInput) {
       };
     }
 
-    // Update the member's role
-    await db
-      .update(memberTable)
-      .set({ role: validated.newRole })
-      .where(
-        and(
-          eq(memberTable.id, validated.memberId),
-          eq(memberTable.organizationId, session.session.activeOrganizationId),
-        ),
-      );
+    // Use better-auth's updateMemberRole API route
+    const updateResult = await fetch(
+      `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/organization/update-member-role`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(await headers()),
+        },
+        body: JSON.stringify({
+          memberId: validated.memberId,
+          role: validated.newRole,
+          organizationId: session.session.activeOrganizationId,
+        }),
+      },
+    );
+
+    const result = await updateResult.json();
+
+    if (!updateResult.ok || result.error) {
+      return {
+        success: false,
+        message: result.error?.message || "Failed to update member role",
+      };
+    }
 
     return {
       success: true,
-      message: `Member role updated to ${validated.newRole}`,
+      message: `Member role updated to ${validated.newRole === "org-admin" ? "Organization Admin" : "HR"}`,
     };
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -121,6 +92,7 @@ export async function updateMemberRole(data: UpdateMemberRoleInput) {
       };
     }
 
+    console.error("Error updating member role:", error);
     return {
       success: false,
       message:

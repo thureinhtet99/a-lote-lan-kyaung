@@ -24,7 +24,7 @@ import {
   approveOrgRequestSchema,
   organizationRequestSchema,
   rejectOrgRequestSchema,
-} from "@/features/admin/admin-schema";
+} from "@/features/admin/schema/admin-schema";
 import {
   ApproveOrgRequestFormType,
   OrgRequestFormType,

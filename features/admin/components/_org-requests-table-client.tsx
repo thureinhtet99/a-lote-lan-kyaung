@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -11,6 +12,15 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import {
   Dialog,
   DialogContent,
@@ -26,8 +36,14 @@ import {
   approveOrganizationRequest,
   rejectOrganizationRequest,
 } from "@/features/organizations/db/organization-request-db";
-import { useRouter } from "next/navigation";
 import { Building2, CheckCircle, XCircle } from "lucide-react";
+
+type SectionPagination = {
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+};
 
 type OrgRequestRow = {
   id: string;
@@ -47,11 +63,17 @@ type OrgRequestRow = {
 export function OrgRequestsTableClient({
   pendingRequests,
   reviewedRequests,
+  pendingPagination,
+  reviewedPagination,
 }: {
   pendingRequests: OrgRequestRow[];
   reviewedRequests: OrgRequestRow[];
+  pendingPagination: SectionPagination;
+  reviewedPagination: SectionPagination;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
@@ -59,6 +81,20 @@ export function OrgRequestsTableClient({
     null,
   );
   const [adminResponse, setAdminResponse] = useState("");
+  const pendingVisiblePages = getVisiblePages(
+    pendingPagination.page,
+    pendingPagination.totalPages,
+  );
+  const reviewedVisiblePages = getVisiblePages(
+    reviewedPagination.page,
+    reviewedPagination.totalPages,
+  );
+
+  const createSectionPageUrl = (sectionParam: "op" | "or", page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set(sectionParam, String(page));
+    return `${pathname}?${params.toString()}`;
+  };
 
   const resetDialogState = () => {
     setAdminResponse("");
@@ -121,7 +157,7 @@ export function OrgRequestsTableClient({
   };
 
   const renderTable = (rows: OrgRequestRow[], showActions: boolean) => (
-    <div className="rounded-md border">
+    <div className="rounded-md">
       <Table>
         <TableHeader>
           <TableRow>
@@ -147,7 +183,7 @@ export function OrgRequestsTableClient({
               <TableCell>
                 <div className="font-medium">{req.orgName}</div>
                 <div className="text-muted-foreground text-xs">
-                  /{req.orgSlug}
+                  @{req.orgSlug}
                 </div>
               </TableCell>
               <TableCell className="max-w-[260px]">
@@ -164,26 +200,24 @@ export function OrgRequestsTableClient({
                   <div className="flex justify-end gap-2">
                     <Button
                       size="sm"
-                      variant="outline"
-                      className="text-green-600 hover:text-green-700 border-green-200 hover:border-green-300"
+                      variant="default"
                       onClick={() => {
                         setSelectedRequest(req);
                         setApproveDialogOpen(true);
                       }}
+                      disabled={isPending}
                     >
-                      <CheckCircle className="mr-1 size-3.5" />
                       Approve
                     </Button>
                     <Button
                       size="sm"
-                      variant="outline"
-                      className="text-destructive hover:text-destructive border-destructive/20 hover:border-destructive/30"
+                      variant="destructive"
                       onClick={() => {
                         setSelectedRequest(req);
                         setRejectDialogOpen(true);
                       }}
+                      disabled={isPending}
                     >
-                      <XCircle className="mr-1 size-3.5" />
                       Reject
                     </Button>
                   </div>
@@ -196,26 +230,129 @@ export function OrgRequestsTableClient({
     </div>
   );
 
+  const renderSectionPagination = (
+    sectionParam: "op" | "or",
+    sectionPagination: SectionPagination,
+    visiblePages: Array<number | "ellipsis">,
+  ) => {
+    if (sectionPagination.totalPages <= 1) return null;
+
+    return (
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-muted-foreground">
+          Showing page {sectionPagination.page} of{" "}
+          {sectionPagination.totalPages} ({sectionPagination.totalItems} total)
+        </p>
+        <Pagination className="mx-0 w-full justify-start overflow-x-auto pb-1 sm:w-auto sm:justify-end sm:pb-0">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href={createSectionPageUrl(
+                  sectionParam,
+                  Math.max(1, sectionPagination.page - 1),
+                )}
+                aria-disabled={sectionPagination.page <= 1 || isPending}
+                tabIndex={
+                  sectionPagination.page <= 1 || isPending ? -1 : undefined
+                }
+                className={
+                  sectionPagination.page <= 1 || isPending
+                    ? "pointer-events-none opacity-50"
+                    : undefined
+                }
+              />
+            </PaginationItem>
+
+            {visiblePages.map((page, index) => (
+              <PaginationItem key={`${sectionParam}-${page}-${index}`}>
+                {page === "ellipsis" ? (
+                  <PaginationEllipsis />
+                ) : (
+                  <PaginationLink
+                    href={createSectionPageUrl(sectionParam, page)}
+                    isActive={page === sectionPagination.page}
+                    aria-disabled={isPending}
+                    tabIndex={isPending ? -1 : undefined}
+                    className={
+                      isPending ? "pointer-events-none opacity-60" : undefined
+                    }
+                  >
+                    {page}
+                  </PaginationLink>
+                )}
+              </PaginationItem>
+            ))}
+
+            <PaginationItem>
+              <PaginationNext
+                href={createSectionPageUrl(
+                  sectionParam,
+                  Math.min(
+                    sectionPagination.totalPages,
+                    sectionPagination.page + 1,
+                  ),
+                )}
+                aria-disabled={
+                  sectionPagination.page >= sectionPagination.totalPages ||
+                  isPending
+                }
+                tabIndex={
+                  sectionPagination.page >= sectionPagination.totalPages ||
+                  isPending
+                    ? -1
+                    : undefined
+                }
+                className={
+                  sectionPagination.page >= sectionPagination.totalPages ||
+                  isPending
+                    ? "pointer-events-none opacity-50"
+                    : undefined
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
+    );
+  };
+
   return (
     <>
-      {pendingRequests.length > 0 && (
+      {pendingPagination.totalItems > 0 && (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold">Pending Requests</h2>
-            <Badge variant="outline">{pendingRequests.length}</Badge>
+            <h2 className="text-xl font-semibold">Pending Requests</h2>
+            <Badge variant="outline">{pendingPagination.totalItems}</Badge>
           </div>
           {renderTable(pendingRequests, true)}
+          {renderSectionPagination(
+            "op",
+            pendingPagination,
+            pendingVisiblePages,
+          )}
         </div>
       )}
 
-      {reviewedRequests.length > 0 && (
+      {reviewedPagination.totalItems > 0 && (
         <div className="space-y-3 mt-8">
           <h2 className="text-lg font-semibold text-muted-foreground">
             Reviewed Requests
           </h2>
           {renderTable(reviewedRequests, false)}
+          {renderSectionPagination(
+            "or",
+            reviewedPagination,
+            reviewedVisiblePages,
+          )}
         </div>
       )}
+
+      {pendingPagination.totalItems === 0 &&
+        reviewedPagination.totalItems === 0 && (
+          <div className="text-muted-foreground p-4 text-center">
+            No organization requests yet
+          </div>
+        )}
 
       {/* Approve Dialog */}
       <Dialog open={approveDialogOpen} onOpenChange={setApproveDialogOpen}>
@@ -300,3 +437,40 @@ export function OrgRequestsTableClient({
     </>
   );
 }
+
+const getVisiblePages = (currentPage: number, totalPages: number) => {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  const pages = new Set([
+    1,
+    totalPages,
+    currentPage - 1,
+    currentPage,
+    currentPage + 1,
+  ]);
+  const sortedPages = Array.from(pages)
+    .filter((page) => page >= 1 && page <= totalPages)
+    .sort((a, b) => a - b);
+
+  const visiblePages: Array<number | "ellipsis"> = [];
+
+  for (let index = 0; index < sortedPages.length; index += 1) {
+    const page = sortedPages[index];
+    const previousPage = sortedPages[index - 1];
+
+    if (index > 0) {
+      const gap = page - previousPage;
+      if (gap === 2) {
+        visiblePages.push(previousPage + 1);
+      } else if (gap > 2) {
+        visiblePages.push("ellipsis");
+      }
+    }
+
+    visiblePages.push(page);
+  }
+
+  return visiblePages;
+};

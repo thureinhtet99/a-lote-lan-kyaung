@@ -1,3 +1,5 @@
+"use client";
+
 import { redirect } from "next/navigation";
 import {
   Card,
@@ -8,15 +10,14 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
-import { signOut } from "@/lib/auth/auth-client";
 import { safeGetSession } from "@/lib/auth/auth-helpers";
 import { APP_ROUTES } from "@/constants/app-config";
+import { useSignOut } from "@/hooks/use-sign-out";
 
 export default async function BannedPage() {
+  const { signOut } = useSignOut();
   const session = await safeGetSession();
   if (!session?.user) redirect(APP_ROUTES.SIGN_IN);
-
-  // Check if user is actually banned
   if (!session.user.banned) redirect("/");
 
   const banExpires = session.user.banExpires;
@@ -37,14 +38,14 @@ export default async function BannedPage() {
         <CardContent className="space-y-4">
           {banReason && (
             <div>
-              <h4 className="mb-2 text-sm font-medium">Reason</h4>
-              <p className="text-sm text-muted-foreground">{banReason}</p>
+              <h4 className="mb-2 text-sm font-medium">Reason:</h4>
+              <p className="text-sm text-muted-foreground"> {banReason}</p>
             </div>
           )}
 
           {banExpires && (
             <div>
-              <h4 className="mb-2 text-sm font-medium">Ban Expires</h4>
+              <h4 className="mb-2 text-sm font-medium">Ban Expires:</h4>
               <p className="text-sm text-muted-foreground">
                 {new Date(banExpires).toLocaleString()}
               </p>
@@ -61,10 +62,7 @@ export default async function BannedPage() {
             <Button
               variant="outline"
               className="w-full"
-              onClick={async () => {
-                await signOut();
-                window.location.href = "/sign-in";
-              }}
+              onClick={() => signOut()}
             >
               Sign Out
             </Button>

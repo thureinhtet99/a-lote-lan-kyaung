@@ -76,7 +76,15 @@ export default async function AdminDashboard() {
     <div className="space-y-6 p-4 sm:p-6 lg:space-y-8 lg:p-8">
       <PageHeader
         title="Dashboard"
-        description={`Welcome back, ${session?.user?.name ?? "Admin"}. Here's what's happening with your platform.`}
+        description={
+          <>
+            Welcome back,{" "}
+            <span className="text-black">
+              {session?.user?.name ?? "Admin"}
+            </span>
+            . Here&apos;s what&apos;s happening with your platform.
+          </>
+        }
       />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

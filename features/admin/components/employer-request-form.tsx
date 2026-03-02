@@ -23,13 +23,15 @@ import {
 } from "@/components/ui/card";
 import { toast } from "sonner";
 import { EmployerRequestFormType } from "@/types/index.type";
-import { employerRequestSchema } from "@/features/admin/admin-schema";
+import { employerRequestSchema } from "@/features/admin/schema/admin-schema";
 import { createEmployerRequest } from "@/features/users/db/user-db";
 import { Loader2Icon } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export function EmployerRequestForm() {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [submitted, setSubmitted] = useState(false);
+  // const [submitted, setSubmitted] = useState(false);
 
   const form = useForm<EmployerRequestFormType>({
     resolver: zodResolver(employerRequestSchema),
@@ -42,34 +44,35 @@ export function EmployerRequestForm() {
     startTransition(async () => {
       const result = await createEmployerRequest(data);
       if (result.success) {
-        toast.success(result.message);
-        setSubmitted(true);
+        // setSubmitted(true);
         form.reset();
+        toast.success(result.message);
+        router.refresh();
       } else {
         toast.error(result.message);
       }
     });
   };
 
-  if (submitted) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Request Submitted</CardTitle>
-          <CardDescription>
-            Your employer request has been submitted successfully
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Your request to become an employer has been submitted and is under
-            admin review. You will be notified once your request has been
-            reviewed.
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
+  // if (submitted) {
+  //   return (
+  //     <Card>
+  //       <CardHeader>
+  //         <CardTitle>Request Submitted</CardTitle>
+  //         <CardDescription>
+  //           Your employer request has been submitted successfully
+  //         </CardDescription>
+  //       </CardHeader>
+  //       <CardContent>
+  //         <p className="text-sm text-muted-foreground">
+  //           Your request to become an employer has been submitted and is under
+  //           admin review. You will be notified once your request has been
+  //           reviewed.
+  //         </p>
+  //       </CardContent>
+  //     </Card>
+  //   );
+  // }
 
   return (
     <Card>

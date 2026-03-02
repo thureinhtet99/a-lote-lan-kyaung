@@ -11,9 +11,10 @@ import {
   userTable,
   verificationTable,
 } from "@/drizzle/schema";
-import { ac, user, employer, admin } from "@/lib/utils/access-control";
+import { ac, hr, orgAdmin } from "@/lib/utils/access-control";
 import { revalidateTag } from "next/cache";
 import { dashboardStatsTag } from "@/lib/utils/data-cache";
+import { sendInvitationEmail } from "@/services/email/send-invitation";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -43,20 +44,23 @@ export const auth = betterAuth({
       },
       ac,
       roles: {
-        user,
-        employer,
-        admin,
+        hr,
+        "org-admin": orgAdmin,
       },
-      organizationHooks: {
-        beforeAddMember: async ({ member, user: memberUser }) => {
-          // Use the user's application role instead of default "owner"
-          return {
-            data: {
-              ...member,
-              role: memberUser.role as "user" | "employer" | "admin",
-            },
-          };
-        },
+      sendInvitationEmail: async (data) => {
+        try {
+          await sendInvitationEmail({
+            email: data.email,
+            invitedByUsername: data.inviter.user.name,
+            invitedByEmail: data.inviter.user.email,
+            organizationName: data.organization.name,
+            role: data.role,
+            inviteUrl: `${process.env.NEXT_PUBLIC_APP_URL}/employer/invitations?invitation=${data.id}`,
+          });
+        } catch (error) {
+          console.error("Failed to send invitation email:", error);
+          // Don't throw - we don't want to fail the invitation if email fails
+        }
       },
     }),
     adminPlugin(),

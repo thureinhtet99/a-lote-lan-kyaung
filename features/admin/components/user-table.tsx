@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { getAllUsers } from "@/features/users/db/user-db";
 import Loading from "@/components/shared/loading";
 import { UserTableClient } from "./_user-table-client";
+import { getNumberParam, getStringParam } from "../lib/utils";
 
 export default function UserTable({
   searchParams,
@@ -23,8 +24,9 @@ const SuspendedComponent = async ({
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const page = getNumberParam(resolvedSearchParams.page, 1);
   const pageSize = getNumberParam(resolvedSearchParams.pageSize, 10);
+  const query = getStringParam(resolvedSearchParams.q, "");
 
-  const result = await getAllUsers(page, pageSize);
+  const result = await getAllUsers(page, pageSize, query);
 
   if (!result.success) {
     return (
@@ -44,24 +46,11 @@ const SuspendedComponent = async ({
   }
   const pagination = result.pagination;
 
-  if (users.length === 0) {
-    return (
-      <div className="text-muted-foreground p-4 text-center animate-pulse">
-        No users found
-      </div>
-    );
-  }
-
-  return <UserTableClient users={users} pagination={pagination} />;
-};
-
-const getNumberParam = (
-  value: string | string[] | undefined,
-  fallback: number,
-) => {
-  const stringValue = Array.isArray(value) ? value[0] : value;
-  if (!stringValue) return fallback;
-
-  const parsed = Number.parseInt(stringValue, 10);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+  return (
+    <UserTableClient
+      users={users}
+      pagination={pagination}
+      initialQuery={query}
+    />
+  );
 };

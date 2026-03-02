@@ -23,8 +23,8 @@ export function AdminNav() {
           key={item.href}
           href={item.href}
           className={cn(
-            "shrink-0 rounded-md px-2.5 py-1.5 transition-colors hover:text-foreground/80 sm:px-3",
-            pathname === item.href ? "text-white" : "text-foreground",
+            "shrink-0 rounded-md px-2.5 py-1.5 transition-colors hover:text-muted-foreground sm:px-3",
+            pathname === item.href && "text-white",
           )}
         >
           {item.label}

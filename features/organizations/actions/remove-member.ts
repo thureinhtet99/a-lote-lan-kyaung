@@ -2,10 +2,6 @@
 
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
-import { db } from "@/lib/db";
-import { memberTable } from "@/drizzle/schema";
-import { and, eq } from "drizzle-orm";
-import { safeGetSession } from "@/lib/auth/auth-helpers";
 
 export async function removeMember(memberId: string) {
   try {
@@ -16,25 +12,9 @@ export async function removeMember(memberId: string) {
       };
     }
 
-    // Check if user has permission to remove members
-    const hasPermission = await auth.api.hasPermission({
+    const session = await auth.api.getSession({
       headers: await headers(),
-      body: {
-        permissions: {
-          member: ["remove"],
-        },
-      },
     });
-
-    if (!hasPermission.success) {
-      return {
-        success: false,
-        message: "You don't have permission to remove members",
-      };
-    }
-
-    // Get current session
-    const session = await safeGetSession();
 
     if (!session?.session?.activeOrganizationId) {
       return {
@@ -43,26 +23,20 @@ export async function removeMember(memberId: string) {
       };
     }
 
-    // Get the member to check if they're an organization admin
-    const member = await db.query.memberTable.findFirst({
-      where: and(
-        eq(memberTable.id, memberId),
-        eq(memberTable.organizationId, session.session.activeOrganizationId),
-      ),
+    // Get member details to find their email
+    const members = await auth.api.listMembers({
+      headers: await headers(),
+      query: {
+        organizationId: session.session.activeOrganizationId,
+      },
     });
+
+    const member = members?.data?.find((m) => m.id === memberId);
 
     if (!member) {
       return {
         success: false,
         message: "Member not found",
-      };
-    }
-
-    // Prevent removing organization admin
-    if (member.role === "admin") {
-      return {
-        success: false,
-        message: "Cannot remove the organization admin",
       };
     }
 
@@ -74,21 +48,37 @@ export async function removeMember(memberId: string) {
       };
     }
 
-    // Remove the member
-    await db
-      .delete(memberTable)
-      .where(
-        and(
-          eq(memberTable.id, memberId),
-          eq(memberTable.organizationId, session.session.activeOrganizationId),
-        ),
-      );
+    // Use better-auth's removeMember API route
+    const removeResult = await fetch(
+      `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/organization/remove-member`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(await headers()),
+        },
+        body: JSON.stringify({
+          memberIdOrEmail: member.email,
+          organizationId: session.session.activeOrganizationId,
+        }),
+      },
+    );
+
+    const result = await removeResult.json();
+
+    if (!removeResult.ok || result.error) {
+      return {
+        success: false,
+        message: result.error?.message || "Failed to remove member",
+      };
+    }
 
     return {
       success: true,
       message: "Member removed successfully",
     };
   } catch (error) {
+    console.error("Error removing member:", error);
     return {
       success: false,
       message:

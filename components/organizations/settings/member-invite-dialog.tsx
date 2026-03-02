@@ -76,8 +76,8 @@ export function MemberInviteDialog() {
           <DialogTitle>Invite Team Member</DialogTitle>
           <DialogDescription>
             Send an invitation to join your organization. The invited user must
-            already have the <strong>employer role</strong> to accept the
-            invitation.
+            already have the <strong className="text-black">employer</strong>{" "}
+            role to accept the invitation.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -87,7 +87,7 @@ export function MemberInviteDialog() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email Address</FormLabel>
+                  <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
@@ -100,32 +100,7 @@ export function MemberInviteDialog() {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="role"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Role</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    disabled={form.formState.isSubmitting}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a role" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="user">User</SelectItem>
-                      <SelectItem value="employer">Employer</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
             <div className="flex justify-end gap-3">
               <Button
                 type="button"
