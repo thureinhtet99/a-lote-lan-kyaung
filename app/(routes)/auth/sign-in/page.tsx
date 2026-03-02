@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Link from "next/link";
-import SignInForm from "./sign-in-form";
+import SignInForm from "../../../../features/auth/components/sign-in-form";
 import { Logo } from "@/components/shared/logo";
 import { FieldSeparator } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
@@ -9,8 +9,8 @@ import { APP_ROUTES } from "@/constants/app-config";
 export default function SignInPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-lg">
-        <CardHeader className="flex items-center justify-center">
+      <Card className="w-full max-w-lg pt-0 rounded-t-none">
+        <CardHeader className="flex items-center py-4 justify-center bg-gradient-to-r from-primary to-accent">
           <Logo size="lg" />
         </CardHeader>
         <div className="flex flex-col gap-2 items-center justify-center">

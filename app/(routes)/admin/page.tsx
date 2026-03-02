@@ -1,67 +1,13 @@
-import { auth } from "@/lib/auth/auth";
-import { headers } from "next/headers";
-import { db } from "@/lib/db";
-import {
-  employerRequestTable,
-  organizationRequestTable,
-  organizationTable,
-  userTable,
-} from "@/drizzle/schema";
-import { eq, count } from "drizzle-orm";
 import { StatCard } from "@/components/shared/stat-card";
 import { PageHeader } from "@/components/shared/page-header";
 import { Users, Briefcase, Shield, Clock, Building2 } from "lucide-react";
-import { cacheLife, cacheTag } from "next/cache";
-import { dashboardStatsTag } from "@/lib/utils/data-cache";
-
-async function getAdminStats() {
-  "use cache";
-  cacheTag(dashboardStatsTag());
-  cacheLife("minutes");
-  const [
-    totalUsersResult,
-    totalEmployersResult,
-    totalAdminsResult,
-    pendingEmployerRequestsResult,
-    pendingOrgRequestsResult,
-    totalOrgsResult,
-  ] = await Promise.all([
-    db.select({ count: count() }).from(userTable),
-    db
-      .select({ count: count() })
-      .from(userTable)
-      .where(eq(userTable.role, "employer")),
-    db
-      .select({ count: count() })
-      .from(userTable)
-      .where(eq(userTable.role, "admin")),
-    db
-      .select({ count: count() })
-      .from(employerRequestTable)
-      .where(eq(employerRequestTable.status, "pending")),
-    db
-      .select({ count: count() })
-      .from(organizationRequestTable)
-      .where(eq(organizationRequestTable.status, "pending")),
-    db.select({ count: count() }).from(organizationTable),
-  ]);
-
-  return {
-    totalUsers: Number(totalUsersResult[0]?.count ?? 0),
-    totalEmployers: Number(totalEmployersResult[0]?.count ?? 0),
-    totalAdmins: Number(totalAdminsResult[0]?.count ?? 0),
-    pendingEmployerRequests: Number(
-      pendingEmployerRequestsResult[0]?.count ?? 0,
-    ),
-    pendingOrgRequests: Number(pendingOrgRequestsResult[0]?.count ?? 0),
-    totalOrgs: Number(totalOrgsResult[0]?.count ?? 0),
-  };
-}
+import { getAdminStats } from "@/features/admin/db/admin-db";
+import { getCurrentUser, safeGetSession } from "@/lib/auth/auth-helpers";
+import { redirect } from "next/navigation";
 
 export default async function AdminDashboard() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const { user } = await getCurrentUser();
+  if (!user || user.role !== "admin") redirect("/");
 
   const {
     totalUsers,
@@ -79,15 +25,13 @@ export default async function AdminDashboard() {
         description={
           <>
             Welcome back,{" "}
-            <span className="text-black">
-              {session?.user?.name ?? "Admin"}
-            </span>
-            . Here&apos;s what&apos;s happening with your platform.
+            <span className="text-black">{user.name ?? "Admin"}</span>.
+            Here&apos;s what&apos;s happening with your platform.
           </>
         }
       />
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Users"
           value={totalUsers}

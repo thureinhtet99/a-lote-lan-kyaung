@@ -23,9 +23,7 @@ export default function InvitationsPage() {
 async function InvitationsContent() {
   const session = await safeGetSession();
 
-  if (!session?.user) {
-    redirect("/auth/sign-in");
-  }
+  if (!session?.user) redirect("/auth/sign-in");
 
   const result = await getMyPendingInvitations();
 

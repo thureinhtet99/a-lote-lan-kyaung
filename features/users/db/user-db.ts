@@ -27,18 +27,30 @@ import {
 import { nanoid } from "nanoid";
 import { safeGetSession } from "@/lib/auth/auth-helpers";
 
-// Users
-export const getAllUsers = async (page = 1, pageSize = 10, query = "") => {
+// Get all users
+export const getAllUsers = async (
+  page = 1,
+  pageSize = 10,
+  query = "",
+): Promise<{
+  success: boolean;
+  message: string;
+  data: Awaited<ReturnType<typeof getAllUsersCached>>["data"][number][];
+  pagination?: {
+    page: number;
+    pageSize: number;
+    totalUsers: number;
+    totalPages: number;
+  };
+}> => {
   try {
     const session = await safeGetSession();
-
-    if (!session?.user || session.user.role !== "admin") {
+    if (!session?.user || session.user.role !== "admin")
       return { success: false, message: "Unauthorized", data: [] };
-    }
 
     return await getAllUsersCached(page, pageSize, query);
   } catch (error) {
-    console.error("Error fetching users:", error);
+    console.error("Error fetching users: ", error);
     return {
       success: false,
       message: "Failed to fetch users",
@@ -98,6 +110,7 @@ const getAllUsersCached = async (
 
   return {
     success: true,
+    message: "All users fetched successfully",
     data: users,
     pagination: {
       page: safePage,
@@ -108,6 +121,7 @@ const getAllUsersCached = async (
   };
 };
 
+// Update user role
 export const updateUserRole = async (userId: string, role: UserRoleType) => {
   try {
     const session = await safeGetSession();

@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth/auth";
 import { ReactNode, Suspense } from "react";
 import Loading from "@/components/shared/loading";
+import { safeGetSession } from "@/lib/auth/auth-helpers";
 
 export default async function AdminLayout({
   children,
@@ -20,14 +21,8 @@ export default async function AdminLayout({
 }
 
 const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  // Only admins can access admin pages
-  if (!session?.user || session?.user.role !== "admin") {
-    redirect("/");
-  }
+  const session = await safeGetSession();
+  if (!session?.user || session?.user.role !== "admin") redirect("/");
 
   return (
     <div className="flex min-h-screen flex-col">

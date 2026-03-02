@@ -61,6 +61,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { getVisiblePages } from "../lib/utils";
 
 export function UserTableClient({
   users,
@@ -339,6 +340,7 @@ export function UserTableClient({
         </TableBody>
       </Table>
 
+      {/* Pagination */}
       <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center justify-between gap-20">
           <p className="text-sm text-muted-foreground sm:order-1">
@@ -422,8 +424,8 @@ export function UserTableClient({
             <DialogTitle>Ban User</DialogTitle>
             <DialogDescription>
               Are you sure you want to ban{" "}
-              <span className="text-black">{selectedUser?.name}</span>? Please
-              provide a reason.
+              <strong className="text-black">{selectedUser?.name}</strong>?
+              Please provide a reason.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -463,8 +465,9 @@ export function UserTableClient({
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Ban</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to ban {selectedUser?.name}? This user will
-              lose access immediately.
+              Are you sure you want to ban{" "}
+              <strong className="text-black">{selectedUser?.name}</strong>? This
+              user will lose access immediately.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -487,40 +490,3 @@ export function UserTableClient({
     </>
   );
 }
-
-const getVisiblePages = (currentPage: number, totalPages: number) => {
-  if (totalPages <= 7) {
-    return Array.from({ length: totalPages }, (_, index) => index + 1);
-  }
-
-  const pages = new Set([
-    1,
-    totalPages,
-    currentPage - 1,
-    currentPage,
-    currentPage + 1,
-  ]);
-  const sortedPages = Array.from(pages)
-    .filter((page) => page >= 1 && page <= totalPages)
-    .sort((a, b) => a - b);
-
-  const visiblePages: Array<number | "ellipsis"> = [];
-
-  for (let index = 0; index < sortedPages.length; index += 1) {
-    const page = sortedPages[index];
-    const previousPage = sortedPages[index - 1];
-
-    if (index > 0) {
-      const gap = page - previousPage;
-      if (gap === 2) {
-        visiblePages.push(previousPage + 1);
-      } else if (gap > 2) {
-        visiblePages.push("ellipsis");
-      }
-    }
-
-    visiblePages.push(page);
-  }
-
-  return visiblePages;
-};

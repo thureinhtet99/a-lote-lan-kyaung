@@ -64,14 +64,13 @@ export function AdminUserMenu({ user }: Props) {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          className="cursor-pointer"
           disabled={isPending}
           onSelect={(event) => {
             event.preventDefault();
           }}
           onClick={() => signOut({ onSuccess: () => setIsOpen(false) })}
         >
-          <LogOutIcon className="mr-1 h-4 w-4" />
+          <LogOutIcon className="mr-1 h-4 w-4  focus:text-accent-foreground" />
           {isPending ? "Logging out..." : "Log Out"}
         </DropdownMenuItem>
       </DropdownMenuContent>

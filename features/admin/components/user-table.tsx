@@ -36,20 +36,14 @@ const SuspendedComponent = async ({
     );
   }
   const users = result.data;
-
-  if (!result.pagination) {
-    return (
-      <div className="text-muted-foreground p-4 text-center animate-pulse">
-        Failed to load pagination
-      </div>
-    );
-  }
   const pagination = result.pagination;
 
   return (
     <UserTableClient
       users={users}
-      pagination={pagination}
+      pagination={
+        pagination ?? { page: 1, pageSize: 10, totalUsers: 0, totalPages: 0 }
+      }
       initialQuery={query}
     />
   );
