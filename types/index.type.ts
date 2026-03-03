@@ -1,17 +1,27 @@
-import { applicationTable, resumeTable, userTable } from "@/drizzle/schema";
+import {
+  applicationTable,
+  organizationTable,
+  resumeTable,
+  signInSchema,
+  signUpSchema,
+} from "@/drizzle/schema";
+import { userTable } from "@/drizzle/schemas/user-schema";
 import {
   approveRequestSchema,
   employerRequestSchema,
   organizationRequestSchema,
   rejectRequestSchema,
-} from "@/features/admin/schema/admin-schema";
-import { organizationTable } from "@/features/organizations/schema/organization-schema";
+} from "@/features/admin/schema/admin-form-schema";
 import { Column } from "@tanstack/react-table";
 import { Key, ReactNode } from "react";
 import z from "zod";
 
-// Others
+// Auth
 
+export type SignInFormType = z.infer<typeof signInSchema>;
+export type SignUpFormType = z.infer<typeof signUpSchema>;
+
+// Others
 export type PaginationType = {
   page: number;
   pageSize: number;
@@ -98,16 +108,6 @@ export type OrganizationRequestType = {
 export type OrgRequestFormType = z.infer<typeof organizationRequestSchema>;
 export type OrganizationType = typeof organizationTable.$inferSelect;
 export type NewOrganizationType = typeof organizationTable.$inferInsert;
-
-// export type OrganizationType = {
-//   id: string;
-//   name: string;
-//   slug: string;
-//   logo: string | null;
-//   createdAt: Date;
-//   metadata: string | null;
-//   role: "org-admin" | "hr";
-// };
 
 export type SidebarNavMenuType = {
   href: string;

@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { getCurrentOrg } from "@/lib/auth/auth-helpers";
 import JobListingForm from "@/features/job-listings/components/job-listing-form";
-import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/permissions";
+import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/permissions";
 import PageLoading from "@/components/shared/page-loading";
 import { getJobListingsByOrgId } from "@/features/job-listings/db/job-listing-db";
 

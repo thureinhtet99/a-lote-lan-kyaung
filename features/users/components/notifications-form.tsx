@@ -12,7 +12,7 @@ import {
 import { userNotificationSettingsTable } from "@/drizzle/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { userNotificationSettingsSchema } from "../user-schema";
+import { userNotificationSettingsSchema } from "../schema/user-noti-schema";
 import { Switch } from "@/components/ui/switch";
 // import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";

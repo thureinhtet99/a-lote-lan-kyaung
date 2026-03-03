@@ -21,7 +21,7 @@ import {
 import StatusToggleButton from "@/features/job-listings/components/status-toggle-button";
 import FeatureToggleButton from "@/features/job-listings/components/feature-toggle-button";
 import Loading from "@/components/shared/loading";
-import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/permissions";
+import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/permissions";
 import { getCurrentOrg } from "@/lib/auth/auth-helpers";
 import PageLoading from "@/components/shared/page-loading";
 import { getApplicationsByJobListingId } from "@/features/applications/db/application-db";

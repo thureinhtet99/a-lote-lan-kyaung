@@ -17,7 +17,7 @@ import MarkdownRenderer from "@/components/markdown/markdown-renderer";
 import Loading from "@/components/shared/loading";
 import { getCurrentUser } from "@/lib/auth/auth-helpers";
 import { cacheLife, cacheTag } from "next/cache";
-import { resumeTag } from "@/lib/utils/data-cache";
+import { resumeTag } from "@/lib/data-cache";
 import DropzoneClient from "./_DropzoneClient";
 
 export default function ResumePage() {

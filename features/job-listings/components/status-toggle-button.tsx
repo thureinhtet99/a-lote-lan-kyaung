@@ -3,7 +3,7 @@ import { JobListingStatusType } from "@/drizzle/schema";
 import { nextJobListingStatus } from "@/features/job-listings/lib/utils";
 import ActionButton from "@/components/shared/action-button";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
-import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/permissions";
+import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/permissions";
 import { toggleJobListingStatus } from "../db/job-listing-db";
 
 export default function StatusToggleButton({

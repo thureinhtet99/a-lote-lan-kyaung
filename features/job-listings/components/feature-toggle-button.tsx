@@ -1,7 +1,7 @@
 import ActionButton from "@/components/shared/action-button";
 import CheckCondition from "@/components/shared/check-condition";
 import { StarIcon, StarOffIcon } from "lucide-react";
-import { hasOrgUserPermission } from "@/lib/utils/permissions";
+import { hasOrgUserPermission } from "@/lib/permissions";
 import { toggleJobListingFeaturedStatus } from "../db/job-listing-db";
 
 export default function FeatureToggleButton({

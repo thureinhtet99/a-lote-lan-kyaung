@@ -6,15 +6,15 @@ import {
   accountTable,
   invitationTable,
   memberTable,
+  organizationTable,
   sessionTable,
   userTable,
   verificationTable,
 } from "@/drizzle/schema";
-import { ac, hr, orgAdmin } from "@/lib/utils/access-control";
+import { ac, hr, orgAdmin } from "@/lib/access-control";
 import { revalidateTag } from "next/cache";
-import { dashboardStatsTag } from "@/lib/utils/data-cache";
+import { dashboardStatsTag } from "@/lib/data-cache";
 import { sendInvitationEmail } from "@/services/email/send-invitation";
-import { organizationTable } from "@/features/organizations/schema/organization-schema";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {

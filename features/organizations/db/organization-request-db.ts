@@ -4,10 +4,10 @@ import { db } from "@/lib/db";
 import {
   jobListingTable,
   memberTable,
+  organizationTable,
   organizationRequestTable,
   userTable,
 } from "@/drizzle/schema";
-import { organizationTable } from "@/features/organizations/schema/organization-schema";
 import { and, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
 import { cacheLife, cacheTag, revalidateTag, updateTag } from "next/cache";
 import { nanoid } from "nanoid";
@@ -17,12 +17,12 @@ import {
   orgRequestsTag,
   organizationsTag,
   userOrgRequestsTag,
-} from "@/lib/utils/data-cache";
+} from "@/lib/data-cache";
 import {
   approveRequestSchema,
   organizationRequestSchema,
   rejectRequestSchema,
-} from "@/features/admin/schema/admin-schema";
+} from "@/features/admin/schema/admin-form-schema";
 import {
   ApproveRequestFormType,
   OrganizationRequestType,

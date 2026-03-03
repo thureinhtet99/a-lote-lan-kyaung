@@ -7,14 +7,14 @@ import { cacheLife, cacheTag, updateTag } from "next/cache";
 import z from "zod";
 import { nanoid } from "nanoid";
 import { getCurrentOrg, safeGetSession } from "@/lib/auth/auth-helpers";
-import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/utils/permissions";
+import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/permissions";
 import {
   jobListingIdTag,
   jobListingsTag,
   mostRecentJobListingIdTag,
   sideBarJobListingWithApplicationsTag,
-} from "@/lib/utils/data-cache";
-import { jobListingFormSchema } from "../job-listing-schema";
+} from "@/lib/data-cache";
+import { jobListingFormSchema } from "../schema/job-listing-form-schema";
 import { nextJobListingStatus } from "../lib/utils";
 
 // export const getJobListingById = async (id: string) => {

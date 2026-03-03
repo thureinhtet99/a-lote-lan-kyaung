@@ -1,9 +1,9 @@
 "use server";
 
 import { headers } from "next/headers";
-import { auth } from "../auth/auth";
+import { auth } from "./auth/auth";
 import type { StatementType, PermissionAction } from "./access-control";
-import { safeGetSession } from "../auth/auth-helpers";
+import { safeGetSession } from "./auth/auth-helpers";
 
 export async function hasOrgUserPermission<T extends StatementType>(
   resource: T,

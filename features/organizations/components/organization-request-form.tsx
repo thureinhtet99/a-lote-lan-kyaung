@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/card";
 import { toast } from "sonner";
 import { OrgRequestFormType } from "@/types/index.type";
-import { organizationRequestSchema } from "@/features/admin/schema/admin-schema";
+import { organizationRequestSchema } from "@/features/admin/schema/admin-form-schema";
 import { createOrganizationRequest } from "@/features/organizations/db/organization-request-db";
 import { Loader2Icon } from "lucide-react";
 

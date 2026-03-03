@@ -33,10 +33,3 @@ export function Logo({ className, size = "md", showText = true }: LogoType) {
     </Link>
   );
 }
-
-export function LogoIcon({
-  className,
-  size = "md",
-}: Omit<LogoType, "showText">) {
-  return <Logo className={className} size={size} showText={false} />;
-}

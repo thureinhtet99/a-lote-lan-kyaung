@@ -14,11 +14,11 @@ import {
   jobListingApplicationsTag,
   jobListingIdTag,
   resumeTag,
-} from "@/lib/utils/data-cache";
-import { newJobListingApplicationSchema } from "../application-schema";
+} from "@/lib/data-cache";
+import { newJobListingApplicationSchema } from "../schema/new-application-form-schema";
 import z from "zod";
 import { getCurrentOrg, getCurrentUser } from "@/lib/auth/auth-helpers";
-import { hasOrgUserPermission } from "@/lib/utils/permissions";
+import { hasOrgUserPermission } from "@/lib/permissions";
 
 // Get application by userId
 export const getApplicationByUserId = async ({

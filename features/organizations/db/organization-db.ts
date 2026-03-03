@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { memberTable } from "@/drizzle/schema";
+import { memberTable, organizationTable } from "@/drizzle/schema";
 import { and, eq } from "drizzle-orm";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
 import { auth } from "@/lib/auth/auth";
@@ -12,11 +12,9 @@ import {
   organizationTag,
   organizationIdTag,
   organizationsTag,
-  jobListingApplicationsTag,
   sideBarJobListingWithApplicationsTag,
-} from "@/lib/utils/data-cache";
+} from "@/lib/data-cache";
 import { safeGetSession } from "@/lib/auth/auth-helpers";
-import { organizationTable } from "../schema/organization-schema";
 
 export const getOrganizationsByEmployerId = async (): Promise<{
   success: boolean;
@@ -96,10 +94,14 @@ export const getOrgById = async (
 const getOrgByIdCached = async (id: string) => {
   "use cache";
 
-  const result = await db.query.organizationTable.findFirst({
-    where: eq(organizationTable.id, id),
-  });
-  if (!result)
+  const result = await db
+    .select()
+    .from(organizationTable)
+    .where(eq(organizationTable.id, id))
+    .limit(1);
+
+  const organization = result[0];
+  if (!organization)
     return {
       success: false,
       message: "Failed to fetch organization by id",
@@ -111,7 +113,7 @@ const getOrgByIdCached = async (id: string) => {
   return {
     success: true,
     message: "Organization by id fetched successfully",
-    data: result,
+    data: organization,
   };
 };
 
@@ -154,7 +156,7 @@ export const deleteOrg = async (
 
     await db.delete(organizationTable).where(eq(organizationTable.id, orgId));
 
-    updateTag(organizationsTag(session.user.id));
+    updateTag(organizationsTag());
 
     return { success: true, message: "Organization deleted successfully" };
   } catch (error) {
@@ -181,7 +183,7 @@ export const switchOrganization = async (
     if (!result)
       return { success: false, message: "Failed to switch organization" };
 
-    updateTag(organizationsTag(session.user.id));
+    updateTag(organizationsTag());
     updateTag(
       sideBarJobListingWithApplicationsTag(organizationId, session.user.id),
     );

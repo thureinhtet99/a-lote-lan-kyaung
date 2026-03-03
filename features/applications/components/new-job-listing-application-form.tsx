@@ -13,7 +13,7 @@ import { MarkdownEditor } from "@/components/markdown/markdown-editor";
 import { Button } from "@/components/ui/button";
 import LoadingSwap from "@/components/shared/loading-swap";
 import z from "zod";
-import { newJobListingApplicationSchema } from "../application-schema";
+import { newJobListingApplicationSchema } from "../schema/new-application-form-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";

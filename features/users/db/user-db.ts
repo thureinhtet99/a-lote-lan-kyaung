@@ -12,7 +12,7 @@ import {
   employerRequestsTag,
   userIdTag,
   usersTag,
-} from "@/lib/utils/data-cache";
+} from "@/lib/data-cache";
 import {
   ApproveRequestFormType,
   EmployerRequestType,
@@ -24,7 +24,7 @@ import {
   approveRequestSchema,
   employerRequestSchema,
   rejectRequestSchema,
-} from "@/features/admin/schema/admin-schema";
+} from "@/features/admin/schema/admin-form-schema";
 import { nanoid } from "nanoid";
 import { safeGetSession } from "@/lib/auth/auth-helpers";
 

@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/card";
 import { toast } from "sonner";
 import { EmployerRequestFormType } from "@/types/index.type";
-import { employerRequestSchema } from "@/features/admin/schema/admin-schema";
+import { employerRequestSchema } from "@/features/admin/schema/admin-form-schema";
 import { createEmployerRequest } from "@/features/users/db/user-db";
 import { Loader2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";

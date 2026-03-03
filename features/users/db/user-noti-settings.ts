@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { userNotificationSettingsTable } from "@/drizzle/schema";
 import { updateTag } from "next/cache";
-import { userNotificationTag } from "@/lib/utils/data-cache";
+import { userNotificationTag } from "@/lib/data-cache";
 
 export async function insertUserNotiSettingsDb(
   settings: typeof userNotificationSettingsTable.$inferInsert,

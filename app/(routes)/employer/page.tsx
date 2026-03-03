@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { getCurrentOrg } from "@/lib/auth/auth-helpers";
 import { cacheLife, cacheTag } from "next/cache";
 import PageLoading from "@/components/shared/page-loading";
-import { jobListingsTag } from "@/lib/utils/data-cache";
+import { jobListingsTag } from "@/lib/data-cache";
 
 export default function EmployerHomePage() {
   return (

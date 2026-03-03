@@ -5,10 +5,10 @@ import {
   primaryKey,
   text,
 } from "drizzle-orm/pg-core";
-import { userTable } from "./auth-schema";
 import { created_at, updated_at } from "../schema-helpers";
 import { relations } from "drizzle-orm";
-import { organizationTable } from "@/features/organizations/schema/organization-schema";
+import { organizationTable } from "./organization-schema";
+import { userTable } from "./user-schema";
 
 export const organizationUserSettingsTable = pgTable(
   "organization_user_settings",

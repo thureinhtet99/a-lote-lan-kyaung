@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { resumeTable } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
-import { resumeTag } from "@/lib/utils/data-cache";
+import { resumeTag } from "@/lib/data-cache";
 
 export async function upsertUserResumeDb(
   userId: string,

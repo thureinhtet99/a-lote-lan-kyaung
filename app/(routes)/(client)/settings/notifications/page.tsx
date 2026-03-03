@@ -8,7 +8,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getCurrentUser } from "@/lib/auth/auth-helpers";
 import { cacheLife, cacheTag } from "next/cache";
-import { userNotificationTag } from "@/lib/utils/data-cache";
+import { userNotificationTag } from "@/lib/data-cache";
 
 export default function NotificationPage() {
   return (

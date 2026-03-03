@@ -41,7 +41,7 @@ import {
   createJobListing,
   updateJobListing,
 } from "@/features/job-listings/db/job-listing-db";
-import { jobListingFormSchema } from "@/features/job-listings/job-listing-schema";
+import { jobListingFormSchema } from "@/features/job-listings/schema/job-listing-form-schema";
 import { Loader2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {

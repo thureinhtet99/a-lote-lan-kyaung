@@ -5,10 +5,10 @@ import {
   primaryKey,
   text,
 } from "drizzle-orm/pg-core";
-import { jobListingTable } from "./job-listing-schema";
-import { userTable } from "./auth-schema";
 import { created_at, updated_at } from "../schema-helpers";
 import { relations } from "drizzle-orm";
+import { jobListingTable } from "./job-listing-schema";
+import { userTable } from "./user-schema";
 
 export const applicationStatus = [
   "denied",
