@@ -85,9 +85,9 @@ export function MemberTable() {
 
   function getRoleBadgeVariant(role: string) {
     switch (role) {
-      case "admin":
+      case "org-admin":
         return "default";
-      case "employer":
+      case "hr":
         return "secondary";
       default:
         return "outline";
@@ -148,7 +148,7 @@ export function MemberTable() {
                 </div>
               </TableCell>
               <TableCell>
-                {member.role === "admin" ? (
+                {member.role === "org-admin" ? (
                   <Badge variant={getRoleBadgeVariant(member.role)}>
                     <Shield className="h-3 w-3 mr-1" />
                     {member.role}
@@ -167,7 +167,7 @@ export function MemberTable() {
                 </span>
               </TableCell>
               <TableCell className="text-right">
-                {member.role !== "admin" && (
+                {member.role !== "org-admin" && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm">

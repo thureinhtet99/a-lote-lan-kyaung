@@ -53,7 +53,7 @@ export async function isOrgOwner(): Promise<boolean> {
       headers: await headers(),
     });
 
-    return member?.role === "admin";
+    return member?.role === "org-admin";
   } catch {
     return false;
   }

@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { memberTable, organizationTable } from "@/drizzle/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
@@ -138,12 +138,14 @@ export const deleteOrg = async (
       .select()
       .from(memberTable)
       .where(
-        eq(memberTable.organizationId, orgId) &&
+        and(
+          eq(memberTable.organizationId, orgId),
           eq(memberTable.userId, session.user.id),
+        ),
       )
       .limit(1);
 
-    if (membership.length === 0 || membership[0].role !== "admin")
+    if (membership.length === 0 || membership[0].role !== "org-admin")
       return {
         success: false,
         message: "Only organization admins can delete organizations",

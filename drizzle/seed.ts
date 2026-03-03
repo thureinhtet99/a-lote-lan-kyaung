@@ -6,6 +6,7 @@ import {
   jobListingTable,
   memberTable,
   organizationTable,
+  organizationRequestTable,
   organizationUserSettingsTable,
   resumeTable,
   sessionTable,
@@ -28,6 +29,8 @@ type SeedUser = {
 };
 
 type CreatedSeedUser = SeedUser & { id: string };
+type EmployerRequestInsert = typeof employerRequestTable.$inferInsert;
+type OrganizationRequestInsert = typeof organizationRequestTable.$inferInsert;
 
 async function createUser(
   email: string,
@@ -91,6 +94,7 @@ async function seed() {
     await db.delete(memberTable);
     await db.delete(invitationTable);
     await db.delete(employerRequestTable);
+    await db.delete(organizationRequestTable);
     await db.delete(accountTable);
     await db.delete(sessionTable);
     await db.delete(verificationTable);
@@ -100,9 +104,9 @@ async function seed() {
     console.log("✅ Cleanup complete");
     console.log("");
 
-    console.log("👤 Creating users (2 admins, 3 employers, 4 users)");
+    console.log("👤 Creating users (2 admins, 3 employers, 14 users)");
 
-    const userPlan: SeedUser[] = [
+    const baseUserPlan: SeedUser[] = [
       { email: "admin.one@test.com", name: "Admin One", role: "admin" },
       { email: "admin.two@test.com", name: "Admin Two", role: "admin" },
       {
@@ -125,6 +129,15 @@ async function seed() {
       { email: "user.three@test.com", name: "User Three", role: "user" },
       { email: "user.four@test.com", name: "User Four", role: "user" },
     ];
+    const extraUserPlan: SeedUser[] = Array.from({ length: 10 }, (_, index) => {
+      const userNumber = index + 5;
+      return {
+        email: `user.${userNumber}@test.com`,
+        name: `User ${userNumber}`,
+        role: "user",
+      };
+    });
+    const userPlan: SeedUser[] = [...baseUserPlan, ...extraUserPlan];
 
     const createdUsers: CreatedSeedUser[] = [];
     for (const user of userPlan) {
@@ -138,9 +151,9 @@ async function seed() {
     console.log("✅ Users created with requested distribution");
     console.log("");
 
-    console.log("🏢 Creating organizations (2 per employer)...");
+    console.log("🏢 Creating organizations (base + 10 extra for pagination)...");
 
-    const orgSeeds = [
+    const baseOrgSeeds = [
       {
         id: nanoid(),
         name: "Atlas Tech",
@@ -184,6 +197,19 @@ async function seed() {
         collaboratorId: employers[1].id,
       },
     ];
+    const extraOrgSeeds = Array.from({ length: 10 }, (_, index) => {
+      const orgNumber = index + 1;
+      const owner = employers[index % employers.length];
+      const collaborator = employers[(index + 1) % employers.length];
+      return {
+        id: nanoid(),
+        name: `Pagination Org ${orgNumber}`,
+        slug: `pagination-org-${orgNumber}`,
+        ownerId: owner.id,
+        collaboratorId: collaborator.id,
+      };
+    });
+    const orgSeeds = [...baseOrgSeeds, ...extraOrgSeeds];
 
     await db.insert(organizationTable).values(
       orgSeeds.map((org) => ({
@@ -281,7 +307,7 @@ async function seed() {
     console.log("");
 
     console.log("💼 Creating employer requests...");
-    await db.insert(employerRequestTable).values([
+    const baseEmployerRequests: EmployerRequestInsert[] = [
       {
         id: nanoid(),
         userId: users[0].id,
@@ -306,8 +332,128 @@ async function seed() {
         reviewedBy: admins[1].id,
         reviewedAt: new Date(Date.now() - 1000 * 60 * 60 * 48),
       },
-    ]);
+    ];
+    const extraEmployerRequests: EmployerRequestInsert[] = Array.from(
+      { length: 22 },
+      (_, index) => {
+      const requester = users[index % users.length];
+      const requestNumber = index + 1;
+      const isPending = index < 11;
+      const reviewer = admins[index % admins.length];
+      const isApproved = index % 2 === 0;
+
+      if (isPending) {
+        return {
+          id: nanoid(),
+          userId: requester.id,
+          status: "pending" as const,
+          requestMessage: `Pagination request ${requestNumber}: requesting employer access for hiring needs.`,
+        };
+      }
+
+        return {
+        id: nanoid(),
+        userId: requester.id,
+        status: (isApproved ? "approved" : "rejected") as
+          | "approved"
+          | "rejected",
+        requestMessage: `Reviewed pagination request ${requestNumber}: employer access follow-up.`,
+        adminResponse: isApproved
+          ? "Approved for pagination test data."
+          : "Rejected for pagination test data.",
+        reviewedBy: reviewer.id,
+        reviewedAt: new Date(Date.now() - 1000 * 60 * 60 * (requestNumber + 12)),
+        };
+      },
+    );
+    await db
+      .insert(employerRequestTable)
+      .values([...baseEmployerRequests, ...extraEmployerRequests]);
     console.log("✅ Employer requests inserted");
+    console.log("");
+
+    console.log("🏢 Creating organization requests...");
+    const baseOrganizationRequests: OrganizationRequestInsert[] = [
+      {
+        id: nanoid(),
+        userId: employers[1].id,
+        orgName: "Harbor Analytics",
+        orgSlug: "harbor-analytics",
+        orgLogo: "https://example.com/logos/harbor-analytics.png",
+        requestMessage:
+          "We need an organization workspace to manage hiring for our analytics consultancy.",
+        status: "pending",
+      },
+      {
+        id: nanoid(),
+        userId: employers[2].id,
+        orgName: "Cedar Systems",
+        orgSlug: "cedar-systems",
+        orgLogo: null,
+        requestMessage:
+          "Requesting organization creation so our team can post engineering roles this quarter.",
+        status: "rejected",
+        adminResponse:
+          "Please provide a company website and legal entity details before resubmitting.",
+        reviewedBy: admins[0].id,
+        reviewedAt: new Date(Date.now() - 1000 * 60 * 60 * 36),
+      },
+      {
+        id: nanoid(),
+        userId: employers[0].id,
+        orgName: "Atlas Tech",
+        orgSlug: "atlas-tech",
+        orgLogo: "https://example.com/logos/atlas-tech.png",
+        requestMessage:
+          "Historical approved request used to bootstrap this organization in seed data.",
+        status: "approved",
+        adminResponse: "Approved. Organization created.",
+        reviewedBy: admins[1].id,
+        reviewedAt: new Date(Date.now() - 1000 * 60 * 60 * 60),
+        createdOrganizationId: orgSeeds[0].id,
+      },
+    ];
+    const extraOrganizationRequests: OrganizationRequestInsert[] = Array.from(
+      { length: 22 },
+      (_, index) => {
+        const requester = employers[index % employers.length];
+        const orgNumber = index + 1;
+        const isPending = index < 11;
+        const reviewer = admins[index % admins.length];
+        const isApproved = index % 2 === 0;
+
+        if (isPending) {
+          return {
+            id: nanoid(),
+            userId: requester.id,
+            orgName: `Requested Org ${orgNumber}`,
+            orgSlug: `requested-org-${orgNumber}`,
+            orgLogo: null,
+            requestMessage: `Pagination request ${orgNumber}: creating organization workspace for recruiting.`,
+            status: "pending",
+          };
+        }
+
+        return {
+          id: nanoid(),
+          userId: requester.id,
+          orgName: `Reviewed Org ${orgNumber}`,
+          orgSlug: `reviewed-org-${orgNumber}`,
+          orgLogo: null,
+          requestMessage: `Reviewed pagination request ${orgNumber}: organization setup request.`,
+          status: isApproved ? "approved" : "rejected",
+          adminResponse: isApproved
+            ? "Approved for pagination test data."
+            : "Rejected for pagination test data.",
+          reviewedBy: reviewer.id,
+          reviewedAt: new Date(Date.now() - 1000 * 60 * 60 * (orgNumber + 20)),
+        };
+      },
+    );
+    await db
+      .insert(organizationRequestTable)
+      .values([...baseOrganizationRequests, ...extraOrganizationRequests]);
+    console.log("✅ Organization requests inserted");
     console.log("");
 
     console.log("📝 Creating job listings (different set for each org)...");
@@ -331,7 +477,29 @@ async function seed() {
           id: nanoid(),
           organizationId: org.id,
           title: `${org.name} Senior Engineer`,
-          description: `Build and scale products at ${org.name}.`,
+          description: `About the role:
+${org.name} is hiring a Senior Engineer to lead delivery on core product initiatives and improve platform reliability as we scale.
+
+What you will do:
+- Design and ship backend/frontend features used by customers daily.
+- Lead technical design reviews and guide implementation across services.
+- Mentor junior engineers through code reviews and pairing.
+- Improve performance, observability, and incident response workflows.
+- Work closely with product and design to break down roadmap items.
+
+What we are looking for:
+- 5+ years of software engineering experience in production systems.
+- Strong TypeScript/JavaScript fundamentals and modern web stack knowledge.
+- Experience with SQL databases, API design, and scalable architectures.
+- Clear communication and ownership mindset.
+
+Nice to have:
+- Experience in hiring platforms, marketplaces, or workflow products.
+- Familiarity with CI/CD, feature flags, and monitoring tools.
+
+Benefits:
+- Competitive salary, flexible schedule, and remote-friendly collaboration.
+- Career growth, mentorship opportunities, and high ownership.`,
           wage: 130000 + index * 2000,
           wageInterval: "yearly" as const,
           city,
@@ -346,7 +514,29 @@ async function seed() {
           id: nanoid(),
           organizationId: org.id,
           title: `${org.name} Product Designer`,
-          description: `Design polished product experiences for ${org.name}.`,
+          description: `About the role:
+${org.name} is looking for a Product Designer to craft intuitive experiences across our employer and candidate workflows.
+
+What you will do:
+- Run lightweight discovery and convert insights into clear design direction.
+- Design user flows, wireframes, prototypes, and production-ready UI.
+- Partner with PMs and engineers from concept to launch.
+- Contribute to and evolve our design system and accessibility standards.
+- Use metrics and feedback to iterate on shipped experiences.
+
+What we are looking for:
+- 3+ years in product design for SaaS or web applications.
+- Strong portfolio showing problem framing and shipped outcomes.
+- Proficiency with Figma and component-based design systems.
+- Comfort collaborating in fast-moving cross-functional teams.
+
+Nice to have:
+- Experience with B2B dashboards and data-dense interfaces.
+- Familiarity with UX writing and information architecture.
+
+Benefits:
+- Flexible work environment and supportive product culture.
+- Opportunity to shape foundational UX patterns at scale.`,
           wage: 90000 + index * 1000,
           wageInterval: "yearly" as const,
 
@@ -362,7 +552,24 @@ async function seed() {
           id: nanoid(),
           organizationId: org.id,
           title: `${org.name} Intern`,
-          description: `Internship role at ${org.name}.`,
+          description: `About the internship:
+${org.name} is offering a hands-on internship for students and early-career candidates interested in real-world product development.
+
+What you will do:
+- Support engineers/designers with small scoped tickets and bug fixes.
+- Write tests, improve documentation, and assist with QA checks.
+- Participate in standups, sprint planning, and demo sessions.
+- Learn development best practices, version control, and team workflows.
+
+What we are looking for:
+- Basic understanding of web development fundamentals.
+- Eagerness to learn, ask questions, and act on feedback.
+- Good communication and time management skills.
+
+What you will gain:
+- Mentorship from experienced team members.
+- Portfolio-ready project contributions.
+- Exposure to product, engineering, and collaboration tools used in industry.`,
           wage: 24 + index,
           wageInterval: "hourly" as const,
 

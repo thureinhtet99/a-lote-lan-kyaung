@@ -35,7 +35,7 @@ import { inviteMember } from "@/features/organizations/actions/invite-member";
 
 const inviteSchema = z.object({
   email: z.string().email("Invalid email address"),
-  role: z.enum(["admin", "employer", "user"]),
+  role: z.enum(["org-admin", "hr"]),
 });
 
 type InviteFormData = z.infer<typeof inviteSchema>;
@@ -47,7 +47,7 @@ export function MemberInviteDialog() {
     resolver: zodResolver(inviteSchema),
     defaultValues: {
       email: "",
-      role: "user",
+      role: "hr",
     },
   });
 

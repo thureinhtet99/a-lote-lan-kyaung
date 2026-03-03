@@ -30,7 +30,7 @@ const SuspendedComponent = async ({
 
   if (!result.success) {
     return (
-      <div className="text-muted-foreground p-4 text-center animate-pulse">
+      <div className="text-destructive p-4 text-center animate-pulse">
         Failed to load users
       </div>
     );

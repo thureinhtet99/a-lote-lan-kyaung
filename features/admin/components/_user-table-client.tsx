@@ -199,34 +199,33 @@ export function UserTableClient({
   return (
     <>
       <form
-        className="flex w-full items-center justify-center"
-        onSubmit={(event) => {
-          event.preventDefault();
+        onSubmit={(e) => {
+          e.preventDefault();
           handleSearch();
         }}
+        className="flex items-center gap-2"
       >
-        <InputGroup>
-          <InputGroupInput
+        <div className="relative w-full max-w-sm">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             placeholder="Search by name or email"
-            aria-label="Search users"
+            className="pl-9 pr-9"
           />
           {searchQuery && (
-            <InputGroupButton
+            <button
               type="button"
-              variant="ghost"
-              size="xs"
               onClick={clearSearch}
-              className="cursor-pointer"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             >
-              <X />
-            </InputGroupButton>
+              <X className="size-4" />
+            </button>
           )}
-          <InputGroupButton type="submit" size="xs" className="cursor-pointer">
-            <Search />
-          </InputGroupButton>
-        </InputGroup>
+        </div>
+        <Button type="submit" variant="outline" size="sm">
+          Search
+        </Button>
       </form>
 
       <Table className="min-w-[760px]">
@@ -342,14 +341,11 @@ export function UserTableClient({
 
       {/* Pagination */}
       <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center justify-between gap-20">
-          <p className="text-sm text-muted-foreground sm:order-1">
-            Showing page {pagination.page} of {pagination.totalPages}
-          </p>
-          <p className="text-sm text-muted-foreground sm:order-2">
-            Total - {pagination.totalUsers} users
-          </p>
-        </div>
+        <p className="text-sm text-muted-foreground sm:order-1">
+          Showing page {pagination.page} of {pagination.totalPages} (
+          {pagination.totalUsers} total)
+        </p>
+
         <Pagination className="order-3 mx-0 w-full justify-start overflow-x-auto pb-1 sm:w-auto sm:justify-end sm:pb-0">
           <PaginationContent>
             <PaginationItem>

@@ -152,8 +152,9 @@ export const getMostRecentJobListing = async (orgId: string) => {
   } catch (error) {
     console.error("Failed to get most recent job-listings: ", error);
     return {
-      success: true,
-      message: "Most recent job-listings fetched successfully",
+      success: false,
+      message: "Failed to get most recent job-listing",
+      data: null,
     };
   }
 };
@@ -167,6 +168,14 @@ const getMostRecentJobListingCached = async (orgId: string) => {
     .where(eq(jobListingTable.organizationId, orgId))
     .orderBy(desc(jobListingTable.created_at))
     .limit(1);
+
+  if (!result) {
+    return {
+      success: true,
+      message: "No job listings found",
+      data: null,
+    };
+  }
 
   cacheTag(mostRecentJobListingIdTag(orgId, result.id));
   cacheLife("hours");

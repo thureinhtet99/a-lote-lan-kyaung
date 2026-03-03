@@ -31,7 +31,7 @@ export function MemberRoleSelect({
     setUpdating(true);
     const result = await updateMemberRole({
       memberId,
-      newRole: newRole as "employer" | "user",
+      newRole: newRole as "org-admin" | "hr",
     });
 
     if (result.success) {
@@ -45,9 +45,9 @@ export function MemberRoleSelect({
 
   function getRoleBadgeVariant(role: string) {
     switch (role) {
-      case "admin":
+      case "org-admin":
         return "default";
-      case "employer":
+      case "hr":
         return "secondary";
       default:
         return "outline";
@@ -68,14 +68,11 @@ export function MemberRoleSelect({
         </SelectValue>
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="user">
-          <Badge variant="outline">user</Badge>
+        <SelectItem value="hr">
+          <Badge variant="secondary">hr</Badge>
         </SelectItem>
-        <SelectItem value="employer">
-          <Badge variant="secondary">employer</Badge>
-        </SelectItem>
-        <SelectItem value="admin" disabled>
-          <Badge variant="default">admin</Badge>
+        <SelectItem value="org-admin">
+          <Badge variant="default">org-admin</Badge>
         </SelectItem>
       </SelectContent>
     </Select>

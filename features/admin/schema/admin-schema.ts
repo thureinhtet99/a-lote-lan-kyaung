@@ -34,6 +34,10 @@ export const organizationRequestSchema = z.object({
       /^[a-z0-9-]+$/,
       "Slug can only contain lowercase letters, numbers, and hyphens",
     ),
+  orgLogo: z
+    .url("Organization logo must be a valid URL")
+    .max(2048, "Organization logo URL is too long (max 2048 characters)")
+    .optional(),
   requestMessage: z
     .string()
     .min(10, "Please provide a reason (at least 10 characters)")

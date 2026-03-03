@@ -264,7 +264,8 @@ const getAllEmployerRequestsCached = async () => {
 export const getEmployerRequest = async () => {
   try {
     const session = await safeGetSession();
-    if (!session?.user) return { success: false, message: "Unauthorized" };
+    if (!session?.user)
+      return { success: false, message: "Unauthorized", data: null };
 
     return await getEmployerRequestCached(session.user.id);
   } catch (error) {
@@ -272,6 +273,7 @@ export const getEmployerRequest = async () => {
     return {
       success: false,
       message: "Failed to fetch employer request",
+      data: null,
     };
   }
 };
@@ -286,7 +288,7 @@ const getEmployerRequestCached = async (userId: string) => {
   });
 
   if (!request)
-    return { success: false, message: "Failed to get employer request" };
+    return { success: true, message: "No employer request", data: null };
 
   cacheTag(employerRequestIdTag(request.id));
 

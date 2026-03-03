@@ -6,9 +6,7 @@ import { z } from "zod";
 
 const updateRoleSchema = z.object({
   memberId: z.string().min(1, "Member ID is required"),
-  newRole: z.enum(["hr", "org-admin"], {
-    errorMap: () => ({ message: "Role must be either 'hr' or 'org-admin'" }),
-  }),
+  newRole: z.enum(["hr", "org-admin"]),
 });
 
 export type UpdateMemberRoleInput = z.infer<typeof updateRoleSchema>;
@@ -30,14 +28,16 @@ export async function updateMemberRole(data: UpdateMemberRoleInput) {
     }
 
     // Get member details
-    const members = await auth.api.listMembers({
+    const membersResult = await auth.api.listMembers({
       headers: await headers(),
       query: {
         organizationId: session.session.activeOrganizationId,
       },
     });
 
-    const member = members?.data?.find((m) => m.id === validated.memberId);
+    const member = membersResult?.members?.find(
+      (m) => m.id === validated.memberId,
+    );
 
     if (!member) {
       return {

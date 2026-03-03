@@ -335,9 +335,7 @@ export function OrgRequestsTableClient({
 
       {reviewedPagination.totalItems > 0 && (
         <div className="space-y-3 mt-8">
-          <h2 className="text-lg font-semibold text-muted-foreground">
-            Reviewed Requests
-          </h2>
+          <h2 className="mb-4 text-xl font-semibold">Reviewed Requests</h2>
           {renderTable(reviewedRequests, false)}
           {renderSectionPagination(
             "or",

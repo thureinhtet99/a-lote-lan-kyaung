@@ -55,7 +55,7 @@ export const createOrganizationRequest = async (data: OrgRequestFormType) => {
       };
     }
 
-    const { orgName, orgSlug, requestMessage } = validated.data;
+    const { orgName, orgSlug, orgLogo, requestMessage } = validated.data;
 
     // Check slug uniqueness in organizations table
     const existing = await db.query.organizationTable.findFirst({
@@ -89,6 +89,7 @@ export const createOrganizationRequest = async (data: OrgRequestFormType) => {
       userId: session.user.id,
       orgName,
       orgSlug,
+      orgLogo: orgLogo ?? null,
       requestMessage,
       status: "pending",
     });
@@ -232,12 +233,12 @@ export const approveOrganizationRequest = async (
       createdAt: new Date(),
     });
 
-    // Create membership (owner/admin role)
+    // Create membership (org-admin role)
     await db.insert(memberTable).values({
       id: nanoid(),
       organizationId: orgId,
       userId: request.userId,
-      role: "admin",
+      role: "org-admin",
       createdAt: new Date(),
     });
 

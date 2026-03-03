@@ -134,7 +134,7 @@ export default function OrganizationsClient({
                       )}
                     </div>
                   </div>
-                  {org.role === "admin" && (
+                  {org.role === "org-admin" && (
                     <DropdownMenu
                       open={showDeleteDialog === org.id}
                       onOpenChange={(open) =>

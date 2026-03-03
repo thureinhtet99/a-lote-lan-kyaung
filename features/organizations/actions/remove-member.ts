@@ -24,14 +24,14 @@ export async function removeMember(memberId: string) {
     }
 
     // Get member details to find their email
-    const members = await auth.api.listMembers({
+    const membersResult = await auth.api.listMembers({
       headers: await headers(),
       query: {
         organizationId: session.session.activeOrganizationId,
       },
     });
 
-    const member = members?.data?.find((m) => m.id === memberId);
+    const member = membersResult?.members?.find((m) => m.id === memberId);
 
     if (!member) {
       return {
@@ -58,7 +58,7 @@ export async function removeMember(memberId: string) {
           ...(await headers()),
         },
         body: JSON.stringify({
-          memberIdOrEmail: member.email,
+          memberIdOrEmail: member.user.email,
           organizationId: session.session.activeOrganizationId,
         }),
       },

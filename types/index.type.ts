@@ -100,7 +100,7 @@ export type OrganizationType = {
   logo: string | null;
   createdAt: Date;
   metadata: string | null;
-  role: UserRoleType;
+  role: "org-admin" | "hr";
 };
 
 export type SidebarNavMenuType = {

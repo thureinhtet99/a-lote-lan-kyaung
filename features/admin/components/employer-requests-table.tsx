@@ -3,7 +3,7 @@ import Loading from "@/components/shared/loading";
 import { EmployerRequestType } from "@/types/index.type";
 import { EmployerRequestsTableClient } from "@/features/admin/components/_employer-requests-table-client";
 import { getAllEmployerRequests } from "@/features/users/db/user-db";
-import { getNumberParam } from "../lib/utils";
+import { getNumberParam, getStringParam } from "../lib/utils";
 
 export default function EmployerRequestsTable({
   searchParams,
@@ -19,6 +19,16 @@ export default function EmployerRequestsTable({
 
 const PAGE_SIZE = 10;
 
+const matchesQuery = (request: EmployerRequestType, query: string) => {
+  if (!query) return true;
+  const q = query.toLowerCase();
+  return (
+    request.user.name?.toLowerCase().includes(q) ||
+    request.user.email?.toLowerCase().includes(q) ||
+    request.requestMessage?.toLowerCase().includes(q)
+  );
+};
+
 const SuspendedComponent = async ({
   searchParams,
 }: {
@@ -27,39 +37,37 @@ const SuspendedComponent = async ({
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const pendingPage = getNumberParam(resolvedSearchParams.ep, 1);
   const reviewedPage = getNumberParam(resolvedSearchParams.er, 1);
+  const pendingQuery = getStringParam(resolvedSearchParams.epq, "");
+  const reviewedQuery = getStringParam(resolvedSearchParams.erq, "");
 
   const result = await getAllEmployerRequests();
   if (!result.success) {
     return (
-      <div className="text-muted-foreground animate-pulse p-4 text-center">
+      <div className="text-destructive animate-pulse p-4 text-center">
         Failed to load employer requests
       </div>
     );
   }
 
   const requests = result.data as EmployerRequestType[];
-  if (requests.length === 0) {
-    return (
-      <div className="text-muted-foreground animate-pulse p-4 text-center">
-        No employer requests found
-      </div>
-    );
-  }
 
-  const pendingRequests = requests.filter(
-    (request) => request.status === "pending",
+  const allPendingRequests = requests.filter((r) => r.status === "pending");
+  const allReviewedRequests = requests.filter((r) => r.status !== "pending");
+
+  const filteredPendingRequests = allPendingRequests.filter((r) =>
+    matchesQuery(r, pendingQuery),
   );
-  const reviewedRequests = requests.filter(
-    (request) => request.status !== "pending",
+  const filteredReviewedRequests = allReviewedRequests.filter((r) =>
+    matchesQuery(r, reviewedQuery),
   );
 
   const pendingTotalPages = Math.max(
     1,
-    Math.ceil(pendingRequests.length / PAGE_SIZE),
+    Math.ceil(filteredPendingRequests.length / PAGE_SIZE),
   );
   const reviewedTotalPages = Math.max(
     1,
-    Math.ceil(reviewedRequests.length / PAGE_SIZE),
+    Math.ceil(filteredReviewedRequests.length / PAGE_SIZE),
   );
 
   const safePendingPage = Math.min(Math.max(pendingPage, 1), pendingTotalPages);
@@ -68,11 +76,11 @@ const SuspendedComponent = async ({
     reviewedTotalPages,
   );
 
-  const paginatedPendingRequests = pendingRequests.slice(
+  const paginatedPendingRequests = filteredPendingRequests.slice(
     (safePendingPage - 1) * PAGE_SIZE,
     safePendingPage * PAGE_SIZE,
   );
-  const paginatedReviewedRequests = reviewedRequests.slice(
+  const paginatedReviewedRequests = filteredReviewedRequests.slice(
     (safeReviewedPage - 1) * PAGE_SIZE,
     safeReviewedPage * PAGE_SIZE,
   );
@@ -84,15 +92,19 @@ const SuspendedComponent = async ({
       pendingPagination={{
         page: safePendingPage,
         pageSize: PAGE_SIZE,
-        totalItems: pendingRequests.length,
+        totalItems: filteredPendingRequests.length,
         totalPages: pendingTotalPages,
       }}
       reviewedPagination={{
         page: safeReviewedPage,
         pageSize: PAGE_SIZE,
-        totalItems: reviewedRequests.length,
+        totalItems: filteredReviewedRequests.length,
         totalPages: reviewedTotalPages,
       }}
+      initialPendingQuery={pendingQuery}
+      initialReviewedQuery={reviewedQuery}
+      totalPendingCount={allPendingRequests.length}
+      totalReviewedCount={allReviewedRequests.length}
     />
   );
 };
