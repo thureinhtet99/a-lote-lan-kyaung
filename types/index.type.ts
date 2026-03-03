@@ -1,17 +1,24 @@
 import { applicationTable, resumeTable, userTable } from "@/drizzle/schema";
 import {
-  approveOrgRequestSchema,
   approveRequestSchema,
   employerRequestSchema,
   organizationRequestSchema,
-  rejectOrgRequestSchema,
   rejectRequestSchema,
 } from "@/features/admin/schema/admin-schema";
+import { organizationTable } from "@/features/organizations/schema/organization-schema";
 import { Column } from "@tanstack/react-table";
 import { Key, ReactNode } from "react";
 import z from "zod";
 
-// Cities
+// Others
+
+export type PaginationType = {
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+};
+
 export type CityType = {
   city: string;
   lat: string;
@@ -19,7 +26,6 @@ export type CityType = {
   country: string;
 };
 
-// Logo
 export type LogoType = {
   className?: string;
   size?: "sm" | "md" | "lg" | "xl";
@@ -54,22 +60,23 @@ export type UserType = {
 export type EmployerRequestType = {
   id: string;
   userId: string;
-  status: string;
+  status: "pending" | "approved" | "rejected";
   requestMessage: string;
   adminResponse: string | null;
-  reviewedBy: string;
-  reviewedAt: Date;
+  reviewedBy: string | null;
+  reviewedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
   user: Pick<UserType, "id" | "name" | "email" | "image">;
-  reviewer: Pick<UserType, "id" | "name" | "email">;
+  reviewer: Pick<UserType, "id" | "name" | "email"> | null;
 };
 
+// Admin
 export type EmployerRequestFormType = z.infer<typeof employerRequestSchema>;
 export type ApproveRequestFormType = z.infer<typeof approveRequestSchema>;
 export type RejectRequestFormType = z.infer<typeof rejectRequestSchema>;
 
-// Organization request
+// Organization
 export type OrganizationRequestType = {
   id: string;
   userId: string;
@@ -89,19 +96,18 @@ export type OrganizationRequestType = {
 };
 
 export type OrgRequestFormType = z.infer<typeof organizationRequestSchema>;
-export type ApproveOrgRequestFormType = z.infer<typeof approveOrgRequestSchema>;
-export type RejectOrgRequestFormType = z.infer<typeof rejectOrgRequestSchema>;
+export type OrganizationType = typeof organizationTable.$inferSelect;
+export type NewOrganizationType = typeof organizationTable.$inferInsert;
 
-// Organization
-export type OrganizationType = {
-  id: string;
-  name: string;
-  slug: string;
-  logo: string | null;
-  createdAt: Date;
-  metadata: string | null;
-  role: "org-admin" | "hr";
-};
+// export type OrganizationType = {
+//   id: string;
+//   name: string;
+//   slug: string;
+//   logo: string | null;
+//   createdAt: Date;
+//   metadata: string | null;
+//   role: "org-admin" | "hr";
+// };
 
 export type SidebarNavMenuType = {
   href: string;
@@ -112,6 +118,7 @@ export type SidebarNavMenuType = {
   roles?: UserRoleType[];
 }[];
 
+// Client
 export type JobSeekerSearchParamsType = {
   searchParams: Promise<Record<string, string | string[]>>;
   params?: Promise<{ jobListingId: string }>;
@@ -127,6 +134,7 @@ export type CheckConditionType = {
   otherwise?: ReactNode;
 };
 
+// Application
 export type ApplicationType = Pick<
   typeof applicationTable.$inferSelect,
   "jobListingId" | "rating" | "status" | "created_at"

@@ -5,30 +5,29 @@ import {
   jobListingTable,
   memberTable,
   organizationRequestTable,
-  organizationTable,
   userTable,
 } from "@/drizzle/schema";
-import { and, count, desc, eq } from "drizzle-orm";
-import { cacheLife, cacheTag, revalidateTag } from "next/cache";
+import { organizationTable } from "@/features/organizations/schema/organization-schema";
+import { and, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
+import { cacheLife, cacheTag, revalidateTag, updateTag } from "next/cache";
 import { nanoid } from "nanoid";
 import { safeGetSession } from "@/lib/auth/auth-helpers";
 import {
-  allOrganizationsTag,
   dashboardStatsTag,
-  orgRequestIdTag,
   orgRequestsTag,
   organizationsTag,
   userOrgRequestsTag,
 } from "@/lib/utils/data-cache";
 import {
-  approveOrgRequestSchema,
+  approveRequestSchema,
   organizationRequestSchema,
-  rejectOrgRequestSchema,
+  rejectRequestSchema,
 } from "@/features/admin/schema/admin-schema";
 import {
-  ApproveOrgRequestFormType,
+  ApproveRequestFormType,
+  OrganizationRequestType,
   OrgRequestFormType,
-  RejectOrgRequestFormType,
+  RejectRequestFormType,
 } from "@/types/index.type";
 
 // ─── User: create org request ──────────────────────────────────────────────
@@ -135,66 +134,284 @@ const getMyOrganizationRequestCached = async (userId: string) => {
   return { success: true, message: "Request fetched", data: result ?? null };
 };
 
-// ─── Admin: get all org requests ───────────────────────────────────────────
-
-export const getAllOrganizationRequests = async () => {
+export const getAllOrganizationRequests = async (
+  pendingPage = 1,
+  reviewedPage = 1,
+  pageSize = 10,
+  pendingQuery = "",
+  reviewedQuery = "",
+): Promise<{
+  success: boolean;
+  message?: string;
+  data: {
+    pending: OrganizationRequestType[];
+    reviewed: OrganizationRequestType[];
+  };
+  pendingPagination: {
+    page: number;
+    pageSize: number;
+    totalItems: number;
+    totalPages: number;
+  };
+  reviewedPagination: {
+    page: number;
+    pageSize: number;
+    totalItems: number;
+    totalPages: number;
+  };
+}> => {
   try {
     const session = await safeGetSession();
     if (!session?.user || session.user.role !== "admin") {
-      return { success: false, message: "Unauthorized", data: [] };
+      return {
+        success: false,
+        message: "Unauthorized",
+        data: { pending: [], reviewed: [] },
+        pendingPagination: { page: 1, pageSize, totalItems: 0, totalPages: 1 },
+        reviewedPagination: { page: 1, pageSize, totalItems: 0, totalPages: 1 },
+      };
     }
 
-    return await getAllOrganizationRequestsCached();
+    return await getAllOrganizationRequestsCached(
+      pendingPage,
+      reviewedPage,
+      pageSize,
+      pendingQuery,
+      reviewedQuery,
+    );
   } catch (error) {
-    console.error("Error fetching organization requests:", error);
+    console.error("Error fetching organization requests: ", error);
     return {
       success: false,
       message: "Failed to fetch organization requests",
-      data: [],
+      data: { pending: [], reviewed: [] },
+      pendingPagination: { page: 1, pageSize, totalItems: 0, totalPages: 1 },
+      reviewedPagination: { page: 1, pageSize, totalItems: 0, totalPages: 1 },
     };
   }
 };
 
-const getAllOrganizationRequestsCached = async () => {
+const getAllOrganizationRequestsCached = async (
+  pendingPage: number,
+  reviewedPage: number,
+  pageSize: number,
+  pendingQuery: string,
+  reviewedQuery: string,
+) => {
   "use cache";
-
   cacheTag(orgRequestsTag());
-  cacheLife("minutes");
+  cacheLife("days");
 
-  const requests = await db
-    .select({
-      id: organizationRequestTable.id,
-      userId: organizationRequestTable.userId,
-      orgName: organizationRequestTable.orgName,
-      orgSlug: organizationRequestTable.orgSlug,
-      orgLogo: organizationRequestTable.orgLogo,
-      requestMessage: organizationRequestTable.requestMessage,
-      status: organizationRequestTable.status,
-      adminResponse: organizationRequestTable.adminResponse,
-      reviewedBy: organizationRequestTable.reviewedBy,
-      reviewedAt: organizationRequestTable.reviewedAt,
-      createdOrganizationId: organizationRequestTable.createdOrganizationId,
-      createdAt: organizationRequestTable.createdAt,
-      updatedAt: organizationRequestTable.updatedAt,
-      userName: userTable.name,
-      userEmail: userTable.email,
-      userImage: userTable.image,
-    })
-    .from(organizationRequestTable)
-    .innerJoin(userTable, eq(organizationRequestTable.userId, userTable.id))
-    .orderBy(desc(organizationRequestTable.createdAt));
+  const normalizedPendingQuery = pendingQuery.trim();
+  const normalizedReviewedQuery = reviewedQuery.trim();
+
+  const [pendingUserMatches, reviewedUserMatches] = await Promise.all([
+    normalizedPendingQuery
+      ? db
+          .select({ id: userTable.id })
+          .from(userTable)
+          .where(
+            or(
+              ilike(userTable.name, `%${normalizedPendingQuery}%`),
+              ilike(userTable.email, `%${normalizedPendingQuery}%`),
+            ),
+          )
+      : Promise.resolve([]),
+    normalizedReviewedQuery
+      ? db
+          .select({ id: userTable.id })
+          .from(userTable)
+          .where(
+            or(
+              ilike(userTable.name, `%${normalizedReviewedQuery}%`),
+              ilike(userTable.email, `%${normalizedReviewedQuery}%`),
+            ),
+          )
+      : Promise.resolve([]),
+  ]);
+
+  const pendingUserIds = pendingUserMatches.map((u) => u.id);
+  const reviewedUserIds = reviewedUserMatches.map((u) => u.id);
+
+  const pendingSearchCondition = normalizedPendingQuery
+    ? pendingUserIds.length > 0
+      ? or(
+          ilike(
+            organizationRequestTable.orgName,
+            `%${normalizedPendingQuery}%`,
+          ),
+          ilike(
+            organizationRequestTable.orgSlug,
+            `%${normalizedPendingQuery}%`,
+          ),
+          ilike(
+            organizationRequestTable.requestMessage,
+            `%${normalizedPendingQuery}%`,
+          ),
+          inArray(organizationRequestTable.userId, pendingUserIds),
+        )
+      : or(
+          ilike(
+            organizationRequestTable.orgName,
+            `%${normalizedPendingQuery}%`,
+          ),
+          ilike(
+            organizationRequestTable.orgSlug,
+            `%${normalizedPendingQuery}%`,
+          ),
+          ilike(
+            organizationRequestTable.requestMessage,
+            `%${normalizedPendingQuery}%`,
+          ),
+        )
+    : undefined;
+
+  const reviewedSearchCondition = normalizedReviewedQuery
+    ? reviewedUserIds.length > 0
+      ? or(
+          ilike(
+            organizationRequestTable.orgName,
+            `%${normalizedReviewedQuery}%`,
+          ),
+          ilike(
+            organizationRequestTable.orgSlug,
+            `%${normalizedReviewedQuery}%`,
+          ),
+          ilike(
+            organizationRequestTable.requestMessage,
+            `%${normalizedReviewedQuery}%`,
+          ),
+          inArray(organizationRequestTable.userId, reviewedUserIds),
+        )
+      : or(
+          ilike(
+            organizationRequestTable.orgName,
+            `%${normalizedReviewedQuery}%`,
+          ),
+          ilike(
+            organizationRequestTable.orgSlug,
+            `%${normalizedReviewedQuery}%`,
+          ),
+          ilike(
+            organizationRequestTable.requestMessage,
+            `%${normalizedReviewedQuery}%`,
+          ),
+        )
+    : undefined;
+
+  const pendingWhere = and(
+    eq(organizationRequestTable.status, "pending"),
+    pendingSearchCondition,
+  );
+  const reviewedWhere = and(
+    or(
+      eq(organizationRequestTable.status, "approved"),
+      eq(organizationRequestTable.status, "rejected"),
+    ),
+    reviewedSearchCondition,
+  );
+
+  const [pendingFilteredTotalResult, reviewedFilteredTotalResult] =
+    await Promise.all([
+      db
+        .select({ count: count() })
+        .from(organizationRequestTable)
+        .where(pendingWhere),
+      db
+        .select({ count: count() })
+        .from(organizationRequestTable)
+        .where(reviewedWhere),
+    ]);
+
+  const pendingTotalItems = pendingFilteredTotalResult[0]?.count ?? 0;
+  const reviewedTotalItems = reviewedFilteredTotalResult[0]?.count ?? 0;
+  const pendingTotalPages = Math.max(
+    1,
+    Math.ceil(pendingTotalItems / pageSize),
+  );
+  const reviewedTotalPages = Math.max(
+    1,
+    Math.ceil(reviewedTotalItems / pageSize),
+  );
+  const safePendingPage = Math.min(Math.max(pendingPage, 1), pendingTotalPages);
+  const safeReviewedPage = Math.min(
+    Math.max(reviewedPage, 1),
+    reviewedTotalPages,
+  );
+
+  const [pendingRequests, reviewedRequests] = await Promise.all([
+    db.query.organizationRequestTable.findMany({
+      where: pendingWhere,
+      with: {
+        user: {
+          columns: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+          },
+        },
+        reviewer: {
+          columns: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: [desc(organizationRequestTable.createdAt)],
+      limit: pageSize,
+      offset: (safePendingPage - 1) * pageSize,
+    }),
+    db.query.organizationRequestTable.findMany({
+      where: reviewedWhere,
+      with: {
+        user: {
+          columns: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+          },
+        },
+        reviewer: {
+          columns: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: [desc(organizationRequestTable.reviewedAt)],
+      limit: pageSize,
+      offset: (safeReviewedPage - 1) * pageSize,
+    }),
+  ]);
 
   return {
     success: true,
     message: "Organization requests fetched",
-    data: requests,
+    data: {
+      pending: pendingRequests as OrganizationRequestType[],
+      reviewed: reviewedRequests as OrganizationRequestType[],
+    },
+    pendingPagination: {
+      page: safePendingPage,
+      pageSize,
+      totalItems: pendingTotalItems,
+      totalPages: pendingTotalPages,
+    },
+    reviewedPagination: {
+      page: safeReviewedPage,
+      pageSize,
+      totalItems: reviewedTotalItems,
+      totalPages: reviewedTotalPages,
+    },
   };
 };
 
-// ─── Admin: approve org request ────────────────────────────────────────────
-
 export const approveOrganizationRequest = async (
-  data: ApproveOrgRequestFormType,
+  data: ApproveRequestFormType,
 ) => {
   try {
     const session = await safeGetSession();
@@ -202,18 +419,10 @@ export const approveOrganizationRequest = async (
       return { success: false, message: "Unauthorized" };
     }
 
-    const validated = approveOrgRequestSchema.safeParse(data);
-    if (!validated.success) {
-      return {
-        success: false,
-        message: validated.error.issues[0]?.message ?? "Invalid input",
-      };
-    }
-
-    const { requestId, adminResponse } = validated.data;
+    const validated = approveRequestSchema.parse(data);
 
     const request = await db.query.organizationRequestTable.findFirst({
-      where: eq(organizationRequestTable.id, requestId),
+      where: eq(organizationRequestTable.id, validated.requestId),
     });
 
     if (!request) {
@@ -223,8 +432,9 @@ export const approveOrganizationRequest = async (
       return { success: false, message: "Request has already been reviewed" };
     }
 
-    // Create the organization
     const orgId = nanoid();
+
+    // Create the organization
     await db.insert(organizationTable).values({
       id: orgId,
       name: request.orgName,
@@ -247,18 +457,16 @@ export const approveOrganizationRequest = async (
       .update(organizationRequestTable)
       .set({
         status: "approved",
-        adminResponse: adminResponse ?? null,
+        adminResponse: validated.adminResponse ?? null,
         reviewedBy: session.user.id,
         reviewedAt: new Date(),
         createdOrganizationId: orgId,
       })
-      .where(eq(organizationRequestTable.id, requestId));
+      .where(eq(organizationRequestTable.id, validated.requestId));
 
-    revalidateTag(orgRequestsTag(), "max");
-    revalidateTag(orgRequestIdTag(requestId), "max");
+    updateTag(orgRequestsTag());
     revalidateTag(userOrgRequestsTag(request.userId), "max");
-    revalidateTag(organizationsTag(request.userId), "max");
-    revalidateTag(allOrganizationsTag(), "max");
+    revalidateTag(organizationsTag(), "max");
     revalidateTag(dashboardStatsTag(), "max");
 
     return {
@@ -266,7 +474,7 @@ export const approveOrganizationRequest = async (
       message: `Organization "${request.orgName}" has been created and the user has been notified`,
     };
   } catch (error) {
-    console.error("Error approving organization request:", error);
+    console.error("Error approving organization request: ", error);
     return {
       success: false,
       message: "Failed to approve organization request",
@@ -274,10 +482,8 @@ export const approveOrganizationRequest = async (
   }
 };
 
-// ─── Admin: reject org request ─────────────────────────────────────────────
-
 export const rejectOrganizationRequest = async (
-  data: RejectOrgRequestFormType,
+  data: RejectRequestFormType,
 ) => {
   try {
     const session = await safeGetSession();
@@ -285,18 +491,17 @@ export const rejectOrganizationRequest = async (
       return { success: false, message: "Unauthorized" };
     }
 
-    const validated = rejectOrgRequestSchema.safeParse(data);
-    if (!validated.success) {
+    // Only admins can reject requests
+    const validated = rejectRequestSchema.parse(data);
+    if (!validated.adminResponse) {
       return {
         success: false,
-        message: validated.error.issues[0]?.message ?? "Invalid input",
+        message: "Please provide a reason for rejection",
       };
     }
 
-    const { requestId, adminResponse } = validated.data;
-
     const request = await db.query.organizationRequestTable.findFirst({
-      where: eq(organizationRequestTable.id, requestId),
+      where: eq(organizationRequestTable.id, validated.requestId),
       columns: { id: true, status: true, userId: true },
     });
 
@@ -311,14 +516,13 @@ export const rejectOrganizationRequest = async (
       .update(organizationRequestTable)
       .set({
         status: "rejected",
-        adminResponse,
+        adminResponse: validated.adminResponse,
         reviewedBy: session.user.id,
         reviewedAt: new Date(),
       })
-      .where(eq(organizationRequestTable.id, requestId));
+      .where(eq(organizationRequestTable.id, validated.requestId));
 
-    revalidateTag(orgRequestsTag(), "max");
-    revalidateTag(orgRequestIdTag(requestId), "max");
+    updateTag(orgRequestsTag());
     revalidateTag(userOrgRequestsTag(request.userId), "max");
 
     return {
@@ -331,26 +535,53 @@ export const rejectOrganizationRequest = async (
   }
 };
 
-// ─── Public / Admin: get all approved organizations ────────────────────────
-
-export const getAllApprovedOrganizations = async () => {
+export const getAllApprovedOrganizations = async (
+  page = 1,
+  pageSize = 10,
+  query = "",
+) => {
   try {
-    return await getAllApprovedOrganizationsCached();
+    return await getAllApprovedOrganizationsCached(page, pageSize, query);
   } catch (error) {
-    console.error("Error fetching organizations:", error);
+    console.error("Error fetching organizations: ", error);
     return {
       success: false,
       message: "Failed to fetch organizations",
       data: [],
+      pagination: {
+        page,
+        pageSize,
+        totalItems: 0,
+        totalPages: 1,
+      },
     };
   }
 };
 
-const getAllApprovedOrganizationsCached = async () => {
+const getAllApprovedOrganizationsCached = async (
+  page: number,
+  pageSize: number,
+  query: string,
+) => {
   "use cache";
+  cacheTag(organizationsTag());
+  cacheLife("days");
 
-  cacheTag(allOrganizationsTag());
-  cacheLife("hours");
+  const normalizedQuery = query.trim();
+  const whereCondition = normalizedQuery
+    ? or(
+        ilike(organizationTable.name, `%${normalizedQuery}%`),
+        ilike(organizationTable.slug, `%${normalizedQuery}%`),
+      )
+    : undefined;
+
+  const [totalResult] = await db
+    .select({ count: count() })
+    .from(organizationTable)
+    .where(whereCondition);
+  const totalItems = totalResult?.count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const safePage = Math.min(Math.max(page, 1), totalPages);
 
   const orgs = await db
     .select({
@@ -363,10 +594,23 @@ const getAllApprovedOrganizationsCached = async () => {
     })
     .from(organizationTable)
     .leftJoin(memberTable, eq(organizationTable.id, memberTable.organizationId))
+    .where(whereCondition)
     .groupBy(organizationTable.id)
-    .orderBy(desc(organizationTable.createdAt));
+    .orderBy(desc(organizationTable.createdAt))
+    .limit(pageSize)
+    .offset((safePage - 1) * pageSize);
 
-  return { success: true, message: "Organizations fetched", data: orgs };
+  return {
+    success: true,
+    message: "Organizations fetched",
+    data: orgs,
+    pagination: {
+      page: safePage,
+      pageSize,
+      totalItems,
+      totalPages,
+    },
+  };
 };
 
 // ─── Public / Admin: get organization with members and job listings by slug ─
@@ -387,7 +631,7 @@ export const getOrganizationDetailBySlug = async (slug: string) => {
 const getOrganizationDetailBySlugCached = async (slug: string) => {
   "use cache";
 
-  cacheTag(allOrganizationsTag());
+  cacheTag(organizationsTag());
   cacheLife("hours");
 
   const org = await db.query.organizationTable.findFirst({

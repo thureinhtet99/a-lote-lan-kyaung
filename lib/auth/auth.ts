@@ -6,7 +6,6 @@ import {
   accountTable,
   invitationTable,
   memberTable,
-  organizationTable,
   sessionTable,
   userTable,
   verificationTable,
@@ -15,6 +14,7 @@ import { ac, hr, orgAdmin } from "@/lib/utils/access-control";
 import { revalidateTag } from "next/cache";
 import { dashboardStatsTag } from "@/lib/utils/data-cache";
 import { sendInvitationEmail } from "@/services/email/send-invitation";
+import { organizationTable } from "@/features/organizations/schema/organization-schema";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {

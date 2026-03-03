@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import Loading from "@/components/shared/loading";
 import { getAllApprovedOrganizations } from "@/features/organizations/db/organization-request-db";
 import { OrganizationsTableClient } from "./_organizations-table-client";
-import { getNumberParam } from "../lib/utils";
+import { getNumberParam, getStringParam } from "../lib/utils";
 
 export default function OrganizationsTable({
   searchParams,
@@ -25,34 +25,29 @@ const SuspendedComponent = async ({
 }) => {
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const page = getNumberParam(resolvedSearchParams.page, 1);
+  const pageSize = getNumberParam(resolvedSearchParams.pageSize, PAGE_SIZE);
+  const query = getStringParam(resolvedSearchParams.q, "");
 
-  const result = await getAllApprovedOrganizations();
+  const result = await getAllApprovedOrganizations(page, pageSize, query);
 
   if (!result.success) {
     return (
-      <div className="text-muted-foreground animate-pulse p-4 text-center">
+      <div className="text-destructive animate-pulse p-4 text-center">
         Failed to load organizations
       </div>
     );
   }
 
-  const totalItems = result.data.length;
-  const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
-  const safePage = Math.min(Math.max(page, 1), totalPages);
-  const paginatedOrganizations = result.data.slice(
-    (safePage - 1) * PAGE_SIZE,
-    safePage * PAGE_SIZE,
-  );
-
   return (
     <OrganizationsTableClient
-      organizations={paginatedOrganizations}
+      organizations={result.data}
       pagination={{
-        page: safePage,
-        pageSize: PAGE_SIZE,
-        totalItems,
-        totalPages,
+        page: result.pagination?.page ?? 1,
+        pageSize: result.pagination?.pageSize ?? pageSize,
+        totalItems: result.pagination?.totalItems ?? 0,
+        totalPages: result.pagination?.totalPages ?? 1,
       }}
+      initialQuery={query}
     />
   );
 };

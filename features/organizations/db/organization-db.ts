@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { memberTable, organizationTable } from "@/drizzle/schema";
+import { memberTable } from "@/drizzle/schema";
 import { and, eq } from "drizzle-orm";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
 import { auth } from "@/lib/auth/auth";
@@ -16,6 +16,7 @@ import {
   sideBarJobListingWithApplicationsTag,
 } from "@/lib/utils/data-cache";
 import { safeGetSession } from "@/lib/auth/auth-helpers";
+import { organizationTable } from "../schema/organization-schema";
 
 export const getOrganizationsByEmployerId = async (): Promise<{
   success: boolean;
@@ -61,7 +62,7 @@ const getOrganizationsByEmployerIdCached = async (userId: string) => {
     )
     .where(eq(memberTable.userId, userId));
 
-  cacheTag(organizationsTag(userId));
+  cacheTag(organizationsTag());
   for (const org of organizations) {
     cacheTag(organizationTag(org.id, userId));
   }

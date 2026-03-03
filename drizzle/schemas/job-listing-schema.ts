@@ -11,7 +11,7 @@ import {
 import { created_at, id, updated_at } from "../schema-helpers";
 import { relations } from "drizzle-orm";
 import { applicationTable } from "./application-schema";
-import { organizationTable } from "./auth-schema";
+import { organizationTable } from "@/features/organizations/schema/organization-schema";
 
 export const wageIntervals = ["monthly", "yearly", "hourly"] as const;
 export type WageIntervalType = (typeof wageIntervals)[number];

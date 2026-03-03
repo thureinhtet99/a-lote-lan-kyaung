@@ -2,10 +2,10 @@
 
 import { db } from "@/lib/db";
 import { employerRequestTable, userTable } from "@/drizzle/schema";
-import { and, count, desc, eq, ilike, or } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
-import { cacheLife, cacheTag, updateTag } from "next/cache";
+import { cacheLife, cacheTag, revalidateTag, updateTag } from "next/cache";
 import {
   dashboardStatsTag,
   employerRequestIdTag,
@@ -15,6 +15,7 @@ import {
 } from "@/lib/utils/data-cache";
 import {
   ApproveRequestFormType,
+  EmployerRequestType,
   EmployerRequestFormType,
   RejectRequestFormType,
   UserRoleType,
@@ -207,58 +208,252 @@ export const deleteUser = async (id: string) => {
 };
 
 // Employer
-export const getAllEmployerRequests = async () => {
+export const getAllEmployerRequests = async (
+  pendingPage = 1,
+  reviewedPage = 1,
+  pageSize = 10,
+  pendingQuery = "",
+  reviewedQuery = "",
+): Promise<{
+  success: boolean;
+  message?: string;
+  data: {
+    pending: EmployerRequestType[];
+    reviewed: EmployerRequestType[];
+  };
+  pendingPagination: {
+    page: number;
+    pageSize: number;
+    totalItems: number;
+    totalPages: number;
+  };
+  reviewedPagination: {
+    page: number;
+    pageSize: number;
+    totalItems: number;
+    totalPages: number;
+  };
+}> => {
   try {
     const session = await safeGetSession();
     if (!session?.user)
-      return { success: false, message: "Unauthorized", data: [] };
+      return {
+        success: false,
+        message: "Unauthorized",
+        data: { pending: [], reviewed: [] },
+        pendingPagination: { page: 1, pageSize, totalItems: 0, totalPages: 1 },
+        reviewedPagination: { page: 1, pageSize, totalItems: 0, totalPages: 1 },
+      };
 
     // Only admins can view all requests
     if (session.user.role !== "admin")
       return {
         success: false,
         message: "Only admins can view all employer requests",
-        data: [],
+        data: { pending: [], reviewed: [] },
+        pendingPagination: { page: 1, pageSize, totalItems: 0, totalPages: 1 },
+        reviewedPagination: { page: 1, pageSize, totalItems: 0, totalPages: 1 },
       };
 
-    return await getAllEmployerRequestsCached();
+    return await getAllEmployerRequestsCached(
+      pendingPage,
+      reviewedPage,
+      pageSize,
+      pendingQuery,
+      reviewedQuery,
+    );
   } catch (error) {
     console.error("Error fetching employer requests: ", error);
     return {
       success: false,
       message: "Failed to fetch employer requests",
-      data: [],
+      data: { pending: [], reviewed: [] },
+      pendingPagination: { page: 1, pageSize, totalItems: 0, totalPages: 1 },
+      reviewedPagination: { page: 1, pageSize, totalItems: 0, totalPages: 1 },
     };
   }
 };
 
-const getAllEmployerRequestsCached = async () => {
+const getAllEmployerRequestsCached = async (
+  pendingPage: number,
+  reviewedPage: number,
+  pageSize: number,
+  pendingQuery: string,
+  reviewedQuery: string,
+) => {
   "use cache";
   cacheTag(employerRequestsTag());
   cacheLife("hours");
 
-  const requests = await db.query.employerRequestTable.findMany({
-    with: {
-      user: {
-        columns: {
-          id: true,
-          name: true,
-          email: true,
-          image: true,
-        },
-      },
-      reviewer: {
-        columns: {
-          id: true,
-          name: true,
-          email: true,
-        },
-      },
-    },
-    orderBy: [desc(employerRequestTable.createdAt)],
-  });
+  const normalizedPendingQuery = pendingQuery.trim();
+  const normalizedReviewedQuery = reviewedQuery.trim();
 
-  return { success: true, data: requests };
+  const [pendingUserMatches, reviewedUserMatches] = await Promise.all([
+    normalizedPendingQuery
+      ? db
+          .select({ id: userTable.id })
+          .from(userTable)
+          .where(
+            or(
+              ilike(userTable.name, `%${normalizedPendingQuery}%`),
+              ilike(userTable.email, `%${normalizedPendingQuery}%`),
+            ),
+          )
+      : Promise.resolve([]),
+    normalizedReviewedQuery
+      ? db
+          .select({ id: userTable.id })
+          .from(userTable)
+          .where(
+            or(
+              ilike(userTable.name, `%${normalizedReviewedQuery}%`),
+              ilike(userTable.email, `%${normalizedReviewedQuery}%`),
+            ),
+          )
+      : Promise.resolve([]),
+  ]);
+
+  const pendingUserIds = pendingUserMatches.map((u) => u.id);
+  const reviewedUserIds = reviewedUserMatches.map((u) => u.id);
+
+  const pendingSearchCondition = normalizedPendingQuery
+    ? pendingUserIds.length > 0
+      ? or(
+          ilike(
+            employerRequestTable.requestMessage,
+            `%${normalizedPendingQuery}%`,
+          ),
+          inArray(employerRequestTable.userId, pendingUserIds),
+        )
+      : ilike(
+          employerRequestTable.requestMessage,
+          `%${normalizedPendingQuery}%`,
+        )
+    : undefined;
+
+  const reviewedSearchCondition = normalizedReviewedQuery
+    ? reviewedUserIds.length > 0
+      ? or(
+          ilike(
+            employerRequestTable.requestMessage,
+            `%${normalizedReviewedQuery}%`,
+          ),
+          inArray(employerRequestTable.userId, reviewedUserIds),
+        )
+      : ilike(
+          employerRequestTable.requestMessage,
+          `%${normalizedReviewedQuery}%`,
+        )
+    : undefined;
+
+  const pendingWhere = and(
+    eq(employerRequestTable.status, "pending"),
+    pendingSearchCondition,
+  );
+  const reviewedWhere = and(
+    or(
+      eq(employerRequestTable.status, "approved"),
+      eq(employerRequestTable.status, "rejected"),
+    ),
+    reviewedSearchCondition,
+  );
+
+  const [pendingFilteredTotalResult, reviewedFilteredTotalResult] =
+    await Promise.all([
+      db
+        .select({ count: count() })
+        .from(employerRequestTable)
+        .where(pendingWhere),
+      db
+        .select({ count: count() })
+        .from(employerRequestTable)
+        .where(reviewedWhere),
+    ]);
+
+  const pendingTotalItems = pendingFilteredTotalResult[0]?.count ?? 0;
+  const reviewedTotalItems = reviewedFilteredTotalResult[0]?.count ?? 0;
+  const pendingTotalPages = Math.max(
+    1,
+    Math.ceil(pendingTotalItems / pageSize),
+  );
+  const reviewedTotalPages = Math.max(
+    1,
+    Math.ceil(reviewedTotalItems / pageSize),
+  );
+  const safePendingPage = Math.min(Math.max(pendingPage, 1), pendingTotalPages);
+  const safeReviewedPage = Math.min(
+    Math.max(reviewedPage, 1),
+    reviewedTotalPages,
+  );
+
+  const [pendingRequests, reviewedRequests] = await Promise.all([
+    db.query.employerRequestTable.findMany({
+      where: pendingWhere,
+      with: {
+        user: {
+          columns: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+          },
+        },
+        reviewer: {
+          columns: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: [desc(employerRequestTable.createdAt)],
+      limit: pageSize,
+      offset: (safePendingPage - 1) * pageSize,
+    }),
+    db.query.employerRequestTable.findMany({
+      where: reviewedWhere,
+      with: {
+        user: {
+          columns: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+          },
+        },
+        reviewer: {
+          columns: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: [desc(employerRequestTable.reviewedAt)],
+      limit: pageSize,
+      offset: (safeReviewedPage - 1) * pageSize,
+    }),
+  ]);
+
+  return {
+    success: true,
+    data: {
+      pending: pendingRequests,
+      reviewed: reviewedRequests,
+    },
+    pendingPagination: {
+      page: safePendingPage,
+      pageSize,
+      totalItems: pendingTotalItems,
+      totalPages: pendingTotalPages,
+    },
+    reviewedPagination: {
+      page: safeReviewedPage,
+      pageSize,
+      totalItems: reviewedTotalItems,
+      totalPages: reviewedTotalPages,
+    },
+  };
 };
 
 export const getEmployerRequest = async () => {
@@ -376,18 +571,10 @@ export const approveEmployerRequest = async (
   data: ApproveRequestFormType,
 ): Promise<{ success: boolean; message?: string }> => {
   try {
-    const validated = approveRequestSchema.parse(data);
-
     const session = await safeGetSession();
+    if (!session?.user) return { success: false, message: "Unauthorized" };
 
-    if (!session?.user) {
-      return { success: false, message: "Unauthorized" };
-    }
-
-    // Only admins can approve requests
-    if (session.user.role !== "admin") {
-      return { success: false, message: "Only admins can approve requests" };
-    }
+    const validated = approveRequestSchema.parse(data);
 
     // Get the request
     const request = await db.query.employerRequestTable.findFirst({
@@ -397,13 +584,10 @@ export const approveEmployerRequest = async (
       },
     });
 
-    if (!request) {
-      return { success: false, message: "Request not found" };
-    }
+    if (!request) return { success: false, message: "Request not found" };
 
-    if (request.status !== "pending") {
+    if (request.status !== "pending")
       return { success: false, message: "Request has already been reviewed" };
-    }
 
     // Update the request
     await db
@@ -424,13 +608,13 @@ export const approveEmployerRequest = async (
       })
       .where(eq(userTable.id, request.userId));
 
-    updateTag(usersTag());
+    revalidateTag(usersTag(), "max");
     updateTag(employerRequestsTag());
-    updateTag(dashboardStatsTag());
+    revalidateTag(dashboardStatsTag(), "max");
 
     return { success: true, message: "Employer request approved successfully" };
   } catch (error) {
-    console.error("Error approving employer request:", error);
+    console.error("Error approving employer request: ", error);
     return {
       success: false,
       message: "Failed to approve employer request",
@@ -442,18 +626,17 @@ export const rejectEmployerRequest = async (
   data: RejectRequestFormType,
 ): Promise<{ success: boolean; message?: string }> => {
   try {
-    // Validate input
-    const validated = rejectRequestSchema.parse(data);
-
     const session = await safeGetSession();
-
     if (!session?.user) {
       return { success: false, message: "Unauthorized" };
     }
 
-    // Only admins can reject requests
-    if (session.user.role !== "admin") {
-      return { success: false, message: "Only admins can reject requests" };
+    const validated = rejectRequestSchema.parse(data);
+    if (!validated.adminResponse) {
+      return {
+        success: false,
+        message: "Please provide a reason for rejection",
+      };
     }
 
     // Get the request
@@ -480,7 +663,7 @@ export const rejectEmployerRequest = async (
       })
       .where(eq(employerRequestTable.id, validated.requestId));
 
-    updateTag(dashboardStatsTag());
+    revalidateTag(dashboardStatsTag(), "max");
     updateTag(employerRequestsTag());
 
     return { success: true, message: "Employer request rejected successfully" };

@@ -2,12 +2,12 @@ import { db } from "@/lib/db";
 import {
   employerRequestTable,
   organizationRequestTable,
-  organizationTable,
   userTable,
 } from "@/drizzle/schema";
 import { eq, count } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 import { dashboardStatsTag } from "@/lib/utils/data-cache";
+import { organizationTable } from "@/features/organizations/schema/organization-schema";
 
 export const getAdminStats = async () => {
   "use cache";

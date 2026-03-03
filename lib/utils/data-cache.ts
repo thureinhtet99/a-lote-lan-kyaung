@@ -1,6 +1,6 @@
 // Organizations
-export const organizationsTag = (userId: string) => {
-  return `organizations-${userId}` as const;
+export const organizationsTag = () => {
+  return "organizations" as const;
 };
 
 // Organization
@@ -11,11 +11,6 @@ export const organizationTag = (orgId: string, userId: string) => {
 // Organizations id
 export const organizationIdTag = (orgId: string) => {
   return `organization-${orgId}` as const;
-};
-
-// All organizations (admin / public)
-export const allOrganizationsTag = () => {
-  return `all-organizations` as const;
 };
 
 // Public organization by slug
@@ -95,10 +90,6 @@ export const employerRequestIdTag = (requestId: string) => {
 // Organization requests
 export const orgRequestsTag = () => {
   return `organization-requests` as const;
-};
-
-export const orgRequestIdTag = (requestId: string) => {
-  return `organization-request-${requestId}` as const;
 };
 
 export const userOrgRequestsTag = (userId: string) => {

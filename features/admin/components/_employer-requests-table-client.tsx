@@ -56,8 +56,6 @@ export function EmployerRequestsTableClient({
   reviewedPagination,
   initialPendingQuery,
   initialReviewedQuery,
-  totalPendingCount,
-  totalReviewedCount,
 }: {
   pendingRequests: EmployerRequestType[];
   reviewedRequests: EmployerRequestType[];
@@ -65,8 +63,6 @@ export function EmployerRequestsTableClient({
   reviewedPagination: Props;
   initialPendingQuery: string;
   initialReviewedQuery: string;
-  totalPendingCount: number;
-  totalReviewedCount: number;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -81,6 +77,12 @@ export function EmployerRequestsTableClient({
   const [selectedRequest, setSelectedRequest] =
     useState<EmployerRequestType | null>(null);
   const [adminResponse, setAdminResponse] = useState("");
+  const activeTabParam = searchParams.get("tab");
+  const activeTab =
+    activeTabParam === "reviewed" ||
+    (!activeTabParam && (searchParams.get("er") || searchParams.get("erq")))
+      ? "reviewed"
+      : "pending";
 
   const pendingVisiblePages = getVisiblePages(
     pendingPagination.page,
@@ -90,12 +92,19 @@ export function EmployerRequestsTableClient({
     reviewedPagination.page,
     reviewedPagination.totalPages,
   );
-
-  // ── URL helpers ──────────────────────────────────────────────────────────
+  const pendingEmptyRowCount = Math.max(
+    0,
+    pendingPagination.pageSize - pendingRequests.length,
+  );
+  const reviewedEmptyRowCount = Math.max(
+    0,
+    reviewedPagination.pageSize - reviewedRequests.length,
+  );
 
   const createPageUrl = (sectionParam: "ep" | "er", page: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set(sectionParam, String(page));
+    params.set("tab", sectionParam === "er" ? "reviewed" : "pending");
     return `${pathname}?${params.toString()}`;
   };
 
@@ -111,6 +120,7 @@ export function EmployerRequestsTableClient({
       params.delete(queryParam);
     }
     params.set(pageParam, "1");
+    params.set("tab", pageParam === "er" ? "reviewed" : "pending");
     router.push(`${pathname}?${params.toString()}`);
   };
 
@@ -123,10 +133,9 @@ export function EmployerRequestsTableClient({
     const params = new URLSearchParams(searchParams.toString());
     params.delete(queryParam);
     params.set(pageParam, "1");
+    params.set("tab", pageParam === "er" ? "reviewed" : "pending");
     router.push(`${pathname}?${params.toString()}`);
   };
-
-  // ── Dialog helpers ───────────────────────────────────────────────────────
 
   const resetDialogState = () => {
     setAdminResponse("");
@@ -179,8 +188,6 @@ export function EmployerRequestsTableClient({
       }
     });
   };
-
-  // ── Pagination renderer ───────────────────────────────────────────────────
 
   const renderPagination = (
     sectionParam: "ep" | "er",
@@ -257,8 +264,6 @@ export function EmployerRequestsTableClient({
     );
   };
 
-  // ── Search bar renderer ──────────────────────────────────────────────────
-
   const renderSearch = (
     value: string,
     setter: (v: string) => void,
@@ -297,27 +302,22 @@ export function EmployerRequestsTableClient({
     </form>
   );
 
-  // ── Render ────────────────────────────────────────────────────────────────
-
   return (
     <>
-      <Tabs defaultValue="pending">
-        <TabsList>
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => {
+          const params = new URLSearchParams(searchParams.toString());
+          params.set("tab", value);
+          router.push(`${pathname}?${params.toString()}`);
+        }}
+      >
+        <TabsList className="w-full">
           <TabsTrigger value="pending" className="gap-2">
             Pending
-            {totalPendingCount > 0 && (
-              <Badge variant="secondary" className="text-xs">
-                {totalPendingCount}
-              </Badge>
-            )}
           </TabsTrigger>
           <TabsTrigger value="reviewed" className="gap-2">
             Reviewed
-            {totalReviewedCount > 0 && (
-              <Badge variant="secondary" className="text-xs">
-                {totalReviewedCount}
-              </Badge>
-            )}
           </TabsTrigger>
         </TabsList>
 
@@ -331,7 +331,7 @@ export function EmployerRequestsTableClient({
             "Search by name, email, or message…",
           )}
           {pendingRequests.length === 0 ? (
-            <div className="rounded-lg border border-dashed p-10 text-center text-sm text-muted-foreground">
+            <div className="p-10 text-center text-sm text-muted-foreground">
               {initialPendingQuery
                 ? `No pending requests match "${initialPendingQuery}"`
                 : "No pending employer requests"}
@@ -389,6 +389,17 @@ export function EmployerRequestsTableClient({
                         </TableCell>
                       </TableRow>
                     ))}
+                    {Array.from(
+                      { length: pendingEmptyRowCount },
+                      (_, index) => (
+                        <TableRow
+                          key={`pending-empty-row-${index}`}
+                          aria-hidden="true"
+                        >
+                          <TableCell colSpan={5} className="h-[49px]" />
+                        </TableRow>
+                      ),
+                    )}
                   </TableBody>
                 </Table>
               </div>
@@ -407,7 +418,7 @@ export function EmployerRequestsTableClient({
             "Search by name, email, or message…",
           )}
           {reviewedRequests.length === 0 ? (
-            <div className="rounded-lg border border-dashed p-10 text-center text-sm text-muted-foreground">
+            <div className="p-10 text-center text-sm text-muted-foreground">
               {initialReviewedQuery
                 ? `No reviewed requests match "${initialReviewedQuery}"`
                 : "No reviewed employer requests"}
@@ -448,7 +459,7 @@ export function EmployerRequestsTableClient({
                         <TableCell className="max-w-[340px] whitespace-normal">
                           {request.adminResponse || "-"}
                         </TableCell>
-                        <TableCell>{request.reviewer.name}</TableCell>
+                        <TableCell>{request.reviewer?.name ?? "-"}</TableCell>
                         <TableCell>
                           {request.reviewedAt
                             ? new Date(request.reviewedAt).toLocaleDateString()
@@ -456,6 +467,17 @@ export function EmployerRequestsTableClient({
                         </TableCell>
                       </TableRow>
                     ))}
+                    {Array.from(
+                      { length: reviewedEmptyRowCount },
+                      (_, index) => (
+                        <TableRow
+                          key={`reviewed-empty-row-${index}`}
+                          aria-hidden="true"
+                        >
+                          <TableCell colSpan={6} className="h-[49px]" />
+                        </TableRow>
+                      ),
+                    )}
                   </TableBody>
                 </Table>
               </div>

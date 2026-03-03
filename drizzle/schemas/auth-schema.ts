@@ -9,6 +9,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { resumeTable } from "./resume-schema";
 import { z } from "zod";
+import { organizationTable } from "@/features/organizations/schema/organization-schema";
 
 export const signInSchema = z.object({
   email: z.email("Invalid email address"),
@@ -114,18 +115,18 @@ export const verificationTable = pgTable(
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
-export const organizationTable = pgTable(
-  "organizations",
-  {
-    id: text("id").primaryKey(),
-    name: text("name").notNull(),
-    slug: text("slug").notNull().unique(),
-    logo: text("logo"),
-    createdAt: timestamp("created_at").notNull(),
-    metadata: text("metadata"),
-  },
-  (table) => [uniqueIndex("organization_slug_uidx").on(table.slug)],
-);
+// export const organizationTable = pgTable(
+//   "organizations",
+//   {
+//     id: text("id").primaryKey(),
+//     name: text("name").notNull(),
+//     slug: text("slug").notNull().unique(),
+//     logo: text("logo"),
+//     createdAt: timestamp("created_at").notNull(),
+//     metadata: text("metadata"),
+//   },
+//   (table) => [uniqueIndex("organization_slug_uidx").on(table.slug)],
+// );
 
 export const memberTable = pgTable(
   "members",

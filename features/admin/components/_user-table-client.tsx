@@ -55,13 +55,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { UserRoleType, UserType } from "@/types/index.type";
-import {
-  InputGroup,
-  InputGroupButton,
-  InputGroupInput,
-} from "@/components/ui/input-group";
+import { PaginationType, UserRoleType, UserType } from "@/types/index.type";
 import { getVisiblePages } from "../lib/utils";
+import CustomPagination from "@/components/shared/custom-pagination";
 
 export function UserTableClient({
   users,
@@ -69,12 +65,7 @@ export function UserTableClient({
   initialQuery,
 }: {
   users: UserType[];
-  pagination: {
-    page: number;
-    pageSize: number;
-    totalUsers: number;
-    totalPages: number;
-  };
+  pagination: PaginationType;
   initialQuery: string;
 }) {
   const router = useRouter();
@@ -228,182 +219,130 @@ export function UserTableClient({
         </Button>
       </form>
 
-      <Table className="min-w-[760px]">
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Joined</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {optimisticUsers.map((user) => (
-            <TableRow key={user.id}>
-              <TableCell className="max-w-[180px] truncate font-medium sm:max-w-none sm:whitespace-normal">
-                {user.name}
-              </TableCell>
-              <TableCell className="max-w-[220px] truncate sm:max-w-none sm:whitespace-normal">
-                {user.email}
-              </TableCell>
-              <TableCell>
-                <Badge
-                  className="capitalize"
-                  variant={
-                    user.role === "admin"
-                      ? "outline"
-                      : user.role === "employer"
-                        ? "default"
-                        : "secondary"
-                  }
-                >
-                  {user.role || "user"}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                {user.banned ? (
-                  <Badge variant="destructive">Banned</Badge>
-                ) : (
-                  <Badge variant="outline">Active</Badge>
-                )}
-              </TableCell>
-              <TableCell>
-                {new Date(user.createdAt).toLocaleDateString()}
-              </TableCell>
-              <TableCell className="text-right">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="h-8 w-8 p-0 cursor-pointer hover:border"
+      {optimisticUsers.length === 0 ? (
+        <div className="rounded-lg border border-dashed p-10 text-center text-sm text-muted-foreground">
+          {initialQuery ? `No users match "${initialQuery}"` : "No users found"}
+        </div>
+      ) : (
+        <>
+          <Table className="min-w-[760px]">
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Joined</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {optimisticUsers.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell className="max-w-[180px] truncate font-medium sm:max-w-none sm:whitespace-normal">
+                    {user.name}
+                  </TableCell>
+                  <TableCell className="max-w-[220px] truncate sm:max-w-none sm:whitespace-normal">
+                    {user.email}
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      className="capitalize"
+                      variant={
+                        user.role === "admin"
+                          ? "outline"
+                          : user.role === "employer"
+                            ? "default"
+                            : "secondary"
+                      }
                     >
-                      <span className="sr-only">Open menu</span>
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      onClick={() => handleRoleChange(user.id, "user")}
-                      disabled={isPending || user.role === "user"}
-                    >
-                      Set as User
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      onClick={() => handleRoleChange(user.id, "employer")}
-                      disabled={isPending || user.role === "employer"}
-                    >
-                      Set as Employer
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      onClick={() => handleRoleChange(user.id, "admin")}
-                      disabled={isPending || user.role === "admin"}
-                    >
-                      Set as Admin
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
+                      {user.role || "user"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
                     {user.banned ? (
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onClick={() => handleUnbanUser(user.id)}
-                        disabled={isPending}
-                      >
-                        Unban User
-                      </DropdownMenuItem>
+                      <Badge variant="destructive">Banned</Badge>
                     ) : (
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setBanDialogOpen(true);
-                        }}
-                        disabled={isPending}
-                      >
-                        Ban User
-                      </DropdownMenuItem>
+                      <Badge variant="outline">Active</Badge>
                     )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))}
-          {Array.from({ length: emptyRowCount }, (_, index) => (
-            <TableRow key={`empty-row-${index}`} aria-hidden="true">
-              <TableCell colSpan={6} className="h-[49px]" />
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+                  </TableCell>
+                  <TableCell>
+                    {new Date(user.createdAt).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          className="h-8 w-8 p-0 cursor-pointer hover:border"
+                        >
+                          <span className="sr-only">Open menu</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() => handleRoleChange(user.id, "user")}
+                          disabled={isPending || user.role === "user"}
+                        >
+                          Set as User
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() => handleRoleChange(user.id, "employer")}
+                          disabled={isPending || user.role === "employer"}
+                        >
+                          Set as Employer
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() => handleRoleChange(user.id, "admin")}
+                          disabled={isPending || user.role === "admin"}
+                        >
+                          Set as Admin
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        {user.banned ? (
+                          <DropdownMenuItem
+                            className="cursor-pointer"
+                            onClick={() => handleUnbanUser(user.id)}
+                            disabled={isPending}
+                          >
+                            Unban User
+                          </DropdownMenuItem>
+                        ) : (
+                          <DropdownMenuItem
+                            className="cursor-pointer"
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setBanDialogOpen(true);
+                            }}
+                            disabled={isPending}
+                          >
+                            Ban User
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {Array.from({ length: emptyRowCount }, (_, index) => (
+                <TableRow key={`empty-row-${index}`} aria-hidden="true">
+                  <TableCell colSpan={6} className="h-[49px]" />
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
 
-      {/* Pagination */}
-      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-muted-foreground sm:order-1">
-          Showing page {pagination.page} of {pagination.totalPages} (
-          {pagination.totalUsers} total)
-        </p>
-
-        <Pagination className="order-3 mx-0 w-full justify-start overflow-x-auto pb-1 sm:w-auto sm:justify-end sm:pb-0">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                href={createPageUrl(Math.max(1, pagination.page - 1))}
-                aria-disabled={pagination.page <= 1 || isPending}
-                tabIndex={pagination.page <= 1 || isPending ? -1 : undefined}
-                className={
-                  pagination.page <= 1 || isPending
-                    ? "pointer-events-none opacity-50"
-                    : undefined
-                }
-              />
-            </PaginationItem>
-
-            {visiblePages.map((page, index) => (
-              <PaginationItem key={`${page}-${index}`}>
-                {page === "ellipsis" ? (
-                  <PaginationEllipsis />
-                ) : (
-                  <PaginationLink
-                    href={createPageUrl(page)}
-                    isActive={page === pagination.page}
-                    aria-disabled={isPending}
-                    tabIndex={isPending ? -1 : undefined}
-                    className={
-                      isPending ? "pointer-events-none opacity-60" : undefined
-                    }
-                  >
-                    {page}
-                  </PaginationLink>
-                )}
-              </PaginationItem>
-            ))}
-
-            <PaginationItem>
-              <PaginationNext
-                href={createPageUrl(
-                  Math.min(pagination.totalPages, pagination.page + 1),
-                )}
-                aria-disabled={
-                  pagination.page >= pagination.totalPages || isPending
-                }
-                tabIndex={
-                  pagination.page >= pagination.totalPages || isPending
-                    ? -1
-                    : undefined
-                }
-                className={
-                  pagination.page >= pagination.totalPages || isPending
-                    ? "pointer-events-none opacity-50"
-                    : undefined
-                }
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </div>
+          <CustomPagination
+            pagination={pagination}
+            createPageUrl={createPageUrl}
+            visiblePages={visiblePages}
+          />
+        </>
+      )}
 
       <Dialog
         open={banDialogOpen}
