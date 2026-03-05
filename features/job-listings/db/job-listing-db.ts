@@ -2,13 +2,14 @@
 
 import { db } from "@/lib/db";
 import { applicationTable, jobListingTable } from "@/drizzle/schema";
-import { and, count, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq, ilike, or, SQL } from "drizzle-orm";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
 import z from "zod";
 import { nanoid } from "nanoid";
 import { getCurrentOrg, safeGetSession } from "@/lib/auth/auth-helpers";
 import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/permissions";
 import {
+  allJobListingsTag,
   jobListingIdTag,
   jobListingsTag,
   mostRecentJobListingIdTag,
@@ -16,6 +17,88 @@ import {
 } from "@/lib/data-cache";
 import { jobListingFormSchema } from "../schema/job-listing-form-schema";
 import { nextJobListingStatus } from "../lib/utils";
+import { searchParamsSchema } from "../schema/search-params-schema";
+
+// Get all job listings
+export const getAllJobListings = async (
+  searchParams: z.infer<typeof searchParamsSchema>,
+  jobListingId: string | undefined,
+) => {
+  try {
+    return await getAllJobListingsCached(searchParams, jobListingId);
+  } catch (error) {
+    console.error("Error fetching all job-listings: ", error);
+    return {
+      success: false,
+      message: "Failed to fetch all job-listings",
+      data: [],
+    };
+  }
+};
+
+const getAllJobListingsCached = async (
+  searchParams: z.infer<typeof searchParamsSchema>,
+  jobListingId: string | undefined,
+) => {
+  "use cache";
+  cacheTag(allJobListingsTag());
+  cacheLife("minutes");
+
+  const whereConditions: (SQL | undefined)[] = [];
+
+  if (searchParams.title)
+    whereConditions.push(
+      ilike(jobListingTable.title, `%${searchParams.title}%`),
+    );
+
+  if (searchParams.mode)
+    whereConditions.push(
+      eq(jobListingTable.locationRequirement, searchParams.mode),
+    );
+
+  if (searchParams.city)
+    whereConditions.push(eq(jobListingTable.city, searchParams.city));
+
+  if (searchParams.experience_level)
+    whereConditions.push(
+      eq(jobListingTable.experienceLevel, searchParams.experience_level),
+    );
+
+  if (searchParams.type)
+    whereConditions.push(eq(jobListingTable.type, searchParams.type));
+
+  if (searchParams.jobIds)
+    whereConditions.push(
+      or(...searchParams.jobIds.map((jobId) => eq(jobListingTable.id, jobId))),
+    );
+
+  const result = await db.query.jobListingTable.findMany({
+    where: or(
+      jobListingId
+        ? and(
+            eq(jobListingTable.status, "published"),
+            eq(jobListingTable.id, jobListingId),
+          )
+        : undefined,
+      and(eq(jobListingTable.status, "published"), ...whereConditions),
+    ),
+    with: {
+      organization: {
+        columns: {
+          name: true,
+          logo: true,
+        },
+      },
+    },
+    orderBy: [desc(jobListingTable.posted_at)],
+  });
+
+  return {
+    success: true,
+    message: "All job-listings fetched successfully",
+    data: result,
+  };
+};
 
 // export const getJobListingById = async (id: string) => {
 //   return await db.query.jobListingTable.findFirst({
@@ -431,7 +514,6 @@ export const toggleJobListingStatus = async (id: string) => {
       .update(jobListingTable)
       .set({
         status: newStatus,
-        isFeatured: newStatus === "published" ? data.isFeatured : false,
         posted_at:
           newStatus === "published" && data.posted_at == null
             ? new Date()
@@ -452,65 +534,6 @@ export const toggleJobListingStatus = async (id: string) => {
   } catch (error) {
     console.error("Error changing job-listing status:", error);
     return { success: false, message: "Failed to change job-listing status" };
-  }
-};
-
-// Toggle featured status
-export const toggleJobListingFeaturedStatus = async (id: string) => {
-  try {
-    const session = await safeGetSession();
-    if (!session?.user) return { success: false, message: "Unauthorized" };
-
-    const { orgId } = await getCurrentOrg();
-    if (orgId == null)
-      return {
-        success: false,
-        message:
-          "You don't have permission to update this job listing's featured status",
-      };
-
-    const { data } = await getJobListingByIdByOrgId(id, orgId);
-    if (!data)
-      return {
-        success: false,
-        message:
-          "You don't have permission to update this job listing's featured status",
-      };
-
-    const newFeaturedStatus = !data.isFeatured;
-    if (
-      !(await hasOrgUserPermission("job_listing.update"))
-      // ||(newFeaturedStatus && (await hasReachedMaxFeaturedJobListings()))
-    ) {
-      return {
-        success: false,
-        message:
-          "You don't have permission to update this job listing's featured status",
-      };
-    }
-
-    await db
-      .update(jobListingTable)
-      .set({
-        isFeatured: newFeaturedStatus,
-      })
-      .where(eq(jobListingTable.id, id));
-
-    updateTag(jobListingIdTag(orgId, id));
-    updateTag(jobListingsTag(orgId));
-    updateTag(sideBarJobListingWithApplicationsTag(orgId, session.user.id));
-
-    const featuredMessage = newFeaturedStatus
-      ? "Featured successfully"
-      : "Unfeatured successfully";
-
-    return { success: true, message: featuredMessage };
-  } catch (error) {
-    console.error("Error changing job-listing featured status:", error);
-    return {
-      success: false,
-      message: "Failed to change job-listing featured status",
-    };
   }
 };
 

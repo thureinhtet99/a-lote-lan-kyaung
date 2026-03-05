@@ -45,7 +45,7 @@ export const APP_ROUTES = {
 
   EMPLOYER: {
     HOME: "/employer",
-    ORG: "/employer/organizations",
+    MY_ORG: "/employer/my-organization",
     // ORG_SELECT: "/employer/organizations/select",
     JOB_LISTINGS: "/employer/job-listings",
     JOB_LISTINGS_NEW: "/employer/job-listings/new",

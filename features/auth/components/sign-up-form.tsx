@@ -16,9 +16,10 @@ import { toast } from "sonner";
 import { authClient } from "@/lib/auth/auth-client";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES } from "@/constants/app-config";
-import { SignUpFormType, signUpSchema } from "@/drizzle/schema";
+import { signUpSchema } from "@/drizzle/schema";
 import { useState } from "react";
 import { Eye, EyeOff, Loader2Icon } from "lucide-react";
+import { SignUpFormType } from "@/types/index.type";
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);

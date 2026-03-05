@@ -19,7 +19,6 @@ export default function JobListingBadges({
     type,
     experienceLevel,
     locationRequirement,
-    isFeatured,
   },
   className,
 }: {
@@ -31,7 +30,6 @@ export default function JobListingBadges({
     | "type"
     | "experienceLevel"
     | "locationRequirement"
-    | "isFeatured"
   >;
   className?: string;
 }) {
@@ -42,12 +40,6 @@ export default function JobListingBadges({
 
   return (
     <>
-      {isFeatured && (
-        <Badge className={cn(className, "bg-primary font-semibold")}>
-          Featured
-        </Badge>
-      )}
-
       {wage != null && wageInterval != null && (
         <Badge {...badgeType}>
           <Banknote />

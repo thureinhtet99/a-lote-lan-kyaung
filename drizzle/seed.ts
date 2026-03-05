@@ -151,65 +151,25 @@ async function seed() {
     console.log("✅ Users created with requested distribution");
     console.log("");
 
-    console.log("🏢 Creating organizations (base + 10 extra for pagination)...");
+    console.log("🏢 Creating organizations (1 organization per employer)...");
 
-    const baseOrgSeeds = [
-      {
-        id: nanoid(),
-        name: "Atlas Tech",
-        slug: "atlas-tech",
-        ownerId: employers[0].id,
-        collaboratorId: employers[1].id,
-      },
-      {
-        id: nanoid(),
-        name: "Vertex Labs",
-        slug: "vertex-labs",
-        ownerId: employers[0].id,
-        collaboratorId: employers[2].id,
-      },
-      {
-        id: nanoid(),
-        name: "Blue Orbit",
-        slug: "blue-orbit",
-        ownerId: employers[1].id,
-        collaboratorId: employers[0].id,
-      },
-      {
-        id: nanoid(),
-        name: "North Ridge",
-        slug: "north-ridge",
-        ownerId: employers[1].id,
-        collaboratorId: employers[2].id,
-      },
-      {
-        id: nanoid(),
-        name: "Signal Foundry",
-        slug: "signal-foundry",
-        ownerId: employers[2].id,
-        collaboratorId: employers[0].id,
-      },
-      {
-        id: nanoid(),
-        name: "Nimbus Point",
-        slug: "nimbus-point",
-        ownerId: employers[2].id,
-        collaboratorId: employers[1].id,
-      },
+    const orgBlueprints = [
+      { name: "Atlas Tech", slug: "atlas-tech" },
+      { name: "Vertex Labs", slug: "vertex-labs" },
+      { name: "Blue Orbit", slug: "blue-orbit" },
     ];
-    const extraOrgSeeds = Array.from({ length: 10 }, (_, index) => {
-      const orgNumber = index + 1;
-      const owner = employers[index % employers.length];
-      const collaborator = employers[(index + 1) % employers.length];
-      return {
-        id: nanoid(),
-        name: `Pagination Org ${orgNumber}`,
-        slug: `pagination-org-${orgNumber}`,
-        ownerId: owner.id,
-        collaboratorId: collaborator.id,
-      };
-    });
-    const orgSeeds = [...baseOrgSeeds, ...extraOrgSeeds];
+
+    const orgSeeds = employers.map((employer, index) => ({
+      id: nanoid(),
+      name:
+        orgBlueprints[index]?.name ??
+        `Employer Org ${index + 1}`,
+      slug:
+        orgBlueprints[index]?.slug ??
+        `employer-org-${index + 1}`,
+      ownerId: employer.id,
+      hrUserId: users[index % users.length].id,
+    }));
 
     await db.insert(organizationTable).values(
       orgSeeds.map((org) => ({
@@ -233,7 +193,7 @@ async function seed() {
       const org = orgSeeds[i];
       const userMember = users[i % users.length];
 
-      await addMemberToOrg(org.collaboratorId, org.id, "org-admin");
+      await addMemberToOrg(org.ownerId, org.id, "org-admin");
       await addMemberToOrg(userMember.id, org.id, "hr");
 
       console.log(`✅ Added 2 members to ${org.name}`);
@@ -254,7 +214,7 @@ async function seed() {
           minimumRating,
         },
         {
-          userId: org.collaboratorId,
+          userId: org.hrUserId,
           organizationId: org.id,
           newApplicationEmailNotification: i % 2 === 0,
           minimumRating: minimumRating >= 3 ? minimumRating - 1 : null,
@@ -590,12 +550,17 @@ What you will gain:
 
     console.log("📬 Creating applications from regular users...");
 
-    const publishedListings = jobListings.filter(
-      (j) => j.status === "published",
-    );
+    const publishedListings = jobListings.filter((j) => j.status === "published");
+    if (publishedListings.length < 2) {
+      throw new Error(
+        "Expected at least 2 published job listings to seed applications.",
+      );
+    }
+
     const applicationRows = users.flatMap((u, userIndex) => {
-      const first = publishedListings[userIndex * 2];
-      const second = publishedListings[userIndex * 2 + 1];
+      const first = publishedListings[(userIndex * 2) % publishedListings.length];
+      const second =
+        publishedListings[(userIndex * 2 + 1) % publishedListings.length];
 
       return [
         {

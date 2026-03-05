@@ -16,7 +16,9 @@ import { Suspense } from "react";
 import Loading from "@/components/shared/loading";
 import { APP_ROUTES } from "@/constants/app-config";
 import { getMyOrganizationRequest } from "@/features/organizations/db/organization-request-db";
+import { getOrganizationsByEmployerId } from "@/features/organizations/db/organization-db";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default async function OrganizationRequestPage() {
   return (
@@ -59,6 +61,34 @@ const SuspendedComponent = async () => {
             access first.
           </AlertDescription>
         </Alert>
+      </div>
+    );
+  }
+
+  // Check if user already has an organization
+  const organizationsResult = await getOrganizationsByEmployerId();
+  if (organizationsResult.success && organizationsResult.data.length > 0) {
+    return (
+      <div className="space-y-6 px-6 py-6 md:px-8 md:py-8">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">
+            Create Organization
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Request to create a new organization on the platform
+          </p>
+        </div>
+        <Alert>
+          <CheckCircle className="h-4 w-4" />
+          <AlertTitle>Organization Already Exists</AlertTitle>
+          <AlertDescription>
+            You already have an organization. Each employer can only have one
+            organization.
+          </AlertDescription>
+        </Alert>
+        <Button asChild>
+          <Link href={APP_ROUTES.EMPLOYER.MY_ORG}>View My Organization</Link>
+        </Button>
       </div>
     );
   }

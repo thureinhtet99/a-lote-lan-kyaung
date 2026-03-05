@@ -14,6 +14,7 @@ import { APP_ROUTES } from "@/constants/app-config";
 import { useSignOut } from "@/hooks/use-sign-out";
 import { UserType } from "@/types/index.type";
 import {
+  BellIcon,
   ChevronsUpDown,
   LogOutIcon,
   SettingsIcon,
@@ -62,13 +63,20 @@ export default function SidebarUserButtonClient({
         <DropdownMenuSeparator />
 
         <DropdownMenuItem onClick={openUserProfile}>
-          <UserIcon className="mr-1" />
+          <UserIcon className="mr-1 focus:text-accent-foreground" />
           Profile
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
           <Link href={APP_ROUTES.SETTINGS.NOTIFICATIONS}>
-            <SettingsIcon className="mr-1" />
+            <BellIcon className="mr-1 focus:text-accent-foreground" />
+            Notifications
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
+          <Link href={APP_ROUTES.SETTINGS.NOTIFICATIONS}>
+            <SettingsIcon className="mr-1 focus:text-accent-foreground" />
             Settings
           </Link>
         </DropdownMenuItem>
@@ -84,7 +92,7 @@ export default function SidebarUserButtonClient({
           }}
           onClick={() => signOut({ onSuccess: () => setIsOpen(false) })}
         >
-          <LogOutIcon className="mr-1 h-4 w-4" />
+          <LogOutIcon className="mr-1 focus:text-accent-foreground" />
           {isPending ? "Logging out..." : "Log Out"}
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -101,7 +109,7 @@ const UserInfo = ({
 
   return (
     <div className="flex items-center gap-4 overflow-hidden">
-      <Avatar className="rounded-lg size-10 group-data-[state=collapsed]:size-8">
+      <Avatar className="size-10 group-data-[state=collapsed]:size-8">
         <AvatarImage src={image || undefined} alt={name} />
         <AvatarFallback className="uppercase bg-primary text-primary-foreground text-xl group-data-[state=collapsed]:text-md">
           {nameInitials}

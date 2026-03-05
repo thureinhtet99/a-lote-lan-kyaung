@@ -72,14 +72,26 @@ const SuspendedComponent = () => {
     resolver: zodResolver(jobBoardFormSchema),
     defaultValues: {
       title: searchParams.get("title") ?? "",
-      city: searchParams.get("city") ?? ANY_VALUE,
+      city: searchParams.get("city") ?? "Yangon",
       locationRequirement:
-        (searchParams.get("location") as LocationRequirementType) ?? ANY_VALUE,
+        (searchParams.get("mode") as LocationRequirementType) ?? ANY_VALUE,
       experienceLevel:
         (searchParams.get("experience") as ExperienceLevelType) ?? ANY_VALUE,
       type: (searchParams.get("type") as JobListingTypeType) ?? ANY_VALUE,
     },
   });
+
+  const handleReset = () => {
+    form.reset({
+      title: "",
+      city: "Yangon",
+      locationRequirement: ANY_VALUE,
+      experienceLevel: ANY_VALUE,
+      type: ANY_VALUE,
+    });
+    router.push(pathname);
+    setOpenMobile(false);
+  };
 
   const onSubmit = async (data: z.infer<typeof jobBoardFormSchema>) => {
     const newParams = new URLSearchParams();
@@ -87,7 +99,7 @@ const SuspendedComponent = () => {
     if (data.title) newParams.set("title", data.title);
 
     if (data.locationRequirement && data.locationRequirement !== ANY_VALUE)
-      newParams.set("location", data.locationRequirement);
+      newParams.set("mode", data.locationRequirement);
 
     if (data.city && data.city !== ANY_VALUE) newParams.set("city", data.city);
 
@@ -121,7 +133,7 @@ const SuspendedComponent = () => {
           )}
         />
 
-        {/* Location */}
+        {/* Mode */}
         <FormField
           name="locationRequirement"
           control={form.control}
@@ -135,7 +147,7 @@ const SuspendedComponent = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value={ANY_VALUE}>any</SelectItem>
+                  <SelectItem value={ANY_VALUE}>Any</SelectItem>
                   {locationRequirements.map((require, index) => (
                     <SelectItem key={index} value={require}>
                       {formatLocationRequirement(require)}
@@ -190,7 +202,7 @@ const SuspendedComponent = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value={ANY_VALUE}>any</SelectItem>
+                  <SelectItem value={ANY_VALUE}>Any</SelectItem>
                   {jobListingTypes.map((type, index) => (
                     <SelectItem key={index} value={type}>
                       {formatJobType(type)}
@@ -216,7 +228,7 @@ const SuspendedComponent = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value={ANY_VALUE}>any</SelectItem>
+                  <SelectItem value={ANY_VALUE}>Any</SelectItem>
                   {experienceLevels.map((level, index) => (
                     <SelectItem key={index} value={level}>
                       {formatExpLevel(level)}
@@ -228,20 +240,31 @@ const SuspendedComponent = () => {
           )}
         />
 
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={form.formState.isSubmitting}
-        >
-          {form.formState.isSubmitting ? (
-            <>
-              <Loader2Icon className="animate-spin" />
-              Searching...
-            </>
-          ) : (
-            "Search"
-          )}
-        </Button>
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-1/2"
+            onClick={handleReset}
+            disabled={form.formState.isSubmitting}
+          >
+            Reset
+          </Button>
+          <Button
+            type="submit"
+            className="w-1/2"
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting ? (
+              <>
+                <Loader2Icon className="animate-spin" />
+                Searching...
+              </>
+            ) : (
+              "Search"
+            )}
+          </Button>
+        </div>
       </form>
     </Form>
   );

@@ -37,6 +37,7 @@ export default function ClientLayout({
                   href: APP_ROUTES.ORGANIZATIONS.HOME,
                   icon: <BuildingIcon />,
                   label: "Organizations",
+                  roles: ["user"],
                 },
                 {
                   href: APP_ROUTES.EMPLOYER.HOME,
@@ -46,9 +47,9 @@ export default function ClientLayout({
                   roles: ["employer"],
                 },
                 {
-                  href: APP_ROUTES.EMPLOYER.ORG,
+                  href: APP_ROUTES.EMPLOYER.MY_ORG,
                   icon: <Building2Icon />,
-                  label: "My organizations",
+                  label: "My organization",
                   authStatus: "signedIn",
                   roles: ["employer"],
                 },

@@ -17,7 +17,6 @@ import { Key, ReactNode } from "react";
 import z from "zod";
 
 // Auth
-
 export type SignInFormType = z.infer<typeof signInSchema>;
 export type SignUpFormType = z.infer<typeof signUpSchema>;
 
@@ -28,6 +27,15 @@ export type PaginationType = {
   totalItems: number;
   totalPages: number;
 };
+
+export type SidebarNavMenuType = {
+  href: string;
+  icon: ReactNode;
+  label: string;
+  activePathPrefixes?: string[];
+  authStatus?: "signedIn" | "signedOut";
+  roles?: UserRoleType[];
+}[];
 
 export type CityType = {
   city: string;
@@ -109,17 +117,8 @@ export type OrgRequestFormType = z.infer<typeof organizationRequestSchema>;
 export type OrganizationType = typeof organizationTable.$inferSelect;
 export type NewOrganizationType = typeof organizationTable.$inferInsert;
 
-export type SidebarNavMenuType = {
-  href: string;
-  icon: ReactNode;
-  label: string;
-  activePathPrefixes?: string[];
-  authStatus?: "signedIn" | "signedOut";
-  roles?: UserRoleType[];
-}[];
-
 // Client
-export type JobSeekerSearchParamsType = {
+export type ClientSearchParamsType = {
   searchParams: Promise<Record<string, string | string[]>>;
   params?: Promise<{ jobListingId: string }>;
 };

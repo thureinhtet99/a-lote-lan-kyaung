@@ -12,6 +12,7 @@ import { and, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
 import { cacheLife, cacheTag, revalidateTag, updateTag } from "next/cache";
 import { nanoid } from "nanoid";
 import { safeGetSession } from "@/lib/auth/auth-helpers";
+import { createNotification } from "./notification-db";
 import {
   dashboardStatsTag,
   orgRequestsTag,
@@ -55,6 +56,25 @@ export const createOrganizationRequest = async (data: OrgRequestFormType) => {
     }
 
     const { orgName, orgSlug, orgLogo, requestMessage } = validated.data;
+
+    // Check if user already has an organization
+    const existingOrg = await db
+      .select({ id: organizationTable.id })
+      .from(organizationTable)
+      .innerJoin(
+        memberTable,
+        eq(memberTable.organizationId, organizationTable.id),
+      )
+      .where(eq(memberTable.userId, session.user.id))
+      .limit(1);
+
+    if (existingOrg.length > 0) {
+      return {
+        success: false,
+        message:
+          "You already have an organization. Each employer can only have one organization.",
+      };
+    }
 
     // Check slug uniqueness in organizations table
     const existing = await db.query.organizationTable.findFirst({
@@ -464,6 +484,15 @@ export const approveOrganizationRequest = async (
       })
       .where(eq(organizationRequestTable.id, validated.requestId));
 
+    // Create notification for the user
+    await createNotification(
+      request.userId,
+      "organization_approved",
+      "Organization Approved! 🎉",
+      `Your organization "${request.orgName}" has been approved. Click "Claim Organization" to start using your employer dashboard.`,
+      orgId,
+    );
+
     updateTag(orgRequestsTag());
     revalidateTag(userOrgRequestsTag(request.userId), "max");
     revalidateTag(organizationsTag(), "max");
@@ -521,6 +550,14 @@ export const rejectOrganizationRequest = async (
         reviewedAt: new Date(),
       })
       .where(eq(organizationRequestTable.id, validated.requestId));
+
+    // Create notification for the user
+    await createNotification(
+      request.userId,
+      "organization_rejected",
+      "Organization Request Rejected",
+      `Your organization request has been rejected. Reason: ${validated.adminResponse}`,
+    );
 
     updateTag(orgRequestsTag());
     revalidateTag(userOrgRequestsTag(request.userId), "max");

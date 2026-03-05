@@ -50,17 +50,18 @@ const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
                   label: "Job board",
                 },
                 {
-                  href: APP_ROUTES.EMPLOYER.ORG,
-                  icon: <Building2Icon />,
-                  label: "Organizations",
+                  href: APP_ROUTES.EMPLOYER.HOME,
+                  icon: <LayoutDashboardIcon />,
+                  label: "Employer dashboard",
                   authStatus: "signedIn",
                   roles: ["employer"],
                 },
                 {
-                  href: APP_ROUTES.SIGN_IN,
-                  icon: <LogInIcon />,
-                  label: "Sign In",
-                  authStatus: "signedOut",
+                  href: APP_ROUTES.EMPLOYER.MY_ORG,
+                  icon: <Building2Icon />,
+                  label: "My Organization",
+                  authStatus: "signedIn",
+                  roles: ["employer"],
                 },
               ]}
             />
@@ -124,7 +125,7 @@ const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
                   roles: ["employer"],
                 },
                 {
-                  href: APP_ROUTES.EMPLOYER.ORG,
+                  href: APP_ROUTES.EMPLOYER.MY_ORG,
                   icon: <Building2Icon />,
                   label: "Organizations",
                   authStatus: "signedIn",

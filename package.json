@@ -71,6 +71,7 @@
     "drizzle-kit": "^0.31.4",
     "eslint": "^10.0.1",
     "eslint-config-next": "^0.2.4",
+    "eslint-plugin-unused-imports": "^4.4.1",
     "knip": "^5.85.0",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",

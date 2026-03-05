@@ -14,9 +14,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "sonner";
-import { SignInFormType, signInSchema } from "@/drizzle/schema";
+import { signInSchema } from "@/drizzle/schema";
 import { useState } from "react";
 import { Eye, EyeOff, Loader2Icon } from "lucide-react";
+import { SignInFormType } from "@/types/index.type";
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);

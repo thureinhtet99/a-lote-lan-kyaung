@@ -42,7 +42,7 @@ const SuspendedComponent = async ({
     <UserTableClient
       users={users}
       pagination={
-        pagination ?? { page: 1, pageSize: 10, totalUsers: 0, totalPages: 0 }
+        pagination ?? { page: 1, pageSize: 10, totalItems: 0, totalPages: 0 }
       }
       initialQuery={query}
     />

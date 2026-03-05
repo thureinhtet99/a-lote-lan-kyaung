@@ -1,4 +1,4 @@
-import JobListingItem from "@/features/job-listings/components/job-listing-item";
+import JobListingItemSection from "@/features/job-listings/components/job-listing-item-section";
 import { Briefcase, Users } from "lucide-react";
 
 export default function ClientPage({
@@ -26,18 +26,7 @@ export default function ClientPage({
         </div>
       </section>
 
-      {/* Listings */}
-      <section className="p-6 flex-1">
-        <div className="mb-5">
-          <h2 className="text-base font-semibold text-foreground">
-            Latest Openings
-          </h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Newest opportunities first
-          </p>
-        </div>
-        <JobListingItem searchParams={searchParams} />
-      </section>
+      <JobListingItemSection searchParams={searchParams} />
     </div>
   );
 }

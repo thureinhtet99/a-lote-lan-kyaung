@@ -9,24 +9,30 @@ export default function SettingsSidebar() {
         {
           href: APP_ROUTES.SETTINGS.NOTIFICATIONS,
           icon: <BellIcon />,
+          authStatus: "signedIn",
           label: "Notifications",
-        },
-        {
-          href: APP_ROUTES.SETTINGS.RESUME,
-          icon: <FileUserIcon />,
-          label: "Resume",
         },
         {
           href: APP_ROUTES.SETTINGS.EMPLOYER_REQUEST,
           icon: <Megaphone />,
           label: "Employer Request",
+          authStatus: "signedIn",
+          roles: ["employer"],
         },
         {
           href: APP_ROUTES.SETTINGS.ORG_REQUEST,
           icon: <Building2Icon />,
-          label: "Create Organization",
+          label: "Organization Request",
           authStatus: "signedIn",
           roles: ["employer"],
+        },
+
+        {
+          href: APP_ROUTES.SETTINGS.RESUME,
+          icon: <FileUserIcon />,
+          label: "Resume",
+          authStatus: "signedIn",
+          roles: ["user"],
         },
       ]}
     />

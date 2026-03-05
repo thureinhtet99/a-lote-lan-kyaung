@@ -18,6 +18,10 @@ export const publicOrganizationSlugTag = (slug: string) => {
   return `public-organization-${slug}` as const;
 };
 
+export const allJobListingsTag = () => {
+  return "all-job-listings" as const;
+};
+
 // JobListing
 export const jobListingsTag = (orgId: string) => {
   return `organization-${orgId}-job-listings` as const;

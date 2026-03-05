@@ -5,6 +5,7 @@ export * from "./schemas/employer-request-schema";
 export * from "./schemas/invitation-schema";
 export * from "./schemas/job-listing-schema";
 export * from "./schemas/member-schema";
+export * from "./schemas/notification-schema";
 export * from "./schemas/organization-request-schema";
 export * from "./schemas/organization-schema";
 export * from "./schemas/organization-user-setting-schema";

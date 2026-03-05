@@ -1,5 +1,8 @@
 import { JobListingStatusType } from "@/drizzle/schema";
+import { differenceInDays } from "date-fns";
 import { EyeIcon } from "lucide-react";
+import { connection } from "next/server";
+import { Badge } from "@/components/ui/badge";
 
 export const nextJobListingStatus = (status: JobListingStatusType) => {
   switch (status) {
@@ -24,4 +27,14 @@ const jobListingStatusSortOrder: Record<JobListingStatusType, number> = {
   published: 0,
   draft: 1,
   delisted: 2,
+};
+
+export const getPostingJobLabel = (postedAt: Date) => {
+  const daySincePosted = differenceInDays(postedAt, Date.now());
+  if (daySincePosted === 0) return "New";
+
+  return new Intl.RelativeTimeFormat(undefined, {
+    style: "narrow",
+    numeric: "always",
+  }).format(daySincePosted, "days");
 };

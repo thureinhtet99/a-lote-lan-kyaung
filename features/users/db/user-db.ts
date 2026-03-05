@@ -40,7 +40,7 @@ export const getAllUsers = async (
   pagination?: {
     page: number;
     pageSize: number;
-    totalUsers: number;
+    totalItems: number;
     totalPages: number;
   };
 }> => {
@@ -59,7 +59,7 @@ export const getAllUsers = async (
       pagination: {
         page,
         pageSize,
-        totalUsers: 0,
+        totalItems: 0,
         totalPages: 1,
       },
     };
@@ -87,8 +87,8 @@ const getAllUsersCached = async (
     .select({ count: count() })
     .from(userTable)
     .where(whereCondition);
-  const totalUsers = total?.count ?? 0;
-  const totalPages = Math.max(1, Math.ceil(totalUsers / pageSize));
+  const totalItems = total?.count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const safePage = Math.min(Math.max(page, 1), totalPages);
 
   const users = await db.query.userTable.findMany({
@@ -116,7 +116,7 @@ const getAllUsersCached = async (
     pagination: {
       page: safePage,
       pageSize,
-      totalUsers,
+      totalItems,
       totalPages,
     },
   };

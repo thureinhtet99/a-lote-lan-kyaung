@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,92 +10,74 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Building2, Plus, Settings, Trash2 } from "lucide-react";
+import { Building2, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { OrganizationType } from "@/types/index.type";
-import {
-  deleteOrg,
-  switchOrganization,
-} from "@/features/organizations/db/organization-db";
+import { deleteOrg } from "@/features/organizations/db/organization-db";
 import { APP_ROUTES } from "@/constants/app-config";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+
+type OrganizationWithRole = {
+  id: string;
+  name: string;
+  slug: string;
+  logo: string | null;
+  createdAt: Date;
+  metadata: string | null;
+  role: string;
+};
 
 export default function OrganizationsClient({
-  organizations,
-  activeOrganizationId,
+  organization,
 }: {
-  organizations: OrganizationType[];
-  activeOrganizationId: string | null;
+  organization: OrganizationWithRole | null;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [showDeleteDialog, setShowDeleteDialog] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [switchingId, setSwitchingId] = useState<string | null>(null);
 
-  const handleDelete = (orgId: string) => {
-    setDeletingId(orgId);
+  const handleDelete = () => {
+    if (!organization) return;
+
     startTransition(async () => {
-      const result = await deleteOrg(orgId);
+      const result = await deleteOrg(organization.id);
       if (result.success) {
-        setShowDeleteDialog(null);
-        setDeletingId(null);
         toast.success(result.message);
         router.refresh();
       } else {
         toast.error(result.message);
-        setDeletingId(null);
       }
     });
   };
 
-  const handleSwitchOrganization = (orgId: string) => {
-    setSwitchingId(orgId);
-    startTransition(async () => {
-      const result = await switchOrganization(orgId);
-      if (result.success) {
-        toast.success(result.message);
-        router.refresh();
-        setSwitchingId(null);
-      } else {
-        toast.error(result.message);
-        setSwitchingId(null);
-      }
-    });
-  };
-
-  return (
-    <div className="flex-1 space-y-6 p-6 md:p-8 max-w-5xl">
-      <div className="flex items-start justify-between">
+  // No organization state
+  if (!organization) {
+    return (
+      <div className="space-y-6 p-4 sm:p-6 lg:space-y-8 lg:p-8">
         <div>
-          <h1 className="text-2xl font-bold">My Organizations</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Manage your organizations and switch between them
+          <h1 className="text-2xl font-bold tracking-tight">My Organization</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            View and manage your organization
           </p>
         </div>
-        <Button asChild size="sm">
-          <Link href={APP_ROUTES.SETTINGS.ORG_REQUEST}>
-            <Plus className="size-4 mr-1.5" />
-            Request New
-          </Link>
-        </Button>
-      </div>
-
-      {organizations.length === 0 ? (
         <Card>
-          <CardContent className="flex flex-col items-center justify-center py-14 text-center">
+          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <Building2 className="size-12 text-muted-foreground/40 mb-4" />
-            <h3 className="text-lg font-semibold mb-1">No organizations yet</h3>
-            <p className="text-sm text-muted-foreground mb-4 max-w-xs">
-              Submit a request to create your first organization. An admin will
-              review and approve it.
+            <h3 className="text-lg font-semibold mb-1">No organization yet</h3>
+            <p className="text-sm text-muted-foreground mb-4 max-w-sm">
+              You haven't created an organization yet. Submit a request to
+              create your organization and an admin will review and approve it.
             </p>
             <Button asChild>
               <Link href={APP_ROUTES.SETTINGS.ORG_REQUEST}>
@@ -105,87 +87,138 @@ export default function OrganizationsClient({
             </Button>
           </CardContent>
         </Card>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {organizations.map((org) => (
-            <Card key={org.id} className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    {org.logo ? (
-                      <Image
-                        src={org.logo}
-                        alt={org.name}
-                        width={40}
-                        height={40}
-                        className="size-10 rounded-lg object-cover"
-                      />
-                    ) : (
-                      <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <Building2 className="size-5 text-primary" />
-                      </div>
-                    )}
-                    <div>
-                      <CardTitle className="text-base">{org.name}</CardTitle>
-                      {org.slug && (
-                        <CardDescription className="text-xs">
-                          /{org.slug}
-                        </CardDescription>
-                      )}
-                    </div>
-                  </div>
-                  {org.role === "org-admin" && (
-                    <DropdownMenu
-                      open={showDeleteDialog === org.id}
-                      onOpenChange={(open) =>
-                        setShowDeleteDialog(open ? org.id : null)
-                      }
-                    >
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-8"
-                          disabled={deletingId !== null}
-                        >
-                          <Settings className="size-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => handleDelete(org.id)}
-                          className="text-destructive focus:text-destructive"
-                        >
-                          <Trash2 className="size-4 mr-2" />
-                          {deletingId === org.id
-                            ? "Deleting…"
-                            : "Delete Organization"}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                {org.id === activeOrganizationId ? (
-                  <Button className="w-full" variant="secondary" disabled>
-                    Active
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={() => handleSwitchOrganization(org.id)}
-                    className="w-full"
-                    variant="outline"
-                    disabled={switchingId !== null}
-                  >
-                    {switchingId === org.id ? "Switching…" : "Switch to this"}
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+      </div>
+    );
+  }
+
+  // Has organization state
+  return (
+    <div className="space-y-6 p-4 sm:p-6 lg:space-y-8 lg:p-8">
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">My Organization</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            View and manage your organization
+          </p>
         </div>
-      )}
+      </div>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-4">
+              {organization.logo ? (
+                <Image
+                  src={organization.logo}
+                  alt={organization.name}
+                  width={64}
+                  height={64}
+                  className="size-16 rounded-lg object-cover border"
+                />
+              ) : (
+                <div className="size-16 rounded-lg bg-primary/10 flex items-center justify-center border">
+                  <Building2 className="size-8 text-primary" />
+                </div>
+              )}
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <CardTitle className="text-xl">{organization.name}</CardTitle>
+                  <Badge variant="outline" className="text-xs">
+                    {organization.role === "org-admin" ? "Admin" : "Member"}
+                  </Badge>
+                </div>
+                {organization.slug && (
+                  <CardDescription className="text-sm">
+                    @{organization.slug}
+                  </CardDescription>
+                )}
+              </div>
+            </div>
+
+            {organization.role === "org-admin" && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
+                    disabled={isPending}
+                  >
+                    <Trash2 className="size-4 mr-1.5" />
+                    Delete
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Organization</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete this organization? This
+                      action cannot be undone. All data associated with this
+                      organization will be permanently removed.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDelete}
+                      className="bg-destructive hover:bg-destructive/90"
+                      disabled={isPending}
+                    >
+                      {isPending ? "Deleting..." : "Delete"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">
+                Organization Name
+              </p>
+              <p className="text-sm">{organization.name}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">
+                Organization Slug
+              </p>
+              <p className="text-sm">{organization.slug || "N/A"}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">
+                Your Role
+              </p>
+              <p className="text-sm capitalize">
+                {organization.role === "org-admin"
+                  ? "Administrator"
+                  : organization.role}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">
+                Created
+              </p>
+              <p className="text-sm">
+                {new Date(organization.createdAt).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </p>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t">
+            <Button asChild variant="outline">
+              <Link href={APP_ROUTES.EMPLOYER.SETTINGS.ORGANIZATION}>
+                Edit Organization Settings
+              </Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

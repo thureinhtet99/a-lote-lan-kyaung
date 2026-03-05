@@ -64,6 +64,15 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(APP_ROUTES.ADMIN.HOME, request.url));
   }
 
+  // Redirect employer away from public organizations
+  if (
+    session &&
+    user?.role === "employer" &&
+    pathname.startsWith(APP_ROUTES.ORGANIZATIONS.HOME)
+  ) {
+    return NextResponse.redirect(new URL(APP_ROUTES.HOME, request.url));
+  }
+
   // Check for banned users
   if (user?.banned) {
     const banExpires = user.banExpires;

@@ -34,7 +34,7 @@ export default function SidebarOrgButtonClient({
   const router = useRouter();
 
   const openOrganizationProfile = () => {
-    router.push(APP_ROUTES.EMPLOYER.ORG);
+    router.push(APP_ROUTES.EMPLOYER.MY_ORG);
     setOpenMobile(false);
   };
 
@@ -62,20 +62,20 @@ export default function SidebarOrgButtonClient({
         <DropdownMenuSeparator />
 
         <DropdownMenuItem onClick={openOrganizationProfile}>
-          <Building2Icon className="mr-1" />
+          <Building2Icon className="mr-1 focus:text-accent-foreground" />
           Manage organization
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
           <Link href={APP_ROUTES.EMPLOYER.SETTINGS.HOME}>
-            <UserRoundCogIcon className="mr-1" />
+            <UserRoundCogIcon className="mr-1 focus:text-accent-foreground" />
             Organization settings
           </Link>
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
           <Link href={APP_ROUTES.EMPLOYER.PRICING}>
-            <CreditCardIcon className="mr-1" />
+            <CreditCardIcon className="mr-1 focus:text-accent-foreground" />
             Change plan
           </Link>
         </DropdownMenuItem>
