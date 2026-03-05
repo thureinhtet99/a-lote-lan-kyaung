@@ -29,7 +29,6 @@ const SuspendedComponent = async ({
 
   const jobListing =
     await getPublishedJobListingByIdWithOrganization(jobListingId);
-
   if (!jobListing.success || !jobListing.data) return notFound();
 
   const nameInitials = jobListing.data?.organization.name
@@ -39,7 +38,7 @@ const SuspendedComponent = async ({
     .join("");
 
   return (
-    <div className="space-y-6 p-6 @container min-h-full">
+    <div className="space-y-10 p-6 @container min-h-full">
       <div className="space-y-4">
         <div className="flex gap-4 items-start">
           <Avatar className="size-14 @max-md:hidden">
@@ -47,21 +46,31 @@ const SuspendedComponent = async ({
               src={jobListing.data.organization.logo ?? undefined}
               alt={jobListing.data.organization.name}
             />
-            <AvatarFallback className="uppercase text-foreground text-sm font-medium">
+            <AvatarFallback className="uppercase bg-primary text-primary-foreground text-xl">
               {nameInitials}
             </AvatarFallback>
           </Avatar>
 
-          <div className="flex flex-col gap-1 flex-1">
-            <h1 className="text-2xl font-bold tracking-tight">
-              {jobListing.data.title}
-            </h1>
-            <div className="text-base text-muted-foreground">
-              {jobListing.data.organization.name}
+          <div className="flex flex-col gap-4 flex-1">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">
+                {jobListing.data.title}
+              </h1>
+              <div className="text-base text-muted-foreground">
+                {jobListing.data.organization.name}
+              </div>
             </div>
+
             {jobListing.data.posted_at != null && (
               <div className="text-sm text-muted-foreground @max-lg:hidden">
-                {new Date(jobListing.data.posted_at).toLocaleDateString()}
+                {new Date(jobListing.data.posted_at).toLocaleDateString(
+                  "en-US",
+                  {
+                    month: "long",
+                    year: "numeric",
+                    day: "2-digit",
+                  },
+                )}
               </div>
             )}
           </div>
@@ -73,11 +82,14 @@ const SuspendedComponent = async ({
         <div className="flex flex-wrap gap-2 mt-2">
           <JobListingBadges jobListing={jobListing.data} />
         </div>
-
-        {jobListing.data.description && (
-          <MarkdownRenderer source={jobListing.data.description} />
-        )}
       </div>
+
+      {jobListing.data.description && (
+        <>
+          <h2 className="text-xl font-bold tracking-tight">Description</h2>
+          <MarkdownRenderer source={jobListing.data.description} />
+        </>
+      )}
     </div>
   );
 };

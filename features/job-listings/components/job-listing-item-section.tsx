@@ -12,6 +12,7 @@ import { ClientSearchParamsType } from "@/types/index.type";
 import { searchParamsSchema } from "../schema/search-params-schema";
 import { getAllJobListings } from "../db/job-listing-db";
 import { getPostingJobLabel } from "../lib/utils";
+import PageLoading from "@/components/shared/page-loading";
 
 export default function JobListingItemSection(props: ClientSearchParamsType) {
   return (
@@ -96,10 +97,10 @@ const JobListingItem = ({
       .join("") || "";
 
   return (
-    <Card className="@container overflow-hidden border-border/60 bg-gradient-to-b from-background to-primary/5 transition-all duration-200 hover:border-primary/60">
+    <Card className="@container overflow-hidden border-border/60 bg-background transition-all duration-200 hover:border-primary/60">
       <CardHeader>
         <div className="flex items-start gap-3">
-          <Avatar className="size-14 rounded-2xl">
+          <Avatar className="size-14">
             <AvatarImage src={org?.logo ?? undefined} alt={org.name} />
             <AvatarFallback className="uppercase bg-primary text-primary-foreground text-xl">
               {orgNameInitial}

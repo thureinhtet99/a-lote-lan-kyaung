@@ -48,6 +48,7 @@ import {
 import cities from "@/constants/cities.json";
 import { Suspense } from "react";
 import { CityType } from "@/types/index.type";
+import LoadingSwap from "@/components/shared/loading-swap";
 
 const ANY_VALUE = "any";
 
@@ -255,14 +256,9 @@ const SuspendedComponent = () => {
             className="w-1/2"
             disabled={form.formState.isSubmitting}
           >
-            {form.formState.isSubmitting ? (
-              <>
-                <Loader2Icon className="animate-spin" />
-                Searching...
-              </>
-            ) : (
-              "Search"
-            )}
+            <LoadingSwap isLoading={form.formState.isSubmitting}>
+              Search
+            </LoadingSwap>
           </Button>
         </div>
       </form>

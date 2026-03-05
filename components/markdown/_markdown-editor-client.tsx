@@ -20,7 +20,6 @@ import {
 } from "@mdxeditor/editor";
 import { Ref } from "react";
 import "@mdxeditor/editor/style.css";
-import { markdownClassNames } from "./markdown-renderer";
 
 export default function InternalMarkdownEditor({
   ref,
@@ -31,7 +30,10 @@ export default function InternalMarkdownEditor({
     <MDXEditor
       {...props}
       ref={ref}
-      className={cn(markdownClassNames, className)}
+      className={cn(
+        "max-w-none prose prose-neutral font-inter text-black",
+        className,
+      )}
       suppressHtmlProcessing
       plugins={[
         headingsPlugin(),

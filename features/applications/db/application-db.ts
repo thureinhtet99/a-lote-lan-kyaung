@@ -179,13 +179,6 @@ export const createApplication = async (
         message: "Job listing is not available",
       };
 
-    const userResume = await getCachedUserResume(userId);
-    if (!userResume.success || !userResume.data)
-      return {
-        success: false,
-        message: "You need to upload your resume before applying",
-      };
-
     const [result] = await db
       .insert(applicationTable)
       .values({ jobListingId, userId, ...data })
@@ -193,6 +186,19 @@ export const createApplication = async (
         jobListingId: applicationTable.jobListingId,
         userId: applicationTable.userId,
       });
+
+    // Save resume to user profile if requested and file key is provided
+    if (data.saveToProfile && data.resumeFileKey) {
+      await db
+        .insert(resumeTable)
+        .values({
+          userId,
+          resumeFileUrl: data.resumeFileUrl,
+          resumeFileKey: data.resumeFileKey,
+        })
+        .onConflictDoNothing();
+      updateTag(resumeTag(userId));
+    }
 
     updateTag(jobListingIdTag(jobListing.organizationId, result.jobListingId));
     updateTag(jobListingApplicationsTag(result.jobListingId));
@@ -396,10 +402,12 @@ export const getResume = async (userId: string) => {
 
 const getCachedUserResume = async (userId: string) => {
   "use cache";
+  cacheTag(resumeTag(userId));
+  cacheLife("hours");
 
   const result = await db.query.resumeTable.findFirst({
     where: eq(resumeTable.userId, userId),
-    columns: { userId: true },
+    columns: { userId: true, resumeFileUrl: true },
   });
 
   if (!result?.userId)
@@ -407,9 +415,6 @@ const getCachedUserResume = async (userId: string) => {
       success: false,
       message: "User id is required",
     };
-
-  cacheTag(resumeTag(userId));
-  cacheLife("hours");
 
   return {
     success: true,

@@ -2,20 +2,22 @@ import { MDXRemote, MDXRemoteProps } from "next-mdx-remote/rsc";
 import { cn } from "@/lib/utils";
 import remarkGfm from "remark-gfm";
 
-type MarkdownRendererType = {
+type Props = {
   className?: string;
 };
-
-export const markdownClassNames =
-  "max-w-none prose prose-neutral font-inter text-black";
 
 export default function MarkdownRenderer({
   className,
   options,
   ...props
-}: MDXRemoteProps & MarkdownRendererType) {
+}: MDXRemoteProps & Props) {
   return (
-    <div className={cn(markdownClassNames, className)}>
+    <div
+      className={cn(
+        "max-w-none prose prose-neutral font-inter text-black",
+        className,
+      )}
+    >
       <MDXRemote
         {...props}
         options={{

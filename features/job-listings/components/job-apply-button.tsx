@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/lib/auth/auth-helpers";
+import { getCurrentOrg, getCurrentUser } from "@/lib/auth/auth-helpers";
 import {
   Popover,
   PopoverContent,
@@ -19,7 +19,7 @@ import {
   getApplicationByUserId,
   getResume,
 } from "@/features/applications/db/application-db";
-import { NewJobListingApplicationForm } from "@/features/applications/components/new-job-listing-application-form";
+import { ApplicationForm } from "@/features/applications/components/application-form";
 import { APP_ROUTES } from "@/constants/app-config";
 import Link from "next/link";
 
@@ -35,17 +35,24 @@ export default async function JobApplyButton({
         <PopoverTrigger asChild>
           <Button>Apply job here</Button>
         </PopoverTrigger>
-        <PopoverContent className="flex flex-col gap-2">
-          You need to create an account before applying for a job
-          <Button asChild>
-            <Link href={APP_ROUTES.SIGN_IN}>Sign in</Link>
-          </Button>
+        <PopoverContent align="end" className="text-sm text-center">
+          Please{" "}
+          <Link
+            href={APP_ROUTES.SIGN_IN}
+            className="text-primary underline hover:no-underline"
+          >
+            sign in
+          </Link>{" "}
+          first to apply for a job
         </PopoverContent>
       </Popover>
     );
   }
 
-  const application = await getApplicationByUserId({ jobListingId, userId });
+  const [application, resume] = await Promise.all([
+    getApplicationByUserId({ jobListingId, userId }),
+    getResume(userId),
+  ]);
   if (application.success && application.data) {
     const formatter = new Intl.RelativeTimeFormat(undefined, {
       style: "short",
@@ -66,23 +73,6 @@ export default async function JobApplyButton({
     );
   }
 
-  const resume = await getResume(userId);
-  if (!resume.success || !resume.data) {
-    return (
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button>Apply job here</Button>
-        </PopoverTrigger>
-        <PopoverContent className="flex flex-col gap-2">
-          You need to upload your resume before applying for a job
-          <Button asChild>
-            <Link href={APP_ROUTES.SETTINGS.RESUME}>Upload Resume</Link>
-          </Button>
-        </PopoverContent>
-      </Popover>
-    );
-  }
-
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -97,7 +87,10 @@ export default async function JobApplyButton({
           </DialogDescription>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto">
-          <NewJobListingApplicationForm jobListingId={jobListingId} />
+          <ApplicationForm
+            jobListingId={jobListingId}
+            existingResumeUrl={resume.data?.resumeFileUrl ?? null}
+          />
         </div>
       </DialogContent>
     </Dialog>

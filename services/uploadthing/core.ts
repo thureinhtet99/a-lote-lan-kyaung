@@ -37,6 +37,26 @@ export const ourFileRouter = {
 
       return { message: "Resume uploaded successfully" };
     }),
+
+  // Temporary resume upload for a single application — does NOT save to profile
+  applicationResumeUploader: f({
+    pdf: {
+      maxFileSize: "2MB",
+      maxFileCount: 1,
+    },
+  })
+    .middleware(async () => {
+      const { userId } = await getCurrentUser();
+      if (userId == null) throw new UploadThingError("Unauthorized");
+      return { userId };
+    })
+    .onUploadComplete(async ({ file }) => {
+      return {
+        fileUrl: file.url,
+        fileKey: file.key,
+        message: "Resume ready for application",
+      };
+    }),
 } satisfies FileRouter;
 
 const getUserResumeFileKey = async (userId: string) => {

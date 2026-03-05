@@ -5,6 +5,7 @@ import {
   invitationTable,
   jobListingTable,
   memberTable,
+  notificationTable,
   organizationTable,
   organizationRequestTable,
   organizationUserSettingsTable,
@@ -87,6 +88,7 @@ async function seed() {
     console.log("🧹 Cleaning up existing data...");
 
     await db.delete(applicationTable);
+    await db.delete(notificationTable);
     await db.delete(jobListingTable);
     await db.delete(organizationUserSettingsTable);
     await db.delete(userNotificationSettingsTable);
@@ -161,12 +163,8 @@ async function seed() {
 
     const orgSeeds = employers.map((employer, index) => ({
       id: nanoid(),
-      name:
-        orgBlueprints[index]?.name ??
-        `Employer Org ${index + 1}`,
-      slug:
-        orgBlueprints[index]?.slug ??
-        `employer-org-${index + 1}`,
+      name: orgBlueprints[index]?.name ?? `Employer Org ${index + 1}`,
+      slug: orgBlueprints[index]?.slug ?? `employer-org-${index + 1}`,
       ownerId: employer.id,
       hrUserId: users[index % users.length].id,
     }));
@@ -296,33 +294,35 @@ async function seed() {
     const extraEmployerRequests: EmployerRequestInsert[] = Array.from(
       { length: 22 },
       (_, index) => {
-      const requester = users[index % users.length];
-      const requestNumber = index + 1;
-      const isPending = index < 11;
-      const reviewer = admins[index % admins.length];
-      const isApproved = index % 2 === 0;
+        const requester = users[index % users.length];
+        const requestNumber = index + 1;
+        const isPending = index < 11;
+        const reviewer = admins[index % admins.length];
+        const isApproved = index % 2 === 0;
 
-      if (isPending) {
+        if (isPending) {
+          return {
+            id: nanoid(),
+            userId: requester.id,
+            status: "pending" as const,
+            requestMessage: `Pagination request ${requestNumber}: requesting employer access for hiring needs.`,
+          };
+        }
+
         return {
           id: nanoid(),
           userId: requester.id,
-          status: "pending" as const,
-          requestMessage: `Pagination request ${requestNumber}: requesting employer access for hiring needs.`,
-        };
-      }
-
-        return {
-        id: nanoid(),
-        userId: requester.id,
-        status: (isApproved ? "approved" : "rejected") as
-          | "approved"
-          | "rejected",
-        requestMessage: `Reviewed pagination request ${requestNumber}: employer access follow-up.`,
-        adminResponse: isApproved
-          ? "Approved for pagination test data."
-          : "Rejected for pagination test data.",
-        reviewedBy: reviewer.id,
-        reviewedAt: new Date(Date.now() - 1000 * 60 * 60 * (requestNumber + 12)),
+          status: (isApproved ? "approved" : "rejected") as
+            | "approved"
+            | "rejected",
+          requestMessage: `Reviewed pagination request ${requestNumber}: employer access follow-up.`,
+          adminResponse: isApproved
+            ? "Approved for pagination test data."
+            : "Rejected for pagination test data.",
+          reviewedBy: reviewer.id,
+          reviewedAt: new Date(
+            Date.now() - 1000 * 60 * 60 * (requestNumber + 12),
+          ),
         };
       },
     );
@@ -550,7 +550,9 @@ What you will gain:
 
     console.log("📬 Creating applications from regular users...");
 
-    const publishedListings = jobListings.filter((j) => j.status === "published");
+    const publishedListings = jobListings.filter(
+      (j) => j.status === "published",
+    );
     if (publishedListings.length < 2) {
       throw new Error(
         "Expected at least 2 published job listings to seed applications.",
@@ -558,14 +560,17 @@ What you will gain:
     }
 
     const applicationRows = users.flatMap((u, userIndex) => {
-      const first = publishedListings[(userIndex * 2) % publishedListings.length];
+      const first =
+        publishedListings[(userIndex * 2) % publishedListings.length];
       const second =
         publishedListings[(userIndex * 2 + 1) % publishedListings.length];
+      const resumeFileUrl = `https://example.com/resumes/${u.email.replace("@", "-at-")}.pdf`;
 
       return [
         {
           jobListingId: first.id,
           userId: u.id,
+          resumeFileUrl,
           coverLetter: `Hello, I am ${u.name} and I am interested in this role.`,
           status: "applied" as const,
           rating: null,
@@ -573,6 +578,7 @@ What you will gain:
         {
           jobListingId: second.id,
           userId: u.id,
+          resumeFileUrl,
           coverLetter: `I believe I am a strong fit for this opportunity.`,
           status:
             userIndex % 2 === 0
