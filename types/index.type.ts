@@ -12,6 +12,7 @@ import {
   organizationRequestSchema,
   rejectRequestSchema,
 } from "@/features/admin/schema/admin-form-schema";
+import { ourFileRouter } from "@/services/uploadthing/core";
 import { Column } from "@tanstack/react-table";
 import { Key, ReactNode } from "react";
 import z from "zod";
@@ -21,6 +22,8 @@ export type SignInFormType = z.infer<typeof signInSchema>;
 export type SignUpFormType = z.infer<typeof signUpSchema>;
 
 // Others
+export type OurFileRouterType = typeof ourFileRouter;
+
 export type PaginationType = {
   page: number;
   pageSize: number;

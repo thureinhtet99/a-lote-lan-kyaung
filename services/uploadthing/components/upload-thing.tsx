@@ -1,14 +1,14 @@
 "use client";
 
 import { generateUploadDropzone } from "@uploadthing/react";
-import { OurFileRouter } from "../core";
 import { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { UploadThingError } from "uploadthing/server";
 import { Json } from "@uploadthing/shared";
+import { OurFileRouterType } from "@/types/index.type";
 
-const UploadDropzoneComponent = generateUploadDropzone<OurFileRouter>();
+const UploadDropzoneComponent = generateUploadDropzone<OurFileRouterType>();
 
 export default function DropZone({
   className,

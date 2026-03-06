@@ -90,6 +90,11 @@ export default async function JobApplyButton({
           <ApplicationForm
             jobListingId={jobListingId}
             existingResumeUrl={resume.data?.resumeFileUrl ?? null}
+            existingResumeKey={resume.data?.resumeFileKey ?? null}
+            existingResumeFileName={resume.data?.resumeFileName ?? null}
+            existingResumeUploadedAt={
+              resume.data?.updated_at?.toISOString() ?? null
+            }
           />
         </div>
       </DialogContent>

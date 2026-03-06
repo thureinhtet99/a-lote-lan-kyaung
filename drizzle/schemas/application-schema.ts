@@ -37,7 +37,6 @@ export const applicationTable = pgTable(
       .notNull(),
     coverLetter: text("cover_letter"),
     resumeFileUrl: text("resume_file_url").notNull(),
-    rating: integer(),
     status: applicationStatusEnum().notNull().default("applied"),
     created_at,
     updated_at,

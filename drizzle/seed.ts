@@ -8,10 +8,9 @@ import {
   notificationTable,
   organizationTable,
   organizationRequestTable,
-  organizationUserSettingsTable,
   resumeTable,
   sessionTable,
-  userNotificationSettingsTable,
+  notificationSettingsTable,
   userTable,
   verificationTable,
 } from "@/drizzle/schema";
@@ -90,8 +89,7 @@ async function seed() {
     await db.delete(applicationTable);
     await db.delete(notificationTable);
     await db.delete(jobListingTable);
-    await db.delete(organizationUserSettingsTable);
-    await db.delete(userNotificationSettingsTable);
+    await db.delete(notificationSettingsTable);
     await db.delete(resumeTable);
     await db.delete(memberTable);
     await db.delete(invitationTable);
@@ -150,7 +148,7 @@ async function seed() {
     const employers = createdUsers.filter((u) => u.role === "employer");
     const users = createdUsers.filter((u) => u.role === "user");
 
-    console.log("✅ Users created with requested distribution");
+    console.log("✅ 19 users created ");
     console.log("");
 
     console.log("🏢 Creating organizations (1 organization per employer)...");
@@ -197,34 +195,8 @@ async function seed() {
       console.log(`✅ Added 2 members to ${org.name}`);
     }
 
-    console.log("");
-    console.log("⚙️ Creating organization user settings...");
-
-    for (let i = 0; i < orgSeeds.length; i++) {
-      const org = orgSeeds[i];
-      const minimumRating = (i % 5) + 1;
-
-      await db.insert(organizationUserSettingsTable).values([
-        {
-          userId: org.ownerId,
-          organizationId: org.id,
-          newApplicationEmailNotification: true,
-          minimumRating,
-        },
-        {
-          userId: org.hrUserId,
-          organizationId: org.id,
-          newApplicationEmailNotification: i % 2 === 0,
-          minimumRating: minimumRating >= 3 ? minimumRating - 1 : null,
-        },
-      ]);
-    }
-
-    console.log("✅ Organization user settings inserted");
-    console.log("");
-
     console.log("🔔 Creating user notification settings...");
-    await db.insert(userNotificationSettingsTable).values(
+    await db.insert(notificationSettingsTable).values(
       createdUsers.map((u, index) => ({
         userId: u.id,
         newJobEmailNotification: index % 2 === 0,
@@ -243,6 +215,7 @@ async function seed() {
         userId: u.id,
         resumeFileUrl: `https://example.com/resumes/${u.email.replace("@", "-at-")}.pdf`,
         resumeFileKey: `resume-${index + 1}`,
+        resumeFileName: `${u.email.split("@")[0]}-resume.pdf`,
       })),
     );
     console.log("✅ Resumes inserted");

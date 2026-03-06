@@ -7,9 +7,9 @@ export const resumeTable = pgTable("resumes", {
   userId: text("user_id")
     .primaryKey()
     .references(() => userTable.id, { onDelete: "cascade" }),
-  resumeFileUrl: text("resume_file_url").notNull(),
-  resumeFileKey: text("resume_file_key").notNull(),
-  // aiSummary: text("ai_summary"),
+  resumeFileUrl: text("file_url").notNull(),
+  resumeFileKey: text("file_key").notNull(),
+  resumeFileName: text("file_name"),
   created_at,
   updated_at,
 });

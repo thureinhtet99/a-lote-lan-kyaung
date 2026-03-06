@@ -9,13 +9,13 @@ import {
   resumeTable,
 } from "@/drizzle/schema";
 import { and, count, desc, eq } from "drizzle-orm";
-import { cacheLife, cacheTag, updateTag } from "next/cache";
+import { cacheLife, cacheTag, revalidateTag, updateTag } from "next/cache";
 import {
   jobListingApplicationsTag,
   jobListingIdTag,
   resumeTag,
 } from "@/lib/data-cache";
-import { newJobListingApplicationSchema } from "../schema/new-application-form-schema";
+import { applicationFormSchema } from "../schema/application-form-schema";
 import z from "zod";
 import { getCurrentOrg, getCurrentUser } from "@/lib/auth/auth-helpers";
 import { hasOrgUserPermission } from "@/lib/permissions";
@@ -130,7 +130,7 @@ const getApplicationsByJobListingIdCached = async (jobListingId: string) => {
 // Create
 export const createApplication = async (
   jobListingId: string,
-  unsafeData: z.infer<typeof newJobListingApplicationSchema>,
+  unsafeData: z.infer<typeof applicationFormSchema>,
 ) => {
   try {
     const { userId } = await getCurrentUser();
@@ -141,7 +141,7 @@ export const createApplication = async (
       };
 
     const { success: hasValidData, data } =
-      newJobListingApplicationSchema.safeParse(unsafeData);
+      applicationFormSchema.safeParse(unsafeData);
     if (!hasValidData)
       return {
         success: false,
@@ -195,13 +195,18 @@ export const createApplication = async (
           userId,
           resumeFileUrl: data.resumeFileUrl,
           resumeFileKey: data.resumeFileKey,
+          resumeFileName:
+            data.resumeFileName ??
+            decodeURIComponent(
+              data.resumeFileUrl.split("/").pop() ?? "resume.pdf",
+            ),
         })
         .onConflictDoNothing();
       updateTag(resumeTag(userId));
     }
 
     updateTag(jobListingIdTag(jobListing.organizationId, result.jobListingId));
-    updateTag(jobListingApplicationsTag(result.jobListingId));
+    revalidateTag(jobListingApplicationsTag(result.jobListingId), "max");
 
     return {
       success: true,
@@ -334,60 +339,6 @@ export const updateApplicationStatus = async (
   }
 };
 
-export async function updateApplicationRating(
-  {
-    jobListingId,
-    userId,
-  }: {
-    jobListingId: string;
-    userId: string;
-  },
-  rating: number | null,
-) {
-  try {
-    const { success, data: safeRating } = z
-      .number()
-      .min(1)
-      .max(5)
-      .nullish()
-      .safeParse(rating);
-    if (!success) return { success: false, message: "Invalid rating" };
-
-    if (!(await hasOrgUserPermission("application", ["update"])))
-      return {
-        success: false,
-        message: "You don't have permission to update the rating",
-      };
-
-    const { orgId } = await getCurrentOrg();
-    if (orgId == null)
-      return {
-        success: false,
-        message: "You don't have permission to update the rating",
-      };
-
-    const [result] = await db
-      .update(applicationTable)
-      .set({ rating: safeRating ?? null })
-      .where(
-        and(
-          eq(applicationTable.jobListingId, jobListingId),
-          eq(applicationTable.userId, userId),
-        ),
-      )
-      .returning({
-        jobListingId: applicationTable.jobListingId,
-      });
-
-    updateTag(jobListingApplicationsTag(result.jobListingId));
-
-    return { success: true, message: "Rating updated successfully" };
-  } catch (error) {
-    console.error("Error updating application rating: ", error);
-    return { success: false, message: "Failed to update rating" };
-  }
-}
-
 export const getResume = async (userId: string) => {
   try {
     return await getCachedUserResume(userId);
@@ -407,7 +358,13 @@ const getCachedUserResume = async (userId: string) => {
 
   const result = await db.query.resumeTable.findFirst({
     where: eq(resumeTable.userId, userId),
-    columns: { userId: true, resumeFileUrl: true },
+    columns: {
+      userId: true,
+      resumeFileUrl: true,
+      resumeFileKey: true,
+      resumeFileName: true,
+      updated_at: true,
+    },
   });
 
   if (!result?.userId)
@@ -421,4 +378,13 @@ const getCachedUserResume = async (userId: string) => {
     message: "Resume get successfully",
     data: result,
   };
+};
+
+export const getResumeFileKey = async (userId: string) => {
+  const data = await db.query.resumeTable.findFirst({
+    where: eq(resumeTable.userId, userId),
+    columns: { resumeFileKey: true },
+  });
+
+  return data?.resumeFileKey;
 };

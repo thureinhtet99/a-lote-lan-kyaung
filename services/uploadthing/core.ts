@@ -1,18 +1,16 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
-import { upsertUserResumeDb } from "@/features/users/db/resume";
-import { db } from "@/lib/db";
-import { eq } from "drizzle-orm";
-import { resumeTable } from "@/drizzle/schema";
+import { upsertUserResumeDb } from "@/features/applications/db/resume-db";
 import { utapi } from "./client";
 import { getCurrentUser } from "@/lib/auth/auth-helpers";
+import { getResumeFileKey } from "@/features/applications/db/application-db";
 
 const f = createUploadthing();
 
 export const ourFileRouter = {
   resumeUploader: f({
     pdf: {
-      maxFileSize: "8MB",
+      maxFileSize: "2MB",
       maxFileCount: 1,
     },
   })
@@ -24,11 +22,12 @@ export const ourFileRouter = {
     })
     .onUploadComplete(async ({ metadata, file }) => {
       const { userId } = metadata;
-      const resumeFileKey = await getUserResumeFileKey(userId);
+      const resumeFileKey = await getResumeFileKey(userId);
 
       await upsertUserResumeDb(userId, {
         resumeFileUrl: file.ufsUrl,
         resumeFileKey: file.key,
+        resumeFileName: file.name,
       });
 
       if (resumeFileKey != undefined) {
@@ -54,18 +53,9 @@ export const ourFileRouter = {
       return {
         fileUrl: file.url,
         fileKey: file.key,
+        fileName: file.name,
+        uploadedAt: new Date().toISOString(),
         message: "Resume ready for application",
       };
     }),
 } satisfies FileRouter;
-
-const getUserResumeFileKey = async (userId: string) => {
-  const data = await db.query.resumeTable.findFirst({
-    where: eq(resumeTable.userId, userId),
-    columns: { resumeFileKey: true },
-  });
-
-  return data?.resumeFileKey;
-};
-
-export type OurFileRouter = typeof ourFileRouter;
