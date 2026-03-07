@@ -11,7 +11,9 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Suspense } from "react";
 import Loading from "@/components/shared/loading";
 import { getEmployerRequest } from "@/features/users/db/user-db";
-import { isEmployer } from "@/lib/auth/auth-helpers";
+import { getCurrentUser, isEmployer } from "@/lib/auth/auth-helpers";
+import { redirect } from "next/navigation";
+import { APP_ROUTES } from "@/constants/app-config";
 
 export default async function EmployerRequestPage() {
   return (
@@ -22,16 +24,20 @@ export default async function EmployerRequestPage() {
 }
 
 const SuspendedComponent = async () => {
+  const { user } = await getCurrentUser();
+  if (!user) return redirect(APP_ROUTES.SIGN_IN);
+
   const isAlreadyEmployer = await isEmployer();
 
-  // Check if user is already an employer or admin
   if (isAlreadyEmployer) {
     return (
-      <div className="space-y-6 px-6 md:px-9 py-6 md:py-9">
+      <div className="space-y-6 px-6 md:px-8 py-6 md:py-8">
         <div>
-          <h3 className="text-lg font-medium">Employer Access</h3>
+          <h2 className="text-2xl font-bold tracking-tight">
+            Employer request
+          </h2>
           <p className="text-sm text-muted-foreground">
-            Manage your employer account status
+            Request access to get employer features
           </p>
         </div>
         <Alert>
@@ -51,9 +57,11 @@ const SuspendedComponent = async () => {
     return (
       <div className="space-y-6 px-6 py-6 md:px-8 md:py-8">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Employer Access</h2>
+          <h2 className="text-2xl font-bold tracking-tight">
+            Employer request
+          </h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Request access to employer features
+            Request access to get employer features
           </p>
         </div>
         <EmployerRequestForm />
@@ -65,7 +73,7 @@ const SuspendedComponent = async () => {
   return (
     <div className="space-y-6 px-6 py-6 md:px-8 md:py-8">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Employer Access</h2>
+        <h2 className="text-2xl font-bold tracking-tight">Employer request</h2>
         <p className="text-sm text-muted-foreground mt-1">
           Request access to employer features
         </p>

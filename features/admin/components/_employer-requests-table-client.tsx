@@ -160,9 +160,9 @@ export function EmployerRequestsTableClient({
         adminResponse: adminResponse || undefined,
       });
       if (result.success) {
+        closeApproveDialog();
         toast.success(result.message);
         router.refresh();
-        closeApproveDialog();
       } else {
         toast.error(result.message);
       }

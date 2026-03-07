@@ -19,6 +19,7 @@ import { getMyOrganizationRequest } from "@/features/organizations/db/organizati
 import { getOrganizationsByEmployerId } from "@/features/organizations/db/organization-db";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { safeGetSession } from "@/lib/auth/auth-helpers";
 
 export default async function OrganizationRequestPage() {
   return (
@@ -29,16 +30,13 @@ export default async function OrganizationRequestPage() {
 }
 
 const SuspendedComponent = async () => {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
+  const session = await safeGetSession();
   if (!session?.user) redirect(APP_ROUTES.SIGN_IN);
 
   // Only employers can request to create orgs
   if (session.user.role !== "employer") {
     return (
-      <div className="space-y-6 px-6 py-6 md:px-9 md:py-9">
+      <div className="space-y-6 px-6 py-6 md:px-8 md:py-8">
         <div>
           <h3 className="text-lg font-medium">Create Organization</h3>
           <p className="text-sm text-muted-foreground">
@@ -74,7 +72,7 @@ const SuspendedComponent = async () => {
           <h2 className="text-2xl font-bold tracking-tight">
             Create Organization
           </h2>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground">
             Request to create a new organization on the platform
           </p>
         </div>
@@ -102,7 +100,7 @@ const SuspendedComponent = async () => {
         <h2 className="text-2xl font-bold tracking-tight">
           Create Organization
         </h2>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-sm text-muted-foreground">
           Request to create a new organization on the platform
         </p>
       </div>
