@@ -1,7 +1,7 @@
 import Loading from "@/components/shared/loading";
 import { Card, CardContent } from "@/components/ui/card";
 import { db } from "@/lib/db";
-import { userNotificationSettingsTable } from "@/drizzle/schema";
+import { notificationSettingsTable } from "@/drizzle/schema";
 import NotificationsForm from "@/features/users/components/notifications-form";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
@@ -54,8 +54,8 @@ async function getNotiSettingsByUserId(userId: string) {
   "use cache";
   cacheTag(userNotificationTag(userId));
   cacheLife("hours");
-  return await db.query.userNotificationSettingsTable.findFirst({
-    where: eq(userNotificationSettingsTable.userId, userId),
+  return await db.query.notificationSettingsTable.findFirst({
+    where: eq(notificationSettingsTable.userId, userId),
     columns: {
       // aiPrompt: true,
       newJobEmailNotification: true,

@@ -9,7 +9,7 @@ import {
   FormLabel,
   // FormMessage,
 } from "@/components/ui/form";
-import { userNotificationSettingsTable } from "@/drizzle/schema";
+import { notificationSettingsTable } from "@/drizzle/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { userNotificationSettingsSchema } from "../schema/user-noti-schema";
@@ -25,7 +25,7 @@ export default function NotificationsForm({
   notificationSettings,
 }: {
   notificationSettings?: Pick<
-    typeof userNotificationSettingsTable.$inferSelect,
+    typeof notificationSettingsTable.$inferSelect,
     "newJobEmailNotification"
   >;
 }) {
