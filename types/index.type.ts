@@ -54,6 +54,7 @@ export type LogoType = {
 };
 
 // User
+
 export type UserPermissionType =
   | "org:job_listing:create"
   | "org:job_listing:update"

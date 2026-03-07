@@ -8,20 +8,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  User,
-  Mail,
-  Phone,
-  MapPin,
-  Briefcase,
-  GraduationCap,
-  Edit,
-  Save,
-  X,
-} from "lucide-react";
+import { User, Mail, Edit, Save, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useSession } from "@/lib/auth/auth-client";
-import { useState } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -30,20 +20,26 @@ import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import { APP_ROUTES } from "@/constants/app-config";
 import { differenceInDays } from "date-fns";
-import { Textarea } from "@/components/ui/textarea";
+import { useRouter } from "next/navigation";
+import { updateUser } from "@/features";
 
 export default function ProfilePage() {
-  const { data: session } = useSession();
+  const { data: session, refetch } = useSession();
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    name: session?.user?.name || "",
-    email: session?.user?.email || "",
-    phone: "",
-    location: "",
-    bio: "",
-    experience: "",
-    education: "",
+    name: "",
   });
+
+  // Sync form data with session
+  useEffect(() => {
+    if (session?.user) {
+      setFormData({
+        name: session.user.name || "",
+      });
+    }
+  }, [session?.user]);
 
   const userInitials =
     session?.user?.name
@@ -53,20 +49,22 @@ export default function ProfilePage() {
       .toUpperCase() || "U";
 
   const handleSave = () => {
-    // TODO: Implement save functionality
-    toast.success("Profile updated successfully!");
-    setIsEditing(false);
+    startTransition(async () => {
+      const result = await updateUser({ name: formData.name });
+      if (result.success) {
+        toast.success(result.message);
+        setIsEditing(false);
+        refetch();
+        router.refresh();
+      } else {
+        toast.error(result.message);
+      }
+    });
   };
 
   const handleCancel = () => {
     setFormData({
       name: session?.user?.name || "",
-      email: session?.user?.email || "",
-      phone: "",
-      location: "",
-      bio: "",
-      experience: "",
-      education: "",
     });
     setIsEditing(false);
   };
@@ -88,7 +86,7 @@ export default function ProfilePage() {
   return (
     <div className="space-y-6 px-6 py-6 md:px-8 md:py-8">
       <Card className="border-primary/20">
-        <CardHeader className="">
+        <CardHeader>
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-6">
               <Avatar className="h-24 w-24">
@@ -106,7 +104,11 @@ export default function ProfilePage() {
                     {session.user?.name}
                   </CardTitle>
                   <CardDescription className="text-base mt-1">
-                    Job Seeker
+                    {session.user?.role === "employer"
+                      ? "Employer"
+                      : session.user?.role === "admin"
+                        ? "Administrator"
+                        : "Job Seeker"}
                   </CardDescription>
                 </div>
                 <div className="flex gap-2">
@@ -129,14 +131,23 @@ export default function ProfilePage() {
               </Button>
             ) : (
               <div className="flex gap-2">
-                <Button onClick={handleSave} className="gap-2">
-                  <Save className="h-4 w-4" />
-                  Save
+                <Button
+                  onClick={handleSave}
+                  disabled={isPending}
+                  className="gap-2"
+                >
+                  {isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4" />
+                  )}
+                  {isPending ? "Saving..." : "Save"}
                 </Button>
                 <Button
                   onClick={handleCancel}
                   variant="outline"
                   className="gap-2"
+                  disabled={isPending}
                 >
                   <X className="h-4 w-4" />
                   Cancel
@@ -147,190 +158,82 @@ export default function ProfilePage() {
         </CardHeader>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Left Column - Contact Information */}
-        <div className="md:col-span-1 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl">Contact Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2 text-muted-foreground">
-                  <Mail className="h-4 w-4" />
-                  Email
-                </Label>
-                {isEditing ? (
-                  <Input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                  />
-                ) : (
-                  <p className="text-sm font-medium">{session.user?.email}</p>
-                )}
-              </div>
-
-              <Separator />
-
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2 text-muted-foreground">
-                  <Phone className="h-4 w-4" />
-                  Phone
-                </Label>
-                {isEditing ? (
-                  <Input
-                    type="tel"
-                    placeholder="+95 9 XXX XXX XXX"
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                  />
-                ) : (
-                  <p className="text-sm font-medium text-muted-foreground">
-                    {formData.phone || "Not provided"}
-                  </p>
-                )}
-              </div>
-
-              <Separator />
-
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2 text-muted-foreground">
-                  <MapPin className="h-4 w-4" />
-                  Location
-                </Label>
-                {isEditing ? (
-                  <Input
-                    placeholder="Yangon, Myanmar"
-                    value={formData.location}
-                    onChange={(e) =>
-                      setFormData({ ...formData, location: e.target.value })
-                    }
-                  />
-                ) : (
-                  <p className="text-sm font-medium text-muted-foreground">
-                    {formData.location || "Not provided"}
-                  </p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Quick Stats */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl">Quick Stats</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">
-                  Applications
-                </span>
-                <Badge className="bg-primary">0</Badge>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">
-                  Saved Jobs
-                </span>
-                <Badge className="bg-secondary">0</Badge>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">
-                  Profile Views
-                </span>
-                <Badge className="bg-tertiary">0</Badge>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Right Column - Bio and Details */}
-        <div className="md:col-span-2 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl flex items-center gap-2">
-                <User className="h-5 w-5" />
-                About Me
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Profile Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Profile Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Full Name</Label>
               {isEditing ? (
-                <Textarea
-                  placeholder="Tell employers about yourself, your skills, and what you're looking for..."
-                  value={formData.bio}
+                <Input
+                  value={formData.name}
                   onChange={(e) =>
-                    setFormData({ ...formData, bio: e.target.value })
+                    setFormData({ ...formData, name: e.target.value })
                   }
-                  rows={5}
-                  className="resize-none"
+                  placeholder="Enter your name"
                 />
               ) : (
-                <p className="text-sm text-muted-foreground">
-                  {formData.bio ||
-                    "No bio provided yet. Click 'Edit Profile' to add information about yourself."}
-                </p>
+                <p className="text-sm font-medium">{session.user?.name}</p>
               )}
-            </CardContent>
-          </Card>
+            </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl flex items-center gap-2">
-                <Briefcase className="h-5 w-5" />
-                Work Experience
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isEditing ? (
-                <Textarea
-                  placeholder="Describe your work experience, previous roles, and achievements..."
-                  value={formData.experience}
-                  onChange={(e) =>
-                    setFormData({ ...formData, experience: e.target.value })
-                  }
-                  rows={5}
-                  className="resize-none"
-                />
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  {formData.experience ||
-                    "No work experience added yet. Click 'Edit Profile' to add your professional background."}
-                </p>
-              )}
-            </CardContent>
-          </Card>
+            <Separator />
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl flex items-center gap-2">
-                <GraduationCap className="h-5 w-5" />
-                Education
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isEditing ? (
-                <Textarea
-                  placeholder="List your educational qualifications, degrees, and certifications..."
-                  value={formData.education}
-                  onChange={(e) =>
-                    setFormData({ ...formData, education: e.target.value })
-                  }
-                  rows={4}
-                  className="resize-none"
-                />
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  {formData.education ||
-                    "No education information added yet. Click 'Edit Profile' to add your educational background."}
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2 text-muted-foreground">
+                <Mail className="h-4 w-4" />
+                Email
+              </Label>
+              <p className="text-sm font-medium">{session.user?.email}</p>
+              <p className="text-xs text-muted-foreground">
+                Email cannot be changed
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Account Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl">Account Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">
+                Account Type
+              </span>
+              <Badge variant="outline" className="capitalize">
+                {session.user?.role}
+              </Badge>
+            </div>
+            <Separator />
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">
+                Email Verified
+              </span>
+              <Badge
+                variant={session.user?.emailVerified ? "default" : "secondary"}
+              >
+                {session.user?.emailVerified ? "Verified" : "Not Verified"}
+              </Badge>
+            </div>
+            <Separator />
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">
+                Member Since
+              </span>
+              <span className="text-sm">
+                {new Date(session.user?.createdAt).toLocaleDateString()}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

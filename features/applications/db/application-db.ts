@@ -93,10 +93,11 @@ const getApplicationsByJobListingIdCached = async (jobListingId: string) => {
     where: eq(applicationTable.jobListingId, jobListingId),
     columns: {
       jobListingId: true,
+      userId: true,
       coverLetter: true,
-      rating: true,
+      resumeFileUrl: true,
       status: true,
-      created_at: true,
+      createdAt: true,
     },
     with: {
       user: {

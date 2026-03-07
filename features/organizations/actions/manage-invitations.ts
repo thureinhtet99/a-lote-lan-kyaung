@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { invitationTable } from "@/drizzle/schema";
 import { and, eq } from "drizzle-orm";
 import { safeGetSession } from "@/lib/auth/auth-helpers";
+import { sendInvitationEmail } from "@/services/email/send-invitation";
 
 export async function getInvitations() {
   try {
@@ -141,7 +142,7 @@ export async function resendInvitation(invitationId: string) {
       };
     }
 
-    // Get the invitation
+    // Get the invitation with organization info
     const invitation = await db.query.invitationTable.findFirst({
       where: and(
         eq(invitationTable.id, invitationId),
@@ -150,6 +151,9 @@ export async function resendInvitation(invitationId: string) {
           session.session.activeOrganizationId,
         ),
       ),
+      with: {
+        organization: true,
+      },
     });
 
     if (!invitation) {
@@ -159,9 +163,17 @@ export async function resendInvitation(invitationId: string) {
       };
     }
 
-    // In a real app, you would send an email here
-    // For now, we'll just return success
-    // TODO: Implement email sending logic
+    // Send the invitation email
+    const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/auth/accept-invitation?token=${invitation.id}`;
+
+    await sendInvitationEmail({
+      email: invitation.email,
+      invitedByUsername: session.user?.name || "Team member",
+      invitedByEmail: session.user?.email || "",
+      organizationName: invitation.organization?.name || "Organization",
+      role: invitation.role || "hr",
+      inviteUrl,
+    });
 
     return {
       success: true,

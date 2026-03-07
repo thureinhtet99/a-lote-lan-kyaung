@@ -92,7 +92,7 @@ export function OrganizationSettingsForm() {
       // Implementation for deleting organization
       // You'll need to create a server action for this
       toast.success("Organization deleted");
-      router.push(APP_ROUTES.EMPLOYER.ORG);
+      router.push(APP_ROUTES.EMPLOYER.MY_ORG);
     } catch (error) {
       toast.error("Failed to delete organization");
     }

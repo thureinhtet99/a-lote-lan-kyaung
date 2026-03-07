@@ -19,6 +19,7 @@ import {
   EmployerRequestFormType,
   RejectRequestFormType,
   UserRoleType,
+  UserType,
 } from "@/types/index.type";
 import {
   approveRequestSchema,
@@ -27,6 +28,7 @@ import {
 } from "@/features/admin/schema/admin-form-schema";
 import { nanoid } from "nanoid";
 import { safeGetSession } from "@/lib/auth/auth-helpers";
+import { userProfileSchema } from "../schema/user-profile-schema";
 
 // Get all users
 export const getAllUsers = async (
@@ -192,14 +194,39 @@ export const unbanUser = async (userId: string) => {
   }
 };
 
-export const updateUser = async (
-  id: string,
-  user: typeof userTable.$inferInsert,
-) => {
-  await db.update(userTable).set(user).where(eq(userTable.id, id));
-  updateTag(userIdTag(id));
-  updateTag(dashboardStatsTag());
-};
+export async function updateUser(
+  data: Pick<UserType, "name">,
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const session = await safeGetSession();
+    if (!session?.user) {
+      return { success: false, message: "Unauthorized" };
+    }
+
+    const validated = userProfileSchema.safeParse(data);
+    if (!validated.success) {
+      return {
+        success: false,
+        message: validated.error.issues[0]?.message ?? "Invalid input",
+      };
+    }
+
+    await db
+      .update(userTable)
+      .set({
+        name: validated.data.name,
+        updatedAt: new Date(),
+      })
+      .where(eq(userTable.id, session.user.id));
+
+    updateTag(userIdTag(session.user.id));
+
+    return { success: true, message: "Profile updated successfully" };
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    return { success: false, message: "Failed to update profile" };
+  }
+}
 
 export const deleteUser = async (id: string) => {
   await db.delete(userTable).where(eq(userTable.id, id));
@@ -459,7 +486,8 @@ const getAllEmployerRequestsCached = async (
 export const getEmployerRequest = async () => {
   try {
     const session = await safeGetSession();
-    if (!session?.user) return { success: false, message: "Unauthorized" };
+    if (!session?.user)
+      return { success: false, message: "Unauthorized", data: null };
 
     return await getEmployerRequestCached(session.user.id);
   } catch (error) {
@@ -467,6 +495,7 @@ export const getEmployerRequest = async () => {
     return {
       success: false,
       message: "Failed to fetch employer request",
+      data: null,
     };
   }
 };
@@ -479,7 +508,8 @@ const getEmployerRequestCached = async (userId: string) => {
     orderBy: [desc(employerRequestTable.createdAt)],
   });
 
-  if (!request) return { success: false, message: "No employer request" };
+  if (!request)
+    return { success: false, message: "No employer request", data: null };
 
   cacheTag(employerRequestIdTag(request.id));
   cacheLife("minutes");

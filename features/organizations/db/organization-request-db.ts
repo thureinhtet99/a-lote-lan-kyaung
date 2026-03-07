@@ -125,13 +125,13 @@ export const getMyOrganizationRequest = async () => {
   try {
     const session = await safeGetSession();
     if (!session?.user) {
-      return { success: false, message: "Unauthorized" };
+      return { success: false, message: "Unauthorized", data: null };
     }
 
     return await getMyOrganizationRequestCached(session.user.id);
   } catch (error) {
     console.error("Error fetching organization request: ", error);
-    return { success: false, message: "Failed to organization fetch request" };
+    return { success: false, message: "Failed to organization fetch request", data: null };
   }
 };
 
@@ -143,7 +143,7 @@ const getMyOrganizationRequestCached = async (userId: string) => {
     orderBy: [desc(organizationRequestTable.createdAt)],
   });
 
-  if (!result) return { success: false, message: "No organization request" };
+  if (!result) return { success: false, message: "No organization request", data: null };
 
   cacheTag(userOrgRequestsTag(result.id));
   cacheLife("minutes");

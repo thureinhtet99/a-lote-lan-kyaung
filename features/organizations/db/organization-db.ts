@@ -16,9 +16,7 @@ import {
 } from "@/lib/data-cache";
 import { safeGetSession } from "@/lib/auth/auth-helpers";
 
-export const getCurrentOrg = async () => {
-  // TODO: get current org from session db
-};
+// Note: getCurrentOrg is defined in @/lib/auth/auth-helpers
 
 export const getOrganizationsByEmployerId = async (): Promise<{
   success: boolean;
