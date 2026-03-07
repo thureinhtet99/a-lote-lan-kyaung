@@ -1,5 +1,3 @@
-import { auth } from "@/lib/auth/auth";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { OrganizationRequestForm } from "@/features/organizations/components/organization-request-form";
 import {
@@ -9,38 +7,42 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { AlertCircle, CheckCircle, Clock } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Suspense } from "react";
-import Loading from "@/components/shared/loading";
 import { APP_ROUTES } from "@/constants/app-config";
 import { getMyOrganizationRequest } from "@/features/organizations/db/organization-request-db";
 import { getOrganizationsByEmployerId } from "@/features/organizations/db/organization-db";
+import { getApprovedOrganizationNotification } from "@/features/organizations/db/notification-db";
+import { ClaimOrganizationButton } from "@/features/organizations/components/claim-organization-button";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { safeGetSession } from "@/lib/auth/auth-helpers";
+import { getCurrentUser, isEmployer } from "@/lib/auth/auth-helpers";
+import PageLoading from "@/components/shared/page-loading";
 
 export default async function OrganizationRequestPage() {
   return (
-    <Suspense fallback={<Loading />}>
+    <Suspense fallback={<PageLoading />}>
       <SuspendedComponent />
     </Suspense>
   );
 }
 
 const SuspendedComponent = async () => {
-  const session = await safeGetSession();
-  if (!session?.user) redirect(APP_ROUTES.SIGN_IN);
+  const { user } = await getCurrentUser();
+  if (!user) return redirect(APP_ROUTES.SIGN_IN);
 
   // Only employers can request to create orgs
-  if (session.user.role !== "employer") {
+  const isAlreadyEmployer = await isEmployer();
+  if (!isAlreadyEmployer) {
     return (
       <div className="space-y-6 px-6 py-6 md:px-8 md:py-8">
         <div>
-          <h3 className="text-lg font-medium">Create Organization</h3>
+          <h2 className="text-2xl font-bold tracking-tight">
+            Organization Request
+          </h2>
           <p className="text-sm text-muted-foreground">
-            Request to create a new organization
+            Request access to get organization features
           </p>
         </div>
         <Alert>
@@ -70,18 +72,17 @@ const SuspendedComponent = async () => {
       <div className="space-y-6 px-6 py-6 md:px-8 md:py-8">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">
-            Create Organization
+            Organization Request
           </h2>
           <p className="text-sm text-muted-foreground">
-            Request to create a new organization on the platform
+            Request access to get organization features
           </p>
         </div>
         <Alert>
           <CheckCircle className="h-4 w-4" />
-          <AlertTitle>Organization Already Exists</AlertTitle>
+          <AlertTitle>You already have organization</AlertTitle>
           <AlertDescription>
-            You already have an organization. Each employer can only have one
-            organization.
+            Each employer can only have one organization.
           </AlertDescription>
         </Alert>
         <Button asChild>
@@ -92,103 +93,163 @@ const SuspendedComponent = async () => {
   }
 
   const requestResult = await getMyOrganizationRequest();
+  if (!requestResult.success || !requestResult.data) {
+    return (
+      <div className="space-y-6 px-6 py-6 md:px-8 md:py-8">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">
+            Organization Request
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Request access to get organization features
+          </p>
+        </div>
+        <OrganizationRequestForm />
+      </div>
+    );
+  }
+
   const existingRequest = requestResult.data;
+
+  // For approved requests, check if there's a notification to claim
+  let approvedNotification = null;
+  if (existingRequest.status === "approved") {
+    const notificationResult = await getApprovedOrganizationNotification();
+    if (notificationResult.success && notificationResult.data) {
+      approvedNotification = notificationResult.data;
+    }
+  }
 
   return (
     <div className="space-y-6 px-6 py-6 md:px-8 md:py-8">
       <div>
         <h2 className="text-2xl font-bold tracking-tight">
-          Create Organization
+          Organization Request
         </h2>
-        <p className="text-sm text-muted-foreground">
-          Request to create a new organization on the platform
+        <p className="text-sm text-muted-foreground mt-1">
+          Request access to get organization features
         </p>
       </div>
 
-      {existingRequest ? (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Your Request Status</CardTitle>
-              <Badge
-                variant={
-                  existingRequest.status === "approved"
-                    ? "default"
-                    : existingRequest.status === "rejected"
-                      ? "destructive"
-                      : "outline"
-                }
-                className={
-                  existingRequest.status === "approved"
-                    ? "bg-green-600 text-white"
-                    : ""
-                }
-              >
-                {existingRequest.status.charAt(0).toUpperCase() +
-                  existingRequest.status.slice(1)}
-              </Badge>
-            </div>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Your Request Status</CardTitle>
             <CardDescription>
               Submitted on{" "}
               {new Date(existingRequest.createdAt).toLocaleDateString()}
             </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <p className="text-sm font-medium">Organization Name</p>
-              <p className="text-sm text-muted-foreground">
-                {existingRequest.orgName}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-medium">Slug</p>
-              <p className="text-sm text-muted-foreground">
-                @{existingRequest.orgSlug}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-medium">Your Message</p>
-              <p className="text-sm text-muted-foreground">
-                {existingRequest.requestMessage}
-              </p>
-            </div>
+          </div>
+          <CardDescription>
+            <p className="text-sm text-muted-foreground">
+              {existingRequest.requestMessage}
+            </p>
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <p className="text-sm font-medium">Organization Name</p>
+            <p className="text-sm text-muted-foreground">
+              {existingRequest.orgName}
+            </p>
+          </div>
+          <div>
+            <p className="text-sm font-medium">Slug</p>
+            <p className="text-sm text-muted-foreground">
+              @{existingRequest.orgSlug}
+            </p>
+          </div>
 
-            {existingRequest.status === "pending" && (
-              <Alert>
-                <Clock className="h-4 w-4" />
-                <AlertTitle>Under Review</AlertTitle>
-                <AlertDescription>
-                  Your organization request is being reviewed by an admin.
-                </AlertDescription>
-              </Alert>
-            )}
+          {existingRequest.status === "pending" && (
+            <Alert>
+              <Clock className="h-4 w-4" />
+              <AlertTitle>Pending Review</AlertTitle>
+              <AlertDescription>
+                Your request is currently being reviewed by our admin team. You
+                will be notified once a decision has been made.
+              </AlertDescription>
+            </Alert>
+          )}
 
-            {existingRequest.status === "approved" && (
-              <Alert>
-                <CheckCircle className="h-4 w-4" />
-                <AlertTitle>Approved!</AlertTitle>
-                <AlertDescription>
-                  {existingRequest.adminResponse ??
-                    "Your organization has been created. You can find it in your employer dashboard."}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {existingRequest.status === "rejected" && (
+          {existingRequest.status === "rejected" && (
+            <>
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Request Rejected</AlertTitle>
                 <AlertDescription>
-                  {existingRequest.adminResponse ??
-                    "Your organization request was rejected by an admin."}
+                  Your request has been reviewed and rejected.
                 </AlertDescription>
               </Alert>
-            )}
-          </CardContent>
-        </Card>
-      ) : (
-        <OrganizationRequestForm />
-      )}
+
+              <CardHeader className="px-0">
+                <div className="flex items-center justify-between">
+                  <CardTitle>Admin Response</CardTitle>
+                  {existingRequest.reviewedAt && (
+                    <CardDescription>
+                      Reviewed on{" "}
+                      {existingRequest.reviewedAt
+                        ? new Date(
+                            existingRequest.reviewedAt,
+                          ).toLocaleDateString()
+                        : "N/A"}
+                    </CardDescription>
+                  )}
+                </div>
+                <CardDescription>
+                  <p className="text-sm text-muted-foreground">
+                    {existingRequest.adminResponse}
+                  </p>
+                </CardDescription>
+              </CardHeader>
+            </>
+          )}
+
+          {existingRequest.status === "approved" && (
+            <>
+              <Alert className="text-green-400">
+                <CheckCircle className="h-4 w-4" />
+                <AlertTitle>Request Approved</AlertTitle>
+                <AlertDescription className="text-green-400">
+                  Congratulations! Your request has been approved.
+                  {approvedNotification
+                    ? " Click the button below to claim your organization and start using employer features."
+                    : " You can now access organization features."}
+                </AlertDescription>
+              </Alert>
+
+              {/* Show claim button if there's an unclaimed notification */}
+              {approvedNotification && approvedNotification.organizationId && (
+                <ClaimOrganizationButton
+                  notificationId={approvedNotification.id}
+                  organizationId={approvedNotification.organizationId}
+                  organizationName={existingRequest.orgName}
+                />
+              )}
+
+              <CardHeader className="px-0">
+                <div className="flex items-center justify-between">
+                  <CardTitle>Admin Response</CardTitle>
+                  {existingRequest.reviewedAt && (
+                    <CardDescription>
+                      Reviewed on{" "}
+                      {existingRequest.reviewedAt
+                        ? new Date(
+                            existingRequest.reviewedAt,
+                          ).toLocaleDateString()
+                        : "N/A"}
+                    </CardDescription>
+                  )}
+                </div>
+                <CardDescription>
+                  <p className="text-sm text-muted-foreground">
+                    {existingRequest.adminResponse}
+                  </p>
+                </CardDescription>
+              </CardHeader>
+            </>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import SidebarOrgButtonClient from "./_sidebar-org-button-client";
 import { getCurrentOrg, getCurrentUser } from "@/lib/auth/auth-helpers";
-import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
+import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { ArrowRight } from "lucide-react";
 import Loading from "@/components/shared/loading";
 import Link from "next/link";
@@ -23,19 +23,14 @@ const SuspendedComponent = async () => {
 
   if (user == null || organization == null) {
     return (
-      <SidebarMenuItem className="cursor-pointer">
-        <Suspense>
-          <SidebarMenuButton
-            className="flex items-center justify-between"
-            asChild
-          >
-            <Link href={APP_ROUTES.SETTINGS.NOTIFICATIONS}>
-              <span>Claim your organization</span>
-              <ArrowRight className="animate-caret-blink" />
-            </Link>
-          </SidebarMenuButton>
-        </Suspense>
-      </SidebarMenuItem>
+      <Suspense>
+        <SidebarMenuButton className="flex items-center justify-between" asChild>
+          <Link href={APP_ROUTES.SETTINGS.NOTIFICATIONS}>
+            <span>Claim your organization</span>
+            <ArrowRight className="animate-caret-blink" />
+          </Link>
+        </SidebarMenuButton>
+      </Suspense>
     );
   }
 

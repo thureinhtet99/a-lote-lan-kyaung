@@ -1,14 +1,21 @@
 import Loading from "@/components/shared/loading";
-import { Card, CardContent } from "@/components/ui/card";
-import { db } from "@/lib/db";
-import { notificationSettingsTable } from "@/drizzle/schema";
-import NotificationsForm from "@/features/users/components/notifications-form";
-import { eq } from "drizzle-orm";
-import { notFound } from "next/navigation";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Bell, Check, CheckCheck, Trash2, ExternalLink } from "lucide-react";
+import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { getCurrentUser } from "@/lib/auth/auth-helpers";
-import { cacheLife, cacheTag } from "next/cache";
-import { userNotificationTag } from "@/lib/data-cache";
+import { APP_ROUTES } from "@/constants/app-config";
+import { getUserNotifications } from "@/features/organizations/db/notification-db";
+import { NotificationsList } from "@/features/organizations/components/notifications-list";
+import { cn } from "@/lib/utils";
 
 export default function NotificationPage() {
   return (
@@ -20,50 +27,39 @@ export default function NotificationPage() {
 
 const SuspendedComponent = async () => {
   const { userId } = await getCurrentUser();
-  if (userId == null) return notFound();
+  if (userId == null) return redirect(APP_ROUTES.SIGN_IN);
+
+  const notificationsResult = await getUserNotifications();
+  const notifications = notificationsResult.success
+    ? notificationsResult.data
+    : [];
 
   return (
     <div className="space-y-6 px-6 py-6 md:px-8 md:py-8">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">
-          Notification Settings
-        </h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          Manage how you receive notifications
-        </p>
+      <div className="flex items-center gap-2">
+        <Bell className="h-6 w-6" />
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Notifications</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            View and manage your notifications
+          </p>
+        </div>
       </div>
+
       <Card>
+        <CardHeader>
+          <CardTitle>Your Notifications</CardTitle>
+          <CardDescription>
+            Stay updated with important information about your account and
+            organization requests
+          </CardDescription>
+        </CardHeader>
         <CardContent>
           <Suspense fallback={<Loading />}>
-            <SuspendedForm userId={userId} />
+            <NotificationsList initialNotifications={notifications} />
           </Suspense>
         </CardContent>
       </Card>
     </div>
   );
-};
-
-const SuspendedForm = async ({ userId }: { userId: string }) => {
-  const notificationSettings = await getNotificationSettings(userId);
-
-  return <NotificationsForm notificationSettings={notificationSettings} />;
-};
-
-// Fetch user noti from db (cached)
-async function getNotiSettingsByUserId(userId: string) {
-  "use cache";
-  cacheTag(userNotificationTag(userId));
-  cacheLife("hours");
-  return await db.query.notificationSettingsTable.findFirst({
-    where: eq(notificationSettingsTable.userId, userId),
-    columns: {
-      // aiPrompt: true,
-      newJobEmailNotification: true,
-    },
-  });
-}
-
-const getNotificationSettings = async (userId: string) => {
-  const data = await getNotiSettingsByUserId(userId);
-  return data;
 };

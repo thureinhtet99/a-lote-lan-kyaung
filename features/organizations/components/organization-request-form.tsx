@@ -26,7 +26,9 @@ import { toast } from "sonner";
 import { OrgRequestFormType } from "@/types/index.type";
 import { organizationRequestSchema } from "@/features/admin/schema/admin-form-schema";
 import { createOrganizationRequest } from "@/features/organizations/db/organization-request-db";
-import { Loader2Icon } from "lucide-react";
+import { Clock, Loader2Icon } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import LoadingSwap from "@/components/shared/loading-swap";
 
 export function OrganizationRequestForm() {
   const [isPending, startTransition] = useTransition();
@@ -65,20 +67,14 @@ export function OrganizationRequestForm() {
 
   if (submitted) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Request Submitted</CardTitle>
-          <CardDescription>
-            Your organization request has been submitted successfully
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Your request to create an organization is under admin review. You
-            will be notified once it has been reviewed.
-          </p>
-        </CardContent>
-      </Card>
+      <Alert>
+        <Clock className="h-4 w-4" />
+        <AlertTitle>Pending Review</AlertTitle>
+        <AlertDescription>
+          Your request is currently being reviewed by our admin team. You will
+          be notified once a decision has been made.
+        </AlertDescription>
+      </Alert>
     );
   }
 
@@ -156,10 +152,7 @@ export function OrganizationRequestForm() {
             />
 
             <Button type="submit" disabled={isPending}>
-              {isPending && (
-                <Loader2Icon className="mr-2 size-4 animate-spin" />
-              )}
-              Submit Request
+              <LoadingSwap isLoading={isPending} children="Submit request" />
             </Button>
           </form>
         </Form>

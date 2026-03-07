@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { notificationTable, sessionTable } from "@/drizzle/schema";
+import { notificationTable, sessionTable, memberTable } from "@/drizzle/schema";
 import { and, desc, eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { safeGetSession } from "@/lib/auth/auth-helpers";
@@ -175,6 +175,25 @@ export const claimOrganization = async (
       };
     }
 
+    // Check if user is already a member of this organization
+    const existingMembership = await db.query.memberTable.findFirst({
+      where: and(
+        eq(memberTable.userId, session.user.id),
+        eq(memberTable.organizationId, organizationId),
+      ),
+    });
+
+    if (!existingMembership) {
+      // Create membership (org-admin role) when claiming
+      await db.insert(memberTable).values({
+        id: nanoid(),
+        organizationId,
+        userId: session.user.id,
+        role: "org-admin",
+        createdAt: new Date(),
+      });
+    }
+
     // Set active organization using better-auth
     const result = await auth.api.setActiveOrganization({
       body: {
@@ -205,6 +224,38 @@ export const claimOrganization = async (
   } catch (error) {
     console.error("Error claiming organization:", error);
     return { success: false, message: "Failed to claim organization" };
+  }
+};
+
+// Get approved organization notification for current user (for claim functionality)
+export const getApprovedOrganizationNotification = async () => {
+  try {
+    const session = await safeGetSession();
+    if (!session?.user) {
+      return { success: false, message: "Unauthorized", data: null };
+    }
+
+    const notification = await db.query.notificationTable.findFirst({
+      where: and(
+        eq(notificationTable.userId, session.user.id),
+        eq(notificationTable.type, "organization_approved"),
+        eq(notificationTable.isRead, false),
+      ),
+      orderBy: desc(notificationTable.createdAt),
+    });
+
+    return {
+      success: true,
+      message: "Notification fetched successfully",
+      data: notification,
+    };
+  } catch (error) {
+    console.error("Error fetching approved notification:", error);
+    return {
+      success: false,
+      message: "Failed to fetch notification",
+      data: null,
+    };
   }
 };
 

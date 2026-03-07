@@ -31,8 +31,6 @@ import {
   RejectRequestFormType,
 } from "@/types/index.type";
 
-// ─── User: create org request ──────────────────────────────────────────────
-
 export const createOrganizationRequest = async (data: OrgRequestFormType) => {
   try {
     const session = await safeGetSession();
@@ -71,8 +69,7 @@ export const createOrganizationRequest = async (data: OrgRequestFormType) => {
     if (existingOrg.length > 0) {
       return {
         success: false,
-        message:
-          "You already have an organization. Each employer can only have one organization.",
+        message: "Employer can have only one organization.",
       };
     }
 
@@ -124,34 +121,38 @@ export const createOrganizationRequest = async (data: OrgRequestFormType) => {
   }
 };
 
-// ─── User: get own org request ─────────────────────────────────────────────
-
 export const getMyOrganizationRequest = async () => {
   try {
     const session = await safeGetSession();
     if (!session?.user) {
-      return { success: false, message: "Unauthorized", data: null };
+      return { success: false, message: "Unauthorized" };
     }
 
     return await getMyOrganizationRequestCached(session.user.id);
   } catch (error) {
-    console.error("Error fetching organization request:", error);
-    return { success: false, message: "Failed to fetch request", data: null };
+    console.error("Error fetching organization request: ", error);
+    return { success: false, message: "Failed to organization fetch request" };
   }
 };
 
 const getMyOrganizationRequestCached = async (userId: string) => {
   "use cache";
 
-  cacheTag(userOrgRequestsTag(userId));
-  cacheLife("minutes");
-
   const result = await db.query.organizationRequestTable.findFirst({
     where: eq(organizationRequestTable.userId, userId),
     orderBy: [desc(organizationRequestTable.createdAt)],
   });
 
-  return { success: true, message: "Request fetched", data: result ?? null };
+  if (!result) return { success: false, message: "No organization request" };
+
+  cacheTag(userOrgRequestsTag(result.id));
+  cacheLife("minutes");
+
+  return {
+    success: true,
+    message: "Organization request fetched successfully",
+    data: result,
+  };
 };
 
 export const getAllOrganizationRequests = async (
@@ -463,14 +464,7 @@ export const approveOrganizationRequest = async (
       createdAt: new Date(),
     });
 
-    // Create membership (org-admin role)
-    await db.insert(memberTable).values({
-      id: nanoid(),
-      organizationId: orgId,
-      userId: request.userId,
-      role: "org-admin",
-      createdAt: new Date(),
-    });
+    // Note: Membership will be created when user claims the organization through notification
 
     // Mark request approved
     await db
@@ -488,7 +482,7 @@ export const approveOrganizationRequest = async (
     await createNotification(
       request.userId,
       "organization_approved",
-      "Organization Approved! 🎉",
+      "Organization Approved!",
       `Your organization "${request.orgName}" has been approved. Click "Claim Organization" to start using your employer dashboard.`,
       orgId,
     );

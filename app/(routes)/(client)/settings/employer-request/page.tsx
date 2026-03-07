@@ -14,10 +14,11 @@ import { getEmployerRequest } from "@/features/users/db/user-db";
 import { getCurrentUser, isEmployer } from "@/lib/auth/auth-helpers";
 import { redirect } from "next/navigation";
 import { APP_ROUTES } from "@/constants/app-config";
+import PageLoading from "@/components/shared/page-loading";
 
 export default async function EmployerRequestPage() {
   return (
-    <Suspense fallback={<Loading />}>
+    <Suspense fallback={<PageLoading />}>
       <SuspendedComponent />
     </Suspense>
   );
@@ -28,13 +29,12 @@ const SuspendedComponent = async () => {
   if (!user) return redirect(APP_ROUTES.SIGN_IN);
 
   const isAlreadyEmployer = await isEmployer();
-
   if (isAlreadyEmployer) {
     return (
       <div className="space-y-6 px-6 md:px-8 py-6 md:py-8">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">
-            Employer request
+            Employer Request
           </h2>
           <p className="text-sm text-muted-foreground">
             Request access to get employer features
@@ -58,7 +58,7 @@ const SuspendedComponent = async () => {
       <div className="space-y-6 px-6 py-6 md:px-8 md:py-8">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">
-            Employer request
+            Employer Request
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
             Request access to get employer features
@@ -73,7 +73,7 @@ const SuspendedComponent = async () => {
   return (
     <div className="space-y-6 px-6 py-6 md:px-8 md:py-8">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Employer request</h2>
+        <h2 className="text-2xl font-bold tracking-tight">Employer Request</h2>
         <p className="text-sm text-muted-foreground mt-1">
           Request access to employer features
         </p>

@@ -16,6 +16,10 @@ import {
 } from "@/lib/data-cache";
 import { safeGetSession } from "@/lib/auth/auth-helpers";
 
+export const getCurrentOrg = async () => {
+  // TODO: get current org from session db
+};
+
 export const getOrganizationsByEmployerId = async (): Promise<{
   success: boolean;
   message?: string;
@@ -162,40 +166,5 @@ export const deleteOrg = async (
   } catch (error) {
     console.error("Error deleting organization:", error);
     return { success: false, message: "Failed to delete organization" };
-  }
-};
-
-export const switchOrganization = async (
-  organizationId: string,
-): Promise<{ success: boolean; message?: string; redirectTo?: string }> => {
-  try {
-    const session = await safeGetSession();
-
-    if (!session?.user) return { success: false, message: "Unauthorized" };
-
-    const result = await auth.api.setActiveOrganization({
-      body: {
-        organizationId,
-      },
-      headers: await headers(),
-    });
-
-    if (!result)
-      return { success: false, message: "Failed to switch organization" };
-
-    updateTag(organizationsTag());
-    updateTag(
-      sideBarJobListingWithApplicationsTag(organizationId, session.user.id),
-    );
-    updateTag(organizationIdTag(organizationId));
-
-    return {
-      success: true,
-      message: "Successfully switched organization",
-      redirectTo: APP_ROUTES.EMPLOYER.HOME,
-    };
-  } catch (error) {
-    console.error("Error switching organization:", error);
-    return { success: false, message: "Failed to switch organization" };
   }
 };

@@ -96,6 +96,6 @@ export const orgRequestsTag = () => {
   return `organization-requests` as const;
 };
 
-export const userOrgRequestsTag = (userId: string) => {
-  return `user-${userId}-organization-requests` as const;
+export const userOrgRequestsTag = (requestId: string) => {
+  return `organization-requests-${requestId}` as const;
 };
