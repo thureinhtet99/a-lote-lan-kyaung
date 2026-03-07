@@ -19,6 +19,7 @@ import { getCurrentUser } from "@/lib/auth/auth-helpers";
 import { cacheLife, cacheTag } from "next/cache";
 import { resumeTag } from "@/lib/data-cache";
 import DropzoneClient from "./_DropzoneClient";
+import { getCurrentResume } from "@/features/applications/db/resume-db";
 
 export default function ResumePage() {
   return (
@@ -30,18 +31,14 @@ export default function ResumePage() {
         </p>
       </div>
 
-      <Card>
-        <CardContent className="pt-6">
-          <DropzoneClient />
-        </CardContent>
-        <Suspense fallback={<Loading />}>
-          <SuspendedComponent />
-        </Suspense>
-      </Card>
+      <DropzoneClient />
+      <Suspense>
+        <SuspendedComponent />
+      </Suspense>
 
       {/* AI */}
       <Suspense>
-        <AISummaryCard />
+        <AISummary />
       </Suspense>
     </div>
   );
@@ -52,58 +49,38 @@ const SuspendedComponent = async () => {
   if (userId == null) return notFound();
 
   const userResume = await getCurrentResume(userId);
-  if (userResume == undefined) return null;
+  if (!userResume.data) return null;
 
   return (
-    <CardFooter>
-      <Button asChild>
-        <Link
-          href={userResume.resumeFileUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          View Resume
-        </Link>
-      </Button>
-    </CardFooter>
+    <Button asChild>
+      <Link
+        href={userResume.data.resumeFileUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        View Resume
+      </Link>
+    </Button>
   );
 };
 
-// Fetch user resume from db (cached)
-async function getResumeByUserId(userId: string) {
-  "use cache";
-  cacheTag(resumeTag(userId));
-  cacheLife("hours");
-  return await db.query.resumeTable.findFirst({
-    where: eq(resumeTable.userId, userId),
-  });
-}
-
-const getCurrentResume = async (userId: string) => {
-  const data = await getResumeByUserId(userId);
-  return data;
-};
-
-const AISummaryCard = async () => {
-  // const { userId } = await getCurrentUser();
-  const userId = "5g4X3I2v2EVlFXUb0SrcBRBtQZPtOj80";
+const AISummary = async () => {
+  const { userId } = await getCurrentUser();
   if (userId == null) return notFound();
 
   const userResume = await getCurrentResume(userId);
-  if (userResume == undefined) return null;
+  if (!userResume.data) return null;
 
   return (
-    <Card>
-      <CardHeader className="border-b">
-        <CardTitle>AI Summary </CardTitle>
-        <CardDescription>
-          This is an AI-generated summary of our resume. This is used by
-          employers to quickly understand your qualifications and experiences.
-        </CardDescription>
+    <Card className="bg-muted/20">
+      <CardHeader>
+        <CardTitle>AI Summary</CardTitle>
       </CardHeader>
       <CardContent>
-        {/* <MarkdownRenderer source={userResume.aiSummary ?? "No summary"} /> */}
-        <MarkdownRenderer source={"No summary"} />
+        <p className="text-sm text-muted-foreground">
+          Coming soon..... You will get an auto-generated summary from your
+          uploaded resume here.
+        </p>
       </CardContent>
     </Card>
   );
