@@ -10,8 +10,8 @@ export const resumeTable = pgTable("resumes", {
   resumeFileUrl: text("file_url").notNull(),
   resumeFileKey: text("file_key").notNull(),
   resumeFileName: text("file_name"),
-  created_at,
-  updated_at,
+  createdAt: created_at,
+  updatedAt: updated_at,
 });
 
 export const userResumesRelations = relations(resumeTable, ({ one }) => ({

@@ -2,6 +2,7 @@ import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
 import { userTable } from "./user-schema";
 import { organizationTable } from "./organization-schema";
 import { relations } from "drizzle-orm";
+import { created_at } from "../schema-helpers";
 
 export const notificationTable = pgTable(
   "notifications",
@@ -20,8 +21,8 @@ export const notificationTable = pgTable(
       { onDelete: "cascade" },
     ),
     isRead: boolean("is_read").notNull().default(false),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    readAt: timestamp("read_at"),
+    createdAt: created_at,
+    readAt: timestamp("read_at", { withTimezone: true }),
   },
   (table) => [
     index("notification_userId_idx").on(table.userId),

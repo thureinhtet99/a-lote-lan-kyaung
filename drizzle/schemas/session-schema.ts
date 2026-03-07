@@ -8,6 +8,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { userTable } from "./user-schema";
 import { relations } from "drizzle-orm";
+import { created_at, updated_at } from "../schema-helpers";
 
 export const sessionTable = pgTable(
   "sessions",
@@ -15,10 +16,8 @@ export const sessionTable = pgTable(
     id: text("id").primaryKey(),
     expiresAt: timestamp("expires_at").notNull(),
     token: text("token").notNull().unique(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at")
-      .$onUpdate(() => /* @__PURE__ */ new Date())
-      .notNull(),
+    createdAt: created_at,
+    updatedAt: updated_at,
     ipAddress: text("ip_address"),
     userAgent: text("user_agent"),
     userId: text("user_id")

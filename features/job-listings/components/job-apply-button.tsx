@@ -60,10 +60,7 @@ export default async function JobApplyButton({
     });
 
     await connection();
-    const difference = differenceInDays(
-      application.data.created_at,
-      new Date(),
-    );
+    const difference = differenceInDays(application.data.createdAt, new Date());
 
     return (
       <div className="text-muted-foreground text-sm">
@@ -93,7 +90,7 @@ export default async function JobApplyButton({
             existingResumeKey={resume.data?.resumeFileKey ?? null}
             existingResumeFileName={resume.data?.resumeFileName ?? null}
             existingResumeUploadedAt={
-              resume.data?.updated_at?.toISOString() ?? null
+              resume.data?.updatedAt?.toISOString() ?? null
             }
           />
         </div>

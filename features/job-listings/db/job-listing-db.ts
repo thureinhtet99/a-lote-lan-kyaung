@@ -150,7 +150,7 @@ const getJobListingsWithApplicationsCached = async (
       eq(jobListingTable.id, applicationTable.jobListingId),
     )
     .groupBy(applicationTable.jobListingId, jobListingTable.id)
-    .orderBy(desc(jobListingTable.created_at));
+    .orderBy(desc(jobListingTable.createdAt));
 
   cacheTag(sideBarJobListingWithApplicationsTag(orgId, userId));
   cacheLife("days");
@@ -249,7 +249,7 @@ const getMostRecentJobListingCached = async (orgId: string) => {
     .select({ id: jobListingTable.id })
     .from(jobListingTable)
     .where(eq(jobListingTable.organizationId, orgId))
-    .orderBy(desc(jobListingTable.created_at))
+    .orderBy(desc(jobListingTable.createdAt))
     .limit(1);
 
   if (!result) {

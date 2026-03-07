@@ -363,7 +363,7 @@ const getCachedUserResume = async (userId: string) => {
       resumeFileUrl: true,
       resumeFileKey: true,
       resumeFileName: true,
-      updated_at: true,
+      updatedAt: true,
     },
   });
 

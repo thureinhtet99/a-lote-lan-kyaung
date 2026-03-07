@@ -9,6 +9,7 @@ import {
 import { relations } from "drizzle-orm";
 import { organizationTable } from "./organization-schema";
 import { userTable } from "./user-schema";
+import { created_at } from "../schema-helpers";
 
 export const memberTable = pgTable(
   "members",
@@ -23,7 +24,7 @@ export const memberTable = pgTable(
     role: text("role", { enum: ["org-admin", "hr"] })
       .default("hr")
       .notNull(),
-    createdAt: timestamp("created_at").notNull(),
+    createdAt: created_at,
   },
   (table) => [
     index("member_organizationId_idx").on(table.organizationId),

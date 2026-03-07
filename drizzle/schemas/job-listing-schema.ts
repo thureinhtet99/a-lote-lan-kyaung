@@ -8,7 +8,7 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
-import { created_at, id, updated_at } from "../schema-helpers";
+import { created_at, updated_at } from "../schema-helpers";
 import { relations } from "drizzle-orm";
 import { organizationTable } from "./organization-schema";
 import { applicationTable } from "./application-schema";
@@ -43,7 +43,7 @@ export const jobListingTypeEnum = pgEnum("type", jobListingTypes);
 export const jobListingTable = pgTable(
   "job_listings",
   {
-    id,
+    id: text("id").primaryKey(),
     organizationId: text("organization_id")
       .references(() => organizationTable.id, { onDelete: "cascade" })
       .notNull(),
@@ -57,8 +57,8 @@ export const jobListingTable = pgTable(
     status: jobListingStatusEnum().notNull().default("draft"),
     type: jobListingTypeEnum().notNull(),
     posted_at: timestamp("posted_at", { withTimezone: true }),
-    created_at,
-    updated_at,
+    createdAt: created_at,
+    updatedAt: updated_at,
   },
   (table) => [index().on(table.city)],
 );

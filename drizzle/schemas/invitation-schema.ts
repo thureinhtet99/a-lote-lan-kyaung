@@ -9,6 +9,7 @@ import {
 import { relations } from "drizzle-orm";
 import { organizationTable } from "./organization-schema";
 import { userTable } from "./user-schema";
+import { created_at } from "../schema-helpers";
 
 export const invitationTable = pgTable(
   "invitations",
@@ -20,8 +21,8 @@ export const invitationTable = pgTable(
     email: text("email").notNull(),
     role: text("role", { enum: ["org-admin", "hr"] }),
     status: text("status").default("pending").notNull(),
-    expiresAt: timestamp("expires_at").notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: created_at,
     inviterId: text("inviter_id")
       .notNull()
       .references(() => userTable.id, { onDelete: "cascade" }),

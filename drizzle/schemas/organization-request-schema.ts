@@ -9,6 +9,7 @@ import {
 import { relations } from "drizzle-orm";
 import { userTable } from "./user-schema";
 import { organizationTable } from "./organization-schema";
+import { created_at, updated_at } from "../schema-helpers";
 
 export const organizationRequestTable = pgTable(
   "organization_requests",
@@ -31,11 +32,8 @@ export const organizationRequestTable = pgTable(
       () => organizationTable.id,
       { onDelete: "set null" },
     ),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at")
-      .defaultNow()
-      .$onUpdate(() => /* @__PURE__ */ new Date())
-      .notNull(),
+    createdAt: created_at,
+    updatedAt: updated_at,
   },
   (table) => [
     index("org_request_userId_idx").on(table.userId),

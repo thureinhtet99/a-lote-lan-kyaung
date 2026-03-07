@@ -38,8 +38,8 @@ export const applicationTable = pgTable(
     coverLetter: text("cover_letter"),
     resumeFileUrl: text("resume_file_url").notNull(),
     status: applicationStatusEnum().notNull().default("applied"),
-    created_at,
-    updated_at,
+    createdAt: created_at,
+    updatedAt: updated_at,
   },
   (table) => [primaryKey({ columns: [table.jobListingId, table.userId] })],
 );

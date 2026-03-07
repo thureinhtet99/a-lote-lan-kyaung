@@ -8,6 +8,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { userTable } from "./user-schema";
+import { created_at, updated_at } from "../schema-helpers";
 
 export const employerRequestTable = pgTable(
   "employer_requests",
@@ -23,11 +24,8 @@ export const employerRequestTable = pgTable(
     adminResponse: text("admin_response"),
     reviewedBy: text("reviewed_by").references(() => userTable.id),
     reviewedAt: timestamp("reviewed_at"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at")
-      .defaultNow()
-      .$onUpdate(() => /* @__PURE__ */ new Date())
-      .notNull(),
+    createdAt: created_at,
+    updatedAt: updated_at,
   },
   (table) => [
     index("employer_request_userId_idx").on(table.userId),

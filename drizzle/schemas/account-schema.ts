@@ -8,6 +8,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { userTable } from "./user-schema";
+import { created_at, updated_at } from "../schema-helpers";
 
 export const accountTable = pgTable(
   "accounts",
@@ -25,10 +26,8 @@ export const accountTable = pgTable(
     refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
     scope: text("scope"),
     password: text("password"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at")
-      .$onUpdate(() => /* @__PURE__ */ new Date())
-      .notNull(),
+    createdAt: created_at,
+    updatedAt: updated_at,
   },
   (table) => [index("account_userId_idx").on(table.userId)],
 );

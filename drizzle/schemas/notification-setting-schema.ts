@@ -11,8 +11,8 @@ export const notificationSettingsTable = pgTable("notification_settings", {
     .notNull()
     .default(false),
   aiPrompt: text("ai_prompt"),
-  created_at,
-  updated_at,
+  createdAt: created_at,
+  updatedAt: updated_at,
 });
 
 export const userNotificationSettingsRelations = relations(

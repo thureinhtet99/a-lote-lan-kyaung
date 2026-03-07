@@ -33,7 +33,6 @@ import { ApplicationType } from "@/types/index.type";
 import DataTableFacetedFilter from "@/components/data-table/data-table-faceted-filter";
 import { DataTableSortableColumnHeader } from "@/components/data-table/data-table-sortable-column-header";
 import StatusIcon from "./status-icon";
-import RatingIcon from "./rating-icon";
 
 export default function ApplicationTable({
   applications,
@@ -93,18 +92,7 @@ function Toolbar<T>({
             }))}
         />
       )}
-      {table.getColumn("rating") && (
-        <DataTableFacetedFilter
-          column={table.getColumn("rating")}
-          title="Rating"
-          disabled={disabled}
-          options={RATING_OPTIONS.map((rating, index) => ({
-            label: <RatingIcon rating={rating} />,
-            value: rating,
-            key: index,
-          }))}
-        />
-      )}
+
       {hiddenRow > 0 && (
         <div className="text-sm text-muted-foreground ml-2">
           {hiddenRow} {hiddenRow > 1 ? "rows" : "row"} hidden
@@ -166,33 +154,15 @@ const getColumns = (
     },
 
     {
-      accessorKey: "rating",
-      header: ({ column }) => (
-        <DataTableSortableColumnHeader column={column} title="Rating" />
-      ),
-      filterFn: ({ original }, _, value) => {
-        return value.includes(original.rating);
-      },
-      cell: ({ row }) => (
-        <RatingCell
-          canUpdate={canUpdateRating}
-          rating={row.original.rating}
-          jobListingId={row.original.jobListingId}
-          userId={row.original.user.id}
-        />
-      ),
-    },
-
-    {
       accessorKey: "createdAt",
-      accessorFn: (row) => row.created_at,
+      accessorFn: (row) => row.createdAt,
       header: ({ column }) => (
         <DataTableSortableColumnHeader column={column} title="Applied On" />
       ),
       cell: ({ row }) => {
         return (
           <div className="flex items-center justify-center">
-            {new Date(row.original.created_at).toLocaleDateString()}
+            {new Date(row.original.createdAt).toLocaleDateString()}
           </div>
         );
       },
@@ -262,59 +232,6 @@ const StatusCell = ({
               }}
             >
               <StatusDetail status={status} />
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
-  );
-};
-
-const RatingCell = ({
-  canUpdate,
-  rating,
-  jobListingId,
-  userId,
-}: {
-  canUpdate: boolean;
-  rating: number | null;
-  jobListingId: string;
-  userId: string;
-}) => {
-  const [optimisticRating, setOptimisticRating] = useOptimistic(rating);
-  const [isPending, startTransition] = useTransition();
-
-  if (!canUpdate) return <RatingIcon rating={optimisticRating} />;
-
-  return (
-    <div className="flex items-center justify-center">
-      <DropdownMenu>
-        <DropdownMenuTrigger className="min-w-40" asChild>
-          <Button
-            variant="ghost"
-            className={cn("-ml-3", isPending && "opacity-50")}
-          >
-            <RatingIcon rating={optimisticRating} />
-            <ChevronDownIcon />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          {RATING_OPTIONS.map((rating) => (
-            <DropdownMenuItem
-              key={rating}
-              onClick={() => {
-                startTransition(async () => {
-                  setOptimisticRating(rating);
-                  // const response = await updateJobListingApplicationRating(
-                  //   { jobListingId, userId },
-                  //   rating,
-                  // );
-
-                  // if (response?.error) toast.error(response.message);
-                });
-              }}
-            >
-              <RatingIcon rating={rating} />
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>

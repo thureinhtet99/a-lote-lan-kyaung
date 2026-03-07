@@ -95,14 +95,6 @@ const SuspendedComponent = async ({
             />
           </Suspense>
 
-          {/* Feature button */}
-          {jobListing.data.status === "published" && (
-            <FeatureToggleButton
-              isFeatured={jobListing.data.isFeatured}
-              id={jobListing.data.id}
-            />
-          )}
-
           {/* Delete button */}
           <CheckCondition
             condition={() => hasOrgUserPermission("job_listing.delete")}
@@ -145,7 +137,7 @@ const Applications = async ({ jobListingId }: { jobListingId: string }) => {
     <ApplicationTable
       applications={applications.data.map((app) => ({
         ...app,
-        createdAt: app.created_at,
+        createdAt: app.createdAt,
         user: {
           ...app.user,
           resume: app.user.resume

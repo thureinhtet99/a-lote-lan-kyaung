@@ -27,6 +27,7 @@ import { employerRequestSchema } from "@/features/admin/schema/admin-form-schema
 import { createEmployerRequest } from "@/features/users/db/user-db";
 import { Loader2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
+import LoadingSwap from "@/components/shared/loading-swap";
 
 export function EmployerRequestForm() {
   const router = useRouter();
@@ -108,14 +109,7 @@ export function EmployerRequestForm() {
             />
 
             <Button type="submit" disabled={isPending}>
-              {isPending ? (
-                <>
-                  <Loader2Icon className="animate-spin" />
-                  Submitting...
-                </>
-              ) : (
-                "Submit Request"
-              )}
+              <LoadingSwap isLoading={isPending} children="Submit request" />
             </Button>
           </form>
         </Form>

@@ -139,7 +139,7 @@ export type CheckConditionType = {
 // Application
 export type ApplicationType = Pick<
   typeof applicationTable.$inferSelect,
-  "jobListingId" | "rating" | "status" | "created_at"
+  "jobListingId" | "status" | "createdAt"
 > & {
   coverLetterMarkDown: ReactNode | null;
   user: Pick<typeof userTable.$inferSelect, "id" | "name" | "image"> & {
