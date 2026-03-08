@@ -1,6 +1,5 @@
 // Job Listings feature exports
 // Components
-export { default as FeatureToggleButton } from "./components/feature-toggle-button";
 export { default as JobApplyButton } from "./components/job-apply-button";
 export { default as JobListingBadges } from "./components/job-listing-badges";
 export { default as JobListingForm } from "./components/job-listing-form";

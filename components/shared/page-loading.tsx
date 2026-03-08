@@ -1,7 +1,7 @@
 export default function PageLoading() {
   return (
-    <div className="h-screen flex justify-center items-center gap-2">
-      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+    <div className="flex min-h-[50vh] items-center justify-center gap-2">
+      <div className="size-5 animate-spin rounded-full border-2 border-blue-600 border-b-transparent"></div>
       <span className="text-base text-muted-foreground">Loading....</span>
     </div>
   );

@@ -30,7 +30,7 @@ export default function AppSidebar({
           collapsible="icon"
           className="overflow-hidden border-r border-primary"
         >
-          <SidebarHeader className="px-4 h-[72px] flex items-center justify-center border-b border-sidebar-border bg-gradient-to-r from-accent to-primary">
+          <SidebarHeader className="px-4 h-[72px] flex items-center justify-center border-b border-sidebar-border bg-gradient-to-r from-accent to-primary group-data-[state=collapsed]:from-primary">
             <Logo size="sm" showText={true} />
           </SidebarHeader>
 

@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { memberTable, organizationTable } from "@/drizzle/schema";
-import { and, eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
@@ -15,8 +15,6 @@ import {
   sideBarJobListingWithApplicationsTag,
 } from "@/lib/data-cache";
 import { safeGetSession } from "@/lib/auth/auth-helpers";
-
-// Note: getCurrentOrg is defined in @/lib/auth/auth-helpers
 
 export const getOrganizationsByEmployerId = async (): Promise<{
   success: boolean;

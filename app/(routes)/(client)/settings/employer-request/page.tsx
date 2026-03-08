@@ -9,7 +9,6 @@ import {
 import { AlertCircle, CheckCircle, Clock } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Suspense } from "react";
-import Loading from "@/components/shared/loading";
 import { getEmployerRequest } from "@/features/users/db/user-db";
 import { getCurrentUser, isEmployer } from "@/lib/auth/auth-helpers";
 import { redirect } from "next/navigation";

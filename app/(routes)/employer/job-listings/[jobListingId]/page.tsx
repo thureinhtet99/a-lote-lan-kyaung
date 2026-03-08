@@ -19,7 +19,6 @@ import {
   getJobListingByIdByOrgId,
 } from "@/features/job-listings/db/job-listing-db";
 import StatusToggleButton from "@/features/job-listings/components/status-toggle-button";
-import FeatureToggleButton from "@/features/job-listings/components/feature-toggle-button";
 import Loading from "@/components/shared/loading";
 import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/permissions";
 import { getCurrentOrg } from "@/lib/auth/auth-helpers";

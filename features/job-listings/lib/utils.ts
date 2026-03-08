@@ -1,8 +1,5 @@
 import { JobListingStatusType } from "@/drizzle/schema";
 import { differenceInDays } from "date-fns";
-import { EyeIcon } from "lucide-react";
-import { connection } from "next/server";
-import { Badge } from "@/components/ui/badge";
 
 export const nextJobListingStatus = (status: JobListingStatusType) => {
   switch (status) {

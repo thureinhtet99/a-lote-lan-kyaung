@@ -1,20 +1,14 @@
 import { notFound } from "next/navigation";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Briefcase, Building2, Clock, MapPin, Users } from "lucide-react";
+import { Briefcase, Clock, Users } from "lucide-react";
 import Link from "next/link";
 import { APP_ROUTES } from "@/constants/app-config";
 import { getOrganizationDetailBySlug } from "@/features/organizations/db/organization-request-db";
 import { Separator } from "@/components/ui/separator";
-import JobApplyButton from "@/features/job-listings/components/job-apply-button";
-import { formatDistanceToNow } from "date-fns";
+import JobListingBadges from "@/features/job-listings/components/job-listing-badges";
+import DaySincePosting from "@/components/shared/day-since-posting";
+import { Suspense } from "react";
 
 export default async function OrganizationDetailPage({
   params,
@@ -24,20 +18,24 @@ export default async function OrganizationDetailPage({
   const { slug } = await params;
   const result = await getOrganizationDetailBySlug(slug);
 
-  if (!result.success || !result.data) {
-    notFound();
-  }
+  if (!result.success || !result.data) notFound();
 
   const org = result.data;
+  const orgNameInitial =
+    org.name
+      .split(" ")
+      .splice(0, 4)
+      .map((word) => word[0])
+      .join("") || "";
 
   return (
     <div className="min-h-screen">
       {/* Header banner */}
-      <section className="px-6 py-8 border-b bg-gradient-to-r from-primary/10 to-accent/10">
+      <section className="px-6 py-10 border-b bg-gradient-to-r from-primary/10 to-accent/10">
         <div className="max-w-4xl mx-auto flex items-center gap-4">
           <Avatar className="size-16 rounded-xl shadow">
             <AvatarImage src={org.logo ?? undefined} alt={org.name} />
-            <AvatarFallback className="rounded-xl bg-primary/10 text-primary text-xl font-bold">
+            <AvatarFallback className="rounded-xl bg-primary text-white text-xl font-bold">
               {org.name.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
@@ -79,46 +77,6 @@ export default async function OrganizationDetailPage({
 
         <Separator />
 
-        {/* Team */}
-        <section>
-          <h2 className="text-lg font-semibold mb-4">Team</h2>
-          {org.members.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No members yet</p>
-          ) : (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {org.members.map((member) => (
-                <div
-                  key={member.id}
-                  className="flex items-center gap-3 rounded-lg border p-3"
-                >
-                  <Avatar className="size-9">
-                    <AvatarImage
-                      src={member.user.image ?? undefined}
-                      alt={member.user.name}
-                    />
-                    <AvatarFallback className="text-xs font-medium">
-                      {member.user.name.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {member.user.name}
-                    </p>
-                    <Badge
-                      variant="outline"
-                      className="text-xs capitalize mt-0.5"
-                    >
-                      {member.role}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        <Separator />
-
         {/* Job Listings */}
         <section>
           <h2 className="text-lg font-semibold mb-4">Open Positions</h2>
@@ -129,56 +87,60 @@ export default async function OrganizationDetailPage({
           ) : (
             <div className="space-y-3">
               {org.jobListings.map((job) => (
-                <Card key={job.id}>
-                  <CardHeader className="pb-2">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <CardTitle className="text-base">{job.title}</CardTitle>
-                        <CardDescription className="flex flex-wrap gap-1.5 mt-1.5">
-                          <Badge
-                            variant="secondary"
-                            className="capitalize text-xs"
-                          >
-                            {job.type.replace("-", " ")}
-                          </Badge>
-                          <Badge
-                            variant="secondary"
-                            className="capitalize text-xs"
-                          >
-                            {job.locationRequirement}
-                          </Badge>
-                          <Badge
-                            variant="secondary"
-                            className="capitalize text-xs"
-                          >
-                            {job.experienceLevel}
-                          </Badge>
-                        </CardDescription>
+                <Link
+                  className="block"
+                  key={job.id}
+                  href={`${APP_ROUTES.JOB_LISTINGS.HOME}/${job.id}`}
+                >
+                  <Card className="@container overflow-hidden border-border/60 bg-background transition-all duration-200 hover:border-primary/60">
+                    <CardHeader>
+                      <div className="flex items-start gap-3">
+                        <Avatar className="size-14">
+                          <AvatarImage
+                            src={org.logo ?? undefined}
+                            alt={org.name}
+                          />
+                          <AvatarFallback className="uppercase bg-primary text-primary-foreground text-xl">
+                            {orgNameInitial}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0 flex-1 space-y-2">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <CardTitle className="text-base sm:text-lg font-semibold line-clamp-1">
+                                {job.title}
+                              </CardTitle>
+                              <p className="text-sm text-muted-foreground truncate">
+                                {org.name}
+                              </p>
+                            </div>
+
+                            <div className="flex items-center gap-2 shrink-0">
+                              {job.posted_at != null && (
+                                <span className="text-sm text-muted-foreground">
+                                  <Suspense
+                                    fallback={
+                                      job.posted_at
+                                        ? new Date(
+                                            job.posted_at,
+                                          ).toLocaleDateString()
+                                        : ""
+                                    }
+                                  >
+                                    <DaySincePosting postedAt={job.posted_at} />
+                                  </Suspense>
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <JobApplyButton jobListingId={job.id} />
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-                      <span>
-                        {job.wage.toLocaleString()}/{job.wageInterval}
-                      </span>
-                      {job.city && (
-                        <span className="flex items-center gap-1">
-                          <MapPin className="size-3" />
-                          {job.city}
-                        </span>
-                      )}
-                      {job.posted_at && (
-                        <span>
-                          {formatDistanceToNow(new Date(job.posted_at), {
-                            addSuffix: true,
-                          })}
-                        </span>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardHeader>
+                    <CardContent>
+                      <JobListingBadges jobListing={job} />
+                    </CardContent>
+                  </Card>
+                </Link>
               ))}
             </div>
           )}

@@ -537,8 +537,8 @@ export const toggleJobListingStatus = async (id: string) => {
   }
 };
 
-// Get published job listings count
-export const getPublishedJobListingCount = async (orgId: string) => {
+// Get published job listings count from org
+export const getPublishedJobListingCountByOrg = async (orgId: string) => {
   try {
     const [result] = await db
       .select({ count: count() })
@@ -551,14 +551,18 @@ export const getPublishedJobListingCount = async (orgId: string) => {
       );
     return {
       success: true,
-      message: "Published job listing count fetched successfully",
+      message:
+        "Published job listing count by organization fetched successfully",
       data: result.count,
     };
   } catch (error) {
-    console.error("Error getting published job listing count: ", error);
+    console.error(
+      "Error getting published job listing count by organization: ",
+      error,
+    );
     return {
       success: false,
-      message: "Failed to fetch published job listing count",
+      message: "Failed to fetch published job listing count by organization",
     };
   }
 };

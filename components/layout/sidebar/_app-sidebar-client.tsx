@@ -11,13 +11,13 @@ export function AppSidebarClient({ children }: { children: ReactNode }) {
   if (isMobile) {
     return (
       <div className="flex flex-col w-full min-h-dvh">
-        <div className="fixed left-2 top-1/2 -translate-y-1/2 z-30 md:hidden">
-          <SidebarTrigger className="size-8 bg-background text-foreground shadow-sm hover:bg-muted" />
-        </div>
-
         {/* Sticky mobile topbar */}
-        <header className="sticky top-0 z-20 flex items-center justify-center gap-2 px-4 py-2.5 border-b bg-gradient-to-r from-primary to-accent shrink-0">
-          <Logo size="sm" showText />
+        <header className="sticky top-0 z-20 flex items-center justify-between px-2.5 py-2.5 border-b bg-gradient-to-r from-primary to-accent shrink-0">
+          <SidebarTrigger className="size-8 bg-background text-foreground shadow-sm hover:bg-muted md:hidden" />
+          <div className="absolute left-1/2 -translate-x-1/2">
+            <Logo size="sm" showText />
+          </div>
+          <div className="size-8" aria-hidden />
         </header>
         <div className="flex-1 flex overflow-hidden relative">{children}</div>
       </div>

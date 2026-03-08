@@ -436,7 +436,6 @@ Benefits:
           wage: 130000 + index * 2000,
           wageInterval: "yearly" as const,
           city,
-          isFeatured: true,
           locationRequirement: "hybrid" as const,
           experienceLevel: "senior" as const,
           status: "published" as const,
@@ -474,7 +473,6 @@ Benefits:
           wageInterval: "yearly" as const,
 
           city,
-          isFeatured: false,
           locationRequirement: "remote" as const,
           experienceLevel: "mid-level" as const,
           status: "published" as const,
@@ -507,7 +505,6 @@ What you will gain:
           wageInterval: "hourly" as const,
 
           city,
-          isFeatured: false,
           locationRequirement: "on-site" as const,
           experienceLevel: "junior" as const,
           status: index % 2 === 0 ? ("draft" as const) : ("delisted" as const),

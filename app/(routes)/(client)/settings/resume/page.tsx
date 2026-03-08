@@ -1,23 +1,9 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { db } from "@/lib/db";
-import { eq } from "drizzle-orm";
-import { resumeTable } from "@/drizzle/schema";
-import MarkdownRenderer from "@/components/markdown/markdown-renderer";
-import Loading from "@/components/shared/loading";
 import { getCurrentUser } from "@/lib/auth/auth-helpers";
-import { cacheLife, cacheTag } from "next/cache";
-import { resumeTag } from "@/lib/data-cache";
 import DropzoneClient from "./_DropzoneClient";
 import { getCurrentResume } from "@/features/applications/db/resume-db";
 
@@ -78,7 +64,7 @@ const AISummary = async () => {
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground">
-          Coming soon..... You will get an auto-generated summary from your
+          Coming soon..... You will get an auto-generated ai summary from your
           uploaded resume here.
         </p>
       </CardContent>

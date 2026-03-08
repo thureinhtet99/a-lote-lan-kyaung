@@ -2,6 +2,7 @@ import { getCurrentOrg, getCurrentUser } from "@/lib/auth/auth-helpers";
 import {
   Popover,
   PopoverContent,
+  PopoverDescription,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { differenceInDays } from "date-fns";
@@ -35,15 +36,17 @@ export default async function JobApplyButton({
         <PopoverTrigger asChild>
           <Button>Apply job here</Button>
         </PopoverTrigger>
-        <PopoverContent align="end" className="text-sm text-center">
-          Please{" "}
-          <Link
-            href={APP_ROUTES.SIGN_IN}
-            className="text-primary underline hover:no-underline"
-          >
-            sign in
-          </Link>{" "}
-          first to apply for a job
+        <PopoverContent align="end" className="text-sm p-2 text-center">
+          <PopoverDescription>
+            Please{" "}
+            <Link
+              href={APP_ROUTES.SIGN_IN}
+              className="text-primary font-semibold hover:underline"
+            >
+              sign in
+            </Link>{" "}
+            first to apply for a job
+          </PopoverDescription>
         </PopoverContent>
       </Popover>
     );

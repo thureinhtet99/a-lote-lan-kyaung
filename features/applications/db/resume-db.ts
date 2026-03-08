@@ -3,7 +3,7 @@
 import { db } from "@/lib/db";
 import { resumeTable } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
-import { cacheLife, cacheTag, updateTag } from "next/cache";
+import { cacheLife, cacheTag, revalidateTag, updateTag } from "next/cache";
 import { resumeTag } from "@/lib/data-cache";
 
 export const getCurrentResume = async (userId: string) => {
@@ -53,6 +53,7 @@ export async function upsertUserResumeDb(
         set: data,
       });
     updateTag(resumeTag(userId));
+    revalidateTag(resumeTag(userId), "max");
   } catch (error) {
     console.error("Error uploading resume: ", error);
     return {
@@ -68,4 +69,5 @@ export async function updateUserResumeDb(
 ) {
   await db.update(resumeTable).set(data).where(eq(resumeTable.userId, userId));
   updateTag(resumeTag(userId));
+  revalidateTag(resumeTag(userId), "max");
 }

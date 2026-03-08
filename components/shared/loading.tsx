@@ -6,7 +6,7 @@ function Loading({ className }: { className?: ReactNode }) {
     <div
       className={cn("flex justify-center items-center space-x-2", className)}
     >
-      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
+      <div className="size-5 animate-spin rounded-full border-2 border-blue-600 border-b-transparent"></div>
       <span className="text-xs text-muted-foreground">Loading....</span>
     </div>
   );

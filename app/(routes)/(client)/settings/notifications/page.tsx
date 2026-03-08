@@ -37,29 +37,19 @@ const SuspendedComponent = async () => {
   return (
     <div className="space-y-6 px-6 py-6 md:px-8 md:py-8">
       <div className="flex items-center gap-2">
-        <Bell className="h-6 w-6" />
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Notifications</h2>
+          <h2 className="text-2xl font-bold tracking-tight">
+            Your notifications
+          </h2>
           <p className="text-sm text-muted-foreground mt-1">
             View and manage your notifications
           </p>
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Your Notifications</CardTitle>
-          <CardDescription>
-            Stay updated with important information about your account and
-            organization requests
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Suspense fallback={<Loading />}>
-            <NotificationsList initialNotifications={notifications} />
-          </Suspense>
-        </CardContent>
-      </Card>
+      <Suspense fallback={<Loading />}>
+        <NotificationsList initialNotifications={notifications} />
+      </Suspense>
     </div>
   );
 };

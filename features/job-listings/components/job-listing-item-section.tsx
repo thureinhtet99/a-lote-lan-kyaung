@@ -11,8 +11,7 @@ import JobListingBadges from "@/features/job-listings/components/job-listing-bad
 import { ClientSearchParamsType } from "@/types/index.type";
 import { searchParamsSchema } from "../schema/search-params-schema";
 import { getAllJobListings } from "../db/job-listing-db";
-import { getPostingJobLabel } from "../lib/utils";
-import PageLoading from "@/components/shared/page-loading";
+import DaySincePosting from "@/components/shared/day-since-posting";
 
 export default function JobListingItemSection(props: ClientSearchParamsType) {
   return (
@@ -109,7 +108,7 @@ const JobListingItem = ({
           <div className="min-w-0 flex-1 space-y-2">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <CardTitle className="text-base sm:text-lg font-semibold hover:text-primary transition-colors line-clamp-1">
+                <CardTitle className="text-base sm:text-lg font-semibold line-clamp-1">
                   {jobListing.title}
                 </CardTitle>
                 <p className="text-sm text-muted-foreground truncate">
@@ -119,10 +118,7 @@ const JobListingItem = ({
 
               <div className="flex items-center gap-2 shrink-0">
                 {jobListing.posted_at != null && (
-                  <Badge
-                    variant="secondary"
-                    className="font-normal text-[11px] px-2.5"
-                  >
+                  <span className="text-sm text-muted-foreground">
                     <Suspense
                       fallback={
                         jobListing.posted_at
@@ -132,25 +128,16 @@ const JobListingItem = ({
                     >
                       <DaySincePosting postedAt={jobListing.posted_at} />
                     </Suspense>
-                  </Badge>
+                  </span>
                 )}
               </div>
             </div>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="pt-0 pb-4">
-        <div className="flex items-center gap-2">
-          <JobListingBadges jobListing={jobListing} className="text-xs" />
-        </div>
+      <CardContent>
+        <JobListingBadges jobListing={jobListing} />
       </CardContent>
     </Card>
   );
-};
-
-const DaySincePosting = ({ postedAt }: { postedAt: Date }) => {
-  const label = getPostingJobLabel(postedAt);
-  if (label === "New") return <Badge>New</Badge>;
-
-  return label;
 };

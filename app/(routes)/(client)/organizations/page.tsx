@@ -7,11 +7,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Building2, Users } from "lucide-react";
+import { Building2, Building2Icon, Users } from "lucide-react";
 import Link from "next/link";
 import { APP_ROUTES } from "@/constants/app-config";
 import { getAllApprovedOrganizations } from "@/features/organizations/db/organization-request-db";
 import Loading from "@/components/shared/loading";
+import PageLoading from "@/components/shared/page-loading";
 
 export default function OrganizationsPage() {
   return (
@@ -22,13 +23,13 @@ export default function OrganizationsPage() {
           Organizations
         </h1>
         <span className="inline-flex items-center gap-1.5 text-white text-xs font-medium shrink-0">
-          <Building2 className="size-5" />
-          Companies hiring now
+          <Building2Icon className="size-5" />
+          Organizations hiring now
         </span>
       </section>
 
       <section className="p-6">
-        <Suspense fallback={<Loading />}>
+        <Suspense fallback={<PageLoading />}>
           <OrganizationsList />
         </Suspense>
       </section>
@@ -60,7 +61,7 @@ const OrganizationsList = async () => {
           All Organizations
         </h2>
         <p className="text-xs text-muted-foreground mt-0.5">
-          <span className="text-black">{result.data.length}</span> organization
+          {result.data.length} organization
           {result.data.length !== 1 ? "s" : ""} on the platform
         </p>
       </div>
@@ -77,7 +78,7 @@ const OrganizationsList = async () => {
                 <div className="flex items-center gap-3">
                   <Avatar className="size-10 rounded-lg">
                     <AvatarImage src={org.logo ?? undefined} alt={org.name} />
-                    <AvatarFallback className="rounded-lg bg-primary/10 text-primary font-semibold">
+                    <AvatarFallback className="rounded-lg bg-primary text-white font-semibold">
                       {org.name.slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>

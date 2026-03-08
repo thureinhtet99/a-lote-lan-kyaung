@@ -1,7 +1,5 @@
-import { Badge } from "@/components/ui/badge";
 import { jobListingTable } from "@/drizzle/schema";
-import { ComponentProps } from "react";
-import { Banknote, BuildingIcon, MapPinIcon } from "lucide-react";
+import { Dot } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   formatExpLevel,
@@ -20,7 +18,6 @@ export default function JobListingBadges({
     experienceLevel,
     locationRequirement,
   },
-  className,
 }: {
   jobListing: Pick<
     typeof jobListingTable.$inferSelect,
@@ -31,49 +28,33 @@ export default function JobListingBadges({
     | "experienceLevel"
     | "locationRequirement"
   >;
-  className?: string;
 }) {
-  const badgeType = {
-    variant: "outline",
-    className,
-  } satisfies ComponentProps<typeof Badge>;
+  const items = [
+    wage != null && wageInterval != null
+      ? formatWage(wage, wageInterval)
+      : null,
+    city != null ? formatJobListingLocation(city) : null,
+    locationRequirement != null
+      ? formatLocationRequirement(locationRequirement)
+      : null,
+    type != null ? formatJobType(type) : null,
+    experienceLevel != null ? formatExpLevel(experienceLevel) : null,
+  ].filter((value): value is string => Boolean(value && value.trim()));
+
+  if (items.length === 0) return null;
 
   return (
-    <>
-      {wage != null && wageInterval != null && (
-        <Badge {...badgeType}>
-          <Banknote />
-          {formatWage(wage, wageInterval)}
-        </Badge>
+    <div
+      className={cn(
+        "flex flex-wrap items-center text-sm text-muted-foreground",
       )}
-
-      {city != null && (
-        <Badge {...badgeType}>
-          <MapPinIcon className="size-10" />
-          {formatJobListingLocation(city)}
-        </Badge>
-      )}
-
-      {locationRequirement != null && (
-        <Badge {...badgeType}>
-          <BuildingIcon className="size-10" />
-          {formatLocationRequirement(locationRequirement)}
-        </Badge>
-      )}
-
-      {type != null && (
-        <Badge {...badgeType}>
-          <BuildingIcon className="size-10" />
-          {formatJobType(type)}
-        </Badge>
-      )}
-
-      {experienceLevel != null && (
-        <Badge {...badgeType}>
-          <BuildingIcon className="size-10" />
-          {formatExpLevel(experienceLevel)}
-        </Badge>
-      )}
-    </>
+    >
+      {items.map((item, index) => (
+        <div key={`${item}-${index}`} className="flex items-center">
+          {index > 0 && <Dot className="size-8 text-muted-foreground/80" />}
+          <span>{item}</span>
+        </div>
+      ))}
+    </div>
   );
 }

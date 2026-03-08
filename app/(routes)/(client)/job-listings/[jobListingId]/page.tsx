@@ -7,6 +7,8 @@ import JobListingBadges from "@/features/job-listings/components/job-listing-bad
 import PageLoading from "@/components/shared/page-loading";
 import JobApplyButton from "@/features/job-listings/components/job-apply-button";
 import { getPublishedJobListingByIdWithOrganization } from "@/features/job-listings/db/job-listing-db";
+import DaySincePosting from "@/components/shared/day-since-posting";
+import { Dot } from "lucide-react";
 
 export default function JobListingPage({
   params,
@@ -60,26 +62,27 @@ const SuspendedComponent = async ({
                 {jobListing.data.organization.name}
               </div>
             </div>
-
-            {jobListing.data.posted_at != null && (
-              <div className="text-sm text-muted-foreground @max-lg:hidden">
-                {new Date(jobListing.data.posted_at).toLocaleDateString(
-                  "en-US",
-                  {
-                    month: "long",
-                    year: "numeric",
-                    day: "2-digit",
-                  },
-                )}
-              </div>
-            )}
           </div>
           <Suspense fallback={<Button disabled>Apply job here</Button>}>
             <JobApplyButton jobListingId={jobListing.data.id} />
           </Suspense>
         </div>
 
-        <div className="flex flex-wrap gap-2 mt-2">
+        <div className="flex flex-wrap items-center mt-2">
+          {jobListing.data.posted_at != null && (
+            <span className="text-sm text-muted-foreground">
+              <Suspense
+                fallback={
+                  jobListing.data.posted_at
+                    ? new Date(jobListing.data.posted_at).toLocaleDateString()
+                    : ""
+                }
+              >
+                <DaySincePosting postedAt={jobListing.data.posted_at} />
+              </Suspense>
+            </span>
+          )}
+          <Dot className="size-8 text-muted-foreground/80" />
           <JobListingBadges jobListing={jobListing.data} />
         </div>
       </div>

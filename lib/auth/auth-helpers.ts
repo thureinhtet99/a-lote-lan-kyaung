@@ -10,7 +10,7 @@ export async function safeGetSession() {
       headers: await headers(),
     });
   } catch (error) {
-    console.error("Auth session error:", error);
+    console.error("Auth session error: ", error);
     return null;
   }
 }
