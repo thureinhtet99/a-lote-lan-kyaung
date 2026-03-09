@@ -1,11 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Suspense } from "react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/auth-helpers";
 import DropzoneClient from "./_DropzoneClient";
 import { getCurrentResume } from "@/features/applications/db/resume-db";
+import ResumeViewerClient from "./_ResumeViewerClient";
 
 export default function ResumePage() {
   return (
@@ -19,7 +18,7 @@ export default function ResumePage() {
 
       <DropzoneClient />
       <Suspense>
-        <SuspendedComponent />
+        <ResumeViewer />
       </Suspense>
 
       {/* AI */}
@@ -30,7 +29,7 @@ export default function ResumePage() {
   );
 }
 
-const SuspendedComponent = async () => {
+const ResumeViewer = async () => {
   const { userId } = await getCurrentUser();
   if (userId == null) return notFound();
 
@@ -38,15 +37,17 @@ const SuspendedComponent = async () => {
   if (!userResume.data) return null;
 
   return (
-    <Button asChild>
-      <Link
-        href={userResume.data.resumeFileUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        View Resume
-      </Link>
-    </Button>
+    <ResumeViewerClient
+      resumeFileUrl={userResume.data.resumeFileUrl}
+      resumeFileName={userResume.data.resumeFileName}
+      uploadedAt={
+        userResume.data.updatedAt instanceof Date
+          ? userResume.data.updatedAt.toISOString()
+          : userResume.data.updatedAt
+            ? String(userResume.data.updatedAt)
+            : null
+      }
+    />
   );
 };
 

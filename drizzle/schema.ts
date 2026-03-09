@@ -10,6 +10,5 @@ export * from "./schemas/organization-request-schema";
 export * from "./schemas/organization-schema";
 export * from "./schemas/resume-schema";
 export * from "./schemas/session-schema";
-export * from "./schemas/notification-setting-schema";
 export * from "./schemas/user-schema";
 export * from "./schemas/verification-schema";

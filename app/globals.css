@@ -47,7 +47,6 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* ─── Light Mode ─────────────────────────────────────────────── */
 :root {
   --radius: 0.625rem;
 

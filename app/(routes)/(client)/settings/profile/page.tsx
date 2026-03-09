@@ -21,7 +21,7 @@ import Link from "next/link";
 import { APP_ROUTES } from "@/constants/app-config";
 import { differenceInDays } from "date-fns";
 import { useRouter } from "next/navigation";
-import { updateUser } from "@/features";
+import { updateUser } from "@/features/users/db/user-db";
 
 export default function ProfilePage() {
   const { data: session, refetch } = useSession();
@@ -104,23 +104,13 @@ export default function ProfilePage() {
                     {session.user?.name}
                   </CardTitle>
                   <CardDescription className="text-base mt-1">
-                    {session.user?.role === "employer"
-                      ? "Employer"
-                      : session.user?.role === "admin"
-                        ? "Administrator"
-                        : "Job Seeker"}
+                    {session.user?.role === "employer" && "Employer"}
                   </CardDescription>
                 </div>
                 <div className="flex gap-2">
-                  <Badge
-                    variant="secondary"
-                    className={`bg-secondary ${session.session.userId ? "text-green-400" : "text-red-400"}`}
-                  >
-                    {session.session.userId ? "Active" : "Inactive"}
-                  </Badge>
-                  <Badge variant="outline">
-                    {daySinceJoined(session.user?.createdAt)}
-                  </Badge>
+                  <span className="text-muted-foreground text-sm">
+                    Joined {daySinceJoined(session.user?.createdAt)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -169,7 +159,7 @@ export default function ProfilePage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label>Full Name</Label>
+              <Label className="text-muted-foreground">Username</Label>
               {isEditing ? (
                 <Input
                   value={formData.name}
@@ -186,14 +176,8 @@ export default function ProfilePage() {
             <Separator />
 
             <div className="space-y-2">
-              <Label className="flex items-center gap-2 text-muted-foreground">
-                <Mail className="h-4 w-4" />
-                Email
-              </Label>
+              <Label className="text-muted-foreground">Email</Label>
               <p className="text-sm font-medium">{session.user?.email}</p>
-              <p className="text-xs text-muted-foreground">
-                Email cannot be changed
-              </p>
             </div>
           </CardContent>
         </Card>
@@ -204,15 +188,6 @@ export default function ProfilePage() {
             <CardTitle className="text-xl">Account Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">
-                Account Type
-              </span>
-              <Badge variant="outline" className="capitalize">
-                {session.user?.role}
-              </Badge>
-            </div>
-            <Separator />
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">
                 Email Verified
