@@ -6,17 +6,16 @@ import { ExternalLink } from "lucide-react";
 import { claimOrganization } from "@/features/organizations/db/notification-db";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import LoadingSwap from "@/components/shared/loading-swap";
 
 interface ClaimOrganizationButtonProps {
   notificationId: string;
   organizationId: string;
-  organizationName: string;
 }
 
 export function ClaimOrganizationButton({
   notificationId,
   organizationId,
-  organizationName,
 }: ClaimOrganizationButtonProps) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -38,10 +37,10 @@ export function ClaimOrganizationButton({
     <Button
       onClick={handleClaimOrganization}
       disabled={isPending}
-      className="w-full"
+      className="w-full cursor-pointer"
     >
-      <ExternalLink className="h-4 w-4 mr-2" />
-      {isPending ? "Claiming..." : `Claim "${organizationName}" Organization`}
+      <ExternalLink className="h-4 w-4" />
+      <LoadingSwap isLoading={isPending} children="Claim" />
     </Button>
   );
 }

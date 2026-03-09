@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth/auth-client";
 import { APP_ROUTES } from "@/constants/app-config";
 import { useTransition } from "react";
+import { toast } from "sonner";
 
 export function useSignOut() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export function useSignOut() {
         onSuccess: () => {
           startTransition(() => {
             onSuccess?.();
+            toast.success("Signout successfully!");
             router.push(APP_ROUTES.HOME);
           });
         },

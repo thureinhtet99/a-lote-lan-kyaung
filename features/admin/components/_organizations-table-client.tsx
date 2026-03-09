@@ -103,7 +103,7 @@ export function OrganizationsTableClient({
       </form>
 
       {organizations.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-10 text-center text-sm text-muted-foreground">
+        <div className="rounded-lg p-10 text-center text-sm text-muted-foreground">
           {initialQuery
             ? `No organizations match "${initialQuery}"`
             : "No organizations found"}
@@ -129,7 +129,7 @@ export function OrganizationsTableClient({
                           src={org.logo ?? undefined}
                           alt={org.name}
                         />
-                        <AvatarFallback className="rounded-lg bg-primary/10 text-sm font-semibold text-primary">
+                        <AvatarFallback className="rounded-xl bg-primary text-white text-md font-bold">
                           {org.name.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>

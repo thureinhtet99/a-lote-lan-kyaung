@@ -144,8 +144,7 @@ export default function OrganizationsClient({
                     className="text-destructive hover:text-destructive"
                     disabled={isPending}
                   >
-                    <Trash2 className="size-4 mr-1.5" />
-                    Delete
+                    <Trash2 className="size-4" />
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -184,18 +183,9 @@ export default function OrganizationsClient({
               <p className="text-sm font-medium text-muted-foreground mb-1">
                 Organization Slug
               </p>
-              <p className="text-sm">{organization.slug || "N/A"}</p>
+              <p className="text-sm">{organization.slug || "---"}</p>
             </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground mb-1">
-                Your Role
-              </p>
-              <p className="text-sm capitalize">
-                {organization.role === "org-admin"
-                  ? "Administrator"
-                  : organization.role}
-              </p>
-            </div>
+
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-1">
                 Created

@@ -10,7 +10,6 @@ import {
   organizationRequestTable,
   resumeTable,
   sessionTable,
-  notificationSettingsTable,
   userTable,
   verificationTable,
 } from "@/drizzle/schema";
@@ -89,7 +88,6 @@ async function seed() {
     await db.delete(applicationTable);
     await db.delete(notificationTable);
     await db.delete(jobListingTable);
-    await db.delete(notificationSettingsTable);
     await db.delete(resumeTable);
     await db.delete(memberTable);
     await db.delete(invitationTable);
@@ -194,20 +192,6 @@ async function seed() {
 
       console.log(`✅ Added 2 members to ${org.name}`);
     }
-
-    console.log("🔔 Creating user notification settings...");
-    await db.insert(notificationSettingsTable).values(
-      createdUsers.map((u, index) => ({
-        userId: u.id,
-        newJobEmailNotification: index % 2 === 0,
-        aiPrompt:
-          u.role === "user"
-            ? "Notify me for remote software roles."
-            : "Notify me for relevant marketplace updates.",
-      })),
-    );
-    console.log("✅ Notification settings inserted");
-    console.log("");
 
     console.log("📄 Creating resumes for all regular users...");
     await db.insert(resumeTable).values(

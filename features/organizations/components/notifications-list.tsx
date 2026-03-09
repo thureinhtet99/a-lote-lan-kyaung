@@ -91,17 +91,6 @@ export function NotificationsList({
     });
   };
 
-  const getNotificationIcon = (type: Notification["type"]) => {
-    switch (type) {
-      case "organization_approved":
-        return "🎉";
-      case "organization_rejected":
-        return "❌";
-      default:
-        return "ℹ️";
-    }
-  };
-
   if (notifications.length === 0) {
     return (
       <div className="py-12 text-center">
@@ -146,15 +135,12 @@ export function NotificationsList({
           <div
             key={notification.id}
             className={cn(
-              "p-4 border rounded-lg hover:bg-accent/50 transition-colors",
+              "p-4 border rounded-lg hover:border-primary/50 transition-colors",
               !notification.isRead && "bg-accent/20 border-primary/20",
             )}
           >
             <div className="flex items-start gap-3">
-              <span className="text-2xl flex-shrink-0 mt-1">
-                {getNotificationIcon(notification.type)}
-              </span>
-              <div className="flex-1 min-w-0 space-y-2">
+              <div className="flex items-center w-full justify-between min-w-0 space-y-2">
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <div className="flex items-center gap-2">
@@ -169,7 +155,14 @@ export function NotificationsList({
                       {notification.message}
                     </p>
                     <p className="text-xs text-muted-foreground mt-2">
-                      {new Date(notification.createdAt).toLocaleString()}
+                      {new Date(notification.createdAt).toLocaleString(
+                        "en-US",
+                        {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        },
+                      )}
                     </p>
                   </div>
                   {!notification.isRead && (

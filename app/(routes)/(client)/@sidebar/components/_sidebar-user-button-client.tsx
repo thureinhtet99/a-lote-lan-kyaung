@@ -1,5 +1,6 @@
 "use client";
 
+import LoadingSwap from "@/components/shared/loading-swap";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,

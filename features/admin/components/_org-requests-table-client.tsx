@@ -41,6 +41,7 @@ import {
   rejectOrganizationRequest,
 } from "@/features/organizations/db/organization-request-db";
 import { getVisiblePages } from "../lib/utils";
+import LoadingSwap from "@/components/shared/loading-swap";
 
 type Props = {
   page: number;
@@ -530,7 +531,7 @@ export function OrgRequestsTableClient({
               Cancel
             </Button>
             <Button onClick={handleApprove} disabled={isPending}>
-              {isPending ? "Approving…" : "Approve Request"}
+              <LoadingSwap isLoading={isPending} children="Approve" />
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -571,7 +572,7 @@ export function OrgRequestsTableClient({
               onClick={handleReject}
               disabled={isPending || !adminResponse.trim()}
             >
-              {isPending ? "Rejecting…" : "Reject Request"}
+              <LoadingSwap isLoading={isPending} children="Reject" />
             </Button>
           </DialogFooter>
         </DialogContent>

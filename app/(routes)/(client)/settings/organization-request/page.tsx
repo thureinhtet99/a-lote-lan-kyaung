@@ -212,7 +212,7 @@ const SuspendedComponent = async () => {
                 <AlertDescription className="text-green-400">
                   Congratulations! Your request has been approved.
                   {approvedNotification
-                    ? " Click the button below to claim your organization and start using employer features."
+                    ? " Click the button below to claim your organization and start using organization features."
                     : " You can now access organization features."}
                 </AlertDescription>
               </Alert>
@@ -222,7 +222,6 @@ const SuspendedComponent = async () => {
                 <ClaimOrganizationButton
                   notificationId={approvedNotification.id}
                   organizationId={approvedNotification.organizationId}
-                  organizationName={existingRequest.orgName}
                 />
               )}
 

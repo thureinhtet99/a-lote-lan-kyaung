@@ -16,10 +16,11 @@ import { APP_ROUTES } from "@/constants/app-config";
 import { getUserNotifications } from "@/features/organizations/db/notification-db";
 import { NotificationsList } from "@/features/organizations/components/notifications-list";
 import { cn } from "@/lib/utils";
+import PageLoading from "@/components/shared/page-loading";
 
 export default function NotificationPage() {
   return (
-    <Suspense fallback={<Loading />}>
+    <Suspense fallback={<PageLoading />}>
       <SuspendedComponent />
     </Suspense>
   );

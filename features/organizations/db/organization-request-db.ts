@@ -131,7 +131,11 @@ export const getMyOrganizationRequest = async () => {
     return await getMyOrganizationRequestCached(session.user.id);
   } catch (error) {
     console.error("Error fetching organization request: ", error);
-    return { success: false, message: "Failed to organization fetch request", data: null };
+    return {
+      success: false,
+      message: "Failed to organization fetch request",
+      data: null,
+    };
   }
 };
 
@@ -143,7 +147,8 @@ const getMyOrganizationRequestCached = async (userId: string) => {
     orderBy: [desc(organizationRequestTable.createdAt)],
   });
 
-  if (!result) return { success: false, message: "No organization request", data: null };
+  if (!result)
+    return { success: false, message: "No organization request", data: null };
 
   cacheTag(userOrgRequestsTag(result.id));
   cacheLife("minutes");
@@ -463,8 +468,6 @@ export const approveOrganizationRequest = async (
       logo: request.orgLogo,
       createdAt: new Date(),
     });
-
-    // Note: Membership will be created when user claims the organization through notification
 
     // Mark request approved
     await db

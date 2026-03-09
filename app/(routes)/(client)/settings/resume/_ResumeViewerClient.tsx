@@ -79,7 +79,7 @@ export default function ResumeViewerClient({
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Button asChild variant="outline">
+        <Button asChild variant="ghost">
           <Link href={resumeFileUrl} target="_blank" rel="noopener noreferrer">
             <EyeIcon />
           </Link>
@@ -93,7 +93,7 @@ export default function ResumeViewerClient({
         >
           <AlertDialogTrigger asChild>
             <Button
-              variant="outline"
+              variant="ghost"
               className="text-destructive hover:text-destructive cursor-pointer"
               disabled={isDeleting}
             >
