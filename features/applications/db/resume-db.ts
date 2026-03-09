@@ -54,7 +54,6 @@ export async function upsertUserResumeDb(
         target: resumeTable.userId,
         set: data,
       });
-    updateTag(resumeTag(userId));
     revalidateTag(resumeTag(userId), "max");
   } catch (error) {
     console.error("Error uploading resume: ", error);

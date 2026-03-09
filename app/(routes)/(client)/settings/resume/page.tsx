@@ -1,10 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Suspense } from "react";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/auth-helpers";
 import DropzoneClient from "./_DropzoneClient";
 import { getCurrentResume } from "@/features/applications/db/resume-db";
 import ResumeViewerClient from "./_ResumeViewerClient";
+import { APP_ROUTES } from "@/constants/app-config";
 
 export default function ResumePage() {
   return (
@@ -16,10 +17,11 @@ export default function ResumePage() {
         </p>
       </div>
 
-      <DropzoneClient />
       <Suspense>
         <ResumeViewer />
       </Suspense>
+
+      <DropzoneClient />
 
       {/* AI */}
       <Suspense>
@@ -31,7 +33,7 @@ export default function ResumePage() {
 
 const ResumeViewer = async () => {
   const { userId } = await getCurrentUser();
-  if (userId == null) return notFound();
+  if (userId == null) return redirect(APP_ROUTES.SIGN_IN);
 
   const userResume = await getCurrentResume(userId);
   if (!userResume.data) return null;

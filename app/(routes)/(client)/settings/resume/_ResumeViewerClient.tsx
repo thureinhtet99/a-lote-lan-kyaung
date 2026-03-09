@@ -19,10 +19,10 @@ import {
   getResumeFileName,
 } from "@/features/applications/lib/utils";
 import { cn } from "@/lib/utils";
-import { FileText, Trash2 } from "lucide-react";
+import { EyeIcon, FileText, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 export default function ResumeViewerClient({
@@ -36,12 +36,14 @@ export default function ResumeViewerClient({
 }) {
   const router = useRouter();
   const [isDeleting, startDeleteTransition] = useTransition();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const handleDelete = () => {
     startDeleteTransition(async () => {
       const result = await deleteCurrentUserResume();
       if (result.success) {
         toast.success(result.message);
+        setIsDeleteDialogOpen(false);
         router.refresh();
       } else {
         toast.error(result.message);
@@ -50,10 +52,10 @@ export default function ResumeViewerClient({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="flex gap-4 items-center justify-between">
       <div
         className={cn(
-          "flex items-center gap-3 rounded-lg border p-3 transition-colors",
+          "flex flex-1 items-center gap-3 rounded-lg border p-3 transition-colors",
           "border-primary bg-primary/5",
         )}
       >
@@ -79,19 +81,23 @@ export default function ResumeViewerClient({
       <div className="flex flex-wrap gap-2">
         <Button asChild variant="outline">
           <Link href={resumeFileUrl} target="_blank" rel="noopener noreferrer">
-            View Resume
+            <EyeIcon />
           </Link>
         </Button>
 
-        <AlertDialog>
+        <AlertDialog
+          open={isDeleteDialogOpen}
+          onOpenChange={(open) => {
+            if (!isDeleting) setIsDeleteDialogOpen(open);
+          }}
+        >
           <AlertDialogTrigger asChild>
             <Button
               variant="outline"
-              className="text-destructive hover:text-destructive"
+              className="text-destructive hover:text-destructive cursor-pointer"
               disabled={isDeleting}
             >
-              <Trash2 className="size-4 mr-1.5" />
-              Delete Resume
+              <Trash2 />
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
@@ -103,13 +109,19 @@ export default function ResumeViewerClient({
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel disabled={isDeleting}>
+              <AlertDialogCancel
+                className="cursor-pointer"
+                disabled={isDeleting}
+              >
                 Cancel
               </AlertDialogCancel>
               <AlertDialogAction
-                onClick={handleDelete}
+                onClick={(event) => {
+                  event.preventDefault();
+                  handleDelete();
+                }}
                 disabled={isDeleting}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                className="bg-destructive cursor-pointer hover:bg-destructive/90"
               >
                 <LoadingSwap isLoading={isDeleting}>Delete</LoadingSwap>
               </AlertDialogAction>
