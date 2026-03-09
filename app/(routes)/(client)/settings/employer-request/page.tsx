@@ -84,7 +84,11 @@ const SuspendedComponent = async () => {
             <CardTitle>Your Request Status</CardTitle>
             <CardDescription>
               Submitted on{" "}
-              {new Date(existingRequest.createdAt).toLocaleDateString()}
+              {new Date(existingRequest.createdAt).toLocaleString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "2-digit",
+              })}
             </CardDescription>
           </div>
           <CardDescription>
@@ -122,9 +126,14 @@ const SuspendedComponent = async () => {
                     <CardDescription>
                       Reviewed on{" "}
                       {existingRequest.reviewedAt
-                        ? new Date(
-                            existingRequest.reviewedAt,
-                          ).toLocaleDateString()
+                        ? new Date(existingRequest.reviewedAt).toLocaleString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "2-digit",
+                            },
+                          )
                         : "N/A"}
                     </CardDescription>
                   )}
@@ -155,9 +164,14 @@ const SuspendedComponent = async () => {
                     <CardDescription>
                       Reviewed on{" "}
                       {existingRequest.reviewedAt
-                        ? new Date(
-                            existingRequest.reviewedAt,
-                          ).toLocaleDateString()
+                        ? new Date(existingRequest.reviewedAt).toLocaleString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "2-digit",
+                            },
+                          )
                         : "N/A"}
                     </CardDescription>
                   )}

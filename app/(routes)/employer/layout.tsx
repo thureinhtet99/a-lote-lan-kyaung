@@ -83,8 +83,6 @@ const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
                 className="w-full flex items-center justify-between"
               >
                 Create job listings here
-                <PlusIcon size={16} />
-                <span className="sr-only">Add Job Listing</span>
               </Link>
             </SidebarGroupLabel>
 

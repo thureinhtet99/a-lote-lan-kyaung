@@ -143,7 +143,11 @@ export function OrganizationsTableClient({
                     {Number(org.memberCount)}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {new Date(org.createdAt).toLocaleDateString()}
+                    {new Date(org.createdAt).toLocaleString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "2-digit",
+                    })}
                   </TableCell>
                 </TableRow>
               ))}

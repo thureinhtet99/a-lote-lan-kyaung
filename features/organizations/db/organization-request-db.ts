@@ -491,7 +491,8 @@ export const approveOrganizationRequest = async (
     );
 
     updateTag(orgRequestsTag());
-    revalidateTag(userOrgRequestsTag(request.userId), "max");
+    updateTag(userOrgRequestsTag(validated.requestId));
+    revalidateTag(userOrgRequestsTag(validated.requestId), "max");
     revalidateTag(organizationsTag(), "max");
     revalidateTag(dashboardStatsTag(), "max");
 

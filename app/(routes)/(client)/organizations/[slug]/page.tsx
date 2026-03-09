@@ -67,9 +67,10 @@ export default async function OrganizationDetailPage({
             <Clock className="size-4" />
             <span>
               Since{" "}
-              {new Date(org.createdAt).toLocaleDateString("en-US", {
-                month: "long",
+              {new Date(org.createdAt).toLocaleString("en-US", {
                 year: "numeric",
+                month: "short",
+                day: "2-digit",
               })}
             </span>
           </div>
@@ -123,7 +124,11 @@ export default async function OrganizationDetailPage({
                                       job.posted_at
                                         ? new Date(
                                             job.posted_at,
-                                          ).toLocaleDateString()
+                                          ).toLocaleString("en-US", {
+                                            year: "numeric",
+                                            month: "short",
+                                            day: "2-digit",
+                                          })
                                         : ""
                                     }
                                   >

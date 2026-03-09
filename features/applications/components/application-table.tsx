@@ -162,7 +162,11 @@ const getColumns = (
       cell: ({ row }) => {
         return (
           <div className="flex items-center justify-center">
-            {new Date(row.original.createdAt).toLocaleDateString()}
+            {new Date(row.original.createdAt).toLocaleString("en-US", {
+              year: "numeric",
+              month: "short",
+              day: "2-digit",
+            })}
           </div>
         );
       },

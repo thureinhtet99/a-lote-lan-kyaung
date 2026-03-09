@@ -2,10 +2,21 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import type { Session, User } from "./lib/auth/auth";
 import { APP_ROUTES } from "./constants/app-config";
+import { safeGetSession } from "./lib/auth/auth-helpers";
 
-const publicRoutes = ["/sign-in", "/sign-up", "/", "/job-listings"];
+const publicRoutes = [
+  APP_ROUTES.SIGN_IN,
+  APP_ROUTES.SIGN_UP,
+  APP_ROUTES.HOME,
+  APP_ROUTES.JOB_LISTINGS.HOME,
+] as const;
 const employerRoutes = ["/employer"];
 const adminRoutes = ["/admin"];
+
+const matchesRoute = (pathname: string, route: string) => {
+  if (route === "/") return pathname === "/";
+  return pathname === route || pathname.startsWith(`${route}/`);
+};
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -17,27 +28,21 @@ export async function proxy(request: NextRequest) {
 
   // Check if route is public
   const isPublicRoute = publicRoutes.some((route) =>
-    pathname.startsWith(route),
+    matchesRoute(pathname, route),
   );
   const isEmployerRoute = employerRoutes.some((route) =>
-    pathname.startsWith(route),
+    matchesRoute(pathname, route),
   );
-  const isAdminRoute = adminRoutes.some((route) => pathname.startsWith(route));
+  const isAdminRoute = adminRoutes.some((route) =>
+    matchesRoute(pathname, route),
+  );
 
   // Get session
-  const sessionResponse = await fetch(
-    new URL("/api/auth/get-session", request.url),
-    {
-      headers: {
-        cookie: request.headers.get("cookie") || "",
-      },
-    },
-  );
+  const sessionResponse = await safeGetSession();
+  if (!sessionResponse) return null;
 
-  const sessionData = sessionResponse.ok ? await sessionResponse.json() : null;
-
-  const session = sessionData?.session as Session | null;
-  const user = sessionData?.user as User | null;
+  const session = sessionResponse?.session as Session | null;
+  const user = sessionResponse?.user as User | null;
 
   // Redirect to sign-in if accessing protected route without session
   if (!isPublicRoute && !session) {

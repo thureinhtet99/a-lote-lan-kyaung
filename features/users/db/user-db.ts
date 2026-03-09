@@ -583,6 +583,7 @@ export const createEmployerRequest = async (
     updateTag(employerRequestIdTag(result.employerRequestId));
     updateTag(employerRequestsTag());
     updateTag(dashboardStatsTag());
+    revalidateTag(employerRequestIdTag(result.employerRequestId), "max");
 
     return { success: true, message: "Submitted successfully" };
   } catch (error) {
@@ -635,8 +636,13 @@ export const approveEmployerRequest = async (
       })
       .where(eq(userTable.id, request.userId));
 
-    revalidateTag(usersTag(), "max");
+    updateTag(employerRequestIdTag(validated.requestId));
     updateTag(employerRequestsTag());
+    updateTag(usersTag());
+    updateTag(userIdTag(request.userId));
+    revalidateTag(employerRequestIdTag(validated.requestId), "max");
+    revalidateTag(usersTag(), "max");
+    revalidateTag(userIdTag(request.userId), "max");
     revalidateTag(dashboardStatsTag(), "max");
 
     return { success: true, message: "Employer request approved successfully" };

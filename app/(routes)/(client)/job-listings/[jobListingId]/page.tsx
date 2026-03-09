@@ -74,7 +74,14 @@ const SuspendedComponent = async ({
               <Suspense
                 fallback={
                   jobListing.data.posted_at
-                    ? new Date(jobListing.data.posted_at).toLocaleDateString()
+                    ? new Date(jobListing.data.posted_at).toLocaleString(
+                        "en-US",
+                        {
+                          year: "numeric",
+                          month: "short",
+                          day: "2-digit",
+                        },
+                      )
                     : ""
                 }
               >

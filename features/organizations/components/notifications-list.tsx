@@ -120,6 +120,7 @@ export function NotificationsList({
           <Button
             variant="outline"
             size="sm"
+            className="cursor-pointer"
             onClick={handleMarkAllAsRead}
             disabled={isPending}
           >
@@ -141,7 +142,7 @@ export function NotificationsList({
           >
             <div className="flex items-start gap-3">
               <div className="flex items-center w-full justify-between min-w-0 space-y-2">
-                <div className="flex items-start justify-between gap-2">
+                <div className="flex items-start justify-between">
                   <div>
                     <div className="flex items-center gap-2">
                       <h4 className="font-semibold">{notification.title}</h4>
@@ -160,52 +161,55 @@ export function NotificationsList({
                         {
                           year: "numeric",
                           month: "short",
-                          day: "numeric",
+                          day: "2-digit",
                         },
                       )}
                     </p>
                   </div>
+                </div>
+
+                {/* Action buttons */}
+                <div className="flex flex-col gap-2">
                   {!notification.isRead && (
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
                       onClick={() => handleMarkAsRead(notification.id)}
                       disabled={isPending}
-                      className="flex-shrink-0"
+                      className="flex-shrink-0 cursor-pointer"
                     >
                       <Check className="h-4 w-4" />
                       Mark read
                     </Button>
                   )}
-                </div>
 
-                {/* Action buttons */}
-                <div className="flex items-center gap-2">
-                  {notification.type === "organization_approved" &&
-                    notification.organizationId && (
-                      <Button
-                        className="flex-1 max-w-xs"
-                        onClick={() =>
-                          handleClaimOrganization(
-                            notification.id,
-                            notification.organizationId!,
-                          )
-                        }
-                        disabled={isPending}
-                      >
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        Claim Organization
-                      </Button>
-                    )}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteNotification(notification.id)}
-                    disabled={isPending}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    {notification.type === "organization_approved" &&
+                      notification.organizationId && (
+                        <Button
+                          className="flex-1 max-w-xs"
+                          onClick={() =>
+                            handleClaimOrganization(
+                              notification.id,
+                              notification.organizationId!,
+                            )
+                          }
+                          disabled={isPending}
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          Claim Organization
+                        </Button>
+                      )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeleteNotification(notification.id)}
+                      disabled={isPending}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>

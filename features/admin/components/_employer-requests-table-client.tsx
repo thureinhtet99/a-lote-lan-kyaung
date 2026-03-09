@@ -361,7 +361,11 @@ export function EmployerRequestsTableClient({
                           {request.requestMessage}
                         </TableCell>
                         <TableCell>
-                          {new Date(request.createdAt).toLocaleDateString()}
+                          {new Date(request.createdAt).toLocaleString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                            day: "2-digit",
+                          })}
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
@@ -463,7 +467,14 @@ export function EmployerRequestsTableClient({
                         <TableCell>{request.reviewer?.name ?? "-"}</TableCell>
                         <TableCell>
                           {request.reviewedAt
-                            ? new Date(request.reviewedAt).toLocaleDateString()
+                            ? new Date(request.reviewedAt).toLocaleString(
+                                "en-US",
+                                {
+                                  year: "numeric",
+                                  month: "short",
+                                  day: "2-digit",
+                                },
+                              )
                             : "-"}
                         </TableCell>
                       </TableRow>

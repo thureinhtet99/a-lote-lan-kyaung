@@ -1,5 +1,3 @@
-"use client";
-
 import { redirect } from "next/navigation";
 import {
   Card,
@@ -12,10 +10,18 @@ import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 import { safeGetSession } from "@/lib/auth/auth-helpers";
 import { APP_ROUTES } from "@/constants/app-config";
-import { useSignOut } from "@/hooks/use-sign-out";
+import { SignOutButton } from "@/features/auth/components/auth-buttons";
+import { Suspense } from "react";
 
 export default async function BannedPage() {
-  const { signOut } = useSignOut();
+  return (
+    <Suspense>
+      <SuspendedComponent />
+    </Suspense>
+  );
+}
+
+const SuspendedComponent = async () => {
   const session = await safeGetSession();
   if (!session?.user) redirect(APP_ROUTES.SIGN_IN);
   if (!session.user.banned) redirect("/");
@@ -47,7 +53,11 @@ export default async function BannedPage() {
             <div>
               <h4 className="mb-2 text-sm font-medium">Ban Expires:</h4>
               <p className="text-sm text-muted-foreground">
-                {new Date(banExpires).toLocaleString()}
+                {new Date(banExpires).toLocaleString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "2-digit",
+                })}
               </p>
             </div>
           )}
@@ -59,13 +69,11 @@ export default async function BannedPage() {
           )}
 
           <div className="pt-4">
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => signOut()}
-            >
-              Sign Out
-            </Button>
+            <SignOutButton>
+              <Button variant="outline" className="w-full">
+                Sign Out
+              </Button>
+            </SignOutButton>
           </div>
 
           <p className="text-center text-xs text-muted-foreground">
@@ -75,4 +83,4 @@ export default async function BannedPage() {
       </Card>
     </div>
   );
-}
+};

@@ -191,10 +191,10 @@ export default function OrganizationsClient({
                 Created
               </p>
               <p className="text-sm">
-                {new Date(organization.createdAt).toLocaleDateString("en-US", {
+                {new Date(organization.createdAt).toLocaleString("en-US", {
                   year: "numeric",
-                  month: "long",
-                  day: "numeric",
+                  month: "short",
+                  day: "2-digit",
                 })}
               </p>
             </div>

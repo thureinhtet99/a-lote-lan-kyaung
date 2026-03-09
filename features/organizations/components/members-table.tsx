@@ -227,7 +227,11 @@ export function MembersTable({
                     </TableCell>
                     <TableCell>{getRoleBadge(member.role)}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {new Date(member.createdAt).toLocaleDateString()}
+                      {new Date(member.createdAt).toLocaleString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "2-digit",
+                      })()}
                     </TableCell>
                     <TableCell>
                       {canInvite && !isCurrentUser(member) && (

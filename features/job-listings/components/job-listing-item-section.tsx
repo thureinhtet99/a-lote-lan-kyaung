@@ -122,7 +122,14 @@ const JobListingItem = ({
                     <Suspense
                       fallback={
                         jobListing.posted_at
-                          ? new Date(jobListing.posted_at).toLocaleDateString()
+                          ? new Date(jobListing.posted_at).toLocaleString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "short",
+                                day: "2-digit",
+                              },
+                            )
                           : ""
                       }
                     >

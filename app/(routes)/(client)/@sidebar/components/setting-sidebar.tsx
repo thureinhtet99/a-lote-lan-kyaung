@@ -11,6 +11,7 @@ import {
   User2Icon,
 } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/auth-helpers";
+import { getUnreadNotificationsCount } from "@/features/organizations/db/notification-db";
 
 const baseItems: SidebarNavMenuType = [
   {
@@ -53,6 +54,7 @@ const SuspendedComponent = async () => {
   if (!user) return true;
 
   const canShowOrganizationRequest = user?.role === "employer";
+  const { count: unreadCount } = await getUnreadNotificationsCount();
 
   const organizationRequestItem: SidebarNavMenuType[number] = {
     href: APP_ROUTES.SETTINGS.ORG_REQUEST,
@@ -66,5 +68,5 @@ const SuspendedComponent = async () => {
     ? [...baseItems, organizationRequestItem]
     : baseItems;
 
-  return <SidebarNavMenuGroup items={items} />;
+  return <SidebarNavMenuGroup items={items} unreadCount={unreadCount} />;
 };

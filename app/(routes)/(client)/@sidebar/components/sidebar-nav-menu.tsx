@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
+import { Badge } from "@/components/ui/badge";
 import {
   SidebarGroup,
   SidebarMenu,
@@ -12,17 +13,24 @@ import { usePathname } from "next/navigation";
 import { SidebarNavMenuType } from "@/types/index.type";
 import { SignedIn, SignedOut } from "@/features/auth/components/auth-statuses";
 import { useSession } from "@/lib/auth/auth-client";
+import { APP_ROUTES } from "@/constants/app-config";
 
 export default function SidebarNavMenu({
   items,
   className,
+  unreadCount,
 }: {
   items: SidebarNavMenuType;
   className?: string;
+  unreadCount?: number;
 }) {
   return (
     <Suspense>
-      <SuspendedComponent items={items} className={className} />
+      <SuspendedComponent
+        items={items}
+        className={className}
+        unreadCount={unreadCount}
+      />
     </Suspense>
   );
 }
@@ -30,9 +38,11 @@ export default function SidebarNavMenu({
 function SuspendedComponent({
   items,
   className,
+  unreadCount = 0,
 }: {
   items: SidebarNavMenuType;
   className?: string;
+  unreadCount?: number;
 }) {
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -48,6 +58,9 @@ function SuspendedComponent({
             item.activePathPrefixes?.some((prefix) =>
               pathname.startsWith(prefix),
             );
+          const isNotificationsItem =
+            item.href === APP_ROUTES.SETTINGS.NOTIFICATIONS;
+          const shouldShowUnreadBadge = isNotificationsItem && unreadCount > 0;
 
           if (item.roles && (!userRole || !hasAllowedRole)) {
             return null;
@@ -60,6 +73,11 @@ function SuspendedComponent({
                   <Link href={item.href}>
                     {item.icon}
                     <span>{item.label}</span>
+                    {shouldShowUnreadBadge && (
+                      <Badge className="ml-auto group-data-[state=collapsed]:absolute -right-1 top-0 size-4">
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </Badge>
+                    )}
                   </Link>
                 </SidebarMenuButton>
               </Suspense>

@@ -1,5 +1,5 @@
 {
-  "id": "d5f00689-9d68-4e45-b496-b67a002766e4",
+  "id": "b52d7a1a-5747-4c6d-9893-17d6c5ae18ec",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -502,14 +502,14 @@
           "name": "wage",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "wageInterval": {
           "name": "wageInterval",
           "type": "wage_interval",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "city": {
           "name": "city",

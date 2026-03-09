@@ -185,7 +185,14 @@ export function NotificationBell({
                     </p>
                     <div className="flex items-center gap-2 mt-2">
                       <span className="text-xs text-muted-foreground">
-                        {new Date(notification.createdAt).toLocaleString()}
+                        {new Date(notification.createdAt).toLocaleString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "short",
+                            day: "2-digit",
+                          },
+                        )}
                       </span>
                       {notification.type === "organization_approved" &&
                         notification.organizationId && (

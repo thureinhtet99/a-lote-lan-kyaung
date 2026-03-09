@@ -66,7 +66,7 @@ export function MarkdownPartial({
             </>
           ) : (
             <>
-              Read More <ChevronDown className="h-4 w-4" />
+              Show More <ChevronDown className="h-4 w-4" />
             </>
           )}
         </Button>

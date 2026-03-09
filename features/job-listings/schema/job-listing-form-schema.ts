@@ -13,13 +13,8 @@ export const jobListingFormSchema = z
     experienceLevel: z.enum(experienceLevels),
     locationRequirement: z.enum(locationRequirements),
     type: z.enum(jobListingTypes),
-    wage: z
-      .number()
-      .int({ message: "Wage must be a whole number" })
-      .positive({ message: "Wage must be greater than zero" })
-      .min(1, { message: "Wage must be at least 1" }),
-    wageInterval: z.enum(wageIntervals),
-    state: z.string().nullable(),
+    wage: z.number().nullable(),
+    wageInterval: z.enum(wageIntervals).nullable(),
     city: z.string().nullable(),
   })
   .refine(
@@ -29,15 +24,6 @@ export const jobListingFormSchema = z
     {
       message: "Required for non-remote listings",
       path: ["city"],
-    },
-  )
-  .refine(
-    (listing) => {
-      return listing.locationRequirement === "remote" || listing.state != null;
-    },
-    {
-      message: "Required for non-remote listings",
-      path: ["state"],
     },
   );
 

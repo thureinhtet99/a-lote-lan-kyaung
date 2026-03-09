@@ -267,7 +267,11 @@ export function UserTableClient({
                     )}
                   </TableCell>
                   <TableCell>
-                    {new Date(user.createdAt).toLocaleDateString()}
+                    {new Date(user.createdAt).toLocaleString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "2-digit",
+                    })}
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
@@ -287,13 +291,6 @@ export function UserTableClient({
                           disabled={isPending || user.role === "user"}
                         >
                           Set as User
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="cursor-pointer"
-                          onClick={() => handleRoleChange(user.id, "employer")}
-                          disabled={isPending || user.role === "employer"}
-                        >
-                          Set as Employer
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className="cursor-pointer"

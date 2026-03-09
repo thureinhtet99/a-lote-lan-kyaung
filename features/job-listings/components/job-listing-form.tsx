@@ -54,6 +54,7 @@ import {
 } from "@/components/ui/combobox";
 import cities from "@/constants/cities.json";
 import { CityType } from "@/types/index.type";
+import LoadingSwap from "@/components/shared/loading-swap";
 
 const createDefaultValues: z.infer<typeof jobListingFormSchema> = {
   title: "",
@@ -61,10 +62,9 @@ const createDefaultValues: z.infer<typeof jobListingFormSchema> = {
   experienceLevel: "junior",
   locationRequirement: "on-site",
   type: "full-time",
-  wage: 0,
-  wageInterval: "monthly",
-  state: "Myanmar",
-  city: "",
+  wage: null,
+  wageInterval: null,
+  city: "Yangon",
 };
 
 export default function JobListingForm({
@@ -109,6 +109,11 @@ export default function JobListingForm({
       }
       router.refresh();
     } else toast.error(result.message);
+  };
+
+  const handleReset = () => {
+    form.reset(jobListing ?? createDefaultValues);
+    setMarkdownResetKey((prev) => prev + 1);
   };
 
   const isSubmitting = form.formState.isSubmitting;
@@ -172,7 +177,7 @@ export default function JobListingForm({
                     render={({ field }) => (
                       <FormItem>
                         <Select
-                          value={field.value ?? ""}
+                          value={field.value ?? undefined}
                           onValueChange={(val) => field.onChange(val)}
                           disabled={isSubmitting}
                         >
@@ -182,7 +187,7 @@ export default function JobListingForm({
                             </SelectTrigger>
                           </FormControl>
 
-                          <SelectContent>
+                          <SelectContent align="end">
                             {wageIntervals.map((wageItv, index) => (
                               <SelectItem key={index} value={wageItv}>
                                 {formatWageInterval(wageItv)}
@@ -341,18 +346,23 @@ export default function JobListingForm({
           )}
         />
 
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? (
-            <>
-              <Loader2Icon className="animate-spin" />
-              {isEditing ? "Updating..." : "Creating..."}
-            </>
-          ) : isEditing ? (
-            "Update"
-          ) : (
-            "Create"
-          )}
-        </Button>
+        <div className="flex items-center gap-4 justify-between">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-1/2"
+            onClick={handleReset}
+            disabled={isSubmitting}
+          >
+            Reset
+          </Button>
+          <Button type="submit" className="w-1/2" disabled={isSubmitting}>
+            <LoadingSwap
+              isLoading={isSubmitting}
+              children={<>{isEditing ? "Update" : "Create"}</>}
+            />
+          </Button>
+        </div>
       </form>
     </Form>
   );

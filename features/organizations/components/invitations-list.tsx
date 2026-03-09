@@ -142,7 +142,11 @@ export function InvitationsList({
                   <div>
                     <p className="font-medium">Expires</p>
                     <p className="text-muted-foreground">
-                      {new Date(invitation.expiresAt).toLocaleDateString()}
+                      {new Date(invitation.expiresAt).toLocaleString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "2-digit",
+                      })()}
                     </p>
                   </div>
                 </div>

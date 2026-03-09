@@ -94,18 +94,18 @@ export default function ProfilePage() {
                   src={session.user?.image || undefined}
                   alt={session.user?.name || "User"}
                 />
-                <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
+                <AvatarFallback className="bg-primary/10 text-primary text-3xl">
                   {userInitials}
                 </AvatarFallback>
               </Avatar>
               <div className="space-y-2">
                 <div>
-                  <CardTitle className="text-3xl">
+                  <CardTitle className="text-3xl flex items-center gap-1">
                     {session.user?.name}
+                    <span className="text-sm text-muted-foreground">
+                      ({session.user?.role === "employer" && "Employer"})
+                    </span>
                   </CardTitle>
-                  <CardDescription className="text-base mt-1">
-                    {session.user?.role === "employer" && "Employer"}
-                  </CardDescription>
                 </div>
                 <div className="flex gap-2">
                   <span className="text-muted-foreground text-sm">
@@ -204,7 +204,11 @@ export default function ProfilePage() {
                 Member Since
               </span>
               <span className="text-sm">
-                {new Date(session.user?.createdAt).toLocaleDateString()}
+                {new Date(session.user?.createdAt).toLocaleString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "2-digit",
+                })}
               </span>
             </div>
           </CardContent>

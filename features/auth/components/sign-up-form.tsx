@@ -176,14 +176,10 @@ export default function SignUpForm() {
           className="w-full mt-4"
           disabled={form.formState.isSubmitting}
         >
-          {form.formState.isSubmitting ? (
-            <>
-              <Loader2Icon className="animate-spin" />
-              Creating...
-            </>
-          ) : (
-            "Create account"
-          )}
+          <LoadingSwap
+            isLoading={form.formState.isSubmitting}
+            children="Create account"
+          />
         </Button>
       </form>
     </Form>

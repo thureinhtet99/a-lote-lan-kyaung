@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth/auth-helpers";
 import { SignOutButton } from "@/features/auth/components/auth-buttons";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { LogOutIcon } from "lucide-react";
+import { getUnreadNotificationsCount } from "@/features/organizations/db/notification-db";
 
 export default function SidebarUserButton() {
   return (
@@ -35,5 +36,8 @@ const SuspendedComponent = async () => {
     image: user.image ?? null,
   };
 
-  return <SidebarUserButtonClient user={userData} />;
+  // Get unread notification count
+  const { count: unreadCount } = await getUnreadNotificationsCount();
+
+  return <SidebarUserButtonClient user={userData} unreadCount={unreadCount} />;
 };

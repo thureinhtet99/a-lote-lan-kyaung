@@ -2,6 +2,7 @@
 
 import LoadingSwap from "@/components/shared/loading-swap";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,8 +28,10 @@ import { useState } from "react";
 
 export default function SidebarUserButtonClient({
   user,
+  unreadCount,
 }: {
   user: Pick<UserType, "name" | "email" | "image">;
+  unreadCount: number;
 }) {
   const { isMobile, setOpenMobile } = useSidebar();
   const router = useRouter();
@@ -48,6 +51,11 @@ export default function SidebarUserButtonClient({
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
         >
           <UserInfo {...user} />
+          {unreadCount > 0 && (
+            <Badge className="ml-auto group-data-[state=collapsed]:absolute -right-1 top-0 size-4">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </Badge>
+          )}
           <ChevronsUpDown className="ml-auto group-data-[state=collapsed]:hidden" />
         </SidebarMenuButton>
       </DropdownMenuTrigger>
@@ -69,9 +77,19 @@ export default function SidebarUserButtonClient({
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
-          <Link href={APP_ROUTES.SETTINGS.NOTIFICATIONS}>
-            <BellIcon className="mr-1 focus:text-accent-foreground" />
-            Notifications
+          <Link
+            href={APP_ROUTES.SETTINGS.NOTIFICATIONS}
+            className="flex items-center justify-between"
+          >
+            <div className="flex items-center">
+              <BellIcon className="mr-1 focus:text-accent-foreground" />
+              Notifications
+            </div>
+            {unreadCount > 0 && (
+              <Badge className="ml-auto ">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </Badge>
+            )}
           </Link>
         </DropdownMenuItem>
 
@@ -109,10 +127,10 @@ const UserInfo = ({
   const nameInitials = name.slice(0, 1);
 
   return (
-    <div className="flex items-center gap-4 overflow-hidden">
+    <div className="flex items-center gap-2 overflow-hidden">
       <Avatar className="size-10 group-data-[state=collapsed]:size-8">
         <AvatarImage src={image || undefined} alt={name} />
-        <AvatarFallback className="uppercase bg-primary text-primary-foreground text-xl group-data-[state=collapsed]:text-md">
+        <AvatarFallback className="uppercase bg-primary/10 text-primary text-xl group-data-[state=collapsed]:text-md">
           {nameInitials}
         </AvatarFallback>
       </Avatar>
