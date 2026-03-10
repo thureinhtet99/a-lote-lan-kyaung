@@ -58,7 +58,7 @@ export async function revokeInvitation(invitationId: string) {
       headers: await headers(),
       body: {
         permissions: {
-          member: ["invite"], // Using invite permission for managing invitations
+          invitation: ["cancel"],
         },
       },
     });
@@ -120,7 +120,7 @@ export async function resendInvitation(invitationId: string) {
       headers: await headers(),
       body: {
         permissions: {
-          member: ["invite"],
+          invitation: ["create"],
         },
       },
     });

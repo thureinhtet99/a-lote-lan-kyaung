@@ -34,7 +34,7 @@ async function MembersList() {
     headers: await headers(),
     body: {
       permissions: {
-        member: ["invite"],
+        invitation: ["create"],
       },
     },
   });

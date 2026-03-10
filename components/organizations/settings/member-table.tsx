@@ -34,6 +34,7 @@ import { MoreVertical, Trash2, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { MemberRoleSelect } from "./member-role-select";
+import Loading from "@/components/shared/loading";
 
 type Member = {
   id: string;
@@ -94,13 +95,7 @@ export function MemberTable() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        Loading members...
-      </div>
-    );
-  }
+  if (loading) return <Loading />;
 
   if (members.length === 0) {
     return (

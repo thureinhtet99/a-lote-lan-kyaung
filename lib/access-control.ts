@@ -4,7 +4,8 @@ export const statement = {
   organization: ["create", "update", "delete", "switch", "read"],
   job_listing: ["create", "update", "delete", "change_status"],
   application: ["read", "update", "change_rating", "change_status"],
-  member: ["invite", "remove", "update_role"],
+  member: ["invite", "remove", "update_role", "create", "update", "delete"],
+  invitation: ["create", "cancel"],
 } as const;
 
 // Create access control instance
@@ -22,7 +23,8 @@ export const orgAdmin = ac.newRole({
   organization: ["create", "read", "update", "delete", "switch"],
   job_listing: ["create", "update", "delete", "change_status"],
   application: ["read", "update", "change_rating", "change_status"],
-  member: ["invite", "remove", "update_role"],
+  member: ["invite", "remove", "update_role", "create", "update", "delete"],
+  invitation: ["create", "cancel"],
 });
 
 // Export permission types for use throughout the app

@@ -32,6 +32,7 @@ import {
 import { UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { inviteMember } from "@/features/organizations/actions/invite-member";
+import LoadingSwap from "@/components/shared/loading-swap";
 
 const inviteSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -59,7 +60,7 @@ export function MemberInviteDialog() {
       setOpen(false);
       form.reset();
     } else {
-      toast.error(result.message || "Failed to send invitation");
+      toast.error(result.message);
     }
   }
 
@@ -67,7 +68,7 @@ export function MemberInviteDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
-          <UserPlus className="h-4 w-4 mr-2" />
+          <UserPlus className="h-4 w-4" />
           Invite Member
         </Button>
       </DialogTrigger>
@@ -111,7 +112,10 @@ export function MemberInviteDialog() {
                 Cancel
               </Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? "Sending..." : "Send Invitation"}
+                <LoadingSwap
+                  isLoading={form.formState.isSubmitting}
+                  children="Invite"
+                />
               </Button>
             </div>
           </form>

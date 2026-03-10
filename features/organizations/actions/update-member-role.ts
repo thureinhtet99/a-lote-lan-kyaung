@@ -3,6 +3,8 @@
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { z } from "zod";
+import { revalidatePath } from "next/cache";
+import { APP_ROUTES } from "@/constants/app-config";
 
 const updateRoleSchema = z.object({
   memberId: z.string().min(1, "Member ID is required"),
@@ -54,31 +56,24 @@ export async function updateMemberRole(data: UpdateMemberRoleInput) {
       };
     }
 
-    // Use better-auth's updateMemberRole API route
-    const updateResult = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/organization/update-member-role`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(await headers()),
-        },
-        body: JSON.stringify({
-          memberId: validated.memberId,
-          role: validated.newRole,
-          organizationId: session.session.activeOrganizationId,
-        }),
+    const result = await auth.api.updateMemberRole({
+      headers: await headers(),
+      body: {
+        memberId: validated.memberId,
+        role: validated.newRole,
+        organizationId: session.session.activeOrganizationId,
       },
-    );
+    });
 
-    const result = await updateResult.json();
-
-    if (!updateResult.ok || result.error) {
+    if (!result) {
       return {
         success: false,
-        message: result.error?.message || "Failed to update member role",
+        message: "Failed to update member role",
       };
     }
+
+    revalidatePath(APP_ROUTES.EMPLOYER.SETTINGS.MEMBERS);
+    revalidatePath("/employer/my-organization/members");
 
     return {
       success: true,

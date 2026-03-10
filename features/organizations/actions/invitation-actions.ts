@@ -79,7 +79,7 @@ export async function getOrganizationInvitations() {
       headers: await headers(),
       body: {
         permissions: {
-          member: ["invite"],
+          invitation: ["create"],
         },
       },
     });
@@ -131,7 +131,7 @@ export async function cancelInvitation(invitationId: string) {
       headers: await headers(),
       body: {
         permissions: {
-          member: ["invite"],
+          invitation: ["cancel"],
         },
       },
     });

@@ -2,6 +2,8 @@
 
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
+import { APP_ROUTES } from "@/constants/app-config";
 
 export async function removeMember(memberId: string) {
   try {
@@ -48,30 +50,23 @@ export async function removeMember(memberId: string) {
       };
     }
 
-    // Use better-auth's removeMember API route
-    const removeResult = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/organization/remove-member`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(await headers()),
-        },
-        body: JSON.stringify({
-          memberIdOrEmail: member.user.email,
-          organizationId: session.session.activeOrganizationId,
-        }),
+    const result = await auth.api.removeMember({
+      headers: await headers(),
+      body: {
+        memberIdOrEmail: member.user.email,
+        organizationId: session.session.activeOrganizationId,
       },
-    );
+    });
 
-    const result = await removeResult.json();
-
-    if (!removeResult.ok || result.error) {
+    if (!result) {
       return {
         success: false,
-        message: result.error?.message || "Failed to remove member",
+        message: "Failed to remove member",
       };
     }
+
+    revalidatePath(APP_ROUTES.EMPLOYER.SETTINGS.MEMBERS);
+    revalidatePath("/employer/my-organization/members");
 
     return {
       success: true,

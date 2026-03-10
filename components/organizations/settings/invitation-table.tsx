@@ -134,7 +134,7 @@ export function InvitationTable() {
                 <div className="font-medium">{invitation.email}</div>
               </TableCell>
               <TableCell>
-                <Badge variant="outline" className="capitalize">
+                <Badge variant="outline" className="uppercase">
                   {invitation.role || "user"}
                 </Badge>
               </TableCell>

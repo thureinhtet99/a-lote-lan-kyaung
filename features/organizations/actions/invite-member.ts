@@ -7,9 +7,11 @@ import { db } from "@/lib/db";
 import { userTable } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
 import { safeGetSession } from "@/lib/auth/auth-helpers";
+import { revalidatePath } from "next/cache";
+import { APP_ROUTES } from "@/constants/app-config";
 
 const inviteMemberSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.email("Invalid email address"),
   role: z.enum(["org-admin", "hr"]),
 });
 
@@ -25,7 +27,7 @@ export async function inviteMember(data: InviteMemberInput) {
       headers: await headers(),
       body: {
         permissions: {
-          member: ["invite"],
+          invitation: ["create"],
         },
       },
     });
@@ -39,7 +41,6 @@ export async function inviteMember(data: InviteMemberInput) {
 
     // Get current session to get organization ID
     const session = await safeGetSession();
-
     if (!session?.session?.activeOrganizationId) {
       return {
         success: false,
@@ -51,7 +52,6 @@ export async function inviteMember(data: InviteMemberInput) {
     const existingUser = await db.query.userTable.findFirst({
       where: eq(userTable.email, validated.email),
     });
-
     if (!existingUser) {
       return {
         success: false,
@@ -64,29 +64,19 @@ export async function inviteMember(data: InviteMemberInput) {
     if (existingUser.role !== "employer" && existingUser.role !== "admin") {
       return {
         success: false,
-        message: `${existingUser.name} (${validated.email}) does not have the employer role yet. They need to request employer access from an admin before they can be invited to an organization.`,
+        message: `(${validated.email}) does not have the employer role yet. They need to request employer access from an admin before they can be invited to an organization.`,
         requiresEmployerRole: true,
       };
     }
 
-    // Use better-auth's organization API route directly
-    const inviteResult = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/organization/invite-member`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(await headers()),
-        },
-        body: JSON.stringify({
-          email: validated.email,
-          role: validated.role,
-          organizationId: session.session.activeOrganizationId,
-        }),
+    const result = await auth.api.createInvitation({
+      headers: await headers(),
+      body: {
+        email: validated.email,
+        role: validated.role,
+        organizationId: session.session.activeOrganizationId,
       },
-    );
-
-    const result = await inviteResult.json();
+    });
 
     if (!result) {
       return {
@@ -94,6 +84,11 @@ export async function inviteMember(data: InviteMemberInput) {
         message: "Failed to create invitation",
       };
     }
+
+    revalidatePath(APP_ROUTES.EMPLOYER.SETTINGS.INVITATIONS);
+    revalidatePath(APP_ROUTES.EMPLOYER.SETTINGS.MEMBERS);
+    revalidatePath("/employer/my-organization/members");
+    revalidatePath("/employer/invitations");
 
     return {
       success: true,

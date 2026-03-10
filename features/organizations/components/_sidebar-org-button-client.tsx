@@ -14,14 +14,12 @@ import { APP_ROUTES } from "@/constants/app-config";
 import { SignOutButton } from "@/features/auth/components/auth-buttons";
 import { OrganizationType, UserType } from "@/types/index.type";
 import {
-  Building2Icon,
   ChevronsUpDown,
   CreditCardIcon,
   LogOutIcon,
   UserRoundCogIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function SidebarOrgButtonClient({
   user,
@@ -30,13 +28,7 @@ export default function SidebarOrgButtonClient({
   user: Pick<UserType, "email">;
   organization: Pick<OrganizationType, "name" | "logo">;
 }) {
-  const { isMobile, setOpenMobile } = useSidebar();
-  const router = useRouter();
-
-  const openOrganizationProfile = () => {
-    router.push(APP_ROUTES.EMPLOYER.MY_ORG);
-    setOpenMobile(false);
-  };
+  const { isMobile } = useSidebar();
 
   return (
     <DropdownMenu>
@@ -60,11 +52,6 @@ export default function SidebarOrgButtonClient({
         </DropdownMenuLabel>
 
         <DropdownMenuSeparator />
-
-        <DropdownMenuItem onClick={openOrganizationProfile}>
-          <Building2Icon className="mr-1 focus:text-accent-foreground" />
-          Manage organization
-        </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
           <Link href={APP_ROUTES.EMPLOYER.SETTINGS.HOME}>

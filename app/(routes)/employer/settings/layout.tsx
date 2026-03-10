@@ -27,12 +27,6 @@ const settingsNavItems = [
     description: "Organization profile and settings",
   },
   {
-    title: "Activity",
-    href: APP_ROUTES.EMPLOYER.SETTINGS.ACTIVITY,
-    icon: Activity,
-    description: "View recent activity and changes",
-  },
-  {
     title: "Permissions",
     href: APP_ROUTES.EMPLOYER.SETTINGS.PERMISSIONS,
     icon: Shield,
@@ -80,9 +74,9 @@ function SettingsNavLink({
       href={item.href}
       className={cn(
         "flex items-start gap-3 rounded-lg px-3 py-2 transition-colors",
-        "hover:bg-accent hover:text-accent-foreground",
+        "hover:text-accent",
         "group relative",
-        isActive && "bg-accent text-accent-foreground",
+        isActive && "text-accent",
       )}
     >
       <item.icon className="h-5 w-5 mt-0.5 flex-shrink-0" />
