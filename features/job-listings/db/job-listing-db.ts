@@ -135,6 +135,8 @@ const getJobListingsWithApplicationsCached = async (
   userId: string,
 ) => {
   "use cache";
+  cacheTag(sideBarJobListingWithApplicationsTag(orgId, userId));
+  cacheLife("minutes");
 
   const result = await db
     .select({
@@ -151,9 +153,6 @@ const getJobListingsWithApplicationsCached = async (
     )
     .groupBy(applicationTable.jobListingId, jobListingTable.id)
     .orderBy(desc(jobListingTable.createdAt));
-
-  cacheTag(sideBarJobListingWithApplicationsTag(orgId, userId));
-  cacheLife("days");
 
   return {
     success: true,
@@ -177,13 +176,12 @@ export const getJobListingsByOrgId = async (orgId: string) => {
 
 const getJobListingsByOrgIdCached = async (orgId: string) => {
   "use cache";
+  cacheTag(jobListingsTag(orgId));
+  cacheLife("minutes");
 
   const result = await db.query.jobListingTable.findMany({
     where: eq(jobListingTable.organizationId, orgId),
   });
-
-  cacheTag(jobListingsTag(orgId));
-  cacheLife("days");
 
   return {
     success: true,
@@ -206,6 +204,9 @@ export const getJobListingByIdByOrgId = async (id: string, orgId: string) => {
 
 const getJobListingByIdByOrgIdCached = async (id: string, orgId: string) => {
   "use cache";
+  cacheTag(jobListingIdTag(orgId, id));
+  cacheLife("minutes");
+
   const result = await db.query.jobListingTable.findFirst({
     where: and(
       eq(jobListingTable.id, id),
@@ -217,9 +218,6 @@ const getJobListingByIdByOrgIdCached = async (id: string, orgId: string) => {
       success: true,
       message: "Job-listings by organization fetched successfully",
     };
-
-  cacheTag(jobListingIdTag(orgId, id));
-  cacheLife("days");
 
   return {
     success: true,
@@ -292,6 +290,9 @@ const getPublishedJobListingByIdWithOrganizationCached = async (
   jobListingId: string,
 ) => {
   "use cache";
+  cacheTag(allJobListingsTag());
+  cacheLife("minutes");
+
   const result = await db.query.jobListingTable.findFirst({
     where: and(
       eq(jobListingTable.id, jobListingId),
@@ -316,7 +317,6 @@ const getPublishedJobListingByIdWithOrganizationCached = async (
     };
 
   cacheTag(jobListingIdTag(result.organization.id, result.id));
-  cacheLife("max");
 
   return {
     success: true,

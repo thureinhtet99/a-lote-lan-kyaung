@@ -1,6 +1,9 @@
 import { Suspense } from "react";
-import OrganizationsClient from "../../../../features/organizations/components/_organizations-client";
-import { getOrganizationsByEmployerId } from "@/features/organizations/db/organization-db";
+import MyOrganizationClient from "@/features/organizations/components/_my-organization-client";
+import {
+  getActiveOrganization,
+  getOrganizationsByEmployerId,
+} from "@/features/organizations/db/organization-db";
 import PageLoading from "@/components/shared/page-loading";
 
 export default function MyOrganizationPage() {
@@ -12,11 +15,18 @@ export default function MyOrganizationPage() {
 }
 
 const SuspendedComponent = async () => {
-  const organizations = await getOrganizationsByEmployerId();
+  // Get active organization from session
+  const activeOrgResult = await getActiveOrganization();
+  const activeOrganization = activeOrgResult.data;
 
-  // Employers can only have one organization, so take the first one
-  const organization =
-    organizations.data.length > 0 ? (organizations.data[0] as any) : null;
+  // Get all organizations user is a member of
+  const allOrgsResult = await getOrganizationsByEmployerId();
+  const availableOrganizations = allOrgsResult.data;
 
-  return <OrganizationsClient organization={organization} />;
+  return (
+    <MyOrganizationClient
+      activeOrganization={activeOrganization as any}
+      availableOrganizations={availableOrganizations as any}
+    />
+  );
 };

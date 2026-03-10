@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { AlertCircle, CheckCircle, Clock } from "lucide-react";
+import { AlertCircle, CheckCircle, Clock, EyeIcon } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Suspense } from "react";
 import { APP_ROUTES } from "@/constants/app-config";
@@ -78,16 +78,20 @@ const SuspendedComponent = async () => {
             Request access to get organization features
           </p>
         </div>
-        <Alert>
-          <CheckCircle className="h-4 w-4" />
-          <AlertTitle>You already have organization</AlertTitle>
-          <AlertDescription>
-            Each employer can only have one organization.
-          </AlertDescription>
-        </Alert>
-        <Button asChild>
-          <Link href={APP_ROUTES.EMPLOYER.MY_ORG}>View My Organization</Link>
-        </Button>
+        <div className="flex items-center justify-between gap-4">
+          <Alert>
+            <CheckCircle className="h-4 w-4" />
+            <AlertTitle>You already have organization</AlertTitle>
+            <AlertDescription>
+              Each employer can only have one organization.
+            </AlertDescription>
+          </Alert>
+          <Button variant="outline" asChild>
+            <Link href={APP_ROUTES.EMPLOYER.MY_ORG}>
+              <EyeIcon />
+            </Link>
+          </Button>
+        </div>
       </div>
     );
   }

@@ -18,6 +18,8 @@ export default function NewJobListingPage() {
 
 const SuspendedComponent = async () => {
   const { orgId } = await getCurrentOrg();
+  console.log("orgId", orgId);
+
   if (orgId == null) return redirect(APP_ROUTES.EMPLOYER.MY_ORG);
 
   const jobListings = await getJobListingsByOrgId(orgId);

@@ -14,8 +14,43 @@ import {
   organizationsTag,
   sideBarJobListingWithApplicationsTag,
 } from "@/lib/data-cache";
-import { safeGetSession } from "@/lib/auth/auth-helpers";
+import { safeGetSession, getCurrentOrg } from "@/lib/auth/auth-helpers";
 
+// Get active organization from session
+export const getActiveOrganization = async (): Promise<{
+  success: boolean;
+  message?: string;
+  data: OrganizationType | null;
+}> => {
+  try {
+    const { orgId } = await getCurrentOrg();
+
+    if (!orgId) {
+      return { success: true, message: "No active organization", data: null };
+    }
+
+    const result = await getOrgById(orgId);
+
+    if (!result.success || !result.data) {
+      return { success: false, message: result.message, data: null };
+    }
+
+    return {
+      success: true,
+      message: "Active organization fetched successfully",
+      data: result.data as OrganizationType,
+    };
+  } catch (error) {
+    console.error("Error fetching active organization: ", error);
+    return {
+      success: false,
+      message: "Failed to fetch active organization",
+      data: null,
+    };
+  }
+};
+
+// Get all organizations user is a member of
 export const getOrganizationsByEmployerId = async (): Promise<{
   success: boolean;
   message?: string;
@@ -31,7 +66,7 @@ export const getOrganizationsByEmployerId = async (): Promise<{
 
     return await getOrganizationsByEmployerIdCached(userId);
   } catch (error) {
-    console.error("Error fetching organizations:", error);
+    console.error("Error fetching organizations: ", error);
     return {
       success: false,
       message: "Failed to fetch organizations",
@@ -40,8 +75,60 @@ export const getOrganizationsByEmployerId = async (): Promise<{
   }
 };
 
+export const activateOrganization = async (
+  organizationId: string,
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    const session = await safeGetSession();
+    if (!session?.user || session.user.role !== "employer") {
+      return { success: false, message: "Unauthorized" };
+    }
+
+    const membership = await db.query.memberTable.findFirst({
+      where: and(
+        eq(memberTable.userId, session.user.id),
+        eq(memberTable.organizationId, organizationId),
+      ),
+      columns: {
+        userId: true,
+      },
+    });
+
+    if (!membership) {
+      return {
+        success: false,
+        message: "You are not a member of this organization",
+      };
+    }
+
+    const result = await auth.api.setActiveOrganization({
+      body: {
+        organizationId,
+      },
+      headers: await headers(),
+    });
+
+    if (!result) {
+      return { success: false, message: "Failed to activate organization" };
+    }
+
+    updateTag(organizationsTag());
+    updateTag(organizationTag(organizationId, session.user.id));
+    updateTag(
+      sideBarJobListingWithApplicationsTag(organizationId, session.user.id),
+    );
+
+    return { success: true, message: "Organization activated successfully" };
+  } catch (error) {
+    console.error("Error activating organization:", error);
+    return { success: false, message: "Failed to activate organization" };
+  }
+};
+
 const getOrganizationsByEmployerIdCached = async (userId: string) => {
   "use cache";
+  cacheTag(organizationsTag());
+  cacheLife("minutes");
 
   const organizations = await db
     .select({
@@ -60,11 +147,9 @@ const getOrganizationsByEmployerIdCached = async (userId: string) => {
     )
     .where(eq(memberTable.userId, userId));
 
-  cacheTag(organizationsTag());
   for (const org of organizations) {
     cacheTag(organizationTag(org.id, userId));
   }
-  cacheLife("days");
 
   return {
     success: true,

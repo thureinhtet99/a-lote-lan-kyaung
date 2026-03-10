@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Bell, Check, CheckCheck, Trash2, ExternalLink } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
-import { getCurrentUser } from "@/lib/auth/auth-helpers";
+import { getCurrentOrg, getCurrentUser } from "@/lib/auth/auth-helpers";
 import { APP_ROUTES } from "@/constants/app-config";
 import { getUserNotifications } from "@/features/organizations/db/notification-db";
 import { NotificationsList } from "@/features/organizations/components/notifications-list";
@@ -27,7 +27,10 @@ export default function NotificationPage() {
 }
 
 const SuspendedComponent = async () => {
-  const { userId } = await getCurrentUser();
+  const [{ userId }, { orgId }] = await Promise.all([
+    getCurrentUser(),
+    getCurrentOrg(),
+  ]);
   if (userId == null) return redirect(APP_ROUTES.SIGN_IN);
 
   const notificationsResult = await getUserNotifications();
@@ -36,10 +39,10 @@ const SuspendedComponent = async () => {
     : [];
 
   return (
-    <div className="space-y-6 px-6 py-6 md:px-8 md:py-8">
+    <div className="space-y-6 px-4 py-4 sm:px-6 sm:py-6 md:px-8 md:py-8">
       <div className="flex items-center gap-2">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
             Your notifications
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
@@ -49,7 +52,10 @@ const SuspendedComponent = async () => {
       </div>
 
       <Suspense fallback={<Loading />}>
-        <NotificationsList initialNotifications={notifications} />
+        <NotificationsList
+          initialNotifications={notifications}
+          hasActiveOrg={orgId != null}
+        />
       </Suspense>
     </div>
   );

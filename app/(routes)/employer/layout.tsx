@@ -35,8 +35,6 @@ export default function EmployerLayout({ children }: { children: ReactNode }) {
 const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
   const { orgId } = await getCurrentOrg();
 
-  // If no organization, show limited navigation without "My Organization"
-  // Employers must first claim an organization before seeing "My Organization"
   if (orgId == null) {
     return (
       <AppSidebar
@@ -54,6 +52,13 @@ const SuspendedComponent = async ({ children }: { children: ReactNode }) => {
                   href: APP_ROUTES.EMPLOYER.HOME,
                   icon: <LayoutDashboardIcon />,
                   label: "Employer dashboard",
+                  authStatus: "signedIn",
+                  roles: ["employer"],
+                },
+                {
+                  href: APP_ROUTES.EMPLOYER.MY_ORG,
+                  icon: <Building2Icon />,
+                  label: "My Organization",
                   authStatus: "signedIn",
                   roles: ["employer"],
                 },

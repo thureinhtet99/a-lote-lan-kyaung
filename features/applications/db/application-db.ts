@@ -88,6 +88,8 @@ export const getApplicationsByJobListingId = async (jobListingId: string) => {
 
 const getApplicationsByJobListingIdCached = async (jobListingId: string) => {
   "use cache";
+  cacheTag(jobListingApplicationsTag(jobListingId));
+  cacheLife("minutes");
 
   const result = await db.query.applicationTable.findMany({
     where: eq(applicationTable.jobListingId, jobListingId),
@@ -117,9 +119,6 @@ const getApplicationsByJobListingIdCached = async (jobListingId: string) => {
       },
     },
   });
-
-  cacheTag(jobListingApplicationsTag(jobListingId));
-  cacheLife("minutes");
 
   return {
     success: true,

@@ -84,30 +84,27 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="space-y-6 px-6 py-6 md:px-8 md:py-8">
+    <div className="space-y-6 px-4 py-4 sm:px-6 sm:py-6 md:px-8 md:py-8">
       <Card className="border-primary/20">
         <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-6">
-              <Avatar className="h-24 w-24">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
+              <Avatar className="h-16 w-16 sm:h-24 sm:w-24">
                 <AvatarImage
                   src={session.user?.image || undefined}
                   alt={session.user?.name || "User"}
                 />
-                <AvatarFallback className="bg-primary/10 text-primary text-3xl">
+                <AvatarFallback className="bg-primary/10 text-primary text-xl sm:text-3xl">
                   {userInitials}
                 </AvatarFallback>
               </Avatar>
-              <div className="space-y-2">
+              <div className="space-y-2 text-center sm:text-left">
                 <div>
-                  <CardTitle className="text-3xl flex items-center gap-1">
+                  <CardTitle className="text-xl sm:text-3xl flex items-center justify-center sm:justify-start gap-1">
                     {session.user?.name}
-                    <span className="text-sm text-muted-foreground">
-                      ({session.user?.role === "employer" && "Employer"})
-                    </span>
                   </CardTitle>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 justify-center sm:justify-start">
                   <span className="text-muted-foreground text-sm">
                     Joined {daySinceJoined(session.user?.createdAt)}
                   </span>
@@ -115,12 +112,15 @@ export default function ProfilePage() {
               </div>
             </div>
             {!isEditing ? (
-              <Button onClick={() => setIsEditing(true)} className="gap-2">
+              <Button
+                onClick={() => setIsEditing(true)}
+                className="gap-2 self-center sm:self-start"
+              >
                 <Edit className="h-4 w-4" />
-                <span className="hidden md:inline">Edit Profile</span>
+                <span className="hidden lg:inline">Edit Profile</span>
               </Button>
             ) : (
-              <div className="flex gap-2">
+              <div className="flex gap-2 self-center sm:self-start">
                 <Button
                   onClick={handleSave}
                   disabled={isPending}
@@ -153,7 +153,6 @@ export default function ProfilePage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-xl flex items-center gap-2">
-              <User className="h-5 w-5" />
               Profile Information
             </CardTitle>
           </CardHeader>
@@ -189,7 +188,7 @@ export default function ProfilePage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm font-medium text-muted-foreground">
                 Email Verified
               </span>
               <Badge
@@ -200,7 +199,7 @@ export default function ProfilePage() {
             </div>
             <Separator />
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm font-medium text-muted-foreground">
                 Member Since
               </span>
               <span className="text-sm">
