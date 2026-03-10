@@ -20,6 +20,7 @@ import { signUpSchema } from "@/drizzle/schema";
 import { useState } from "react";
 import { Eye, EyeOff, Loader2Icon } from "lucide-react";
 import { SignUpFormType } from "@/types/index.type";
+import LoadingSwap from "@/components/shared/loading-swap";
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);

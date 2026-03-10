@@ -28,7 +28,7 @@ export default function DataTableFacetedFilter<TData, TValue, OValue>({
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
+      <PopoverTrigger className="cursor-pointer" asChild>
         <Button disabled={disabled} variant="outline" size="sm">
           {selectedValues.size > 0 && (
             <Badge variant="secondary" size="sm">
@@ -39,16 +39,17 @@ export default function DataTableFacetedFilter<TData, TValue, OValue>({
           <ChevronDownIcon />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-[200px] p-0">
+      <PopoverContent align="end" className="w-[200px] p-0">
         <Command className="max-w-sm rounded-lg border">
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup heading="Suggestions">
+            <CommandGroup>
               {options.map((opt) => {
                 const isSelected = selectedValues.has(opt.value);
 
                 return (
                   <CommandItem
+                    className="text-sm"
                     key={opt.key}
                     onSelect={() => {
                       if (isSelected) {
@@ -65,19 +66,23 @@ export default function DataTableFacetedFilter<TData, TValue, OValue>({
                   >
                     <div
                       className={cn(
-                        "flex size-3 items-center justify-center rounded-[4px] border",
+                        "flex size-3 items-center justify-center p-2 rounded",
                         isSelected
                           ? "bg-primary border-primary text-primary-foreground"
                           : "border-input",
                       )}
                     >
-                      <CheckIcon className="text-primary-foreground size-3.5" />
+                      <CheckIcon className="text-primary-foreground size-4" />
                     </div>
                     <span>{opt.label}</span>
                     {facets?.get(opt.value) && (
-                      <span className="text-muted-foreground ml-auto flex size-4 items-center justify-center font-mono text-xs">
+                      <Badge
+                        size="sm"
+                        variant="outline"
+                        className="ml-auto text-primary"
+                      >
                         {facets?.get(opt.value)}
-                      </span>
+                      </Badge>
                     )}
                   </CommandItem>
                 );
@@ -86,10 +91,10 @@ export default function DataTableFacetedFilter<TData, TValue, OValue>({
             {selectedValues.size > 0 && (
               <>
                 <CommandSeparator />
-                <CommandGroup heading="Settings">
+                <CommandGroup>
                   <CommandItem
                     onSelect={() => column?.setFilterValue(undefined)}
-                    className="justify-center text-center"
+                    className="justify-center text-center text-destructive"
                   >
                     Clear
                   </CommandItem>

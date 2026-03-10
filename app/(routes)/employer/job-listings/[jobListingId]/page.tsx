@@ -59,7 +59,7 @@ const SuspendedComponent = async ({
             {jobListing.data.title}
           </h1>
 
-          <div className="flex flex-wrap gap-2 mt-2">
+          <div className="flex flex-wrap gap-4 mt-2">
             <Badge>{formatJobListingStatus(jobListing.data.status)}</Badge>
             <JobListingBadges jobListing={jobListing.data} />
           </div>
@@ -142,7 +142,7 @@ const Applications = async ({ jobListingId }: { jobListingId: string }) => {
           resume: app.user.resume
             ? {
                 ...app.user.resume,
-                markdownSummary: app.user.resume.resumeFileUrl ? ( // replace resumeFileUrl wit aiSummary later
+                markdownSummary: app.user.resume.resumeFileUrl ? (
                   <MarkdownRenderer source={app.user.resume.resumeFileUrl} />
                 ) : null,
               }
@@ -152,7 +152,6 @@ const Applications = async ({ jobListingId }: { jobListingId: string }) => {
           <MarkdownRenderer source={app.coverLetter} />
         ) : null,
       }))}
-      canUpdateRating={await hasOrgUserPermission("application.change_rating")}
       canUpdateStatus={await hasOrgUserPermission("application.change_status")}
     />
   );

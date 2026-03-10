@@ -17,9 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ChevronDownIcon, MoreHorizontalIcon } from "lucide-react";
-
 import { toast } from "sonner";
-import { RATING_OPTIONS } from "../data/constants";
 import {
   Dialog,
   DialogContent,
@@ -33,23 +31,22 @@ import { ApplicationType } from "@/types/index.type";
 import DataTableFacetedFilter from "@/components/data-table/data-table-faceted-filter";
 import { DataTableSortableColumnHeader } from "@/components/data-table/data-table-sortable-column-header";
 import StatusIcon from "./status-icon";
+import { updateApplicationStatus } from "../db/application-db";
 
 export default function ApplicationTable({
   applications,
-  canUpdateRating,
   canUpdateStatus,
   noResultMessage = "No applications",
   disableToolbar = false,
 }: {
   applications: ApplicationType[];
-  canUpdateRating: boolean;
   canUpdateStatus: boolean;
   noResultMessage?: ReactNode;
   disableToolbar?: boolean;
 }) {
   return (
     <DataTable
-      columns={getColumns(canUpdateRating, canUpdateStatus)}
+      columns={getColumns(canUpdateStatus)}
       data={applications}
       noResultMessage={noResultMessage}
       ToolbarComponent={disableToolbar ? DisabledToolbar : Toolbar}
@@ -74,8 +71,6 @@ function Toolbar<T>({
   table: Table<T>;
   disabled?: boolean;
 }) {
-  const hiddenRow = table.getCoreRowModel().rows.length - table.getRowCount();
-
   return (
     <div className="flex items-center gap-2">
       {table.getColumn("status") && (
@@ -92,20 +87,11 @@ function Toolbar<T>({
             }))}
         />
       )}
-
-      {hiddenRow > 0 && (
-        <div className="text-sm text-muted-foreground ml-2">
-          {hiddenRow} {hiddenRow > 1 ? "rows" : "row"} hidden
-        </div>
-      )}
     </div>
   );
 }
 
-const getColumns = (
-  canUpdateRating: boolean,
-  canUpdateStatus: boolean,
-): ColumnDef<ApplicationType>[] => {
+const getColumns = (canUpdateStatus: boolean): ColumnDef<ApplicationType>[] => {
   return [
     {
       accessorFn: (row) => row.user.name,
@@ -120,13 +106,13 @@ const getColumns = (
 
         return (
           <div className="flex items-center gap-2">
-            <Avatar className="rounded-full size-6">
+            <Avatar className="size-8">
               <AvatarImage src={user.image ?? undefined} alt={user.name} />
-              <AvatarFallback className="uppercase bg-primary text-primary-foreground text-xs">
+              <AvatarFallback className="bg-primary text-primary-foreground text-xs uppercase">
                 {nameInitial}
               </AvatarFallback>
             </Avatar>
-            <span>{user.name}</span>
+            <span className="font-medium">{user.name}</span>
           </div>
         );
       },
@@ -159,17 +145,15 @@ const getColumns = (
       header: ({ column }) => (
         <DataTableSortableColumnHeader column={column} title="Applied On" />
       ),
-      cell: ({ row }) => {
-        return (
-          <div className="flex items-center justify-center">
-            {new Date(row.original.createdAt).toLocaleString("en-US", {
-              year: "numeric",
-              month: "short",
-              day: "2-digit",
-            })}
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <div className="text-center text-sm text-muted-foreground">
+          {new Date(row.original.createdAt).toLocaleString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "2-digit",
+          })}
+        </div>
+      ),
     },
 
     {
@@ -210,13 +194,17 @@ const StatusCell = ({
   return (
     <div className="flex items-center justify-center">
       <DropdownMenu>
-        <DropdownMenuTrigger className="min-w-40" asChild>
+        <DropdownMenuTrigger className="min-w-36 cursor-pointer border" asChild>
           <Button
             variant="ghost"
-            className={cn("-ml-3", isPending && "opacity-50")}
+            size="sm"
+            className={cn(
+              "-ml-3 h-8",
+              isPending && "opacity-50 cursor-not-allowed",
+            )}
           >
             <StatusDetail status={optimisticStatus} />
-            <ChevronDownIcon />
+            <ChevronDownIcon className="ml-1 size-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
@@ -226,12 +214,13 @@ const StatusCell = ({
               onClick={() => {
                 startTransition(async () => {
                   setOptimisticStatus(status);
-                  // const response = await updateJobListingApplicationStatus(
-                  //   { jobListingId, userId },
-                  //   status,
-                  // );
+                  const response = await updateApplicationStatus(
+                    { jobListingId, userId },
+                    status,
+                  );
 
-                  // if (response?.error) toast.error(response.message);
+                  if (response.success) toast.success(response.message);
+                  else toast.error(response.message);
                 });
               }}
             >
@@ -269,24 +258,24 @@ const ActionCell = ({
               <MoreHorizontalIcon className="size-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent>
+          <DropdownMenuContent align="end">
             {resumeMarkDown != null || resumeUrl != null ? (
               <DropdownMenuItem onClick={() => setOpenModal("resume")}>
-                View Resume
+                View resume
               </DropdownMenuItem>
             ) : (
               <DropdownMenuLabel className="text-muted-foreground">
-                No Resume
+                No resume
               </DropdownMenuLabel>
             )}
 
             {coverLetterMarkDown ? (
               <DropdownMenuItem onClick={() => setOpenModal("cover-letter")}>
-                View Cover Letter
+                View cover letter
               </DropdownMenuItem>
             ) : (
               <DropdownMenuLabel className="text-muted-foreground">
-                No Cover Letter
+                No cover letter
               </DropdownMenuLabel>
             )}
           </DropdownMenuContent>
@@ -340,11 +329,9 @@ const ActionCell = ({
   );
 };
 
-const StatusDetail = ({ status }: { status: ApplicationStatusType }) => {
-  return (
-    <div className="flex items-center gap-2">
-      <StatusIcon status={status} className="size-5 text-inherit" />
-      <div>{formatApplicationStatus(status)}</div>
-    </div>
-  );
-};
+const StatusDetail = ({ status }: { status: ApplicationStatusType }) => (
+  <div className="flex items-center gap-2">
+    <StatusIcon status={status} className="size-4" />
+    <span className="text-sm">{formatApplicationStatus(status)}</span>
+  </div>
+);

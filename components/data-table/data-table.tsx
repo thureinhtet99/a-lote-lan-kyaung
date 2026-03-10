@@ -25,7 +25,7 @@ import {
 import { ComponentType, ReactNode, useState } from "react";
 import { DataTablePagination } from "./data-table-pagination";
 
-interface DataTableProps<TData, TValue> {
+interface Props<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   initialFilters?: ColumnFiltersState;
@@ -36,10 +36,10 @@ interface DataTableProps<TData, TValue> {
 export function DataTable<TData, TValue>({
   columns,
   data,
-  initialFilters,
   noResultMessage = "No results",
   ToolbarComponent,
-}: DataTableProps<TData, TValue>) {
+  initialFilters,
+}: Props<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumFilters] = useState<ColumnFiltersState>(
     initialFilters ?? [],
@@ -63,7 +63,9 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="flex flex-col gap-4">
-      {ToolbarComponent && <ToolbarComponent table={table} />}
+      <div className="ml-auto">
+        {ToolbarComponent && <ToolbarComponent table={table} />}
+      </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
