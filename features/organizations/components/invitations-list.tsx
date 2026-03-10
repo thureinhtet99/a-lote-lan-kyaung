@@ -23,6 +23,7 @@ import {
   Crown,
   Shield,
 } from "lucide-react";
+import LoadingSwap from "@/components/shared/loading-swap";
 
 type Invitation = {
   id: string;
@@ -154,20 +155,34 @@ export function InvitationsList({
               <CardFooter className="flex gap-2">
                 <Button
                   variant="outline"
-                  className="flex-1"
+                  className="flex-1 cursor-pointer"
                   onClick={() => handleReject(invitation.id)}
                   disabled={isPending || isExpired}
                 >
-                  <XCircle className="mr-2 size-4" />
-                  Decline
+                  <LoadingSwap
+                    isLoading={isPending}
+                    children={
+                      <>
+                        <XCircle className="mr-2 size-4" />
+                        Decline
+                      </>
+                    }
+                  />
                 </Button>
                 <Button
-                  className="flex-1"
+                  className="flex-1 cursor-pointer"
                   onClick={() => handleAccept(invitation.id)}
                   disabled={isPending || isExpired}
                 >
-                  <CheckCircle className="mr-2 size-4" />
-                  Accept
+                  <LoadingSwap
+                    isLoading={isPending}
+                    children={
+                      <>
+                        <CheckCircle className="mr-2 size-4" />
+                        Accept
+                      </>
+                    }
+                  />
                 </Button>
               </CardFooter>
             </Card>

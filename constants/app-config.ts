@@ -33,6 +33,7 @@ export const APP_ROUTES = {
     HOME: "/settings",
     PROFILE: "/settings/profile",
     RESUME: "/settings/resume",
+    INVITATIONS: "/settings/invitations",
     NOTIFICATIONS: "/settings/notifications",
     EMPLOYER_REQUEST: "/settings/employer-request",
     ORG_REQUEST: "/settings/organization-request",

@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import {
   BellIcon,
   Building2Icon,
+  FileSymlink,
   FileUserIcon,
   Megaphone,
   User2Icon,
@@ -25,6 +26,13 @@ const baseItems: SidebarNavMenuType = [
     icon: <BellIcon />,
     authStatus: "signedIn",
     label: "Notifications",
+  },
+  {
+    href: APP_ROUTES.SETTINGS.INVITATIONS,
+    icon: <FileSymlink />,
+    authStatus: "signedIn",
+    label: "Invitations",
+    roles: ["employer"],
   },
   {
     href: APP_ROUTES.SETTINGS.RESUME,

@@ -160,7 +160,7 @@ export function InvitationTable() {
                       onClick={() => handleResendInvitation(invitation.id)}
                       disabled={resending === invitation.id}
                     >
-                      <Mail className="h-4 w-4 mr-2" />
+                      <Mail className="h-4 w-4 hover:text-white" />
                       {resending === invitation.id
                         ? "Resending..."
                         : "Resend Invitation"}
@@ -169,7 +169,7 @@ export function InvitationTable() {
                       onClick={() => setInvitationToRevoke(invitation)}
                       className="text-destructive focus:text-destructive"
                     >
-                      <Trash2 className="h-4 w-4 mr-2" />
+                      <Trash2 className="h-4 w-4 hover:text-white" />
                       Revoke
                     </DropdownMenuItem>
                   </DropdownMenuContent>
