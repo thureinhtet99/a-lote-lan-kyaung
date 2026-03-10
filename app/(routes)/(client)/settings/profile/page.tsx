@@ -1,14 +1,7 @@
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { User, Mail, Edit, Save, X, Loader2 } from "lucide-react";
+import { Edit, Save, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useSession } from "@/lib/auth/auth-client";
 import { useState, useTransition, useEffect } from "react";
@@ -85,80 +78,71 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6 px-4 py-4 sm:px-6 sm:py-6 md:px-8 md:py-8">
-      <Card className="border-primary/20">
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
-              <Avatar className="h-16 w-16 sm:h-24 sm:w-24">
-                <AvatarImage
-                  src={session.user?.image || undefined}
-                  alt={session.user?.name || "User"}
-                />
-                <AvatarFallback className="bg-primary/10 text-primary text-xl sm:text-3xl">
-                  {userInitials}
-                </AvatarFallback>
-              </Avatar>
-              <div className="space-y-2 text-center sm:text-left">
-                <div>
-                  <CardTitle className="text-xl sm:text-3xl flex items-center justify-center sm:justify-start gap-1">
-                    {session.user?.name}
-                  </CardTitle>
-                </div>
-                <div className="flex gap-2 justify-center sm:justify-start">
-                  <span className="text-muted-foreground text-sm">
-                    Joined {daySinceJoined(session.user?.createdAt)}
-                  </span>
-                </div>
-              </div>
-            </div>
-            {!isEditing ? (
-              <Button
-                onClick={() => setIsEditing(true)}
-                className="gap-2 self-center sm:self-start"
-              >
-                <Edit className="h-4 w-4" />
-                <span className="hidden lg:inline">Edit Profile</span>
-              </Button>
-            ) : (
-              <div className="flex gap-2 self-center sm:self-start">
-                <Button
-                  onClick={handleSave}
-                  disabled={isPending}
-                  className="gap-2"
-                >
-                  {isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Save className="h-4 w-4" />
-                  )}
-                  {isPending ? "Saving..." : "Save"}
-                </Button>
-                <Button
-                  onClick={handleCancel}
-                  variant="outline"
-                  className="gap-2"
-                  disabled={isPending}
-                >
-                  <X className="h-4 w-4" />
-                  Cancel
-                </Button>
-              </div>
-            )}
+      {/* Header with Avatar */}
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
+          <Avatar className="h-16 w-16 sm:h-20 sm:w-20">
+            <AvatarImage
+              src={session.user?.image || undefined}
+              alt={session.user?.name || "User"}
+            />
+            <AvatarFallback className="bg-primary/10 text-primary text-xl sm:text-2xl">
+              {userInitials}
+            </AvatarFallback>
+          </Avatar>
+          <div className="space-y-1 text-center sm:text-left">
+            <h1 className="text-xl sm:text-2xl font-bold">
+              {session.user?.name}
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              Joined {daySinceJoined(session.user?.createdAt)}
+            </p>
           </div>
-        </CardHeader>
-      </Card>
+        </div>
+        {!isEditing ? (
+          <Button
+            onClick={() => setIsEditing(true)}
+            variant="outline"
+            className="gap-2 self-center sm:self-start"
+          >
+            <Edit className="h-4 w-4" />
+            Edit Profile
+          </Button>
+        ) : (
+          <div className="flex gap-2 self-center sm:self-start">
+            <Button onClick={handleSave} disabled={isPending} className="gap-2">
+              {isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              {isPending ? "Saving..." : "Save"}
+            </Button>
+            <Button
+              onClick={handleCancel}
+              variant="outline"
+              className="gap-2"
+              disabled={isPending}
+            >
+              <X className="h-4 w-4" />
+              Cancel
+            </Button>
+          </div>
+        )}
+      </div>
 
+      <Separator />
+
+      {/* Profile Details */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Profile Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl flex items-center gap-2">
-              Profile Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label className="text-muted-foreground">Username</Label>
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold">Profile Information</h2>
+
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <Label className="text-muted-foreground text-xs uppercase tracking-wide">
+                Username
+              </Label>
               {isEditing ? (
                 <Input
                   value={formData.name}
@@ -172,23 +156,21 @@ export default function ProfilePage() {
               )}
             </div>
 
-            <Separator />
-
-            <div className="space-y-2">
-              <Label className="text-muted-foreground">Email</Label>
+            <div className="space-y-1">
+              <Label className="text-muted-foreground text-xs uppercase tracking-wide">
+                Email
+              </Label>
               <p className="text-sm font-medium">{session.user?.email}</p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* Account Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl">Account Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold">Account Information</h2>
+
+          <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-muted-foreground">
+              <span className="text-muted-foreground text-xs uppercase tracking-wide">
                 Email Verified
               </span>
               <Badge
@@ -197,9 +179,9 @@ export default function ProfilePage() {
                 {session.user?.emailVerified ? "Verified" : "Not Verified"}
               </Badge>
             </div>
-            <Separator />
+
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-muted-foreground">
+              <span className="text-muted-foreground text-xs uppercase tracking-wide">
                 Member Since
               </span>
               <span className="text-sm">
@@ -210,8 +192,8 @@ export default function ProfilePage() {
                 })}
               </span>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

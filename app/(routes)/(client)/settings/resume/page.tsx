@@ -2,9 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/auth-helpers";
-import DropzoneClient from "./_DropzoneClient";
+import DropzoneClient from "./_dropzone-client";
 import { getCurrentResume } from "@/features/applications/db/resume-db";
-import ResumeViewerClient from "./_ResumeViewerClient";
+import ResumeViewerClient from "./_resume-viewer-client";
 import { APP_ROUTES } from "@/constants/app-config";
 
 export default function ResumePage() {

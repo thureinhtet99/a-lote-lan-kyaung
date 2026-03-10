@@ -502,6 +502,8 @@ export const getEmployerRequest = async () => {
 
 const getEmployerRequestCached = async (userId: string) => {
   "use cache";
+  cacheTag(employerRequestIdTag(userId));
+  cacheLife("minutes");
 
   const request = await db.query.employerRequestTable.findFirst({
     where: eq(employerRequestTable.userId, userId),
@@ -510,9 +512,6 @@ const getEmployerRequestCached = async (userId: string) => {
 
   if (!request)
     return { success: false, message: "No employer request", data: null };
-
-  cacheTag(employerRequestIdTag(request.id));
-  cacheLife("minutes");
 
   return {
     success: true,

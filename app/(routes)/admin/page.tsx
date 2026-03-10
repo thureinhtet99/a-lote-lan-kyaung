@@ -2,7 +2,7 @@ import { StatCard } from "@/components/shared/stat-card";
 import { PageHeader } from "@/components/shared/page-header";
 import { Users, Briefcase, Shield, Clock, Building2 } from "lucide-react";
 import { getAdminStats } from "@/features/admin/db/admin-db";
-import { getCurrentUser, safeGetSession } from "@/lib/auth/auth-helpers";
+import { getCurrentUser } from "@/lib/auth/auth-helpers";
 import { redirect } from "next/navigation";
 
 export default async function AdminDashboard() {
@@ -25,13 +25,13 @@ export default async function AdminDashboard() {
         description={
           <>
             Welcome back,{" "}
-            <span className="text-black">{user.name ?? "Admin"}</span>.
+            <span className="font-medium">{user.name ?? "Admin"}</span>.
             Here&apos;s what&apos;s happening with your platform.
           </>
         }
       />
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard
           title="Users"
           value={totalUsers}

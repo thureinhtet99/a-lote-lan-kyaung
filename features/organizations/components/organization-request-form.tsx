@@ -15,18 +15,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { toast } from "sonner";
 import { OrgRequestFormType } from "@/types/index.type";
 import { organizationRequestSchema } from "@/features/admin/schema/admin-form-schema";
 import { createOrganizationRequest } from "@/features/organizations/db/organization-request-db";
-import { Clock, Loader2Icon } from "lucide-react";
+import { Clock } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import LoadingSwap from "@/components/shared/loading-swap";
 
@@ -79,84 +72,85 @@ export function OrganizationRequestForm() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Request to Create Organization</CardTitle>
-        <CardDescription>
+    <div className="space-y-6">
+      <div className="space-y-1">
+        <h2 className="text-lg font-semibold">
+          Request to Create Organization
+        </h2>
+        <p className="text-sm text-muted-foreground">
           Submit a request to create a new organization on the platform
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="orgName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Organization Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Acme Corp"
-                      {...field}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        handleNameChange(e.target.value);
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        </p>
+      </div>
 
-            <FormField
-              control={form.control}
-              name="orgSlug"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Slug</FormLabel>
-                  <FormControl>
-                    <Input placeholder="acme-corp" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Used in your organization URL. Only lowercase letters,
-                    numbers, and hyphens.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="orgName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Organization Name</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Acme Corp"
+                    {...field}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      handleNameChange(e.target.value);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <FormField
-              control={form.control}
-              name="requestMessage"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Why do you want to create this organization?
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Describe your organization and why you want to create it on this platform..."
-                      rows={4}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Min 10 characters, max 500 characters
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <FormField
+            control={form.control}
+            name="orgSlug"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Slug</FormLabel>
+                <FormControl>
+                  <Input placeholder="acme-corp" {...field} />
+                </FormControl>
+                <FormDescription>
+                  Used in your organization URL. Only lowercase letters,
+                  numbers, and hyphens.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <Button type="submit" disabled={isPending}>
-              <LoadingSwap isLoading={isPending} children="Submit request" />
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+          <FormField
+            control={form.control}
+            name="requestMessage"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Why do you want to create this organization?
+                </FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Describe your organization and why you want to create it on this platform..."
+                    rows={4}
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Min 10 characters, max 500 characters
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Button type="submit" disabled={isPending}>
+            <LoadingSwap isLoading={isPending} children="Submit request" />
+          </Button>
+        </form>
+      </Form>
+    </div>
   );
 }

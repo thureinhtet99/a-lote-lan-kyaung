@@ -12,7 +12,6 @@ import {
   allJobListingsTag,
   jobListingIdTag,
   jobListingsTag,
-  mostRecentJobListingIdTag,
   sideBarJobListingWithApplicationsTag,
 } from "@/lib/data-cache";
 import { jobListingFormSchema } from "../schema/job-listing-form-schema";
@@ -242,6 +241,8 @@ export const getMostRecentJobListing = async (orgId: string) => {
 
 const getMostRecentJobListingCached = async (orgId: string) => {
   "use cache";
+  cacheTag(jobListingsTag(orgId));
+  cacheLife("hours");
 
   const [result] = await db
     .select({ id: jobListingTable.id })
@@ -257,9 +258,6 @@ const getMostRecentJobListingCached = async (orgId: string) => {
       data: null,
     };
   }
-
-  cacheTag(mostRecentJobListingIdTag(orgId, result.id));
-  cacheLife("hours");
 
   return {
     success: true,

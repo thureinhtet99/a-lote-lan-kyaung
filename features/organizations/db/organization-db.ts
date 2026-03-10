@@ -178,6 +178,8 @@ export const getOrgById = async (
 
 const getOrgByIdCached = async (id: string) => {
   "use cache";
+  cacheTag(organizationIdTag(id));
+  cacheLife("days");
 
   const result = await db
     .select()
@@ -191,9 +193,6 @@ const getOrgByIdCached = async (id: string) => {
       success: false,
       message: "Failed to fetch organization by id",
     };
-
-  cacheTag(organizationIdTag(id));
-  cacheLife("days");
 
   return {
     success: true,

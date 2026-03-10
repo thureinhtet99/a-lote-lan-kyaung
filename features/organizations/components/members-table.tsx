@@ -231,7 +231,7 @@ export function MembersTable({
                         year: "numeric",
                         month: "short",
                         day: "2-digit",
-                      })()}
+                      })}
                     </TableCell>
                     <TableCell>
                       {canInvite && !isCurrentUser(member) && (

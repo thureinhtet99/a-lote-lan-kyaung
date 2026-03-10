@@ -141,6 +141,8 @@ export const getMyOrganizationRequest = async () => {
 
 const getMyOrganizationRequestCached = async (userId: string) => {
   "use cache";
+  cacheTag(userOrgRequestsTag(userId));
+  cacheLife("minutes");
 
   const result = await db.query.organizationRequestTable.findFirst({
     where: eq(organizationRequestTable.userId, userId),
@@ -149,9 +151,6 @@ const getMyOrganizationRequestCached = async (userId: string) => {
 
   if (!result)
     return { success: false, message: "No organization request", data: null };
-
-  cacheTag(userOrgRequestsTag(result.id));
-  cacheLife("minutes");
 
   return {
     success: true,

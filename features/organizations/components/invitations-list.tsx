@@ -146,7 +146,7 @@ export function InvitationsList({
                         year: "numeric",
                         month: "short",
                         day: "2-digit",
-                      })()}
+                      })}
                     </p>
                   </div>
                 </div>

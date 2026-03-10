@@ -31,6 +31,15 @@ export type PaginationType = {
   totalPages: number;
 };
 
+// Standardized API response types
+export type ActionResult<T = undefined> = T extends undefined
+  ? { success: boolean; message: string }
+  : { success: boolean; message: string; data: T };
+
+export type ActionResultWithPagination<T> = ActionResult<T> & {
+  pagination: PaginationType;
+};
+
 export type SidebarNavMenuType = {
   href: string;
   icon: ReactNode;
