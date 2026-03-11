@@ -1,7 +1,3 @@
-import { betterAuth } from "better-auth/minimal";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db } from "@/lib/db";
-import { organization, admin as adminPlugin } from "better-auth/plugins";
 import {
   accountTable,
   invitationTable,
@@ -12,10 +8,30 @@ import {
   verificationTable,
 } from "@/drizzle/schema";
 import { ac, hr, orgAdmin } from "@/lib/access-control";
-import { revalidateTag } from "next/cache";
 import { dashboardStatsTag } from "@/lib/data-cache";
+import { db } from "@/lib/db";
 import { sendInvitationEmail } from "@/services/email/send-invitation";
-import { getInitialOrganization } from "@/features/organizations/db/organization-db";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { betterAuth } from "better-auth/minimal";
+import { admin as adminPlugin, organization } from "better-auth/plugins";
+import { eq } from "drizzle-orm";
+import { revalidateTag } from "next/cache";
+
+const getInitialOrganizationId = async (
+  userId: string,
+): Promise<string | null> => {
+  if (!userId) return null;
+
+  const membership = await db.query.memberTable.findFirst({
+    where: eq(memberTable.userId, userId),
+    columns: {
+      organizationId: true,
+    },
+    orderBy: (members, { asc }) => [asc(members.createdAt)],
+  });
+
+  return membership?.organizationId ?? null;
+};
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -78,20 +94,26 @@ export const auth = betterAuth({
         },
       },
     },
-  },
-  session: {
-    create: {
-      before: async (session: { userId: string } & Record<string, unknown>) => {
-        const organization = await getInitialOrganization(session.userId);
+    session: {
+      create: {
+        before: async (
+          session: { userId: string } & Record<string, unknown>,
+        ) => {
+          const activeOrganizationId = await getInitialOrganizationId(
+            session.userId,
+          );
 
-        return {
-          data: {
-            ...session,
-            activeOrganizationId: organization?.id,
-          },
-        };
+          return {
+            data: {
+              ...session,
+              activeOrganizationId,
+            },
+          };
+        },
       },
     },
+  },
+  session: {
     cookieCache: {
       enabled: true,
       maxAge: 5 * 60, // 5 minutes

@@ -1,10 +1,8 @@
+import { Logo } from "@/components/shared/logo";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { APP_ROUTES } from "@/constants/app-config";
 import Link from "next/link";
 import SignInForm from "../../../../features/auth/components/sign-in-form";
-import { Logo } from "@/components/shared/logo";
-import { FieldSeparator } from "@/components/ui/field";
-import { Button } from "@/components/ui/button";
-import { APP_ROUTES } from "@/constants/app-config";
 
 export default function SignInPage() {
   return (
@@ -13,7 +11,7 @@ export default function SignInPage() {
         <CardHeader className="flex items-center py-4 justify-center bg-gradient-to-r from-primary to-accent">
           <Logo size="lg" />
         </CardHeader>
-        <div className="flex flex-col gap-2 items-center justify-center">
+        {/* <div className="flex flex-col gap-2 items-center justify-center">
           <Button
             variant="outline"
             type="button"
@@ -27,11 +25,11 @@ export default function SignInPage() {
             </svg>
             Login with Google
           </Button>
-        </div>
+        </div> */}
         <CardContent>
-          <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card mt-2 mb-4">
+          {/* <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card mt-2 mb-4">
             Or continue with
-          </FieldSeparator>
+          </FieldSeparator> */}
           <SignInForm />
           <div className="mt-6 text-center text-sm flex flex-col gap-3">
             <div className="text-muted-foreground">

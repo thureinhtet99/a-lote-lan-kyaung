@@ -1,19 +1,19 @@
 "use server";
 
-import { db } from "@/lib/db";
 import { memberTable, organizationTable } from "@/drizzle/schema";
-import { and, eq } from "drizzle-orm";
-import { cacheLife, cacheTag, updateTag } from "next/cache";
 import { auth } from "@/lib/auth/auth";
-import { headers } from "next/headers";
-import { OrganizationType } from "@/types/index.type";
+import { getCurrentOrg, safeGetSession } from "@/lib/auth/auth-helpers";
 import {
-  organizationTag,
   organizationIdTag,
   organizationsTag,
+  organizationTag,
   sideBarJobListingWithApplicationsTag,
 } from "@/lib/data-cache";
-import { safeGetSession, getCurrentOrg } from "@/lib/auth/auth-helpers";
+import { db } from "@/lib/db";
+import { OrganizationType } from "@/types/index.type";
+import { and, eq } from "drizzle-orm";
+import { cacheLife, cacheTag, updateTag } from "next/cache";
+import { headers } from "next/headers";
 
 export const getInitialOrganization = async (
   userId: string,

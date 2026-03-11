@@ -1,12 +1,11 @@
-import { Card, CardContent } from "@/components/ui/card";
+import PageLoading from "@/components/shared/page-loading";
 import { APP_ROUTES } from "@/constants/app-config";
+import JobListingForm from "@/features/job-listings/components/job-listing-form";
+import { getJobListingsByOrgId } from "@/features/job-listings/db/job-listing-db";
+import { getCurrentOrg } from "@/lib/auth/auth-helpers";
+import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/permissions";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { getCurrentOrg } from "@/lib/auth/auth-helpers";
-import JobListingForm from "@/features/job-listings/components/job-listing-form";
-import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/permissions";
-import PageLoading from "@/components/shared/page-loading";
-import { getJobListingsByOrgId } from "@/features/job-listings/db/job-listing-db";
 
 export default function NewJobListingPage() {
   return (
@@ -39,11 +38,9 @@ const SuspendedComponent = async () => {
         </p>
       </div>
 
-      <Card>
-        <CardContent>
-          <JobListingForm />
-        </CardContent>
-      </Card>
+      <div>
+        <JobListingForm />
+      </div>
     </div>
   );
 };
