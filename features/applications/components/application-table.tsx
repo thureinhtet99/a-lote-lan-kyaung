@@ -1,23 +1,10 @@
 "use client";
 
 import { DataTable } from "@/components/data-table/data-table";
+import DataTableFacetedFilter from "@/components/data-table/data-table-faceted-filter";
+import { DataTableSortableColumnHeader } from "@/components/data-table/data-table-sortable-column-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ColumnDef } from "@tanstack/react-table";
-import sortApplicationByStatus from "../lib/utils";
-import { applicationStatus, ApplicationStatusType } from "@/drizzle/schema";
-import { ReactNode, useOptimistic, useState, useTransition } from "react";
-import { formatApplicationStatus } from "../lib/formatters";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { ChevronDownIcon, MoreHorizontalIcon } from "lucide-react";
-import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -25,13 +12,24 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import Link from "next/link";
-import { Table } from "@tanstack/react-table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { applicationStatus, ApplicationStatusType } from "@/drizzle/schema";
+import { cn } from "@/lib/utils";
 import { ApplicationType } from "@/types/index.type";
-import DataTableFacetedFilter from "@/components/data-table/data-table-faceted-filter";
-import { DataTableSortableColumnHeader } from "@/components/data-table/data-table-sortable-column-header";
-import StatusIcon from "./status-icon";
+import { ColumnDef, Table } from "@tanstack/react-table";
+import { ChevronDownIcon, FileTextIcon, MailIcon } from "lucide-react";
+import Link from "next/link";
+import { ReactNode, useOptimistic, useState, useTransition } from "react";
+import { toast } from "sonner";
 import { updateApplicationStatus } from "../db/application-db";
+import { formatApplicationStatus } from "../lib/formatters";
+import sortApplicationByStatus from "../lib/utils";
+import StatusIcon from "./status-icon";
 
 export default function ApplicationTable({
   applications,
@@ -76,12 +74,16 @@ function Toolbar<T>({
       {table.getColumn("status") && (
         <DataTableFacetedFilter
           column={table.getColumn("status")}
-          title="Status"
+          title="Filter"
           disabled={disabled}
           options={applicationStatus
             .toSorted(sortApplicationByStatus)
             .map((status) => ({
-              label: <StatusDetail status={status} />,
+              label: (
+                <span className="text-sm">
+                  {formatApplicationStatus(status)}
+                </span>
+              ),
               value: status,
               key: status,
             }))}
@@ -106,9 +108,9 @@ const getColumns = (canUpdateStatus: boolean): ColumnDef<ApplicationType>[] => {
 
         return (
           <div className="flex items-center gap-2">
-            <Avatar className="size-8">
+            <Avatar className="size-10">
               <AvatarImage src={user.image ?? undefined} alt={user.name} />
-              <AvatarFallback className="bg-primary text-primary-foreground text-xs uppercase">
+              <AvatarFallback className="bg-primary text-primary-foreground text-lg uppercase">
                 {nameInitial}
               </AvatarFallback>
             </Avatar>
@@ -143,7 +145,7 @@ const getColumns = (canUpdateStatus: boolean): ColumnDef<ApplicationType>[] => {
       accessorKey: "createdAt",
       accessorFn: (row) => row.createdAt,
       header: ({ column }) => (
-        <DataTableSortableColumnHeader column={column} title="Applied On" />
+        <DataTableSortableColumnHeader column={column} title="Applied Date" />
       ),
       cell: ({ row }) => (
         <div className="text-center text-sm text-muted-foreground">
@@ -247,91 +249,110 @@ const ActionCell = ({
   const [openModal, setOpenModal] = useState<"resume" | "cover-letter" | null>(
     null,
   );
+  const hasResumeUrl = resumeUrl != null;
+  const hasCoverLetter = coverLetterMarkDown != null;
 
   return (
     <>
-      <div className="flex items-center justify-end">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <span className="sr-only">Open Menu</span>
-              <MoreHorizontalIcon className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {resumeMarkDown != null || resumeUrl != null ? (
-              <DropdownMenuItem onClick={() => setOpenModal("resume")}>
-                View resume
-              </DropdownMenuItem>
-            ) : (
-              <DropdownMenuLabel className="text-muted-foreground">
-                No resume
-              </DropdownMenuLabel>
-            )}
+      <div className="flex items-center justify-end gap-1">
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          aria-label="Open resume"
+          onClick={() => setOpenModal("resume")}
+          disabled={!hasResumeUrl}
+          className={cn(
+            hasResumeUrl
+              ? "cursor-pointer"
+              : "cursor-not-allowed text-muted-foreground",
+          )}
+        >
+          <FileTextIcon className="size-4" />
+          <span className="sr-only">Resume</span>
+        </Button>
 
-            {coverLetterMarkDown ? (
-              <DropdownMenuItem onClick={() => setOpenModal("cover-letter")}>
-                View cover letter
-              </DropdownMenuItem>
-            ) : (
-              <DropdownMenuLabel className="text-muted-foreground">
-                No cover letter
-              </DropdownMenuLabel>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          aria-label="Open cover letter"
+          onClick={() => setOpenModal("cover-letter")}
+          disabled={!hasCoverLetter}
+          className={cn(
+            hasCoverLetter
+              ? "cursor-pointer"
+              : "cursor-not-allowed text-muted-foreground",
+          )}
+        >
+          <MailIcon className="size-4" />
+          <span className="sr-only">Cover letter</span>
+        </Button>
       </div>
 
-      {coverLetterMarkDown && (
+      {hasCoverLetter && (
         <Dialog
           open={openModal === "cover-letter"}
           onOpenChange={(open) => setOpenModal(open ? "cover-letter" : null)}
         >
-          <DialogContent className="lg:max-w-5xl md:max-w-3xl max-h-[calc(100%-2rem)] overflow-hidden flex flex-col">
+          <DialogContent className="lg:max-w-5xl md:max-w-3xl max-h-[85vh] overflow-hidden flex flex-col">
             <DialogHeader>
-              <DialogTitle>Cover Letter</DialogTitle>
+              <DialogTitle className="text-3xl font-bold">
+                Cover Letter
+              </DialogTitle>
               <DialogDescription>{userName}</DialogDescription>
             </DialogHeader>
-            <div className="flex-1 overflow-y-auto">{coverLetterMarkDown}</div>
+            <div className="flex-1 overflow-y-auto px-1">
+              {coverLetterMarkDown}
+            </div>
           </DialogContent>
         </Dialog>
       )}
-      {resumeMarkDown ||
-        (resumeUrl && (
-          <Dialog
-            open={openModal === "resume"}
-            onOpenChange={(open) => setOpenModal(open ? "resume" : null)}
-          >
-            <DialogContent className="lg:max-w-5xl md:max-w-3xl max-h-[calc(100%-2rem)] overflow-hidden flex flex-col">
-              <DialogHeader>
-                <DialogTitle>Resume</DialogTitle>
-                <DialogDescription>{userName}</DialogDescription>
-                {resumeUrl && (
-                  <Button asChild className="self-start">
-                    <Link
-                      href={resumeUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Original Resume
-                    </Link>
-                  </Button>
-                )}
+      {hasResumeUrl && (
+        <Dialog
+          open={openModal === "resume"}
+          onOpenChange={(open) => setOpenModal(open ? "resume" : null)}
+        >
+          <DialogContent className="lg:max-w-5xl md:max-w-3xl max-h-[85vh] overflow-hidden flex flex-col">
+            <DialogHeader className="space-y-2">
+              <DialogTitle>Resume</DialogTitle>
+              <DialogDescription>{userName}</DialogDescription>
+              {resumeUrl && (
+                <Button asChild size="sm" className="self-start">
+                  <Link
+                    href={resumeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View Resume
+                  </Link>
+                </Button>
+              )}
+              {resumeMarkDown != null && (
                 <DialogDescription>
-                  This is AI-generated summary of the applicant&apos;s resume
+                  AI-generated summary of the applicant&apos;s resume
                 </DialogDescription>
-              </DialogHeader>
-              <div className="flex-1 overflow-y-auto">{resumeMarkDown}</div>
-            </DialogContent>
-          </Dialog>
-        ))}
+              )}
+            </DialogHeader>
+            {resumeMarkDown != null ? (
+              <div className="flex-1 overflow-y-auto px-1">
+                {resumeMarkDown}
+              </div>
+            ) : (
+              <div className="flex flex-1 items-center justify-center rounded-md px-4 text-sm text-muted-foreground">
+                No summary available. View resume for full details.
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 };
 
 const StatusDetail = ({ status }: { status: ApplicationStatusType }) => (
   <div className="flex items-center gap-2">
-    <StatusIcon status={status} className="size-4" />
+    <StatusIcon status={status} className="size-4 focus:text-white" />
     <span className="text-sm">{formatApplicationStatus(status)}</span>
   </div>
 );

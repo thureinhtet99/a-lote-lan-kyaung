@@ -120,7 +120,7 @@ import { createAccessControl } from "better-auth/plugins/access";
 export const statement = {
   organization: ["create", "update", "delete"],
   job_listing: ["create", "update", "delete", "change_status"],
-  application: ["read", "update", "change_rating", "change_status"],
+  application: ["read", "update", "change_status"],
   member: ["invite", "remove", "update_role"],
 } as const;
 
@@ -130,14 +130,14 @@ export const ac = createAccessControl(statement);
 export const owner = ac.newRole({
   organization: ["create", "update", "delete"],
   job_listing: ["create", "update", "delete", "change_status"],
-  application: ["read", "update", "change_rating", "change_status"],
+  application: ["read", "update", "change_status"],
   member: ["invite", "remove", "update_role"],
 });
 
 export const admin = ac.newRole({
   organization: ["update"], // No create or delete
   job_listing: ["create", "update", "delete", "change_status"],
-  application: ["read", "update", "change_rating", "change_status"],
+  application: ["read", "update", "change_status"],
   member: ["invite", "remove", "update_role"],
 });
 

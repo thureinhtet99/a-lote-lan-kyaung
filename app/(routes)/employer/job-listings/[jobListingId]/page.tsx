@@ -1,29 +1,29 @@
+import { MarkdownPartial } from "@/components/markdown/markdown-partial";
+import MarkdownRenderer from "@/components/markdown/markdown-renderer";
 import ActionButton from "@/components/shared/action-button";
 import CheckCondition from "@/components/shared/check-condition";
-import MarkdownRenderer from "@/components/markdown/markdown-renderer";
+import Loading from "@/components/shared/loading";
+import PageLoading from "@/components/shared/page-loading";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatJobListingStatus } from "@/features/job-listings/lib/formatters";
-import { APP_ROUTES } from "@/constants/app-config";
-import { EditIcon, Trash2Icon } from "lucide-react";
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import { Suspense } from "react";
 import { Separator } from "@/components/ui/separator";
+import { APP_ROUTES } from "@/constants/app-config";
 import ApplicationTable from "@/features/applications/components/application-table";
-import { MarkdownPartial } from "@/components/markdown/markdown-partial";
-import JobListingBadges from "@/features/job-listings/components/job-listing-badges";
 import SkeletonApplicationTable from "@/features/applications/components/skeleton-application-table";
+import { getApplicationsByJobListingId } from "@/features/applications/db/application-db";
+import JobListingBadges from "@/features/job-listings/components/job-listing-badges";
+import StatusToggleButton from "@/features/job-listings/components/status-toggle-button";
 import {
   deleteJobListing,
   getJobListingByIdByOrgId,
 } from "@/features/job-listings/db/job-listing-db";
-import StatusToggleButton from "@/features/job-listings/components/status-toggle-button";
-import Loading from "@/components/shared/loading";
-import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/permissions";
+import { formatJobListingStatus } from "@/features/job-listings/lib/formatters";
 import { getCurrentOrg } from "@/lib/auth/auth-helpers";
-import PageLoading from "@/components/shared/page-loading";
-import { getApplicationsByJobListingId } from "@/features/applications/db/application-db";
+import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/permissions";
+import { EditIcon, Trash2Icon } from "lucide-react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 export default function JobListingPage({
   params,
@@ -142,9 +142,7 @@ const Applications = async ({ jobListingId }: { jobListingId: string }) => {
           resume: app.user.resume
             ? {
                 ...app.user.resume,
-                markdownSummary: app.user.resume.resumeFileUrl ? (
-                  <MarkdownRenderer source={app.user.resume.resumeFileUrl} />
-                ) : null,
+                markdownSummary: null,
               }
             : null,
         },

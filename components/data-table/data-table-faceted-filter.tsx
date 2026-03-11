@@ -1,12 +1,4 @@
-import { DataTableFacetedTablePropsType } from "@/types/index.type";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { Badge } from "../ui/badge";
-import { CheckIcon, ChevronDownIcon } from "lucide-react";
 import {
   Command,
   CommandEmpty,
@@ -15,7 +7,14 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { DataTableFacetedTablePropsType } from "@/types/index.type";
+import { CheckIcon, ChevronDownIcon } from "lucide-react";
 
 export default function DataTableFacetedFilter<TData, TValue, OValue>({
   column,
@@ -30,16 +29,11 @@ export default function DataTableFacetedFilter<TData, TValue, OValue>({
     <Popover>
       <PopoverTrigger className="cursor-pointer" asChild>
         <Button disabled={disabled} variant="outline" size="sm">
-          {selectedValues.size > 0 && (
-            <Badge variant="secondary" size="sm">
-              {selectedValues.size}
-            </Badge>
-          )}
           {title}
           <ChevronDownIcon />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-[200px] p-0">
+      <PopoverContent align="end" className="w-[180px] p-0">
         <Command className="max-w-sm rounded-lg border">
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
@@ -66,7 +60,7 @@ export default function DataTableFacetedFilter<TData, TValue, OValue>({
                   >
                     <div
                       className={cn(
-                        "flex size-3 items-center justify-center p-2 rounded",
+                        "flex size-3 items-center justify-center p-2 rounded border",
                         isSelected
                           ? "bg-primary border-primary text-primary-foreground"
                           : "border-input",
@@ -76,13 +70,7 @@ export default function DataTableFacetedFilter<TData, TValue, OValue>({
                     </div>
                     <span>{opt.label}</span>
                     {facets?.get(opt.value) && (
-                      <Badge
-                        size="sm"
-                        variant="outline"
-                        className="ml-auto text-primary"
-                      >
-                        {facets?.get(opt.value)}
-                      </Badge>
+                      <span className="ml-auto">{facets?.get(opt.value)}</span>
                     )}
                   </CommandItem>
                 );
