@@ -13,20 +13,32 @@ type SeedAccount = {
 
 const seedAccounts: SeedAccount[] = [
   {
-    email: process.env.SEED_USER_EMAIL ?? "user.test@gmail.com",
-    username: process.env.SEED_USER_NAME ?? "testuser",
-    password: process.env.SEED_USER_PASSWORD ?? "Test123!",
+    email: "user.one@test.com",
+    username: "testuserone",
+    password: "Test123!",
     role: "user",
   },
   {
-    email: process.env.SEED_EMPLOYER_EMAIL ?? "employer.test@gmail.com",
-    username: process.env.SEED_EMPLOYER_NAME ?? "testemployer One",
-    password: process.env.SEED_EMPLOYER_PASSWORD ?? "Test123!",
+    email: "user.two@test.com",
+    username: "testusertwo",
+    password: "Test123!",
+    role: "user",
+  },
+  {
+    email: "employer.one@test.com",
+    username: "testemployerone",
+    password: "Test123!",
     role: "employer",
   },
   {
-    email: process.env.SEED_ADMIN_EMAIL ?? "admin.test@gmail.com",
-    username: process.env.SEED_ADMIN_NAME ?? "testadmin",
+    email: "employer.two@test.com",
+    username: "testemployertwo",
+    password: "Test123!",
+    role: "employer",
+  },
+  {
+    email: process.env.SEED_ADMIN_EMAIL ?? "admin.one@test.com",
+    username: process.env.SEED_ADMIN_NAME ?? "testadminone",
     password: process.env.SEED_ADMIN_PASSWORD ?? "Test123!",
     role: "admin",
   },

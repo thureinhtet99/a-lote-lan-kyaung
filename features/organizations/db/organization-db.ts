@@ -2,11 +2,10 @@
 
 import { db } from "@/lib/db";
 import { memberTable, organizationTable } from "@/drizzle/schema";
-import { and, count, eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
-import { APP_ROUTES } from "@/constants/app-config";
 import { OrganizationType } from "@/types/index.type";
 import {
   organizationTag,
@@ -15,6 +14,29 @@ import {
   sideBarJobListingWithApplicationsTag,
 } from "@/lib/data-cache";
 import { safeGetSession, getCurrentOrg } from "@/lib/auth/auth-helpers";
+
+export const getInitialOrganization = async (
+  userId: string,
+): Promise<Pick<OrganizationType, "id"> | null> => {
+  try {
+    if (!userId) return null;
+
+    const membership = await db.query.memberTable.findFirst({
+      where: eq(memberTable.userId, userId),
+      columns: {
+        organizationId: true,
+      },
+      orderBy: (members, { asc }) => [asc(members.createdAt)],
+    });
+
+    if (!membership) return null;
+
+    return { id: membership.organizationId };
+  } catch (error) {
+    console.error("Error getting initial organization:", error);
+    return null;
+  }
+};
 
 // Get active organization from session
 export const getActiveOrganization = async (): Promise<{

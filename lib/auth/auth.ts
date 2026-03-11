@@ -15,6 +15,7 @@ import { ac, hr, orgAdmin } from "@/lib/access-control";
 import { revalidateTag } from "next/cache";
 import { dashboardStatsTag } from "@/lib/data-cache";
 import { sendInvitationEmail } from "@/services/email/send-invitation";
+import { getInitialOrganization } from "@/features/organizations/db/organization-db";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -79,6 +80,18 @@ export const auth = betterAuth({
     },
   },
   session: {
+    create: {
+      before: async (session: { userId: string } & Record<string, unknown>) => {
+        const organization = await getInitialOrganization(session.userId);
+
+        return {
+          data: {
+            ...session,
+            activeOrganizationId: organization?.id,
+          },
+        };
+      },
+    },
     cookieCache: {
       enabled: true,
       maxAge: 5 * 60, // 5 minutes

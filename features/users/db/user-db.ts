@@ -220,6 +220,7 @@ export async function updateUser(
       .where(eq(userTable.id, session.user.id));
 
     updateTag(userIdTag(session.user.id));
+    revalidateTag(userIdTag(session.user.id), "max");
 
     return { success: true, message: "Profile updated successfully" };
   } catch (error) {
