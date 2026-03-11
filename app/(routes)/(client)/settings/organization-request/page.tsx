@@ -1,24 +1,18 @@
-import { redirect } from "next/navigation";
-import { OrganizationRequestForm } from "@/features/organizations/components/organization-request-form";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { AlertCircle, CheckCircle, Clock, EyeIcon } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Suspense } from "react";
-import { APP_ROUTES } from "@/constants/app-config";
-import { getMyOrganizationRequest } from "@/features/organizations/db/organization-request-db";
-import { getOrganizationsByEmployerId } from "@/features/organizations/db/organization-db";
-import { getApprovedOrganizationNotification } from "@/features/organizations/db/notification-db";
-import { ClaimOrganizationButton } from "@/features/organizations/components/claim-organization-button";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { getCurrentUser, isEmployer } from "@/lib/auth/auth-helpers";
 import PageLoading from "@/components/shared/page-loading";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { APP_ROUTES } from "@/constants/app-config";
+import { ClaimOrganizationButton } from "@/features/organizations/components/claim-organization-button";
+import { OrganizationRequestForm } from "@/features/organizations/components/organization-request-form";
+import { getApprovedOrganizationNotification } from "@/features/organizations/db/notification-db";
+import { getOrganizationsByEmployerId } from "@/features/organizations/db/organization-db";
+import { getMyOrganizationRequest } from "@/features/organizations/db/organization-request-db";
+import { getCurrentUser, isEmployer } from "@/lib/auth/auth-helpers";
+import { AlertCircle, CheckCircle, Clock, EyeIcon } from "lucide-react";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 export default async function OrganizationRequestPage() {
   return (
@@ -135,8 +129,8 @@ const SuspendedComponent = async () => {
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
+      <div>
+        <div className="mb-4">
           <div className="flex items-center justify-between">
             <CardTitle>Your Request Status</CardTitle>
             <CardDescription>
@@ -153,8 +147,8 @@ const SuspendedComponent = async () => {
               {existingRequest.requestMessage}
             </p>
           </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+        </div>
+        <div className="space-y-4">
           <div>
             <p className="text-sm font-medium">Organization Name</p>
             <p className="text-sm text-muted-foreground">
@@ -219,24 +213,27 @@ const SuspendedComponent = async () => {
 
           {existingRequest.status === "approved" && (
             <>
-              <Alert className="text-green-400">
-                <CheckCircle className="h-4 w-4" />
-                <AlertTitle>Request Approved</AlertTitle>
-                <AlertDescription className="text-green-400">
-                  Congratulations! Your request has been approved.
-                  {approvedNotification
-                    ? " Click the button below to claim your organization and start using organization features."
-                    : " You can now access organization features."}
-                </AlertDescription>
-              </Alert>
+              <div className="flex items-center gap-4 justify-between">
+                <Alert className="text-green-400">
+                  <CheckCircle className="h-4 w-4" />
+                  <AlertTitle>Request Approved</AlertTitle>
+                  <AlertDescription className="text-green-400">
+                    Congratulations! Your request has been approved.
+                    {approvedNotification
+                      ? " Click the button below to claim your organization and start using organization features."
+                      : " You can now access organization features."}
+                  </AlertDescription>
+                </Alert>
 
-              {/* Show claim button if there's an unclaimed notification */}
-              {approvedNotification && approvedNotification.organizationId && (
-                <ClaimOrganizationButton
-                  notificationId={approvedNotification.id}
-                  organizationId={approvedNotification.organizationId}
-                />
-              )}
+                {/* Show claim button if there's an unclaimed notification */}
+                {approvedNotification &&
+                  approvedNotification.organizationId && (
+                    <ClaimOrganizationButton
+                      notificationId={approvedNotification.id}
+                      organizationId={approvedNotification.organizationId}
+                    />
+                  )}
+              </div>
 
               <CardHeader className="px-0">
                 <div className="flex items-center justify-between">
@@ -265,8 +262,8 @@ const SuspendedComponent = async () => {
               </CardHeader>
             </>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };

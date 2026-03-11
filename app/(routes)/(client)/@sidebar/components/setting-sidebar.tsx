@@ -1,8 +1,9 @@
 import SidebarNavMenuGroup from "@/app/(routes)/(client)/@sidebar/components/sidebar-nav-menu";
 import { APP_ROUTES } from "@/constants/app-config";
-import { getEmployerRequest } from "@/features/users/db/user-db";
+import { getMyPendingInvitationsCount } from "@/features/organizations/actions/invitation-actions";
+import { getUnreadNotificationsCount } from "@/features/organizations/db/notification-db";
+import { getCurrentUser } from "@/lib/auth/auth-helpers";
 import { SidebarNavMenuType } from "@/types/index.type";
-import { Suspense } from "react";
 import {
   BellIcon,
   Building2Icon,
@@ -11,8 +12,7 @@ import {
   Megaphone,
   User2Icon,
 } from "lucide-react";
-import { getCurrentUser } from "@/lib/auth/auth-helpers";
-import { getUnreadNotificationsCount } from "@/features/organizations/db/notification-db";
+import { Suspense } from "react";
 
 const baseItems: SidebarNavMenuType = [
   {
@@ -62,7 +62,11 @@ const SuspendedComponent = async () => {
   if (!user) return true;
 
   const canShowOrganizationRequest = user?.role === "employer";
-  const { count: unreadCount } = await getUnreadNotificationsCount();
+  const [{ count: unreadCount }, { count: invitationsCount }] =
+    await Promise.all([
+      getUnreadNotificationsCount(),
+      getMyPendingInvitationsCount(),
+    ]);
 
   const organizationRequestItem: SidebarNavMenuType[number] = {
     href: APP_ROUTES.SETTINGS.ORG_REQUEST,
@@ -76,5 +80,11 @@ const SuspendedComponent = async () => {
     ? [...baseItems, organizationRequestItem]
     : baseItems;
 
-  return <SidebarNavMenuGroup items={items} unreadCount={unreadCount} />;
+  return (
+    <SidebarNavMenuGroup
+      items={items}
+      unreadCount={unreadCount}
+      invitationsCount={invitationsCount}
+    />
+  );
 };

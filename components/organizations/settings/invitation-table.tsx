@@ -1,27 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import {
-  getInvitations,
-  revokeInvitation,
-  resendInvitation,
-} from "@/features/organizations/actions/manage-invitations";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,9 +10,31 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreVertical, Trash2, Mail } from "lucide-react";
-import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  getInvitations,
+  resendInvitation,
+  revokeInvitation,
+} from "@/features/organizations/actions/manage-invitations";
 import { format } from "date-fns";
+import { Mail, MoreVertical, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 type Invitation = {
   id: string;
@@ -163,7 +163,7 @@ export function InvitationTable() {
                       <Mail className="h-4 w-4 hover:text-white" />
                       {resending === invitation.id
                         ? "Resending..."
-                        : "Resend Invitation"}
+                        : "Send via Email"}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => setInvitationToRevoke(invitation)}

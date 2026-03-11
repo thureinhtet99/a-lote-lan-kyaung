@@ -1,11 +1,11 @@
 "use server";
 
-import { auth } from "@/lib/auth/auth";
-import { headers } from "next/headers";
-import { db } from "@/lib/db";
 import { invitationTable, userTable } from "@/drizzle/schema";
-import { and, eq } from "drizzle-orm";
+import { auth } from "@/lib/auth/auth";
 import { safeGetSession } from "@/lib/auth/auth-helpers";
+import { db } from "@/lib/db";
+import { and, eq } from "drizzle-orm";
+import { headers } from "next/headers";
 
 /**
  * Get pending invitations for the current user
@@ -55,6 +55,42 @@ export async function getMyPendingInvitations() {
       message:
         error instanceof Error ? error.message : "Failed to fetch invitations",
       data: [],
+    };
+  }
+}
+
+/**
+ * Get pending invitations count for the current user
+ */
+export async function getMyPendingInvitationsCount() {
+  try {
+    const session = await safeGetSession();
+
+    if (!session?.user) {
+      return {
+        success: false,
+        count: 0,
+      };
+    }
+
+    const invitations = await db
+      .select({ id: invitationTable.id })
+      .from(invitationTable)
+      .where(
+        and(
+          eq(invitationTable.email, session.user.email),
+          eq(invitationTable.status, "pending"),
+        ),
+      );
+
+    return {
+      success: true,
+      count: invitations.length,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      count: 0,
     };
   }
 }

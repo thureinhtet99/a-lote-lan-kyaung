@@ -1,6 +1,5 @@
 "use client";
 
-import { Suspense } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   SidebarGroup,
@@ -8,21 +7,24 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { SidebarNavMenuType } from "@/types/index.type";
+import { APP_ROUTES } from "@/constants/app-config";
 import { SignedIn, SignedOut } from "@/features/auth/components/auth-statuses";
 import { useSession } from "@/lib/auth/auth-client";
-import { APP_ROUTES } from "@/constants/app-config";
+import { SidebarNavMenuType } from "@/types/index.type";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Suspense } from "react";
 
 export default function SidebarNavMenu({
   items,
   className,
   unreadCount,
+  invitationsCount,
 }: {
   items: SidebarNavMenuType;
   className?: string;
   unreadCount?: number;
+  invitationsCount?: number;
 }) {
   return (
     <Suspense>
@@ -30,6 +32,7 @@ export default function SidebarNavMenu({
         items={items}
         className={className}
         unreadCount={unreadCount}
+        invitationsCount={invitationsCount}
       />
     </Suspense>
   );
@@ -39,10 +42,12 @@ function SuspendedComponent({
   items,
   className,
   unreadCount = 0,
+  invitationsCount = 0,
 }: {
   items: SidebarNavMenuType;
   className?: string;
   unreadCount?: number;
+  invitationsCount?: number;
 }) {
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -60,7 +65,15 @@ function SuspendedComponent({
             );
           const isNotificationsItem =
             item.href === APP_ROUTES.SETTINGS.NOTIFICATIONS;
-          const shouldShowUnreadBadge = isNotificationsItem && unreadCount > 0;
+          const isInvitationsItem =
+            item.href === APP_ROUTES.SETTINGS.INVITATIONS ||
+            item.href === APP_ROUTES.EMPLOYER.SETTINGS.INVITATIONS;
+          const badgeCount = isNotificationsItem
+            ? unreadCount
+            : isInvitationsItem
+              ? invitationsCount
+              : 0;
+          const shouldShowBadge = badgeCount > 0;
 
           if (item.roles && (!userRole || !hasAllowedRole)) {
             return null;
@@ -73,9 +86,9 @@ function SuspendedComponent({
                   <Link href={item.href}>
                     {item.icon}
                     <span>{item.label}</span>
-                    {shouldShowUnreadBadge && (
+                    {shouldShowBadge && (
                       <Badge className="ml-auto group-data-[state=collapsed]:absolute -right-1 top-0 size-4">
-                        {unreadCount > 9 ? "9+" : unreadCount}
+                        {badgeCount > 9 ? "9+" : badgeCount}
                       </Badge>
                     )}
                   </Link>

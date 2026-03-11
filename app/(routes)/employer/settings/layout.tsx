@@ -1,11 +1,11 @@
 "use client";
 
-import { ReactNode } from "react";
+import { APP_ROUTES } from "@/constants/app-config";
+import { cn } from "@/lib/utils";
+import { Mail, Shield, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { APP_ROUTES } from "@/constants/app-config";
-import { Users, Mail, Building2, Activity, Shield } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ReactNode } from "react";
 
 const settingsNavItems = [
   {
@@ -20,12 +20,12 @@ const settingsNavItems = [
     icon: Mail,
     description: "View and manage pending invitations",
   },
-  {
-    title: "Organization",
-    href: APP_ROUTES.EMPLOYER.SETTINGS.ORGANIZATION,
-    icon: Building2,
-    description: "Organization profile and settings",
-  },
+  // {
+  //   title: "Organization",
+  //   href: APP_ROUTES.EMPLOYER.SETTINGS.ORGANIZATION,
+  //   icon: Building2,
+  //   description: "Organization profile and settings",
+  // },
   {
     title: "Permissions",
     href: APP_ROUTES.EMPLOYER.SETTINGS.PERMISSIONS,

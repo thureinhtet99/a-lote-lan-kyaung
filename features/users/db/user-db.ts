@@ -1,11 +1,12 @@
 "use server";
 
-import { db } from "@/lib/db";
 import { employerRequestTable, userTable } from "@/drizzle/schema";
-import { and, asc, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
-import { auth } from "@/lib/auth/auth";
-import { headers } from "next/headers";
-import { cacheLife, cacheTag, revalidateTag, updateTag } from "next/cache";
+import {
+  approveRequestSchema,
+  employerRequestSchema,
+  rejectRequestSchema,
+} from "@/features/admin/schema/admin-form-schema";
+import { safeGetSession } from "@/lib/auth/auth-helpers";
 import {
   dashboardStatsTag,
   employerRequestIdTag,
@@ -13,21 +14,18 @@ import {
   userIdTag,
   usersTag,
 } from "@/lib/data-cache";
+import { db } from "@/lib/db";
 import {
   ApproveRequestFormType,
-  EmployerRequestType,
   EmployerRequestFormType,
+  EmployerRequestType,
   RejectRequestFormType,
   UserRoleType,
   UserType,
 } from "@/types/index.type";
-import {
-  approveRequestSchema,
-  employerRequestSchema,
-  rejectRequestSchema,
-} from "@/features/admin/schema/admin-form-schema";
+import { and, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
 import { nanoid } from "nanoid";
-import { safeGetSession } from "@/lib/auth/auth-helpers";
+import { cacheLife, cacheTag, revalidateTag, updateTag } from "next/cache";
 import { userProfileSchema } from "../schema/user-profile-schema";
 
 // Get all users
@@ -525,19 +523,15 @@ export const createEmployerRequest = async (
   data: EmployerRequestFormType,
 ): Promise<{ success: boolean; message?: string }> => {
   try {
-    // Validate input
     const validated = employerRequestSchema.parse(data);
 
     const session = await safeGetSession();
-
-    if (!session?.user) {
-      return { success: false, message: "Unauthorized" };
-    }
+    if (!session?.user) return { success: false, message: "Unauthorized" };
 
     const user = session.user;
 
     // Check if user is already an employer or admin
-    if (user.role === "employer" || user.role === "admin") {
+    if (user.role === "employer") {
       return {
         success: false,
         message: "You are already an employer",
@@ -580,14 +574,15 @@ export const createEmployerRequest = async (
         employerRequestId: employerRequestTable.id,
       });
 
-    updateTag(employerRequestIdTag(result.employerRequestId));
     updateTag(employerRequestsTag());
     updateTag(dashboardStatsTag());
     revalidateTag(employerRequestIdTag(result.employerRequestId), "max");
+    revalidateTag(employerRequestsTag(), "max");
+    revalidateTag(dashboardStatsTag(), "max");
 
     return { success: true, message: "Submitted successfully" };
   } catch (error) {
-    console.error("Error creating employer request:", error);
+    console.error("Error creating employer request: ", error);
     return {
       success: false,
       message: "Failed to create employer request",

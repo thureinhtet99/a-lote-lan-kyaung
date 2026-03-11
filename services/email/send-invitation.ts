@@ -21,7 +21,7 @@ export async function sendInvitationEmail({
 }: SendInvitationEmailParams) {
   try {
     const { data, error } = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
+      from: process.env.RESEND_FROM_EMAIL!!,
       to: email,
       subject: `You've been invited to join ${organizationName}`,
       react: createElement(OrganizationInvitationEmail, {
@@ -34,14 +34,13 @@ export async function sendInvitationEmail({
     });
 
     if (error) {
-      console.error("❌ Failed to send invitation email:", error);
+      console.error("Failed to send invitation email:", error);
       throw new Error(`Failed to send email: ${error.message}`);
     }
 
-    console.log("✅ Invitation email sent successfully:", data?.id);
     return { success: true, messageId: data?.id };
   } catch (error) {
-    console.error("❌ Error sending invitation email:", error);
+    console.error("Error sending invitation email:", error);
     throw error;
   }
 }

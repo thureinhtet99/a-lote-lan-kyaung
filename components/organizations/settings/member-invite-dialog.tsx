@@ -1,9 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import LoadingSwap from "@/components/shared/loading-swap";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -12,8 +10,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -22,17 +18,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { UserPlus } from "lucide-react";
-import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 import { inviteMember } from "@/features/organizations/actions/invite-member";
-import LoadingSwap from "@/components/shared/loading-swap";
+import {
+  getInvitations,
+  resendInvitation,
+} from "@/features/organizations/actions/manage-invitations";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Mail, UserPlus } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
 const inviteSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -43,6 +40,7 @@ type InviteFormData = z.infer<typeof inviteSchema>;
 
 export function MemberInviteDialog() {
   const [open, setOpen] = useState(false);
+  const [resending, setResending] = useState(false);
 
   const form = useForm<InviteFormData>({
     resolver: zodResolver(inviteSchema),
@@ -62,6 +60,44 @@ export function MemberInviteDialog() {
     } else {
       toast.error(result.message);
     }
+  }
+
+  async function handleResendInvitation() {
+    const isValid = await form.trigger("email");
+
+    if (!isValid) return;
+
+    const email = form.getValues("email").trim().toLowerCase();
+
+    setResending(true);
+
+    const invitationsResult = await getInvitations();
+
+    if (!invitationsResult.success) {
+      toast.error(invitationsResult.message || "Failed to load invitations");
+      setResending(false);
+      return;
+    }
+
+    const invitation = invitationsResult.data.find(
+      (item) => item.email.toLowerCase() === email,
+    );
+
+    if (!invitation) {
+      toast.error(`No pending invitation found for ${email}`);
+      setResending(false);
+      return;
+    }
+
+    const result = await resendInvitation(invitation.id);
+
+    if (result.success) {
+      toast.success(result.message || "Invitation resent");
+    } else {
+      toast.error(result.message || "Failed to resend invitation");
+    }
+
+    setResending(false);
   }
 
   return (
@@ -110,6 +146,15 @@ export function MemberInviteDialog() {
                 disabled={form.formState.isSubmitting}
               >
                 Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleResendInvitation}
+                disabled={form.formState.isSubmitting || resending}
+              >
+                <Mail className="h-4 w-4" />
+                {resending ? "Resending..." : "Send via Email"}
               </Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
                 <LoadingSwap

@@ -1,5 +1,3 @@
-import * as React from "react";
-
 interface OrganizationInvitationEmailProps {
   invitedByName: string;
   invitedByEmail: string;
@@ -103,7 +101,7 @@ export function OrganizationInvitationEmail({
       <body>
         <div className="container">
           <div className="header">
-            <h1>🎉 You've been invited!</h1>
+            <h1>You've been invited!</h1>
           </div>
 
           <div className="content">

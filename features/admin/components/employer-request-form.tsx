@@ -1,8 +1,14 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import LoadingSwap from "@/components/shared/loading-swap";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -13,26 +19,18 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { toast } from "sonner";
-import { EmployerRequestFormType } from "@/types/index.type";
 import { employerRequestSchema } from "@/features/admin/schema/admin-form-schema";
 import { createEmployerRequest } from "@/features/users/db/user-db";
-import { Loader2Icon } from "lucide-react";
+import { EmployerRequestFormType } from "@/types/index.type";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import LoadingSwap from "@/components/shared/loading-swap";
+import { useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export function EmployerRequestForm() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  // const [submitted, setSubmitted] = useState(false);
 
   const form = useForm<EmployerRequestFormType>({
     resolver: zodResolver(employerRequestSchema),
@@ -45,7 +43,6 @@ export function EmployerRequestForm() {
     startTransition(async () => {
       const result = await createEmployerRequest(data);
       if (result.success) {
-        // setSubmitted(true);
         form.reset();
         toast.success(result.message);
         router.refresh();
@@ -54,26 +51,6 @@ export function EmployerRequestForm() {
       }
     });
   };
-
-  // if (submitted) {
-  //   return (
-  //     <Card>
-  //       <CardHeader>
-  //         <CardTitle>Request Submitted</CardTitle>
-  //         <CardDescription>
-  //           Your employer request has been submitted successfully
-  //         </CardDescription>
-  //       </CardHeader>
-  //       <CardContent>
-  //         <p className="text-sm text-muted-foreground">
-  //           Your request to become an employer has been submitted and is under
-  //           admin review. You will be notified once your request has been
-  //           reviewed.
-  //         </p>
-  //       </CardContent>
-  //     </Card>
-  //   );
-  // }
 
   return (
     <Card>

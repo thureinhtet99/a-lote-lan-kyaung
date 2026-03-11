@@ -1,9 +1,8 @@
 "use client";
 
-import { useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { acceptInvitation } from "@/features/organizations/actions/accept-invitation";
-import { rejectInvitation } from "@/features/organizations/actions/reject-invitation";
+import LoadingSwap from "@/components/shared/loading-swap";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -12,18 +11,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { acceptInvitation } from "@/features/organizations/actions/accept-invitation";
+import { rejectInvitation } from "@/features/organizations/actions/reject-invitation";
+import { Calendar, CheckCircle, Mail, XCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 import { toast } from "sonner";
-import {
-  Mail,
-  CheckCircle,
-  XCircle,
-  Calendar,
-  Crown,
-  Shield,
-} from "lucide-react";
-import LoadingSwap from "@/components/shared/loading-swap";
 
 type Invitation = {
   id: string;
@@ -71,16 +64,9 @@ export function InvitationsList({
     });
   };
 
-  const getRoleIcon = (role: string | null) => {
-    if (role === "org-admin")
-      return <Crown className="size-4 text-amber-500" />;
-    if (role === "hr") return <Shield className="size-4 text-blue-500" />;
-    return null;
-  };
-
   const getRoleLabel = (role: string | null) => {
     if (role === "org-admin") return "Organization Admin";
-    if (role === "hr") return "HR Manager";
+    if (role === "hr") return "HR role";
     return role || "Member";
   };
 
@@ -115,7 +101,6 @@ export function InvitationsList({
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
-                    {getRoleIcon(invitation.role)}
                     <CardTitle className="text-lg">
                       {getRoleLabel(invitation.role)}
                     </CardTitle>
@@ -162,10 +147,10 @@ export function InvitationsList({
                   <LoadingSwap
                     isLoading={isPending}
                     children={
-                      <>
+                      <div className="flex items-center">
                         <XCircle className="mr-2 size-4" />
                         Decline
-                      </>
+                      </div>
                     }
                   />
                 </Button>
@@ -177,10 +162,10 @@ export function InvitationsList({
                   <LoadingSwap
                     isLoading={isPending}
                     children={
-                      <>
+                      <div className="flex items-center">
                         <CheckCircle className="mr-2 size-4" />
                         Accept
-                      </>
+                      </div>
                     }
                   />
                 </Button>

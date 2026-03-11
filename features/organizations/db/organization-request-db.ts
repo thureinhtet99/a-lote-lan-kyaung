@@ -1,35 +1,35 @@
 "use server";
 
-import { db } from "@/lib/db";
 import {
   jobListingTable,
   memberTable,
-  organizationTable,
   organizationRequestTable,
+  organizationTable,
   userTable,
 } from "@/drizzle/schema";
-import { and, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
-import { cacheLife, cacheTag, revalidateTag, updateTag } from "next/cache";
-import { nanoid } from "nanoid";
-import { safeGetSession } from "@/lib/auth/auth-helpers";
-import { createNotification } from "./notification-db";
-import {
-  dashboardStatsTag,
-  orgRequestsTag,
-  organizationsTag,
-  userOrgRequestsTag,
-} from "@/lib/data-cache";
 import {
   approveRequestSchema,
   organizationRequestSchema,
   rejectRequestSchema,
 } from "@/features/admin/schema/admin-form-schema";
+import { safeGetSession } from "@/lib/auth/auth-helpers";
+import {
+  dashboardStatsTag,
+  organizationsTag,
+  orgRequestsTag,
+  userOrgRequestsTag,
+} from "@/lib/data-cache";
+import { db } from "@/lib/db";
 import {
   ApproveRequestFormType,
   OrganizationRequestType,
   OrgRequestFormType,
   RejectRequestFormType,
 } from "@/types/index.type";
+import { and, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
+import { nanoid } from "nanoid";
+import { cacheLife, cacheTag, revalidateTag, updateTag } from "next/cache";
+import { createNotification } from "./notification-db";
 
 export const createOrganizationRequest = async (data: OrgRequestFormType) => {
   try {
@@ -110,6 +110,8 @@ export const createOrganizationRequest = async (data: OrgRequestFormType) => {
       status: "pending",
     });
 
+    updateTag(orgRequestsTag());
+    updateTag(dashboardStatsTag());
     revalidateTag(orgRequestsTag(), "max");
     revalidateTag(userOrgRequestsTag(session.user.id), "max");
     revalidateTag(dashboardStatsTag(), "max");
@@ -646,8 +648,6 @@ const getAllApprovedOrganizationsCached = async (
     },
   };
 };
-
-// ─── Public / Admin: get organization with members and job listings by slug ─
 
 export const getOrganizationDetailBySlug = async (slug: string) => {
   try {

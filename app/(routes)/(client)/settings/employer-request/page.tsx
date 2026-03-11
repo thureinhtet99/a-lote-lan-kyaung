@@ -1,11 +1,5 @@
 import { EmployerRequestForm } from "@/features/admin/components/employer-request-form";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle, CheckCircle, Clock } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Suspense } from "react";
@@ -78,114 +72,112 @@ const SuspendedComponent = async () => {
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Your Request Status</CardTitle>
-            <CardDescription>
-              Submitted on{" "}
-              {new Date(existingRequest.createdAt).toLocaleString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "2-digit",
-              })}
-            </CardDescription>
-          </div>
+      <div>
+        <div className="flex items-center justify-between">
+          <CardTitle>Your Request Status</CardTitle>
           <CardDescription>
-            <p className="text-sm text-muted-foreground">
-              {existingRequest.requestMessage}
-            </p>
+            Submitted on{" "}
+            {new Date(existingRequest.createdAt).toLocaleString("en-US", {
+              year: "numeric",
+              month: "short",
+              day: "2-digit",
+            })}
           </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {existingRequest.status === "pending" && (
-            <Alert>
-              <Clock className="h-4 w-4" />
-              <AlertTitle>Pending Review</AlertTitle>
+        </div>
+        <CardDescription>
+          <p className="text-sm text-muted-foreground">
+            {existingRequest.requestMessage}
+          </p>
+        </CardDescription>
+      </div>
+      <div className="space-y-4">
+        {existingRequest.status === "pending" && (
+          <Alert>
+            <Clock className="h-4 w-4" />
+            <AlertTitle>Pending Review</AlertTitle>
+            <AlertDescription>
+              Your request is currently being reviewed by our admin team. You
+              will be notified once a decision has been made.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {existingRequest.status === "rejected" && (
+          <>
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Request Rejected</AlertTitle>
               <AlertDescription>
-                Your request is currently being reviewed by our admin team. You
-                will be notified once a decision has been made.
+                Your request has been reviewed and rejected.
               </AlertDescription>
             </Alert>
-          )}
 
-          {existingRequest.status === "rejected" && (
-            <>
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Request Rejected</AlertTitle>
-                <AlertDescription>
-                  Your request has been reviewed and rejected.
-                </AlertDescription>
-              </Alert>
+            <CardHeader className="px-0">
+              <div className="flex items-center justify-between">
+                <CardTitle>Admin Response</CardTitle>
+                {existingRequest.reviewedAt && (
+                  <CardDescription>
+                    Reviewed on{" "}
+                    {existingRequest.reviewedAt
+                      ? new Date(existingRequest.reviewedAt).toLocaleString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "short",
+                            day: "2-digit",
+                          },
+                        )
+                      : "N/A"}
+                  </CardDescription>
+                )}
+              </div>
+              <CardDescription>
+                <p className="text-sm text-muted-foreground">
+                  {existingRequest.adminResponse}
+                </p>
+              </CardDescription>
+            </CardHeader>
+          </>
+        )}
 
-              <CardHeader className="px-0">
-                <div className="flex items-center justify-between">
-                  <CardTitle>Admin Response</CardTitle>
-                  {existingRequest.reviewedAt && (
-                    <CardDescription>
-                      Reviewed on{" "}
-                      {existingRequest.reviewedAt
-                        ? new Date(existingRequest.reviewedAt).toLocaleString(
-                            "en-US",
-                            {
-                              year: "numeric",
-                              month: "short",
-                              day: "2-digit",
-                            },
-                          )
-                        : "N/A"}
-                    </CardDescription>
-                  )}
-                </div>
-                <CardDescription>
-                  <p className="text-sm text-muted-foreground">
-                    {existingRequest.adminResponse}
-                  </p>
-                </CardDescription>
-              </CardHeader>
-            </>
-          )}
-
-          {existingRequest.status === "approved" && (
-            <>
-              <Alert className="text-green-400">
-                <CheckCircle className="h-4 w-4" />
-                <AlertTitle>Request Approved</AlertTitle>
-                <AlertDescription className="text-green-400">
-                  Congratulations! Your request has been approved. You now have
-                  employer access.
-                </AlertDescription>
-              </Alert>
-              <CardHeader className="px-0">
-                <div className="flex items-center justify-between">
-                  <CardTitle>Admin Response</CardTitle>
-                  {existingRequest.reviewedAt && (
-                    <CardDescription>
-                      Reviewed on{" "}
-                      {existingRequest.reviewedAt
-                        ? new Date(existingRequest.reviewedAt).toLocaleString(
-                            "en-US",
-                            {
-                              year: "numeric",
-                              month: "short",
-                              day: "2-digit",
-                            },
-                          )
-                        : "N/A"}
-                    </CardDescription>
-                  )}
-                </div>
-                <CardDescription>
-                  <p className="text-sm text-muted-foreground">
-                    {existingRequest.adminResponse}
-                  </p>
-                </CardDescription>
-              </CardHeader>
-            </>
-          )}
-        </CardContent>
-      </Card>
+        {existingRequest.status === "approved" && (
+          <>
+            <Alert className="text-green-400">
+              <CheckCircle className="h-4 w-4" />
+              <AlertTitle>Request Approved</AlertTitle>
+              <AlertDescription className="text-green-400">
+                Congratulations! Your request has been approved. You now have
+                employer access.
+              </AlertDescription>
+            </Alert>
+            <CardHeader className="px-0">
+              <div className="flex items-center justify-between">
+                <CardTitle>Admin Response</CardTitle>
+                {existingRequest.reviewedAt && (
+                  <CardDescription>
+                    Reviewed on{" "}
+                    {existingRequest.reviewedAt
+                      ? new Date(existingRequest.reviewedAt).toLocaleString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "short",
+                            day: "2-digit",
+                          },
+                        )
+                      : "N/A"}
+                  </CardDescription>
+                )}
+              </div>
+              <CardDescription>
+                <p className="text-sm text-muted-foreground">
+                  {existingRequest.adminResponse}
+                </p>
+              </CardDescription>
+            </CardHeader>
+          </>
+        )}
+      </div>
     </div>
   );
 };

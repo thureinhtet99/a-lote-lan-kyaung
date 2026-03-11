@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Button } from "@/components/ui/button";
-import { ExternalLink } from "lucide-react";
-import { claimOrganization } from "@/features/organizations/db/notification-db";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import LoadingSwap from "@/components/shared/loading-swap";
+import { Button } from "@/components/ui/button";
+import { claimOrganization } from "@/features/organizations/db/notification-db";
+import { ExternalLink } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
+import { toast } from "sonner";
 
 interface ClaimOrganizationButtonProps {
   notificationId: string;
@@ -37,7 +37,7 @@ export function ClaimOrganizationButton({
     <Button
       onClick={handleClaimOrganization}
       disabled={isPending}
-      className="w-full cursor-pointer"
+      className="cursor-pointer"
     >
       <ExternalLink className="h-4 w-4" />
       <LoadingSwap isLoading={isPending} children="Claim" />
