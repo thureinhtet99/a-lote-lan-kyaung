@@ -13,6 +13,7 @@ This job portal connects job seekers with employers, providing a comprehensive p
 ## ✨ Key Features
 
 ### For Job Seekers
+
 - 🔍 Browse and search job listings
 - 📝 Apply for jobs with custom cover letters
 - 📊 Track application status
@@ -20,6 +21,7 @@ This job portal connects job seekers with employers, providing a comprehensive p
 - 🔔 Receive notifications
 
 ### For Employers
+
 - 📋 Post and manage job listings
 - 🏢 Create and manage organizations
 - 👥 Manage team members and roles
@@ -28,6 +30,7 @@ This job portal connects job seekers with employers, providing a comprehensive p
 - 💳 Subscription plans (Free, Pro, Enterprise)
 
 ### For Administrators
+
 - 👨‍💼 User management (ban/unban, roles)
 - ✅ Approve/reject employer requests
 - 📈 System statistics and monitoring

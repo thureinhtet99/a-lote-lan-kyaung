@@ -111,12 +111,8 @@
           "name": "accounts_user_id_users_id_fk",
           "tableFrom": "accounts",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -184,12 +180,8 @@
           "name": "applications_job_listing_id_job_listings_id_fk",
           "tableFrom": "applications",
           "tableTo": "job_listings",
-          "columnsFrom": [
-            "job_listing_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["job_listing_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -197,12 +189,8 @@
           "name": "applications_user_id_users_id_fk",
           "tableFrom": "applications",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -210,10 +198,7 @@
       "compositePrimaryKeys": {
         "applications_job_listing_id_user_id_pk": {
           "name": "applications_job_listing_id_user_id_pk",
-          "columns": [
-            "job_listing_id",
-            "user_id"
-          ]
+          "columns": ["job_listing_id", "user_id"]
         }
       },
       "uniqueConstraints": {},
@@ -320,12 +305,8 @@
           "name": "employer_requests_user_id_users_id_fk",
           "tableFrom": "employer_requests",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -333,12 +314,8 @@
           "name": "employer_requests_reviewed_by_users_id_fk",
           "tableFrom": "employer_requests",
           "tableTo": "users",
-          "columnsFrom": [
-            "reviewed_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["reviewed_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -441,12 +418,8 @@
           "name": "invitations_organization_id_organizations_id_fk",
           "tableFrom": "invitations",
           "tableTo": "organizations",
-          "columnsFrom": [
-            "organization_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["organization_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -454,12 +427,8 @@
           "name": "invitations_inviter_id_users_id_fk",
           "tableFrom": "invitations",
           "tableTo": "users",
-          "columnsFrom": [
-            "inviter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["inviter_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -589,12 +558,8 @@
           "name": "job_listings_organization_id_organizations_id_fk",
           "tableFrom": "job_listings",
           "tableTo": "organizations",
-          "columnsFrom": [
-            "organization_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["organization_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -679,12 +644,8 @@
           "name": "members_organization_id_organizations_id_fk",
           "tableFrom": "members",
           "tableTo": "organizations",
-          "columnsFrom": [
-            "organization_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["organization_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -692,12 +653,8 @@
           "name": "members_user_id_users_id_fk",
           "tableFrom": "members",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -806,12 +763,8 @@
           "name": "notifications_user_id_users_id_fk",
           "tableFrom": "notifications",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -819,12 +772,8 @@
           "name": "notifications_organization_id_organizations_id_fk",
           "tableFrom": "notifications",
           "tableTo": "organizations",
-          "columnsFrom": [
-            "organization_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["organization_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -958,12 +907,8 @@
           "name": "organization_requests_user_id_users_id_fk",
           "tableFrom": "organization_requests",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -971,12 +916,8 @@
           "name": "organization_requests_reviewed_by_users_id_fk",
           "tableFrom": "organization_requests",
           "tableTo": "users",
-          "columnsFrom": [
-            "reviewed_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["reviewed_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -984,12 +925,8 @@
           "name": "organization_requests_created_organization_id_organizations_id_fk",
           "tableFrom": "organization_requests",
           "tableTo": "organizations",
-          "columnsFrom": [
-            "created_organization_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_organization_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1064,9 +1001,7 @@
         "organizations_slug_unique": {
           "name": "organizations_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -1122,12 +1057,8 @@
           "name": "resumes_user_id_users_id_fk",
           "tableFrom": "resumes",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1221,12 +1152,8 @@
           "name": "sessions_user_id_users_id_fk",
           "tableFrom": "sessions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1236,9 +1163,7 @@
         "sessions_token_unique": {
           "name": "sessions_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -1321,9 +1246,7 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -1402,58 +1325,32 @@
     "public.application_status": {
       "name": "application_status",
       "schema": "public",
-      "values": [
-        "denied",
-        "applied",
-        "interested",
-        "interviewed",
-        "hired"
-      ]
+      "values": ["denied", "applied", "interested", "interviewed", "hired"]
     },
     "public.experience": {
       "name": "experience",
       "schema": "public",
-      "values": [
-        "junior",
-        "mid-level",
-        "senior"
-      ]
+      "values": ["junior", "mid-level", "senior"]
     },
     "public.status": {
       "name": "status",
       "schema": "public",
-      "values": [
-        "draft",
-        "published",
-        "delisted"
-      ]
+      "values": ["draft", "published", "delisted"]
     },
     "public.type": {
       "name": "type",
       "schema": "public",
-      "values": [
-        "full-time",
-        "part-time",
-        "internship"
-      ]
+      "values": ["full-time", "part-time", "internship"]
     },
     "public.location_requirement": {
       "name": "location_requirement",
       "schema": "public",
-      "values": [
-        "on-site",
-        "remote",
-        "hybrid"
-      ]
+      "values": ["on-site", "remote", "hybrid"]
     },
     "public.wage_interval": {
       "name": "wage_interval",
       "schema": "public",
-      "values": [
-        "monthly",
-        "yearly",
-        "hourly"
-      ]
+      "values": ["monthly", "yearly", "hourly"]
     }
   },
   "schemas": {},

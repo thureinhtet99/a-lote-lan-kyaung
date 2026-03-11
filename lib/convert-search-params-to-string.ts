@@ -1,5 +1,5 @@
 export function convertSearchParamsToString(
-  searchParams: Record<string, string | string[]>
+  searchParams: Record<string, string | string[]>,
 ): string {
   const params = new URLSearchParams();
 
