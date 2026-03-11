@@ -1,5 +1,6 @@
 "use client";
 
+import LoadingSwap from "@/components/shared/loading-swap";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,9 +11,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useSignOut } from "@/hooks/use-sign-out";
 import { LogOutIcon, User } from "lucide-react";
 import { useState } from "react";
-import { useSignOut } from "@/hooks/use-sign-out";
 
 type Props = {
   user: {
@@ -71,7 +72,7 @@ export function AdminUserMenu({ user }: Props) {
           onClick={() => signOut({ onSuccess: () => setIsOpen(false) })}
         >
           <LogOutIcon className="mr-1 h-4 w-4  focus:text-accent-foreground" />
-          {isPending ? "Logging out..." : "Log Out"}
+          <LoadingSwap isLoading={isPending} children="Log out" />
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

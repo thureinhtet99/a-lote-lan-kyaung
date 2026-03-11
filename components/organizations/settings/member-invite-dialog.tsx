@@ -25,7 +25,7 @@ import {
   resendInvitation,
 } from "@/features/organizations/actions/manage-invitations";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Mail, UserPlus } from "lucide-react";
+import { Mail, PlusIcon, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -50,6 +50,8 @@ export function MemberInviteDialog() {
     },
   });
 
+  const isBusy = form.formState.isSubmitting || resending;
+
   async function onSubmit(data: InviteFormData) {
     const result = await inviteMember(data);
 
@@ -62,53 +64,72 @@ export function MemberInviteDialog() {
     }
   }
 
-  async function handleResendInvitation() {
+  async function handleEmailInvitation() {
     const isValid = await form.trigger("email");
-
     if (!isValid) return;
 
     const email = form.getValues("email").trim().toLowerCase();
 
     setResending(true);
 
-    const invitationsResult = await getInvitations();
+    try {
+      const invitationsResult = await getInvitations();
 
-    if (!invitationsResult.success) {
-      toast.error(invitationsResult.message || "Failed to load invitations");
+      if (!invitationsResult.success) {
+        toast.error(invitationsResult.message || "Failed to load invitations");
+        return;
+      }
+
+      const invitation = invitationsResult.data.find(
+        (item) =>
+          item.email.toLowerCase() === email && item.status === "pending",
+      );
+
+      if (invitation) {
+        const resendResult = await resendInvitation(invitation.id, email);
+        if (resendResult.success) {
+          toast.success(resendResult.message || "Invitation resent");
+        } else {
+          toast.error(resendResult.message || "Failed to resend invitation");
+        }
+        return;
+      }
+
+      const inviteResult = await inviteMember({ email, role: "hr" });
+      if (inviteResult.success) {
+        toast.success(inviteResult.message || `Invitation sent to ${email}`);
+        form.reset();
+      } else {
+        toast.error(inviteResult.message || "Failed to send invitation");
+      }
+    } finally {
       setResending(false);
-      return;
+      setOpen(false);
     }
-
-    const invitation = invitationsResult.data.find(
-      (item) => item.email.toLowerCase() === email,
-    );
-
-    if (!invitation) {
-      toast.error(`No pending invitation found for ${email}`);
-      setResending(false);
-      return;
-    }
-
-    const result = await resendInvitation(invitation.id);
-
-    if (result.success) {
-      toast.success(result.message || "Invitation resent");
-    } else {
-      toast.error(result.message || "Failed to resend invitation");
-    }
-
-    setResending(false);
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (isBusy) return;
+        setOpen(nextOpen);
+      }}
+    >
       <DialogTrigger asChild>
         <Button>
           <UserPlus className="h-4 w-4" />
           Invite Member
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent
+        onInteractOutside={(event) => {
+          if (isBusy) event.preventDefault();
+        }}
+        onEscapeKeyDown={(event) => {
+          if (isBusy) event.preventDefault();
+        }}
+      >
         <DialogHeader>
           <DialogTitle>Invite Team Member</DialogTitle>
           <DialogDescription>
@@ -130,7 +151,7 @@ export function MemberInviteDialog() {
                       {...field}
                       type="email"
                       placeholder="member@example.com"
-                      disabled={form.formState.isSubmitting}
+                      disabled={isBusy}
                     />
                   </FormControl>
                   <FormMessage />
@@ -143,23 +164,27 @@ export function MemberInviteDialog() {
                 type="button"
                 variant="outline"
                 onClick={() => setOpen(false)}
-                disabled={form.formState.isSubmitting}
+                disabled={isBusy}
               >
                 Cancel
               </Button>
               <Button
                 type="button"
-                variant="outline"
-                onClick={handleResendInvitation}
-                disabled={form.formState.isSubmitting || resending}
+                onClick={handleEmailInvitation}
+                disabled={isBusy}
               >
                 <Mail className="h-4 w-4" />
-                {resending ? "Resending..." : "Send via Email"}
+                <LoadingSwap isLoading={isBusy} children="Send via Email" />
               </Button>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
+              <Button type="submit" disabled={isBusy}>
                 <LoadingSwap
-                  isLoading={form.formState.isSubmitting}
-                  children="Invite"
+                  isLoading={isBusy}
+                  children={
+                    <>
+                      <PlusIcon className="h-4 w-4" />
+                      Invite
+                    </>
+                  }
                 />
               </Button>
             </div>

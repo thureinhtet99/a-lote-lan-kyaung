@@ -16,6 +16,7 @@ export const hr = ac.newRole({
   organization: ["read"],
   job_listing: ["create", "update", "delete", "change_status"],
   application: ["read", "update", "change_status"],
+  invitation: ["create", "cancel"],
 });
 
 // Org Admin - full organization management role

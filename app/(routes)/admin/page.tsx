@@ -1,11 +1,21 @@
-import { StatCard } from "@/components/shared/stat-card";
 import { PageHeader } from "@/components/shared/page-header";
-import { Users, Briefcase, Shield, Clock, Building2 } from "lucide-react";
+import PageLoading from "@/components/shared/page-loading";
+import { StatCard } from "@/components/shared/stat-card";
 import { getAdminStats } from "@/features/admin/db/admin-db";
 import { getCurrentUser } from "@/lib/auth/auth-helpers";
+import { Briefcase, Building2, Clock, Shield, Users } from "lucide-react";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 export default async function AdminDashboard() {
+  return (
+    <Suspense fallback={<PageLoading />}>
+      <SuspendedComponent />
+    </Suspense>
+  );
+}
+
+const SuspendedComponent = async () => {
   const { user } = await getCurrentUser();
   if (!user || user.role !== "admin") redirect("/");
 
@@ -31,7 +41,7 @@ export default async function AdminDashboard() {
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-4 lg:grid-cols-6">
         <StatCard
           title="Users"
           value={totalUsers}
@@ -71,4 +81,4 @@ export default async function AdminDashboard() {
       </div>
     </div>
   );
-}
+};

@@ -1,8 +1,8 @@
 "use server";
 
+import { getOrgById } from "@/features/organizations/db/organization-db";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
-import { getOrgById } from "@/features/organizations/db/organization-db";
 
 export async function safeGetSession() {
   try {

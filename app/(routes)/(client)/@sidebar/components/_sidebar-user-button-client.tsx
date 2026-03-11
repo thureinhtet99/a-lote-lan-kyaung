@@ -112,7 +112,7 @@ export default function SidebarUserButtonClient({
           onClick={() => signOut({ onSuccess: () => setIsOpen(false) })}
         >
           <LogOutIcon className="mr-1 focus:text-accent-foreground" />
-          {isPending ? "Logging out..." : "Log Out"}
+          <LoadingSwap isLoading={isPending} children="Log out" />
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

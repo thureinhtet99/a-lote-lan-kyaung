@@ -1,50 +1,7 @@
 "use client";
 
-import { useOptimistic, useState, useTransition } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import {
-  updateUserRole,
-  banUser,
-  unbanUser,
-} from "@/features/users/db/user-db";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Search, X } from "lucide-react";
-import { toast } from "sonner";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import CustomPagination from "@/components/shared/custom-pagination";
+import LoadingSwap from "@/components/shared/loading-swap";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -55,9 +12,44 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  banUser,
+  unbanUser,
+  updateUserRole,
+} from "@/features/users/db/user-db";
 import { PaginationType, UserRoleType, UserType } from "@/types/index.type";
+import { MoreHorizontal, Search, X } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useOptimistic, useState, useTransition } from "react";
+import { toast } from "sonner";
 import { getVisiblePages } from "../lib/utils";
-import CustomPagination from "@/components/shared/custom-pagination";
 
 export function UserTableClient({
   users,
@@ -414,7 +406,7 @@ export function UserTableClient({
               disabled={isPending}
               className="bg-destructive hover:bg-destructive/90"
             >
-              {isPending ? "Confirming..." : "Confirm Ban"}
+              <LoadingSwap isLoading={isPending} children="Confirm Ban" />
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

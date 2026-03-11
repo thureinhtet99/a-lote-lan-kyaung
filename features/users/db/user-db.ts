@@ -6,6 +6,7 @@ import {
   employerRequestSchema,
   rejectRequestSchema,
 } from "@/features/admin/schema/admin-form-schema";
+import { auth } from "@/lib/auth/auth";
 import { safeGetSession } from "@/lib/auth/auth-helpers";
 import {
   dashboardStatsTag,
@@ -26,7 +27,10 @@ import {
 import { and, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { cacheLife, cacheTag, revalidateTag, updateTag } from "next/cache";
+import { headers } from "next/headers";
 import { userProfileSchema } from "../schema/user-profile-schema";
+
+const BAN_EXPIRE_TIME = 60 * 60 * 24 * 7;
 
 // Get all users
 export const getAllUsers = async (
@@ -149,6 +153,15 @@ export const banUser = async (userId: string, reason: string) => {
     if (!session?.user || session.user.role !== "admin") {
       return { success: false, message: "Unauthorized" };
     }
+
+    await auth.api.banUser({
+      body: {
+        userId: userId,
+        banReason: reason,
+        banExpiresIn: BAN_EXPIRE_TIME,
+      },
+      headers: await headers(),
+    });
 
     await db
       .update(userTable)

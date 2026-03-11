@@ -1,10 +1,8 @@
 import { resend } from "@/lib/email/resend-client";
 import { OrganizationInvitationEmail } from "@/lib/email/templates/organization-invitation";
-import { createElement } from "react";
 
 interface SendInvitationEmailParams {
   email: string;
-  invitedByUsername: string;
   invitedByEmail: string;
   organizationName: string;
   role: string;
@@ -13,7 +11,6 @@ interface SendInvitationEmailParams {
 
 export async function sendInvitationEmail({
   email,
-  invitedByUsername,
   invitedByEmail,
   organizationName,
   role,
@@ -23,9 +20,8 @@ export async function sendInvitationEmail({
     const { data, error } = await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL!!,
       to: email,
-      subject: `You've been invited to join ${organizationName}`,
-      react: createElement(OrganizationInvitationEmail, {
-        invitedByName: invitedByUsername,
+      subject: `Invitation to join ${organizationName}`,
+      html: OrganizationInvitationEmail({
         invitedByEmail,
         organizationName,
         role,

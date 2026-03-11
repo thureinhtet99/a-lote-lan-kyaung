@@ -68,7 +68,6 @@ export const auth = betterAuth({
         try {
           await sendInvitationEmail({
             email: data.email,
-            invitedByUsername: data.inviter.user.name,
             invitedByEmail: data.inviter.user.email,
             organizationName: data.organization.name,
             role: data.role,

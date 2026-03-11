@@ -1,4 +1,5 @@
-import { redirect } from "next/navigation";
+import PageLoading from "@/components/shared/page-loading";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -6,16 +7,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { AlertCircle } from "lucide-react";
-import { safeGetSession } from "@/lib/auth/auth-helpers";
 import { APP_ROUTES } from "@/constants/app-config";
 import { SignOutButton } from "@/features/auth/components/auth-buttons";
+import { safeGetSession } from "@/lib/auth/auth-helpers";
+import { AlertCircle } from "lucide-react";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 export default async function BannedPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<PageLoading />}>
       <SuspendedComponent />
     </Suspense>
   );
@@ -70,7 +71,7 @@ const SuspendedComponent = async () => {
 
           <div className="pt-4">
             <SignOutButton>
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full cursor-pointer">
                 Sign Out
               </Button>
             </SignOutButton>

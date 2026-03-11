@@ -1,12 +1,12 @@
 "use server";
 
-import { auth } from "@/lib/auth/auth";
-import { headers } from "next/headers";
-import { db } from "@/lib/db";
 import { invitationTable } from "@/drizzle/schema";
-import { and, eq } from "drizzle-orm";
+import { auth } from "@/lib/auth/auth";
 import { safeGetSession } from "@/lib/auth/auth-helpers";
+import { db } from "@/lib/db";
 import { sendInvitationEmail } from "@/services/email/send-invitation";
+import { and, eq } from "drizzle-orm";
+import { headers } from "next/headers";
 
 export async function getInvitations() {
   try {
@@ -106,7 +106,10 @@ export async function revokeInvitation(invitationId: string) {
   }
 }
 
-export async function resendInvitation(invitationId: string) {
+export async function resendInvitation(
+  invitationId: string,
+  invitedUserEmail?: string,
+) {
   try {
     if (!invitationId) {
       return {
@@ -166,10 +169,13 @@ export async function resendInvitation(invitationId: string) {
     // Send the invitation email
     const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/auth/accept-invitation?token=${invitation.id}`;
 
+    const normalizedInvitedUserEmail = invitedUserEmail
+      ? invitedUserEmail.trim().toLowerCase()
+      : invitation.email;
+
     await sendInvitationEmail({
       email: invitation.email,
-      invitedByUsername: session.user?.name || "Team member",
-      invitedByEmail: session.user?.email || "",
+      invitedByEmail: normalizedInvitedUserEmail,
       organizationName: invitation.organization?.name || "Organization",
       role: invitation.role || "hr",
       inviteUrl,

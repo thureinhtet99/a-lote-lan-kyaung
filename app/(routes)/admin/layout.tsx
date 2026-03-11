@@ -1,9 +1,9 @@
-import { redirect } from "next/navigation";
+import { Logo } from "@/components/shared/logo";
 import { AdminNav } from "@/features/admin/components/admin-nav";
 import { AdminUserMenu } from "@/features/admin/components/admin-user-menu";
-import { Logo } from "@/components/shared/logo";
-import { ReactNode, Suspense } from "react";
 import { safeGetSession } from "@/lib/auth/auth-helpers";
+import { redirect } from "next/navigation";
+import { ReactNode, Suspense } from "react";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
