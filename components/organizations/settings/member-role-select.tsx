@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import { updateMemberRole } from "@/features/organizations/actions/update-member-role";
 import {
   Select,
   SelectContent,
@@ -9,7 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+import { updateMemberRole } from "@/features/organizations/actions/update-member-role";
+import { useState } from "react";
 import { toast } from "sonner";
 
 type MemberRoleSelectProps = {
@@ -43,37 +42,18 @@ export function MemberRoleSelect({
     setUpdating(false);
   }
 
-  function getRoleBadgeVariant(role: string) {
-    switch (role) {
-      case "org-admin":
-        return "default";
-      case "hr":
-        return "secondary";
-      default:
-        return "outline";
-    }
-  }
-
   return (
     <Select
       value={currentRole}
       onValueChange={handleRoleChange}
       disabled={updating}
     >
-      <SelectTrigger className="w-[120px] h-auto p-0 border-none">
-        <SelectValue>
-          <Badge variant={getRoleBadgeVariant(currentRole)}>
-            {currentRole}
-          </Badge>
-        </SelectValue>
+      <SelectTrigger className="w-[120px] h-auto border-none capitalize">
+        <SelectValue>{currentRole}</SelectValue>
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="hr">
-          <Badge variant="secondary">hr</Badge>
-        </SelectItem>
-        <SelectItem value="org-admin">
-          <Badge variant="default">org-admin</Badge>
-        </SelectItem>
+        <SelectItem value="hr">Hr</SelectItem>
+        <SelectItem value="org-admin">Org-Admin</SelectItem>
       </SelectContent>
     </Select>
   );

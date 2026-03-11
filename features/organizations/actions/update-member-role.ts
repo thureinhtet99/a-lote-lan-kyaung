@@ -1,10 +1,10 @@
 "use server";
 
+import { APP_ROUTES } from "@/constants/app-config";
 import { auth } from "@/lib/auth/auth";
+import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
-import { revalidatePath } from "next/cache";
-import { APP_ROUTES } from "@/constants/app-config";
 
 const updateRoleSchema = z.object({
   memberId: z.string().min(1, "Member ID is required"),
@@ -40,6 +40,16 @@ export async function updateMemberRole(data: UpdateMemberRoleInput) {
     const member = membersResult?.members?.find(
       (m) => m.id === validated.memberId,
     );
+    const currentMember = membersResult?.members?.find(
+      (m) => m.userId === session.user.id,
+    );
+
+    if (currentMember?.role !== "org-admin") {
+      return {
+        success: false,
+        message: "Only organization admins can update member roles",
+      };
+    }
 
     if (!member) {
       return {

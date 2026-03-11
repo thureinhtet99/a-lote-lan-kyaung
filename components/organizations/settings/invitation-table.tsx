@@ -1,5 +1,6 @@
 "use client";
 
+import Loading from "@/components/shared/loading";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -97,13 +98,7 @@ export function InvitationTable() {
     setResending(null);
   }
 
-  if (loading) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        Loading invitations...
-      </div>
-    );
-  }
+  if (loading) return <Loading />;
 
   if (invitations.length === 0) {
     return (
@@ -134,7 +129,7 @@ export function InvitationTable() {
                 <div className="font-medium">{invitation.email}</div>
               </TableCell>
               <TableCell>
-                <Badge variant="outline" className="uppercase">
+                <Badge variant="outline" className="capitalize">
                   {invitation.role || "user"}
                 </Badge>
               </TableCell>
@@ -149,31 +144,33 @@ export function InvitationTable() {
                 </span>
               </TableCell>
               <TableCell className="text-right">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      onClick={() => handleResendInvitation(invitation.id)}
-                      disabled={resending === invitation.id}
-                    >
-                      <Mail className="h-4 w-4 hover:text-white" />
-                      {resending === invitation.id
-                        ? "Resending..."
-                        : "Send via Email"}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => setInvitationToRevoke(invitation)}
-                      className="text-destructive focus:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4 hover:text-white" />
-                      Revoke
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                {invitation.status !== "accepted" && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() => handleResendInvitation(invitation.id)}
+                        disabled={resending === invitation.id}
+                      >
+                        <Mail className="h-4 w-4 hover:text-white" />
+                        {resending === invitation.id
+                          ? "Resending..."
+                          : "Send via Email"}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setInvitationToRevoke(invitation)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 hover:text-white" />
+                        Revoke
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </TableCell>
             </TableRow>
           ))}

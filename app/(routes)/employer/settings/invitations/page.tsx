@@ -1,4 +1,5 @@
-import { Suspense } from "react";
+import { InvitationTable } from "@/components/organizations/settings/invitation-table";
+import Loading from "@/components/shared/loading";
 import {
   Card,
   CardContent,
@@ -6,8 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { InvitationTable } from "@/components/organizations/settings/invitation-table";
+import { Suspense } from "react";
 
 export default function InvitationsPage() {
   return (
@@ -20,30 +20,11 @@ export default function InvitationsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Suspense fallback={<InvitationTableSkeleton />}>
+          <Suspense fallback={<Loading />}>
             <InvitationTable />
           </Suspense>
         </CardContent>
       </Card>
-    </div>
-  );
-}
-
-function InvitationTableSkeleton() {
-  return (
-    <div className="space-y-3">
-      {[1, 2, 3].map((i) => (
-        <div
-          key={i}
-          className="flex items-center justify-between p-3 border rounded-lg"
-        >
-          <div className="flex-1 space-y-2">
-            <Skeleton className="h-4 w-1/3" />
-            <Skeleton className="h-3 w-1/4" />
-          </div>
-          <Skeleton className="h-8 w-20" />
-        </div>
-      ))}
     </div>
   );
 }

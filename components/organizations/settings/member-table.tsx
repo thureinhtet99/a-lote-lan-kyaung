@@ -1,25 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getOrganizationMembers } from "@/features/organizations/actions/get-members";
-import { removeMember } from "@/features/organizations/actions/remove-member";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import Loading from "@/components/shared/loading";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,11 +11,31 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreVertical, Trash2, Shield } from "lucide-react";
-import { toast } from "sonner";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { getOrganizationMembers } from "@/features/organizations/actions/get-members";
+import { removeMember } from "@/features/organizations/actions/remove-member";
+import { useSession } from "@/lib/auth/auth-client";
+import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { MoreVertical, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { MemberRoleSelect } from "./member-role-select";
-import Loading from "@/components/shared/loading";
 
 type Member = {
   id: string;
@@ -52,6 +53,13 @@ export function MemberTable() {
   const [loading, setLoading] = useState(true);
   const [memberToDelete, setMemberToDelete] = useState<Member | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const { data: session } = useSession();
+
+  const currentUserId = session?.user?.id ?? null;
+  const currentUserRole = currentUserId
+    ? members.find((member) => member.userId === currentUserId)?.role
+    : null;
+  const canManageMembers = currentUserRole === "org-admin";
 
   useEffect(() => {
     loadMembers();
@@ -84,17 +92,6 @@ export function MemberTable() {
     setDeleting(false);
   }
 
-  function getRoleBadgeVariant(role: string) {
-    switch (role) {
-      case "org-admin":
-        return "default";
-      case "hr":
-        return "secondary";
-      default:
-        return "outline";
-    }
-  }
-
   if (loading) return <Loading />;
 
   if (members.length === 0) {
@@ -117,72 +114,88 @@ export function MemberTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {members.map((member) => (
-            <TableRow key={member.id}>
-              <TableCell>
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-9 w-9">
-                    <AvatarImage
-                      src={member.userImage || ""}
-                      alt={member.userName}
-                    />
-                    <AvatarFallback>
-                      {member.userName
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                        .toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-medium">{member.userName}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {member.userEmail}
+          {members.map((member) => {
+            const isCurrentUser =
+              currentUserId != null && member.userId === currentUserId;
+            const canManageThisMember =
+              canManageMembers && member.role !== "org-admin" && !isCurrentUser;
+
+            return (
+              <TableRow
+                key={member.id}
+                className={cn(isCurrentUser && "bg-primary/5")}
+              >
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-9 w-9">
+                      <AvatarImage
+                        src={member.userImage || ""}
+                        alt={member.userName}
+                      />
+                      <AvatarFallback className="bg-primary text-white size-10 text-lg">
+                        {member.userName
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <div className="font-medium">{member.userName}</div>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {member.userEmail}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </TableCell>
-              <TableCell>
-                {member.role === "org-admin" ? (
-                  <Badge variant={getRoleBadgeVariant(member.role)}>
-                    <Shield className="h-3 w-3 mr-1" />
-                    {member.role}
-                  </Badge>
-                ) : (
-                  <MemberRoleSelect
-                    memberId={member.id}
-                    currentRole={member.role}
-                    onRoleChange={loadMembers}
-                  />
-                )}
-              </TableCell>
-              <TableCell>
-                <span className="text-sm text-muted-foreground">
-                  {format(new Date(member.createdAt), "MMM d, yyyy")}
-                </span>
-              </TableCell>
-              <TableCell className="text-right">
-                {member.role !== "org-admin" && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={() => setMemberToDelete(member)}
-                        className="text-destructive focus:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Remove Member
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
-              </TableCell>
-            </TableRow>
-          ))}
+                </TableCell>
+                <TableCell>
+                  {canManageMembers && member.role !== "org-admin" ? (
+                    <MemberRoleSelect
+                      memberId={member.id}
+                      currentRole={member.role}
+                      onRoleChange={loadMembers}
+                    />
+                  ) : (
+                    <span
+                      className={cn(
+                        "capitalize",
+                        member.role === "org-admin" && "text-primary",
+                      )}
+                    >
+                      {member.role}
+                    </span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <span className="text-sm text-muted-foreground">
+                    {format(new Date(member.createdAt), "MMM d, yyyy")}
+                  </span>
+                </TableCell>
+                <TableCell className="text-right">
+                  {canManageThisMember && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={() => setMemberToDelete(member)}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Remove
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
 

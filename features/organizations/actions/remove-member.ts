@@ -1,9 +1,9 @@
 "use server";
 
-import { auth } from "@/lib/auth/auth";
-import { headers } from "next/headers";
-import { revalidatePath } from "next/cache";
 import { APP_ROUTES } from "@/constants/app-config";
+import { auth } from "@/lib/auth/auth";
+import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 
 export async function removeMember(memberId: string) {
   try {
@@ -34,6 +34,16 @@ export async function removeMember(memberId: string) {
     });
 
     const member = membersResult?.members?.find((m) => m.id === memberId);
+    const currentMember = membersResult?.members?.find(
+      (m) => m.userId === session.user.id,
+    );
+
+    if (currentMember?.role !== "org-admin") {
+      return {
+        success: false,
+        message: "Only organization admins can remove members",
+      };
+    }
 
     if (!member) {
       return {
