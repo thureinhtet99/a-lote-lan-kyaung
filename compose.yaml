@@ -32,7 +32,7 @@ services:
       context: .
       dockerfile: Dockerfile
       # target: development # Uncomment if using multi-stage build
-    container_name: a-lote-lann-kyaung-server
+    container_name: a-lote-lann-kyaung
     restart: unless-stopped
     depends_on:
       db:

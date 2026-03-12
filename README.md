@@ -1,122 +1,106 @@
-# Job Portal - Modular Architecture
+# A-lote-lann-kyaung
 
-A modern, scalable job portal application built with Next.js 15, featuring a feature-based modular architecture.
+A full-stack hiring platform built with Next.js, Drizzle ORM, Better Auth, and PostgreSQL.
 
-## 🚀 Overview
+The codebase supports three primary audiences:
 
-This job portal connects job seekers with employers, providing a comprehensive platform for:
+- **Job-seekers** browsing and applying for jobs
+- **Employers** managing organizations, listings, invitations, and applications
+- **Admins** reviewing access requests and monitoring the platform
 
-- **Job Seekers:** Browse and apply for jobs, manage applications, build profiles
-- **Employers:** Post jobs, manage organizations, review applications
-- **Admins:** Manage users, approve employer requests, monitor system
+## Overview
 
-## ✨ Key Features
+The repository is organized in `app/`, feature-level business logic in `features/`, shared UI in `components/`, and cross-cutting utilities in `lib/`, `services/`, and `drizzle/`. See more details in [ARCHITECTURE.md](ARCHITECTURE.md).
 
-### For Job Seekers
+Core product capabilities include:
 
-- 🔍 Browse and search job listings
-- 📝 Apply for jobs with custom cover letters
-- 📊 Track application status
-- 👤 Manage profile and resume
-- 🔔 Receive notifications
+- _Job listing_ discovery, filtering, and application workflows
+- _Employer_ and _organization_ request review flows
+- _Organization membership_, _invitations_, and _role management_
+- _Notification-driven_ _organization claim_ flow
+- Admin _user management_
 
-### For Employers
+## Tech Stack
 
-- 📋 Post and manage job listings
-- 🏢 Create and manage organizations
-- 👥 Manage team members and roles
-- 💼 Review job applications
-- ⭐ Feature important job listings
-- 💳 Subscription plans (Free, Pro, Enterprise)
+- Framework: Next.js 16 App Router
+- Language: TypeScript
+- Database: PostgreSQL with Drizzle ORM
+- Authentication and RBAC (Role-based access control): Better Auth
+- UI: Tailwind CSS and shadcn/ui primitives
+- File uploads: UploadThing
+- Rich text and markdown: MDXEditor
+<!-- - Email delivery: Resend-backed invitation service -->
 
-### For Administrators
+## Getting Started
 
-- 👨‍💼 User management (ban/unban, roles)
-- ✅ Approve/reject employer requests
-- 📈 System statistics and monitoring
-- 🛡️ Content moderation
-
-## 🏗️ Architecture
-
-This project uses a **feature-based modular architecture** where each module is self-contained.
-
-See [Architecture Documentation](./docs/ARCHITECTURE.md) for complete details.
-
-## 🛠️ Tech Stack
-
-- **Framework:** [Next.js 15](https://nextjs.org) (App Router)
-- **Language:** TypeScript
-- **Database:** PostgreSQL with [Drizzle ORM](https://orm.drizzle.team)
-- **Authentication:** [Better Auth](https://better-auth.com)
-- **UI:** [Shadcn UI](https://ui.shadcn.com) + [Tailwind CSS](https://tailwindcss.com)
-- **File Upload:** [UploadThing](https://uploadthing.com)
-- **Markdown:** [MDXEditor](https://mdxeditor.dev)
-
-## 📦 Getting Started
-
-### Installation
+### Install dependencies
 
 ```bash
 npm install
 ```
 
-### Setup Environment
+### Configure environment variables
 
 ```bash
 cp .env.example .env
 ```
 
-### Setup Database
+Minimum local setup usually needs:
+
+- `DATABASE_URL`
+- `BETTER_AUTH_SECRET`
+- `BETTER_AUTH_URL`
+- `NEXT_PUBLIC_APP_URL`
+- `UPLOADTHING_TOKEN`
+- `SEED_ADMIN_EMAIL`
+- `SEED_ADMIN_NAME`
+- `SEED_ADMIN_PASSWORD`
+
+### Prepare the database
 
 ```bash
-npx drizzle-kit generate
-npx drizzle-kit migrate
+npm run db:generate
+npm run db:migrate
 npm run db:seed
 ```
 
-### Run Development Server
+The seed script recreates the default users and organizations, then inserts sample job listings.
+
+### Start the app
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+Open http://localhost:3000.
 
-## 📚 Documentation
+## Common Commands
 
-- [Architecture](./docs/ARCHITECTURE.md) - System architecture
-- [Development Guide](./docs/DEVELOPMENT_GUIDE.md) - How to develop features
-- [Module Index](./docs/MODULE_INDEX.md) - Quick reference
-- [Migration Guide](./docs/MODULE_MIGRATION_GUIDE.md) - Migration guide
+- `npm run dev` starts the development server
+- `npm run build` creates the production build
+- `npm run db:generate` creates a Drizzle migration
+- `npm run db:migrate` applies migrations
+- `npm run db:seed` reseeds local development data
+- `npm run db:studio` opens Drizzle Studio
+- `npm run detect` runs knip
 
-### Module Documentation
+## Repository Layout
 
-- [Admin Module](./modules/admin/README.md)
-- [Employer Module](./modules/employer/README.md)
-- [Job Seeker Module](./modules/job-seeker/README.md)
-- [Shared Module](./modules/shared/README.md)
-
-## 🗂️ Project Structure
-
-```
+```text
 job-portal/
-├── app/                    # Next.js routes
-├── modules/                # Feature modules
-│   ├── admin/
-│   ├── employer/
-│   ├── job-seeker/
-│   ├── auth/
-│   └── shared/
-├── drizzle/               # Database schema
-├── docs/                  # Documentation
-└── lib/                   # Core utilities
+├── app/           Next.js routes, layouts, and entry points
+├── components/    Reusable UI, tables, markdown, and layout pieces
+├── constants/     Shared constants and route configuration
+├── drizzle/       Schema, migrations, reset, and seed logic
+├── features/      Business logic and feature components
+├── hooks/         Shared React hooks
+├── lib/           Auth, permissions, db client, caching, and utilities
+├── services/      External service integrations such as uploads
+└── types/         Shared TypeScript types
 ```
 
-## 🤝 Contributing
+## Current Architecture Notes
 
-See [Development Guide](./docs/DEVELOPMENT_GUIDE.md) for details on how to contribute.
-
----
-
-**Version:** 2.0.0  
-**Last Updated:** February 17, 2026
+- `app/` owns routing and composition, not deep business logic.
+- `features/` holds domain behavior for admin, applications, auth, employer, job listings, organizations, and users.
+- `components/` holds reusable presentation primitives and shared widgets used across features.
