@@ -1,6 +1,17 @@
 "use client";
 
+import LoadingSwap from "@/components/shared/loading-swap";
+import { Button } from "@/components/ui/button";
 import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox";
+import {
+  Form,
   FormControl,
   FormField,
   FormItem,
@@ -15,40 +26,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useSidebar } from "@/components/ui/sidebar";
+import cities from "@/constants/cities.json";
 import {
-  JobListingTypeType,
   experienceLevels,
-  jobListingTypes,
   ExperienceLevelType,
+  jobListingTypes,
+  JobListingTypeType,
   locationRequirements,
   LocationRequirementType,
 } from "@/drizzle/schema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useForm } from "react-hook-form";
 import {
   formatExpLevel,
   formatJobType,
   formatLocationRequirement,
 } from "@/features/job-listings/lib/formatters";
-import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
-import { useSidebar } from "@/components/ui/sidebar";
-import { jobBoardFormSchema } from "../job-board-form-schema";
-import z from "zod";
-import { Loader2Icon } from "lucide-react";
-import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-} from "@/components/ui/combobox";
-import cities from "@/constants/cities.json";
-import { Suspense } from "react";
 import { CityType } from "@/types/index.type";
-import LoadingSwap from "@/components/shared/loading-swap";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+import { useForm } from "react-hook-form";
+import z from "zod";
+import { jobBoardFormSchema } from "../job-board-form-schema";
 
 const ANY_VALUE = "any";
 

@@ -27,6 +27,13 @@ export async function getInvitations() {
         invitationTable.organizationId,
         session.session.activeOrganizationId,
       ),
+      with: {
+        organization: {
+          columns: {
+            name: true,
+          },
+        },
+      },
       orderBy: (invitations, { desc }) => [desc(invitations.id)],
     });
 
@@ -109,6 +116,7 @@ export async function revokeInvitation(invitationId: string) {
 export async function resendInvitation(
   invitationId: string,
   invitedUserEmail?: string,
+  organizationName?: string,
 ) {
   try {
     if (!invitationId) {
@@ -173,10 +181,15 @@ export async function resendInvitation(
       ? invitedUserEmail.trim().toLowerCase()
       : invitation.email;
 
+    const normalizedOrganizationName = organizationName?.trim();
+
     await sendInvitationEmail({
       email: invitation.email,
       invitedByEmail: normalizedInvitedUserEmail,
-      organizationName: invitation.organization?.name || "Organization",
+      organizationName:
+        normalizedOrganizationName ||
+        invitation.organization?.name ||
+        "Organization",
       role: invitation.role || "hr",
       inviteUrl,
     });

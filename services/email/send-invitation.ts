@@ -1,4 +1,4 @@
-import { resend } from "@/lib/email/resend-client";
+import { createGmailTransporter } from "@/lib/email/nodemailer-client";
 import { OrganizationInvitationEmail } from "@/lib/email/templates/organization-invitation";
 
 interface SendInvitationEmailParams {
@@ -17,8 +17,10 @@ export async function sendInvitationEmail({
   inviteUrl,
 }: SendInvitationEmailParams) {
   try {
-    const { data, error } = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL!!,
+    const transporter = createGmailTransporter();
+
+    const info = await transporter.sendMail({
+      from: organizationName,
       to: email,
       subject: `Invitation to join ${organizationName}`,
       html: OrganizationInvitationEmail({
@@ -29,12 +31,7 @@ export async function sendInvitationEmail({
       }),
     });
 
-    if (error) {
-      console.error("Failed to send invitation email:", error);
-      throw new Error(`Failed to send email: ${error.message}`);
-    }
-
-    return { success: true, messageId: data?.id };
+    return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error("Error sending invitation email:", error);
     throw error;

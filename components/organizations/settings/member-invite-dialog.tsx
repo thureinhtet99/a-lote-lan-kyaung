@@ -86,7 +86,11 @@ export function MemberInviteDialog() {
       );
 
       if (invitation) {
-        const resendResult = await resendInvitation(invitation.id, email);
+        const resendResult = await resendInvitation(
+          invitation.id,
+          email,
+          invitation.organization?.name,
+        );
         if (resendResult.success) {
           toast.success(resendResult.message || "Invitation resent");
         } else {
@@ -171,19 +175,27 @@ export function MemberInviteDialog() {
               <Button
                 type="button"
                 onClick={handleEmailInvitation}
-                disabled={isBusy}
+                // disabled={isBusy}
+                disabled
               >
-                <Mail className="h-4 w-4" />
-                <LoadingSwap isLoading={isBusy} children="Send via Email" />
+                <LoadingSwap
+                  isLoading={isBusy}
+                  children={
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4" />
+                      Send Email
+                    </div>
+                  }
+                />
               </Button>
               <Button type="submit" disabled={isBusy}>
                 <LoadingSwap
                   isLoading={isBusy}
                   children={
-                    <>
+                    <div className="flex items-center gap-2">
                       <PlusIcon className="h-4 w-4" />
                       Invite
-                    </>
+                    </div>
                   }
                 />
               </Button>

@@ -1,10 +1,10 @@
-import { Suspense } from "react";
+import PageLoading from "@/components/shared/page-loading";
 import MyOrganizationClient from "@/features/organizations/components/_my-organization-client";
 import {
   getActiveOrganization,
   getOrganizationsByEmployerId,
 } from "@/features/organizations/db/organization-db";
-import PageLoading from "@/components/shared/page-loading";
+import { Suspense } from "react";
 
 export default function MyOrganizationPage() {
   return (

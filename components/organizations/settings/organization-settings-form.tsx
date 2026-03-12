@@ -1,21 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import LoadingSwap from "@/components/shared/loading-swap";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,10 +12,32 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { toast } from "sonner";
-import { Trash2, Loader2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { APP_ROUTES } from "@/constants/app-config";
+import {
+  deleteOrg,
+  getActiveOrganizationSettings,
+  updateActiveOrganization,
+} from "@/features/organizations/db/organization-db";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
 const organizationSchema = z.object({
   name: z.string().min(3, "Organization name must be at least 3 characters"),
@@ -41,6 +48,7 @@ const organizationSchema = z.object({
       /^[a-z0-9-]+$/,
       "Slug can only contain lowercase letters, numbers, and hyphens",
     ),
+  metadata: z.string().max(5000, "Metadata must be 5000 characters or less"),
 });
 
 type OrganizationFormData = z.infer<typeof organizationSchema>;
@@ -49,54 +57,92 @@ export function OrganizationSettingsForm() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
-  const [isOwner] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
+  const [activeOrganizationId, setActiveOrganizationId] = useState<
+    string | null
+  >(null);
 
   const form = useForm<OrganizationFormData>({
     resolver: zodResolver(organizationSchema),
     defaultValues: {
       name: "",
       slug: "",
+      metadata: "",
     },
   });
 
   useEffect(() => {
-    loadOrganization();
+    void loadOrganization();
   }, []);
 
   async function loadOrganization() {
     setLoading(true);
     try {
-      // This needs to be called from a server component or server action
-      // For now, we'll use a placeholder
-      // In a real implementation, you'd create a server action to fetch this
-      setLoading(false);
+      const result = await getActiveOrganizationSettings();
+
+      if (!result.success || !result.data) {
+        toast.error(result.message || "Failed to load organization");
+        return;
+      }
+
+      setActiveOrganizationId(result.data.id);
+      setIsOwner(result.data.isOrgAdmin);
+
+      form.reset({
+        name: result.data.name,
+        slug: result.data.slug,
+        metadata: result.data.metadata ?? "",
+      });
     } catch (error) {
+      console.error("Failed to load organization settings:", error);
       toast.error("Failed to load organization");
+    } finally {
       setLoading(false);
     }
   }
 
   async function onSubmit(data: OrganizationFormData) {
     try {
-      // Implementation for updating organization
-      // You'll need to create a server action for this
-      toast.success("Organization updated successfully");
+      const result = await updateActiveOrganization(data);
+
+      if (!result.success) {
+        toast.error(result.message || "Failed to update organization");
+        return;
+      }
+
+      toast.success(result.message);
+      form.reset(data);
+      router.refresh();
     } catch (error) {
+      console.error("Failed to update organization settings:", error);
       toast.error("Failed to update organization");
     }
   }
 
   async function handleDeleteOrganization() {
+    if (!activeOrganizationId) {
+      toast.error("No active organization found");
+      return;
+    }
+
     setDeleting(true);
     try {
-      // Implementation for deleting organization
-      // You'll need to create a server action for this
-      toast.success("Organization deleted");
+      const result = await deleteOrg(activeOrganizationId);
+
+      if (!result.success) {
+        toast.error(result.message || "Failed to delete organization");
+        return;
+      }
+
+      toast.success(result.message || "Organization deleted");
       router.push(APP_ROUTES.EMPLOYER.MY_ORG);
+      router.refresh();
     } catch (error) {
+      console.error("Failed to delete organization:", error);
       toast.error("Failed to delete organization");
+    } finally {
+      setDeleting(false);
     }
-    setDeleting(false);
   }
 
   if (loading) {
@@ -106,6 +152,8 @@ export function OrganizationSettingsForm() {
       </div>
     );
   }
+
+  const isFormDisabled = form.formState.isSubmitting || !isOwner;
 
   return (
     <div className="space-y-6">
@@ -121,7 +169,7 @@ export function OrganizationSettingsForm() {
                   <Input
                     {...field}
                     placeholder="My Organization"
-                    disabled={form.formState.isSubmitting}
+                    disabled={isFormDisabled}
                   />
                 </FormControl>
                 <FormDescription>
@@ -142,7 +190,7 @@ export function OrganizationSettingsForm() {
                   <Input
                     {...field}
                     placeholder="my-organization"
-                    disabled={form.formState.isSubmitting}
+                    disabled={isFormDisabled}
                   />
                 </FormControl>
                 <FormDescription>
@@ -154,9 +202,37 @@ export function OrganizationSettingsForm() {
             )}
           />
 
-          <Button type="submit" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? "Saving..." : "Save Changes"}
-          </Button>
+          <FormField
+            control={form.control}
+            name="metadata"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Organization Description</FormLabel>
+                <FormControl>
+                  <Textarea
+                    {...field}
+                    rows={5}
+                    placeholder="Add organization description"
+                    disabled={isFormDisabled}
+                  />
+                </FormControl>
+                <FormDescription>
+                  This value is stored as organization metadata and can be used
+                  as your organization description.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="flex items-center justify-end">
+            <Button type="submit" disabled={isFormDisabled}>
+              <LoadingSwap
+                isLoading={form.formState.isSubmitting}
+                children="Save"
+              />
+            </Button>
+          </div>
         </form>
       </Form>
 
@@ -167,14 +243,14 @@ export function OrganizationSettingsForm() {
           <h3 className="text-lg font-semibold text-destructive">
             Danger Zone
           </h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            Irreversible and destructive actions
-          </p>
         </div>
 
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" disabled={!isOwner || deleting}>
+            <Button
+              variant="destructive"
+              disabled={!isOwner || deleting || !activeOrganizationId}
+            >
               <Trash2 className="h-4 w-4 mr-2" />
               Delete Organization
             </Button>
@@ -195,7 +271,10 @@ export function OrganizationSettingsForm() {
                 disabled={deleting}
                 className="bg-destructive hover:bg-destructive/90"
               >
-                {deleting ? "Deleting..." : "Delete Organization"}
+                <LoadingSwap
+                  isLoading={deleting}
+                  children="Delete organization"
+                />
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

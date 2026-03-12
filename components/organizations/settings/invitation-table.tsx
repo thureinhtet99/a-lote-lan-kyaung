@@ -40,6 +40,9 @@ import { toast } from "sonner";
 type Invitation = {
   id: string;
   organizationId: string;
+  organization?: {
+    name: string;
+  } | null;
   email: string;
   role: string | null;
   status: string | null;
@@ -86,9 +89,9 @@ export function InvitationTable() {
     setRevoking(false);
   }
 
-  async function handleResendInvitation(id: string) {
+  async function handleResendInvitation(id: string, organizationName?: string) {
     setResending(id);
-    const result = await resendInvitation(id);
+    const result = await resendInvitation(id, undefined, organizationName);
 
     if (result.success) {
       toast.success(result.message || "Invitation resent");
@@ -153,8 +156,14 @@ export function InvitationTable() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
-                        onClick={() => handleResendInvitation(invitation.id)}
-                        disabled={resending === invitation.id}
+                        onClick={() =>
+                          handleResendInvitation(
+                            invitation.id,
+                            invitation.organization?.name,
+                          )
+                        }
+                        // disabled={resending === invitation.id}
+                        disabled
                       >
                         <Mail className="h-4 w-4 hover:text-white" />
                         {resending === invitation.id

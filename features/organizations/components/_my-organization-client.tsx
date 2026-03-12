@@ -1,15 +1,14 @@
 "use client";
 
-import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { Building2, Check, Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { APP_ROUTES } from "@/constants/app-config";
-import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import Image from "next/image";
 import { activateOrganization } from "@/features/organizations/db/organization-db";
+import { Building2, Plus } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
+import { toast } from "sonner";
 
 type OrganizationWithRole = {
   id: string;
@@ -68,10 +67,10 @@ export default function MyOrganizationClient({
                 alt={activeOrganization.name}
                 width={64}
                 height={64}
-                className="size-16 rounded-lg object-cover border"
+                className="size-20 rounded-lg object-cover border"
               />
             ) : (
-              <div className="size-16 rounded-lg bg-primary/10 flex items-center justify-center border">
+              <div className="size-20 rounded-lg bg-primary/10 flex items-center justify-center border">
                 <Building2 className="size-8 text-primary" />
               </div>
             )}
@@ -80,13 +79,6 @@ export default function MyOrganizationClient({
                 <h2 className="text-xl font-semibold">
                   {activeOrganization.name}
                 </h2>
-                <Badge variant="outline" className="text-xs">
-                  {activeOrganization.role === "org-admin" ? "Admin" : "Member"}
-                </Badge>
-                <Badge variant="default" className="text-xs">
-                  <Check className="size-3 mr-1" />
-                  Active
-                </Badge>
               </div>
               {activeOrganization.slug && (
                 <p className="text-sm text-muted-foreground">
@@ -130,6 +122,15 @@ export default function MyOrganizationClient({
               })}
             </p>
           </div>
+        </div>
+
+        <div className="space-y-1">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide">
+            Description
+          </p>
+          <p className="text-sm font-medium">
+            {activeOrganization.metadata || "No description provided"}
+          </p>
         </div>
       </div>
     );
