@@ -4,13 +4,15 @@ A full-stack hiring platform built with Next.js, Drizzle ORM, Better Auth, and P
 
 The codebase supports three primary audiences:
 
-- **Job-seekers** browsing and applying for jobs
+- **Users** browsing and applying for jobs
 - **Employers** managing organizations, listings, invitations, and applications
 - **Admins** reviewing access requests and monitoring the platform
 
 ## Overview
 
-The repository is organized in `app/`, feature-level business logic in `features/`, shared UI in `components/`, and cross-cutting utilities in `lib/`, `services/`, and `drizzle/`. See more details in [ARCHITECTURE.md](ARCHITECTURE.md).
+The repository is organized in `app/`, feature-level business logic in `features/`, shared UI in `components/`, and cross-cutting utilities in `lib/`, `services/`, and `drizzle/`. See more details in [ARCHITECTURE.md](./docs/ARCHITECTURE.md).
+
+**View project visualization in:** [a-lote-lann-kyaung.pdf](./docs/a-lote-lann-kyaung.drawio.pdf) or [a-lote-lann-kyaung.drawio](./docs/a-lote-lann-kyaung.drawio).
 
 Core product capabilities include:
 
@@ -56,6 +58,16 @@ Minimum local setup usually needs:
 - `SEED_ADMIN_NAME`
 - `SEED_ADMIN_PASSWORD`
 
+For BETTER_AUTH_SECRET, go visit to: *https://better-auth.com/docs/installation* and **Generate Secret**.
+
+You can also use:
+
+```bash
+openssl rand -base64 32
+```
+
+to generate one.
+
 ### Prepare the database
 
 ```bash
@@ -83,24 +95,3 @@ Open http://localhost:3000.
 - `npm run db:seed` reseeds local development data
 - `npm run db:studio` opens Drizzle Studio
 - `npm run detect` runs knip
-
-## Repository Layout
-
-```text
-job-portal/
-├── app/           Next.js routes, layouts, and entry points
-├── components/    Reusable UI, tables, markdown, and layout pieces
-├── constants/     Shared constants and route configuration
-├── drizzle/       Schema, migrations, reset, and seed logic
-├── features/      Business logic and feature components
-├── hooks/         Shared React hooks
-├── lib/           Auth, permissions, db client, caching, and utilities
-├── services/      External service integrations such as uploads
-└── types/         Shared TypeScript types
-```
-
-## Current Architecture Notes
-
-- `app/` owns routing and composition, not deep business logic.
-- `features/` holds domain behavior for admin, applications, auth, employer, job listings, organizations, and users.
-- `components/` holds reusable presentation primitives and shared widgets used across features.
