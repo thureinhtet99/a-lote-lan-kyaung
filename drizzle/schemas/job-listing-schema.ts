@@ -1,5 +1,5 @@
+import { relations } from "drizzle-orm";
 import {
-  boolean,
   index,
   integer,
   pgEnum,
@@ -9,9 +9,8 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { created_at, updated_at } from "../schema-helpers";
-import { relations } from "drizzle-orm";
-import { organizationTable } from "./organization-schema";
 import { applicationTable } from "./application-schema";
+import { organizationTable } from "./organization-schema";
 
 export const wageIntervals = ["monthly", "yearly", "hourly"] as const;
 export type WageIntervalType = (typeof wageIntervals)[number];
@@ -51,7 +50,7 @@ export const jobListingTable = pgTable(
     description: text(),
     wage: integer(),
     wageInterval: wageIntervalEnum(),
-    city: varchar(),
+    city: varchar().notNull(),
     locationRequirement: locationRequirementEnum().notNull(),
     experienceLevel: experienceLevelEnum().notNull(),
     status: jobListingStatusEnum().notNull().default("draft"),

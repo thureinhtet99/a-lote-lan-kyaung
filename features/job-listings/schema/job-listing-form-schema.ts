@@ -15,7 +15,7 @@ export const jobListingFormSchema = z
     type: z.enum(jobListingTypes),
     wage: z.number().nullable(),
     wageInterval: z.enum(wageIntervals).nullable(),
-    city: z.string().nullable(),
+    city: z.string(),
   })
   .refine(
     (listing) => {
