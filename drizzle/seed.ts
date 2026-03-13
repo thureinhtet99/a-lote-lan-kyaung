@@ -69,9 +69,9 @@ const seedAccounts: SeedAccount[] = [
     role: "employer",
   },
   {
-    email: process.env.SEED_ADMIN_EMAIL!!,
-    username: process.env.SEED_ADMIN_NAME!!,
-    password: process.env.SEED_ADMIN_PASSWORD!!,
+    email: process.env.SEED_ADMIN_EMAIL || "admin.one@test.com",
+    username: process.env.SEED_ADMIN_NAME || "testadmin",
+    password: process.env.SEED_ADMIN_PASSWORD || "Test123!",
     role: "admin",
   },
 ];
