@@ -1,45 +1,44 @@
 name: a-lote-lann-kyaung
 
 services:
-  db:
-    image: postgres:16-alpine
-    container_name: a-lote-lann-kyaung-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: a-lote-lann-kyaung
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    env_file:
-      - .env
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_is ready -U ${POSTGRES_USER:-postgres} -d a-lote-lann-kyaung",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - app-network
+  # db:
+  #   image: postgres:16-alpine
+  #   container_name: a-lote-lann-kyaung-db
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_DB: a-lote-lann-kyaung
+  #     POSTGRES_USER: ${POSTGRES_USER:-postgres}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test:
+  #       [
+  #         "CMD-SHELL",
+  #         "pg_is ready -U ${POSTGRES_USER:-postgres} -d a-lote-lann-kyaung",
+  #       ]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   networks:
+  #     - app-network
 
   server:
     build:
       context: .
       dockerfile: Dockerfile
-      # target: development # Uncomment if using multi-stage build
     container_name: a-lote-lann-kyaung
     restart: unless-stopped
-    depends_on:
-      db:
-        condition: service_healthy
+    # depends_on:
+    #   db:
+    #     condition: service_healthy
     environment:
       NODE_ENV: development
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@db:5432/a-lote-lann-kyaung
+      # DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@db:5432/a-lote-lann-kyaung
     env_file:
       - .env
     ports:
