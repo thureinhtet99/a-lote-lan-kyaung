@@ -653,10 +653,10 @@ export const getOrganizationDetailBySlug = async (slug: string) => {
   try {
     return await getOrganizationDetailBySlugCached(slug);
   } catch (error) {
-    console.error("Error fetching organization detail:", error);
+    console.error("Error fetching organization detail: ", error);
     return {
       success: false,
-      message: "Failed to fetch organization",
+      message: "Failed to fetch organization detail",
       data: null,
     };
   }
