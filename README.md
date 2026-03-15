@@ -12,16 +12,6 @@ The codebase supports three primary audiences:
 
 The repository is organized in `app/`, feature-level business logic in `features/`, shared UI in `components/`, and cross-cutting utilities in `lib/`, `services/`, and `drizzle/`. See more details in [ARCHITECTURE.md](./docs/ARCHITECTURE.md).
 
-**View project visualization in:** [a-lote-lann-kyaung.pdf](./docs/a-lote-lann-kyaung.drawio.pdf) or [a-lote-lann-kyaung.drawio](./docs/a-lote-lann-kyaung.drawio).
-
-Core product capabilities include:
-
-- _Job listing_ discovery, filtering, and application workflows
-- _Employer_ and _organization_ request review flows
-- _Organization membership_, _invitations_, and _role management_
-- _Notification-driven_ _organization claim_ flow
-- Admin _user management_
-
 ## Tech Stack
 
 - Framework: Next.js 16 App Router
@@ -33,7 +23,51 @@ Core product capabilities include:
 - Rich text and markdown: MDXEditor
 <!-- - Email delivery: Resend-backed invitation service -->
 
+## Live
+
+```bash
+https://a-lote-lan-kyaung.vercel.app/
+```
+
+## Screenshots
+
+<p align="center">
+	<img src="./public/images/home-page.png" alt="Home page" width="48%" />
+	<img src="./public/images/job-listing-detail.png" alt="Job listing detail page" width="48%" />
+</p>
+
+<p align="center">
+	<img src="./public/images/application-form.png" alt="Application form modal" width="48%" />
+	<img src="./public/images/sign-in-page.png" alt="Sign in page" width="48%" />
+</p>
+
+<p align="center">
+	<img src="./public/images/job-listing.png" alt="Employer job listing page" width="48%" />
+	<img src="./public/images/org-setting.png" alt="Organization settings page" width="48%" />
+</p>
+
+<p align="center">
+	<img src="./public/images/admin-user.png" alt="Admin user management page" width="48%" />
+	<img src="./public/images/admin-org.png" alt="Admin organizations page" width="48%" />
+</p>
+
+**View project visualization in:** [a-lote-lann-kyaung.pdf](./docs/a-lote-lann-kyaung.drawio.pdf) or [a-lote-lann-kyaung.drawio](./docs/a-lote-lann-kyaung.drawio).
+
+Core product capabilities include:
+
+- _Job listing_ discovery, filtering, and application workflows
+- _Employer_ and _organization_ request review flows
+- _Organization membership_, _invitations_, and _role management_
+- _Notification-driven_ _organization claim_ flow
+- Admin _user management_
+
 ## Getting Started
+
+### Clone the repository
+
+```bash
+git clone https://github.com/thureinhtet99/a-lote-lan-kyaung.git
+```
 
 ### Install dependencies
 
@@ -60,13 +94,11 @@ Minimum local setup usually needs:
 
 For BETTER_AUTH_SECRET, go visit to: *https://better-auth.com/docs/installation* and **Generate Secret**.
 
-You can also use:
+You can also use To generate secret:
 
 ```bash
 openssl rand -base64 32
 ```
-
-to generate one.
 
 ### Prepare the database
 
