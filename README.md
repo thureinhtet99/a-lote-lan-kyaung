@@ -31,6 +31,8 @@ https://a-lote-lan-kyaung.vercel.app/
 
 ## Screenshots
 
+_more features are included in projects_
+
 <p align="center">
 	<img src="./public/images/home-page.png" alt="Home page" width="48%" />
 	<img src="./public/images/job-listing-detail.png" alt="Job listing detail page" width="48%" />
