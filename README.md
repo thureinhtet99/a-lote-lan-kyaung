@@ -8,12 +8,7 @@ The codebase supports three primary audiences:
 - **Employers** managing organizations, listings, invitations, and applications
 - **Admins** reviewing access requests and monitoring the platform
   
-## UI Preview
-
-
 **Live:** https://a-lote-lan-kyaung.vercel.app/
-
-
 
 ## Overview
 
