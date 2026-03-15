@@ -1,42 +1,33 @@
-# syntax=docker/dockerfile:1
+# Development dependencies
+FROM node:20-alpine AS deps-dev
+WORKDIR /app
+COPY package*.json ./
+RUN npm install  # All dependencies including dev
 
-# Development Dockerfile for Next.js
-ARG NODE_VERSION=22.17.0
+# Production dependencies
+# FROM node:20-alpine AS deps-prod
+# WORKDIR /app
+# COPY package*.json ./
+# RUN npm ci --only=production  # Only production deps
 
-FROM node:${NODE_VERSION}-alpine
-
-# Install dependencies for better compatibility
-# RUN apk add --no-cache libc6-compat
-
-# Set working directory
+# Builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Set development environment
-ENV NODE_ENV development
+# Use dev dependencies for building
+COPY --from=deps-dev /app/node_modules ./node_modules
 
-# Copy package files
-COPY package*.json  ./
+COPY . .
+RUN npm run build
 
-# Install all dependencies (for development)
-RUN npm i
+# Production
+# FROM node:20-alpine AS production
+# WORKDIR /app
 
-# Create non-root user for development
-# RUN addgroup --system --gid 1001 nodejs
-# RUN adduser --system --uid 1001 nextjs
+# Use production dependencies
+# COPY --from=deps-prod /app/node_modules ./node_modules
 
-# Change ownership of the app directory
-# RUN chown -R nextjs:nodejs /app
-# USER nextjs
+# COPY --from=builder /app/.next ./.next
+# COPY package.json ./
 
-# Copy source code
-# COPY --chown=nextjs:nodejs . .
-
-# Expose the port
-EXPOSE 3000
-
-# Set environment variables for development
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
-
-# Start the development server
-CMD ["npm", "run", "dev"]
+CMD ["npm", "start"]

@@ -1,0 +1,278 @@
+[
+  {
+    "city": "Yangon",
+    "lat": "16.7950",
+    "lng": "96.1600",
+    "country": "Burma"
+  },
+  {
+    "city": "Mandalay",
+    "lat": "21.9831",
+    "lng": "96.0844",
+    "country": "Burma"
+  },
+  {
+    "city": "Nay Pyi Taw",
+    "lat": "19.7475",
+    "lng": "96.1150",
+    "country": "Burma"
+  },
+  {
+    "city": "Kyaukse",
+    "lat": "21.6131",
+    "lng": "96.1303",
+    "country": "Burma"
+  },
+  {
+    "city": "Hpa-An",
+    "lat": "16.8906",
+    "lng": "97.6333",
+    "country": "Burma"
+  },
+  {
+    "city": "Maungdaw",
+    "lat": "20.8167",
+    "lng": "92.3667",
+    "country": "Burma"
+  },
+  {
+    "city": "Magway",
+    "lat": "20.1500",
+    "lng": "94.9500",
+    "country": "Burma"
+  },
+  {
+    "city": "Pathein",
+    "lat": "16.7842",
+    "lng": "94.7333",
+    "country": "Burma"
+  },
+  {
+    "city": "Bago",
+    "lat": "17.3333",
+    "lng": "96.4833",
+    "country": "Burma"
+  },
+  {
+    "city": "Taunggyi",
+    "lat": "20.7836",
+    "lng": "97.0354",
+    "country": "Burma"
+  },
+  {
+    "city": "Mawlamyine",
+    "lat": "16.4847",
+    "lng": "97.6258",
+    "country": "Burma"
+  },
+  {
+    "city": "Natogyi",
+    "lat": "21.4167",
+    "lng": "95.6500",
+    "country": "Burma"
+  },
+  {
+    "city": "Myitkyina",
+    "lat": "25.3833",
+    "lng": "97.4000",
+    "country": "Burma"
+  },
+  {
+    "city": "Myeik",
+    "lat": "12.4333",
+    "lng": "98.6000",
+    "country": "Burma"
+  },
+  {
+    "city": "Monywa",
+    "lat": "22.1083",
+    "lng": "95.1417",
+    "country": "Burma"
+  },
+  {
+    "city": "Myawadi",
+    "lat": "16.6878",
+    "lng": "98.5083",
+    "country": "Burma"
+  },
+  {
+    "city": "Thanhlyin",
+    "lat": "16.7333",
+    "lng": "96.2500",
+    "country": "Burma"
+  },
+  {
+    "city": "Meiktila",
+    "lat": "20.8833",
+    "lng": "95.8833",
+    "country": "Burma"
+  },
+  {
+    "city": "Letpandan",
+    "lat": "17.7866",
+    "lng": "95.7507",
+    "country": "Burma"
+  },
+  {
+    "city": "Hinthada",
+    "lat": "17.6461",
+    "lng": "95.4603",
+    "country": "Burma"
+  },
+  {
+    "city": "Thingangyun",
+    "lat": "16.8281",
+    "lng": "96.1842",
+    "country": "Burma"
+  },
+  {
+    "city": "Minbya",
+    "lat": "20.3622",
+    "lng": "93.2733",
+    "country": "Burma"
+  },
+  {
+    "city": "Katha",
+    "lat": "24.1822",
+    "lng": "96.3306",
+    "country": "Burma"
+  },
+  {
+    "city": "Mogok",
+    "lat": "22.9167",
+    "lng": "96.5000",
+    "country": "Burma"
+  },
+  {
+    "city": "Kyaunggon",
+    "lat": "17.1000",
+    "lng": "95.1833",
+    "country": "Burma"
+  },
+  {
+    "city": "Mahlaing",
+    "lat": "21.0900",
+    "lng": "95.6400",
+    "country": "Burma"
+  },
+  {
+    "city": "Mudon",
+    "lat": "16.2578",
+    "lng": "97.7164",
+    "country": "Burma"
+  },
+  {
+    "city": "Lashio",
+    "lat": "22.9333",
+    "lng": "97.7500",
+    "country": "Burma"
+  },
+  {
+    "city": "Dawei",
+    "lat": "14.0833",
+    "lng": "98.2000",
+    "country": "Burma"
+  },
+  {
+    "city": "Taungdwingyi",
+    "lat": "20.0017",
+    "lng": "95.5461",
+    "country": "Burma"
+  },
+  {
+    "city": "Thanatpin",
+    "lat": "17.2942",
+    "lng": "96.5800",
+    "country": "Burma"
+  },
+  {
+    "city": "Myebon",
+    "lat": "20.0500",
+    "lng": "93.3667",
+    "country": "Burma"
+  },
+  {
+    "city": "Pyay",
+    "lat": "18.8200",
+    "lng": "95.2156",
+    "country": "Burma"
+  },
+  {
+    "city": "Thandwe",
+    "lat": "18.4667",
+    "lng": "94.3667",
+    "country": "Burma"
+  },
+  {
+    "city": "Mogaung",
+    "lat": "25.3014",
+    "lng": "96.9417",
+    "country": "Burma"
+  },
+  {
+    "city": "Thaton",
+    "lat": "16.9333",
+    "lng": "97.3667",
+    "country": "Burma"
+  },
+  {
+    "city": "Ponnagyun",
+    "lat": "20.3342",
+    "lng": "93.0039",
+    "country": "Burma"
+  },
+  {
+    "city": "Pakokku",
+    "lat": "21.3320",
+    "lng": "95.0866",
+    "country": "Burma"
+  },
+  {
+    "city": "An",
+    "lat": "19.7833",
+    "lng": "94.0333",
+    "country": "Burma"
+  },
+  {
+    "city": "Taungoo",
+    "lat": "18.9333",
+    "lng": "96.4333",
+    "country": "Burma"
+  },
+  {
+    "city": "Htison",
+    "lat": "15.9000",
+    "lng": "98.1833",
+    "country": "Burma"
+  },
+  {
+    "city": "Sittwe",
+    "lat": "20.1670",
+    "lng": "92.7850",
+    "country": "Burma"
+  },
+  {
+    "city": "Pyinmana",
+    "lat": "19.7500",
+    "lng": "96.2000",
+    "country": "Burma"
+  },
+  {
+    "city": "Hakha",
+    "lat": "22.6455",
+    "lng": "93.6050",
+    "country": "Burma"
+  },
+  {
+    "city": "Amarapura",
+    "lat": "21.9000",
+    "lng": "96.0500",
+    "country": "Burma"
+  },
+  {
+    "city": "Loikaw",
+    "lat": "19.6742",
+    "lng": "97.2092",
+    "country": "Burma"
+  }
+]

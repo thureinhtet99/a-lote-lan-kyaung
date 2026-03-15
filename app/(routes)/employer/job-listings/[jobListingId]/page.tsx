@@ -1,0 +1,156 @@
+import { MarkdownPartial } from "@/components/markdown/markdown-partial";
+import MarkdownRenderer from "@/components/markdown/markdown-renderer";
+import ActionButton from "@/components/shared/action-button";
+import CheckCondition from "@/components/shared/check-condition";
+import Loading from "@/components/shared/loading";
+import PageLoading from "@/components/shared/page-loading";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { APP_ROUTES } from "@/constants/app-config";
+import ApplicationTable from "@/features/applications/components/application-table";
+import SkeletonApplicationTable from "@/features/applications/components/skeleton-application-table";
+import { getApplicationsByJobListingId } from "@/features/applications/db/application-db";
+import JobListingBadges from "@/features/job-listings/components/job-listing-badges";
+import StatusToggleButton from "@/features/job-listings/components/status-toggle-button";
+import {
+  deleteJobListing,
+  getJobListingByIdByOrgId,
+} from "@/features/job-listings/db/job-listing-db";
+import { formatJobListingStatus } from "@/features/job-listings/lib/formatters";
+import { getCurrentOrg } from "@/lib/auth/auth-helpers";
+import { hasOrgUserPermissionLegacy as hasOrgUserPermission } from "@/lib/permissions";
+import { EditIcon, Trash2Icon } from "lucide-react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Suspense } from "react";
+
+export default function JobListingPage({
+  params,
+}: {
+  params: Promise<{ jobListingId: string }>;
+}) {
+  return (
+    <Suspense fallback={<PageLoading />}>
+      <SuspendedComponent params={params} />
+    </Suspense>
+  );
+}
+
+const SuspendedComponent = async ({
+  params,
+}: {
+  params: Promise<{ jobListingId: string }>;
+}) => {
+  const { jobListingId } = await params;
+
+  const { orgId } = await getCurrentOrg();
+  if (orgId == null) return notFound();
+
+  // Get job listing by id by organization id (cached)
+  const jobListing = await getJobListingByIdByOrgId(jobListingId, orgId);
+  if (!jobListing.data) return notFound();
+
+  return (
+    <div className="space-y-6 p-4 sm:p-6 lg:p-8 @container">
+      <div className="flex items-center justify-between gap-4 @max-4xl:flex-col @max-4xl:items-start">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {jobListing.data.title}
+          </h1>
+
+          <div className="flex flex-wrap gap-4 mt-2">
+            <Badge>{formatJobListingStatus(jobListing.data.status)}</Badge>
+            <JobListingBadges jobListing={jobListing.data} />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 empty:-mt-4">
+          {/* Edit button */}
+          <CheckCondition
+            condition={() => hasOrgUserPermission("job_listing.update")}
+          >
+            <Button asChild variant="outline">
+              <Link
+                href={`${APP_ROUTES.EMPLOYER.JOB_LISTINGS}/${jobListing.data.id}/edit`}
+              >
+                <EditIcon className="size-4" />
+                Edit
+              </Link>
+            </Button>
+          </CheckCondition>
+
+          {/* Status button */}
+          <Suspense
+            fallback={
+              <Button variant="outline" disabled>
+                <Loading />
+              </Button>
+            }
+          >
+            <StatusToggleButton
+              status={jobListing.data.status}
+              id={jobListing.data.id}
+            />
+          </Suspense>
+
+          {/* Delete button */}
+          <CheckCondition
+            condition={() => hasOrgUserPermission("job_listing.delete")}
+          >
+            <ActionButton
+              action={deleteJobListing.bind(null, jobListing.data?.id)}
+              variant="destructive"
+              areYouSure
+            >
+              <Trash2Icon className="size-4" />
+            </ActionButton>
+          </CheckCondition>
+        </div>
+      </div>
+
+      {/* Markdown partial */}
+      <MarkdownPartial
+        dialogMarkdown={
+          <MarkdownRenderer source={jobListing.data.description ?? ""} />
+        }
+        mainMarkdown={
+          <MarkdownRenderer source={jobListing.data.description ?? ""} />
+        }
+      />
+
+      <Separator />
+
+      <h2 className="text-xl font-semibold">Applications</h2>
+      <Suspense fallback={<SkeletonApplicationTable />}>
+        <Applications jobListingId={jobListingId} />
+      </Suspense>
+    </div>
+  );
+};
+
+const Applications = async ({ jobListingId }: { jobListingId: string }) => {
+  const applications = await getApplicationsByJobListingId(jobListingId);
+
+  return (
+    <ApplicationTable
+      applications={applications.data.map((app) => ({
+        ...app,
+        createdAt: app.createdAt,
+        user: {
+          ...app.user,
+          resume: app.user.resume
+            ? {
+                ...app.user.resume,
+                markdownSummary: null,
+              }
+            : null,
+        },
+        coverLetterMarkDown: app.coverLetter ? (
+          <MarkdownRenderer source={app.coverLetter} />
+        ) : null,
+      }))}
+      canUpdateStatus={await hasOrgUserPermission("application.change_status")}
+    />
+  );
+};

@@ -1,0 +1,216 @@
+"use client";
+
+import Loading from "@/components/shared/loading";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  getInvitations,
+  resendInvitation,
+  revokeInvitation,
+} from "@/features/organizations/actions/manage-invitations";
+import { format } from "date-fns";
+import { Mail, MoreVertical, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+type Invitation = {
+  id: string;
+  organizationId: string;
+  organization?: {
+    name: string;
+  } | null;
+  email: string;
+  role: string | null;
+  status: string | null;
+  expiresAt: Date;
+  inviterId: string;
+};
+
+export function InvitationTable() {
+  const [invitations, setInvitations] = useState<Invitation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [invitationToRevoke, setInvitationToRevoke] =
+    useState<Invitation | null>(null);
+  const [revoking, setRevoking] = useState(false);
+  const [resending, setResending] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadInvitations();
+  }, []);
+
+  async function loadInvitations() {
+    setLoading(true);
+    const result = await getInvitations();
+    if (result.success) {
+      setInvitations(result.data);
+    } else {
+      toast.error(result.message || "Failed to load invitations");
+    }
+    setLoading(false);
+  }
+
+  async function handleRevokeInvitation() {
+    if (!invitationToRevoke) return;
+
+    setRevoking(true);
+    const result = await revokeInvitation(invitationToRevoke.id);
+
+    if (result.success) {
+      toast.success("Invitation revoked");
+      setInvitationToRevoke(null);
+      loadInvitations();
+    } else {
+      toast.error(result.message || "Failed to revoke invitation");
+    }
+    setRevoking(false);
+  }
+
+  async function handleResendInvitation(id: string, organizationName?: string) {
+    setResending(id);
+    const result = await resendInvitation(id, undefined, organizationName);
+
+    if (result.success) {
+      toast.success(result.message || "Invitation resent");
+    } else {
+      toast.error(result.message || "Failed to resend invitation");
+    }
+    setResending(null);
+  }
+
+  if (loading) return <Loading />;
+
+  if (invitations.length === 0) {
+    return (
+      <div className="text-center py-12 text-muted-foreground">
+        <Mail className="h-12 w-12 mx-auto mb-4 opacity-50" />
+        <p>No pending invitations</p>
+        <p className="text-sm mt-1">Invite members from the Members page</p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Email</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Expires</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {invitations.map((invitation) => (
+            <TableRow key={invitation.id}>
+              <TableCell>
+                <div className="font-medium">{invitation.email}</div>
+              </TableCell>
+              <TableCell>
+                <Badge variant="outline" className="capitalize">
+                  {invitation.role || "user"}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <Badge variant="secondary">
+                  {invitation.status || "pending"}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <span className="text-sm text-muted-foreground">
+                  {format(new Date(invitation.expiresAt), "MMM d, yyyy")}
+                </span>
+              </TableCell>
+              <TableCell className="text-right">
+                {invitation.status !== "accepted" && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() =>
+                          handleResendInvitation(
+                            invitation.id,
+                            invitation.organization?.name,
+                          )
+                        }
+                        // disabled={resending === invitation.id}
+                        disabled
+                      >
+                        <Mail className="h-4 w-4 hover:text-white" />
+                        {resending === invitation.id
+                          ? "Resending..."
+                          : "Send via Email"}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setInvitationToRevoke(invitation)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 hover:text-white" />
+                        Revoke
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+
+      <AlertDialog
+        open={!!invitationToRevoke}
+        onOpenChange={() => setInvitationToRevoke(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Revoke Invitation</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to revoke the invitation sent to{" "}
+              {invitationToRevoke?.email}? They will no longer be able to join
+              using this invitation.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={revoking}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleRevokeInvitation}
+              disabled={revoking}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {revoking ? "Revoking..." : "Revoke"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
