@@ -25,12 +25,6 @@ The repository is organized in `app/`, feature-level business logic in `features
 - Rich text and markdown: MDXEditor
 <!-- - Email delivery: Resend-backed invitation service -->
 
-## Live
-
-```bash
-https://a-lote-lan-kyaung.vercel.app/
-```
-
 ## Screenshots
 
 _more features are included in projects_
