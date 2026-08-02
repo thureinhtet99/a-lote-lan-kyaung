@@ -1,4 +1,4 @@
-# A-lote-lann-kyaung
+# A-lote-lann-kyaung (အလုပ်လမ်းကြောင်း)
 
 A modern full-stack hiring platform built with **Next.js**, **Drizzle ORM**, **PostgreSQL**, and **Better Auth**.
 
