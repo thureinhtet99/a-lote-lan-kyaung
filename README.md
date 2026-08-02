@@ -1,104 +1,155 @@
 # A-lote-lann-kyaung
 
-A full-stack hiring platform built with Next.js, Drizzle ORM, Better Auth, and PostgreSQL.
+A modern full-stack hiring platform built with **Next.js**, **Drizzle ORM**, **PostgreSQL**, and **Better Auth**.
 
-The codebase supports three primary audiences:
+The platform is designed for three types of users:
 
-- **Users** browsing and applying for jobs
-- **Employers** managing organizations, listings, invitations, and applications
-- **Admins** reviewing access requests and monitoring the platform
+- **Job Seekers** — Browse and apply for jobs
+- **Employers** — Manage organizations, job listings, applications, and team members
+- **Administrators** — Review organization requests and manage the platform
 
-**Live:** https://a-lote-lan-kyaung.vercel.app/
+**Live Demo:** https://a-lote-lan-kyaung.vercel.app
 
-## Overview
+---
 
-The repository is organized in `app/`, feature-level business logic in `features/`, shared UI in `components/`, and cross-cutting utilities in `lib/`, `services/`, and `drizzle/`. See more details in [ARCHITECTURE.md](./docs/ARCHITECTURE.md).
+## Features
+
+- Browse and search job listings
+- Apply for jobs
+- Organization management
+- Team member invitations and role management
+- Organization claim workflow
+- Notification system
+- Admin dashboard
+- User management
+- Authentication & Role-Based Access Control (RBAC)
+
+---
 
 ## Tech Stack
 
-- Framework: Next.js 16 App Router
-- Language: TypeScript
-- Database: PostgreSQL with Drizzle ORM
-- Authentication and RBAC (Role-based access control): Better Auth
-- UI: Tailwind CSS and shadcn/ui primitives
-- File uploads: UploadThing
-- Rich text and markdown: MDXEditor
-<!-- - Email delivery: Resend-backed invitation service -->
+| Category | Technology |
+|----------|------------|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript |
+| Database | PostgreSQL |
+| ORM | Drizzle ORM |
+| Authentication | Better Auth |
+| Styling | Tailwind CSS |
+| UI Components | shadcn/ui |
+| File Uploads | UploadThing |
+| Rich Text Editor | MDXEditor |
+
+---
+
+## Project Structure
+
+The project follows a **feature-based architecture**.
+
+```text
+app/          Next.js routes
+features/     Business logic by feature
+components/   Shared UI components
+lib/          Shared utilities
+services/     External services
+drizzle/      Database schema and migrations
+docs/         Documentation
+```
+
+For a detailed explanation, see:
+
+- [ARCHITECTURE.md](./docs/ARCHITECTURE.md)
+
+---
 
 ## Screenshots
 
-_more features are included in projects_
+> More features are available in the project.
 
 <p align="center">
-	<img src="./public/images/home-page.png" alt="Home page" width="48%" />
-	<img src="./public/images/job-listing-detail.png" alt="Job listing detail page" width="48%" />
+  <img src="./public/images/home-page.png" alt="Home Page" width="48%" />
+  <img src="./public/images/job-listing-detail.png" alt="Job Listing Detail" width="48%" />
 </p>
 
 <p align="center">
-	<img src="./public/images/application-form.png" alt="Application form modal" width="48%" />
-	<img src="./public/images/sign-in-page.png" alt="Sign in page" width="48%" />
+  <img src="./public/images/application-form.png" alt="Application Form" width="48%" />
+  <img src="./public/images/sign-in-page.png" alt="Sign In" width="48%" />
 </p>
 
 <p align="center">
-	<img src="./public/images/job-listing.png" alt="Employer job listing page" width="48%" />
-	<img src="./public/images/org-setting.png" alt="Organization settings page" width="48%" />
+  <img src="./public/images/job-listing.png" alt="Employer Dashboard" width="48%" />
+  <img src="./public/images/org-setting.png" alt="Organization Settings" width="48%" />
 </p>
 
 <p align="center">
-	<img src="./public/images/admin-user.png" alt="Admin user management page" width="48%" />
-	<img src="./public/images/admin-org.png" alt="Admin organizations page" width="48%" />
+  <img src="./public/images/admin-user.png" alt="Admin Users" width="48%" />
+  <img src="./public/images/admin-org.png" alt="Admin Organizations" width="48%" />
 </p>
 
-**View project visualization in:** [a-lote-lann-kyaung.pdf](./docs/a-lote-lann-kyaung.drawio.pdf) or [a-lote-lann-kyaung.drawio](./docs/a-lote-lann-kyaung.drawio).
+---
 
-Core product capabilities include:
+## Project Documentation
 
-- _Job listing_ discovery, filtering, and application workflows
-- _Employer_ and _organization_ request review flows
-- _Organization membership_, _invitations_, and _role management_
-- _Notification-driven_ _organization claim_ flow
-- Admin _user management_
+Additional documentation is available in the [`docs`](./docs) directory.
 
-## Getting Started
+- [Architecture](./docs/ARCHITECTURE.md)
+- [Project Diagram (PDF)](./docs/a-lote-lann-kyaung.drawio.pdf)
+- [Project Diagram (Draw.io)](./docs/a-lote-lann-kyaung.drawio)
 
-### Clone the repository
+---
+
+# Getting Started
+
+## 1. Clone the repository
 
 ```bash
 git clone https://github.com/thureinhtet99/a-lote-lan-kyaung.git
+cd a-lote-lan-kyaung
 ```
 
-### Install dependencies
+## 2. Install dependencies
 
 ```bash
 npm install
 ```
 
-### Configure environment variables
+## 3. Configure environment variables
+
+Copy the example environment file.
 
 ```bash
 cp .env.example .env
 ```
 
-Minimum local setup usually needs:
+Required variables:
 
-- `DATABASE_URL`
-- `BETTER_AUTH_SECRET`
-- `BETTER_AUTH_BASE_URL`
-- `NEXT_PUBLIC_APP_URL`
-- `UPLOADTHING_TOKEN`
-- `SEED_ADMIN_EMAIL`
-- `SEED_ADMIN_NAME`
-- `SEED_ADMIN_PASSWORD`
+```env
+DATABASE_URL=
+BETTER_AUTH_SECRET=
+BETTER_AUTH_BASE_URL=
+NEXT_PUBLIC_APP_URL=
+UPLOADTHING_TOKEN=
 
-For BETTER_AUTH_SECRET, go visit to: *https://better-auth.com/docs/installation* and **Generate Secret**.
+SEED_ADMIN_EMAIL=
+SEED_ADMIN_NAME=
+SEED_ADMIN_PASSWORD=
+```
 
-You can also use To generate secret:
+Generate a Better Auth secret with either:
 
 ```bash
 openssl rand -base64 32
 ```
 
-### Prepare the database
+or from the Better Auth documentation:
+
+https://better-auth.com/docs/installation
+
+---
+
+## 4. Prepare the database
+
+Generate migrations, apply them, and seed the database.
 
 ```bash
 npm run db:generate
@@ -106,22 +157,33 @@ npm run db:migrate
 npm run db:seed
 ```
 
-The seed script recreates the default users and organizations, then inserts sample job listings.
+The seed command creates default users, organizations, and sample job listings for local development.
 
-### Start the app
+---
+
+## 5. Start the development server
 
 ```bash
 npm run dev
 ```
 
-Open http://localhost:3000.
+Visit:
 
-## Common Commands
+```
+http://localhost:3000
+```
 
-- `npm run dev` starts the development server
-- `npm run build` creates the production build
-- `npm run db:generate` creates a Drizzle migration
-- `npm run db:migrate` applies migrations
-- `npm run db:seed` reseeds local development data
-- `npm run db:studio` opens Drizzle Studio
-- `npm run detect` runs knip
+---
+
+# Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start the development server |
+| `npm run build` | Build the application for production |
+| `npm run lint` | Run ESLint |
+| `npm run db:generate` | Generate Drizzle migrations |
+| `npm run db:migrate` | Apply database migrations |
+| `npm run db:seed` | Seed the database |
+| `npm run db:studio` | Open Drizzle Studio |
+| `npm run detect` | Run Knip to detect unused files, exports, and dependencies |
